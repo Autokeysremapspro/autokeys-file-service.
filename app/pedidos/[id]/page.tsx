@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Download, FileArchive, Loader2, MessageCircle, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Download, FileArchive, Loader2, ShieldCheck } from 'lucide-react'
 import AKSidebar from '@/components/ak/AKSidebar'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import AKTimeline from '@/components/ak/AKTimeline'
+import AKChat from '@/components/ak/AKChat'
 import { descargarArchivo, formatBytes, formatEstado, getPedidoById, type FileServicePedido } from '@/lib/services/pedidos'
 
 export default function PedidoDetallePage({ params }: { params: { id: string } }) {
@@ -101,12 +102,7 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
 
           <aside className="space-y-6">
             <AKTimeline estado={pedido.estado} />
-            <AKCard className="p-6">
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Soporte</p>
-              <h3 className="mt-2 text-2xl font-black">Chat técnico</h3>
-              <p className="mt-2 text-sm text-white/40">El chat en tiempo real será el siguiente bloque del portal.</p>
-              <AKButton href="/soporte" variant="ghost" className="mt-5 w-full"><MessageCircle size={18} /> Abrir soporte</AKButton>
-            </AKCard>
+            <AKChat pedidoId={pedido.id} autorTipo="cliente" compact />
           </aside>
         </div>
       </section>

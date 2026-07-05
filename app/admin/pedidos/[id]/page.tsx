@@ -20,6 +20,7 @@ import {
   Wrench,
 } from 'lucide-react'
 import AppShell from '@/components/AppShell'
+import AKChat from '@/components/ak/AKChat'
 import {
   actualizarPedidoAdmin,
   descargarArchivo,
@@ -239,6 +240,8 @@ export default function AdminPedidoDetallePage() {
             <Panel title="Observaciones cliente" icon={<MessageSquare size={20} />}>
               <p className="whitespace-pre-wrap text-zinc-300">{pedido.observaciones || 'Sin observaciones.'}</p>
             </Panel>
+
+            <AKChat pedidoId={pedido.id} autorTipo="admin" title="Chat con distribuidor" compact />
 
             {pedido.estado === 'cancelado' && (
               <div className="rounded-[2rem] border border-red-500/25 bg-red-500/10 p-5 text-red-200">
