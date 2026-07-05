@@ -19,10 +19,8 @@ export type FileServicePedido = {
   cambio: string | null
   servicios: string[] | null
   observaciones: string | null
-  notas_internas?: string | null
   estado: PedidoEstado | string
   prioridad: string | null
-  urgente?: boolean | null
   ori_nombre: string | null
   ori_bucket: string | null
   ori_path: string | null
@@ -32,6 +30,7 @@ export type FileServicePedido = {
   mod_path: string | null
   precio: number | null
   pagado: boolean | null
+  notas_internas?: string | null
   created_at: string | null
   updated_at: string | null
 }
@@ -49,8 +48,8 @@ export type CrearPedidoPayload = {
   cv?: string
   cambio?: string
   prioridad?: string
-  ori?: File | null
   precio?: number
+  ori?: File | null
 }
 
 export async function crearPedidoFileService(payload: CrearPedidoPayload) {
@@ -91,17 +90,17 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
       cliente_email: user?.email || null,
       servicios: payload.servicios,
       observaciones: payload.observaciones || null,
-      marca: payload.marca || null,
-      modelo: payload.modelo || null,
-      motor: payload.motor || null,
-      anio: payload.anio || null,
-      ecu: payload.ecu || null,
-      hw: payload.hw || null,
-      sw: payload.sw || null,
-      cv: payload.cv || null,
+      marca: payload.marca || 'Audi',
+      modelo: payload.modelo || 'A4',
+      motor: payload.motor || '2.0 TDI',
+      anio: payload.anio || '2014-2018',
+      ecu: payload.ecu || 'Bosch EDC17C64',
+      hw: payload.hw || '1037XXXXXX',
+      sw: payload.sw || 'SW 5521',
+      cv: payload.cv || '150 CV',
       cambio: payload.cambio || null,
       prioridad: payload.prioridad || 'normal',
-      precio: payload.precio || 0,
+      precio: payload.precio || null,
       estado: 'pendiente',
       ...oriInfo,
     })
@@ -128,6 +127,16 @@ export async function getMisPedidos() {
   return (data || []) as FileServicePedido[]
 }
 
+export async function getPedidosAdmin() {
+  const { data, error } = await supabase
+    .from('file_service_pedidos')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) throw new Error(error.message)
+  return (data || []) as FileServicePedido[]
+}
+
 export async function getPedidoById(id: string) {
   const { data, error } = await supabase
     .from('file_service_pedidos')
@@ -139,39 +148,7 @@ export async function getPedidoById(id: string) {
   return data as FileServicePedido
 }
 
-export async function getPedidoPublicoById(id: string) {
-  const { data: authData } = await supabase.auth.getUser()
-  const user = authData.user
-
-  let query = supabase
-    .from('file_service_pedidos')
-    .select('*')
-    .eq('id', id)
-
-  if (user?.id) query = query.eq('user_id', user.id)
-
-  const { data, error } = await query.single()
-  if (error) throw new Error(error.message)
-  return data as FileServicePedido
-}
-
-export async function getPedidosAdmin(estado?: string) {
-  let query = supabase
-    .from('file_service_pedidos')
-    .select('*')
-    .order('created_at', { ascending: false })
-
-  if (estado && estado !== 'todos') query = query.eq('estado', estado)
-
-  const { data, error } = await query
-  if (error) throw new Error(error.message)
-  return (data || []) as FileServicePedido[]
-}
-
-export async function actualizarPedidoAdmin(
-  id: string,
-  payload: Partial<FileServicePedido> & { estado?: string; notas_internas?: string | null; urgente?: boolean | null }
-) {
+export async function actualizarPedido(id: string, payload: Partial<FileServicePedido>) {
   const { data, error } = await supabase
     .from('file_service_pedidos')
     .update({ ...payload, updated_at: new Date().toISOString() })
@@ -189,16 +166,16 @@ export async function subirModPedido(id: string, file: File) {
 
   const { error: uploadError } = await supabase.storage
     .from('file-service')
-    .upload(path, file, { upsert: false })
+    .upload(path, file, { upsert: true })
 
   if (uploadError) throw new Error(uploadError.message)
 
-  return actualizarPedidoAdmin(id, {
+  return actualizarPedido(id, {
     mod_nombre: file.name,
     mod_bucket: 'file-service',
     mod_path: path,
     estado: 'finalizado',
-  } as any)
+  } as Partial<FileServicePedido>)
 }
 
 export async function descargarArchivo(bucket: string, path: string) {
@@ -217,16 +194,14 @@ export function formatEstado(estado: string) {
   return map[estado] || estado
 }
 
-export function estadoColor(estado: string) {
-  if (estado === 'finalizado') return 'border-emerald-500/35 bg-emerald-500/10 text-emerald-300'
-  if (estado === 'en_proceso') return 'border-blue-500/35 bg-blue-500/10 text-blue-300'
-  if (estado === 'cancelado') return 'border-zinc-500/35 bg-zinc-500/10 text-zinc-300'
-  return 'border-yellow-500/35 bg-yellow-500/10 text-yellow-300'
-}
-
-export function formatBytes(size?: number | null) {
-  if (!size) return '—'
-  if (size < 1024) return `${size} B`
-  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
-  return `${(size / 1024 / 1024).toFixed(2)} MB`
+export function formatBytes(bytes?: number | null) {
+  if (!bytes) return '—'
+  const units = ['B', 'KB', 'MB', 'GB']
+  let value = bytes
+  let index = 0
+  while (value >= 1024 && index < units.length - 1) {
+    value /= 1024
+    index += 1
+  }
+  return `${value.toFixed(index === 0 ? 0 : 1)} ${units[index]}`
 }

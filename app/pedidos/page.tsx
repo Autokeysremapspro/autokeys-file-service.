@@ -2,136 +2,87 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import toast from 'react-hot-toast'
-import { ArrowRight, Download, FileText, Plus, RefreshCw, Search } from 'lucide-react'
-import AppShell from '@/components/AppShell'
-import { descargarArchivo, estadoColor, formatEstado, getMisPedidos, type FileServicePedido } from '@/lib/services/pedidos'
-
-function formatDate(date?: string | null) {
-  if (!date) return '—'
-  return new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(date))
-}
+import { ArrowRight, Briefcase, Calendar, Download, Search } from 'lucide-react'
+import AKSidebar from '@/components/ak/AKSidebar'
+import AKCard from '@/components/ak/AKCard'
+import AKStatCard from '@/components/ak/AKStatCard'
+import { getMisPedidos, type FileServicePedido, formatEstado } from '@/lib/services/pedidos'
 
 export default function PedidosPage() {
   const [pedidos, setPedidos] = useState<FileServicePedido[]>([])
-  const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
+  const [loading, setLoading] = useState(true)
 
-  async function load() {
-    setLoading(true)
-    try {
-      setPedidos(await getMisPedidos())
-    } catch (error: any) {
-      toast.error(error?.message || 'No se pudieron cargar los pedidos')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    getMisPedidos()
+      .then(setPedidos)
+      .catch(console.error)
+      .finally(() => setLoading(false))
+  }, [])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return pedidos
-    return pedidos.filter((p) => [p.numero, p.marca, p.modelo, p.ecu, p.hw, p.sw, p.ori_nombre, ...(p.servicios || [])].some((value) => (value || '').toLowerCase().includes(q)))
+    return pedidos.filter((pedido) => [pedido.numero, pedido.ori_nombre, pedido.ecu, pedido.hw, pedido.sw, pedido.marca, pedido.modelo, pedido.motor, ...(pedido.servicios || [])].some((value) => (value || '').toLowerCase().includes(q)))
   }, [pedidos, query])
 
-  async function download(bucket?: string | null, path?: string | null, name?: string | null) {
-    if (!bucket || !path) return toast.error('Archivo no disponible')
-    try {
-      const blob = await descargarArchivo(bucket, path)
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = name || 'archivo'
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      URL.revokeObjectURL(url)
-    } catch (error: any) {
-      toast.error(error?.message || 'No se pudo descargar')
-    }
-  }
-
-  const pendientes = pedidos.filter((p) => p.estado === 'pendiente').length
-  const proceso = pedidos.filter((p) => p.estado === 'en_proceso').length
+  const abiertos = pedidos.filter((p) => p.estado !== 'finalizado' && p.estado !== 'cancelado').length
   const finalizados = pedidos.filter((p) => p.estado === 'finalizado').length
 
   return (
-    <AppShell>
-      <div className="space-y-6">
-        <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
-          <div>
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-red-500/25 bg-red-500/10 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-red-400">
-              <FileText size={14} /> Mis pedidos
-            </div>
-            <h1 className="text-3xl font-black tracking-tight">Pedidos File Service</h1>
-            <p className="mt-1 text-zinc-500">Estado, archivos ORI/MOD y servicios solicitados.</p>
+    <main className="ak-noise flex min-h-screen">
+      <AKSidebar />
+      <section className="flex-1 p-4 lg:p-8">
+        <div className="mb-7">
+          <p className="text-xs font-black uppercase tracking-[0.28em] text-[var(--ak-glow)]">Orders</p>
+          <h1 className="mt-2 text-4xl font-black tracking-tight">Mis trabajos</h1>
+          <p className="mt-2 text-sm text-white/40">Consulta estados, archivos ORI/MOD, servicios y timeline de cada pedido.</p>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-3">
+          <AKStatCard label="Total" value={String(pedidos.length)} helper="Pedidos creados" tone="red" />
+          <AKStatCard label="Abiertos" value={String(abiertos)} helper="Pendientes / proceso" tone="orange" />
+          <AKStatCard label="Finalizados" value={String(finalizados)} helper="Listos para descarga" tone="green" />
+        </div>
+
+        <AKCard className="mt-6 p-4">
+          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/25 px-4 py-3">
+            <Search size={18} className="text-white/35" />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por pedido, ECU, HW, SW, matrícula, servicio..." className="w-full bg-transparent text-sm outline-none placeholder:text-white/25" />
           </div>
-          <Link href="/nuevo-pedido" className="rounded-2xl bg-red-600 px-5 py-3 text-sm font-black shadow-lg shadow-red-950/40 hover:bg-red-500"><Plus className="mr-2 inline" size={18} /> Nuevo pedido</Link>
-        </div>
+        </AKCard>
 
-        <div className="grid gap-4 md:grid-cols-4">
-          <Stat label="Total" value={pedidos.length} />
-          <Stat label="Pendientes" value={pendientes} />
-          <Stat label="En proceso" value={proceso} />
-          <Stat label="Finalizados" value={finalizados} />
-        </div>
-
-        <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-4">
-          <div className="flex items-center gap-3">
-            <Search size={20} className="text-zinc-500" />
-            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar por FS, ECU, HW, SW, archivo o servicio..." className="w-full border-0 bg-transparent p-0 outline-none" />
-            <button onClick={load} className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-black hover:bg-white/[0.08]"><RefreshCw className="mr-2 inline" size={16} /> Actualizar</button>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 text-zinc-500">Cargando pedidos...</div>
-        ) : filtered.length === 0 ? (
-          <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 text-zinc-500">No hay pedidos todavía.</div>
-        ) : (
-          <div className="grid gap-4">
-            {filtered.map((pedido) => (
-              <div key={pedido.id} className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 transition hover:border-red-500/35 hover:bg-white/[0.06]">
-                <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-black text-red-300">{pedido.numero || 'FS sin número'}</span>
-                      <span className={`rounded-full border px-3 py-1 text-xs font-black uppercase ${estadoColor(pedido.estado)}`}>{formatEstado(pedido.estado)}</span>
-                    </div>
-                    <h3 className="mt-2 text-xl font-black">{[pedido.marca, pedido.modelo, pedido.ecu].filter(Boolean).join(' · ') || 'Pedido rápido'}</h3>
-                    <p className="mt-1 text-sm text-zinc-500">Creado {formatDate(pedido.created_at)}</p>
+        <div className="mt-6 space-y-3">
+          {loading ? (
+            <AKCard className="p-8 text-white/35">Cargando pedidos...</AKCard>
+          ) : filtered.length === 0 ? (
+            <AKCard className="p-8 text-center text-white/35">No hay pedidos que coincidan con la búsqueda.</AKCard>
+          ) : filtered.map((pedido) => (
+            <Link key={pedido.id} href={`/pedidos/${pedido.id}`} className="group block rounded-[2rem] border border-white/10 bg-white/[0.035] p-5 transition hover:border-[var(--ak-red)]/40 hover:bg-white/[0.055]">
+              <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 px-3 py-1 text-xs font-black text-[var(--ak-glow)]">{pedido.numero || 'FS'}</span>
+                    <span className="rounded-full border border-white/10 bg-black/25 px-3 py-1 text-xs font-black text-white/55">{formatEstado(pedido.estado)}</span>
+                    {pedido.prioridad === 'urgente' && <span className="rounded-full border border-orange-500/25 bg-orange-500/10 px-3 py-1 text-xs font-black text-orange-300">Urgente</span>}
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Link href={`/pedidos/${pedido.id}`} className="rounded-2xl border border-red-500/30 bg-red-600/20 px-4 py-2 text-sm font-black text-white hover:bg-red-600/30"><ArrowRight className="mr-2 inline" size={15} /> Abrir</Link>
-                    <button onClick={() => download(pedido.ori_bucket, pedido.ori_path, pedido.ori_nombre)} className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-black hover:bg-white/[0.08]"><Download className="mr-2 inline" size={15} /> ORI</button>
-                    <button onClick={() => download(pedido.mod_bucket, pedido.mod_path, pedido.mod_nombre)} disabled={!pedido.mod_path} className="rounded-2xl bg-red-600 px-4 py-2 text-sm font-black hover:bg-red-500 disabled:opacity-40"><Download className="mr-2 inline" size={15} /> MOD</button>
+                  <h2 className="mt-3 text-xl font-black">{pedido.ecu || 'ECU pendiente'} · {pedido.ori_nombre || 'Sin ORI'}</h2>
+                  <p className="mt-1 text-sm text-white/35">{[pedido.marca, pedido.modelo, pedido.motor, pedido.cv].filter(Boolean).join(' · ') || 'Sin datos de vehículo'}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {(pedido.servicios || []).map((servicio) => <span key={servicio} className="rounded-full bg-white/[0.05] px-3 py-1 text-xs font-bold text-white/50">{servicio}</span>)}
                   </div>
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {(pedido.servicios || []).map((s) => <span key={s} className="rounded-full bg-red-600/15 px-3 py-1 text-xs font-bold text-red-300">{s}</span>)}
-                </div>
-
-                <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
-                  <Info label="ORI" value={pedido.ori_nombre || '—'} />
-                  <Info label="HW / SW" value={[pedido.hw, pedido.sw].filter(Boolean).join(' / ') || '—'} />
-                  <Info label="Observaciones" value={pedido.observaciones || '—'} />
+                <div className="flex items-center gap-4 text-sm text-white/35">
+                  <div className="hidden items-center gap-2 md:flex"><Calendar size={16} /> {pedido.created_at ? new Date(pedido.created_at).toLocaleDateString('es-ES') : '—'}</div>
+                  <div className="hidden items-center gap-2 md:flex"><Download size={16} /> {pedido.mod_path ? 'MOD listo' : 'Esperando MOD'}</div>
+                  <ArrowRight size={20} className="text-white/25 transition group-hover:text-[var(--ak-glow)]" />
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </AppShell>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </main>
   )
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-4"><p className="text-xs font-bold uppercase tracking-wider text-zinc-500">{label}</p><p className="mt-1 text-3xl font-black">{value}</p></div>
-}
-
-function Info({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-2xl bg-black/25 p-3"><div className="text-xs font-bold uppercase tracking-wider text-zinc-500">{label}</div><div className="mt-1 truncate font-bold">{value}</div></div>
 }
