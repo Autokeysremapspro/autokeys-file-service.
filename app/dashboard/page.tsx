@@ -1,0 +1,5 @@
+'use client'
+import AppShell from '@/components/AppShell'
+import Link from 'next/link'
+export default function Dashboard(){return <AppShell><div className="mb-8"><div className="text-xs font-black tracking-[.25em] text-red-400">FILE SERVICE</div><h1 className="mt-2 text-4xl font-black">Dashboard</h1><p className="text-zinc-500">Portal de archivos Autokeys.</p></div><div className="grid gap-4 md:grid-cols-4"><Card title="Pedidos abiertos" value="0"/><Card title="Pendientes" value="0"/><Card title="En proceso" value="0"/><Card title="Finalizados" value="0"/></div><div className="mt-8 card p-6"><h2 className="text-2xl font-black">Crear solicitud rápida</h2><p className="mt-1 text-zinc-500">Sube un ORI y elige el servicio.</p><Link href="/nuevo-pedido" className="btn btn-red mt-5 inline-block">Nuevo pedido</Link></div></AppShell>}
+function Card({title,value}:{title:string;value:string}){return <div className="card p-5"><p className="text-sm font-bold text-zinc-500">{title}</p><p className="mt-2 text-4xl font-black">{value}</p></div>}

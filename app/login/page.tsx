@@ -1,0 +1,6 @@
+'use client'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
+import { supabase } from '@/lib/supabase'
+export default function LoginPage(){const router=useRouter();const [email,setEmail]=useState('');const [password,setPassword]=useState('');const [loading,setLoading]=useState(false);async function login(e:React.FormEvent){e.preventDefault();setLoading(true);const {error}=await supabase.auth.signInWithPassword({email,password});setLoading(false);if(error){toast.error(error.message);return}router.push('/dashboard')}return <main className="min-h-screen grid place-items-center p-6 bg-[radial-gradient(circle_at_top,#1f2937,#020617_60%)]"><form onSubmit={login} className="card w-full max-w-md p-8"><div className="text-3xl font-black">AUTOKEYS <span className="text-red-500">FILES</span></div><p className="mt-2 text-zinc-400">Acceso distribuidores y administración</p><div className="mt-8 space-y-4"><input type="email" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} required/><input type="password" placeholder="Contraseña" value={password} onChange={e=>setPassword(e.target.value)} required/><button disabled={loading} className="btn btn-red w-full">{loading?'Entrando...':'Iniciar sesión'}</button></div></form></main>}

@@ -1,0 +1,6 @@
+'use client'
+import { useEffect, useState } from 'react'
+import AppShell from '@/components/AppShell'
+import { supabase } from '@/lib/supabase'
+type Pedido={id:string;marca:string|null;modelo:string|null;ecu:string|null;servicio:string|null;estado:string|null;created_at:string|null}
+export default function Pedidos(){const [pedidos,setPedidos]=useState<Pedido[]>([]);useEffect(()=>{supabase.from('file_service').select('*').order('created_at',{ascending:false}).then(({data})=>setPedidos((data||[]) as Pedido[]))},[]);return <AppShell><h1 className="text-4xl font-black">Mis pedidos</h1><div className="card mt-6 overflow-auto"><table className="w-full text-left"><thead className="text-zinc-500"><tr><th className="p-4">Fecha</th><th>Vehículo</th><th>ECU</th><th>Servicio</th><th>Estado</th></tr></thead><tbody>{pedidos.map(p=><tr key={p.id} className="border-t border-white/10"><td className="p-4">{p.created_at?.slice(0,10)||'—'}</td><td>{[p.marca,p.modelo].filter(Boolean).join(' ')||'—'}</td><td>{p.ecu||'—'}</td><td>{p.servicio||'—'}</td><td><span className="rounded-full bg-red-600/20 px-3 py-1 text-sm font-bold text-red-300">{p.estado||'pendiente'}</span></td></tr>)}</tbody></table></div></AppShell>}

@@ -1,0 +1,7 @@
+'use client'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { LayoutDashboard, UploadCloud, FolderOpen, Download, User, LogOut } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+const items=[['/dashboard','Dashboard',LayoutDashboard],['/nuevo-pedido','Nuevo pedido',UploadCloud],['/pedidos','Mis pedidos',FolderOpen],['/descargas','Descargas',Download],['/perfil','Perfil',User]] as const
+export default function AppShell({children}:{children:React.ReactNode}){const path=usePathname();const router=useRouter();async function logout(){await supabase.auth.signOut();router.push('/login')}return <div className="min-h-screen lg:grid lg:grid-cols-[280px_1fr]"><aside className="border-r border-white/10 bg-slate-950 p-5"><div className="mb-8"><div className="text-2xl font-black">AUTOKEYS <span className="text-red-500">FILES</span></div><div className="text-xs text-zinc-500">File Service Portal</div></div><nav className="space-y-2">{items.map(([href,label,Icon])=><Link key={href} href={href} className={`flex items-center gap-3 rounded-2xl px-4 py-3 font-bold ${path===href?'bg-red-600':'hover:bg-white/5'}`}><Icon size={18}/>{label}</Link>)}</nav><button onClick={logout} className="mt-8 flex items-center gap-3 rounded-2xl px-4 py-3 font-bold text-zinc-400 hover:bg-white/5"><LogOut size={18}/>Salir</button></aside><main className="p-5 lg:p-8">{children}</main></div>}
