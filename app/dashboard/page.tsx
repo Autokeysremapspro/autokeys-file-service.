@@ -2,21 +2,27 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Bell, Car, CheckCircle2, Cloud, Download, FileUp, Gauge, History, MessageCircle, Sparkles, Wallet } from 'lucide-react'
+import { ArrowRight, Bell, Car, CheckCircle2, Cloud, Download, FileUp, Gauge, History, MessageCircle, Sparkles } from 'lucide-react'
 import AKSidebar from '@/components/ak/AKSidebar'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import AKStatCard from '@/components/ak/AKStatCard'
 import AKTimeline from '@/components/ak/AKTimeline'
+import AKNotificationBell from '@/components/ak/AKNotificationBell'
 import { getMisPedidos, type FileServicePedido, formatEstado } from '@/lib/services/pedidos'
+import { getMisNotificaciones, type FileServiceNotificacion, formatNotificationDate } from '@/lib/services/notificaciones'
 
 export default function DashboardPage() {
   const [pedidos, setPedidos] = useState<FileServicePedido[]>([])
+  const [notificaciones, setNotificaciones] = useState<FileServiceNotificacion[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getMisPedidos()
-      .then(setPedidos)
+    Promise.all([getMisPedidos(), getMisNotificaciones()])
+      .then(([pedidosData, notifData]) => {
+        setPedidos(pedidosData)
+        setNotificaciones(notifData)
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])
@@ -25,8 +31,9 @@ export default function DashboardPage() {
     const abiertos = pedidos.filter((p) => p.estado !== 'finalizado' && p.estado !== 'cancelado').length
     const finalizados = pedidos.filter((p) => p.estado === 'finalizado').length
     const proceso = pedidos.filter((p) => p.estado === 'en_proceso').length
-    return { abiertos, finalizados, proceso }
-  }, [pedidos])
+    const sinLeer = notificaciones.filter((n) => !n.leida).length
+    return { abiertos, finalizados, proceso, sinLeer }
+  }, [pedidos, notificaciones])
 
   const ultimo = pedidos[0]
 
@@ -40,7 +47,8 @@ export default function DashboardPage() {
             <h1 className="mt-2 text-4xl font-black tracking-tight md:text-5xl">AK Cloud</h1>
             <p className="mt-2 max-w-2xl text-sm text-white/40">Sube archivos, consulta pedidos, revisa tu garaje y mantén todos tus ORI/MOD organizados en una sola plataforma.</p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <AKNotificationBell />
             <AKButton href="/nuevo-pedido"><FileUp size={18} /> New Job</AKButton>
             <AKButton href="/pedidos" variant="ghost"><History size={18} /> Orders</AKButton>
           </div>
@@ -50,7 +58,7 @@ export default function DashboardPage() {
           <AKStatCard label="Saldo" value="250 €" helper="Professional plan" tone="green" />
           <AKStatCard label="Pedidos abiertos" value={String(stats.abiertos)} helper="En cola y en proceso" tone="orange" />
           <AKStatCard label="Finalizados" value={String(stats.finalizados)} helper="Archivos listos" tone="blue" />
-          <AKStatCard label="Tiempo medio" value="17 min" helper="Últimos trabajos" tone="red" />
+          <AKStatCard label="Avisos" value={String(stats.sinLeer)} helper="Sin leer" tone="red" />
         </div>
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_420px]">
@@ -62,7 +70,7 @@ export default function DashboardPage() {
                     <Sparkles size={15} /> AK Cloud Intelligence
                   </div>
                   <h2 className="mt-5 text-3xl font-black tracking-tight md:text-5xl">Upload once. AK Cloud organises the rest.</h2>
-                  <p className="mt-4 max-w-2xl text-sm leading-7 text-white/42">Nuevo workspace premium para file service: análisis visual, servicios compatibles, timeline vivo y biblioteca técnica privada para cada distribuidor.</p>
+                  <p className="mt-4 max-w-2xl text-sm leading-7 text-white/42">Workspace premium para file service: análisis visual, servicios compatibles, timeline vivo, chat técnico y notificaciones automáticas.</p>
                   <div className="mt-6 flex flex-wrap gap-3">
                     <AKButton href="/nuevo-pedido"><Cloud size={18} /> Drop ORI file</AKButton>
                     <AKButton href="/garage" variant="ghost"><Car size={18} /> Open Garage</AKButton>
@@ -72,7 +80,7 @@ export default function DashboardPage() {
                 <div className="rounded-[2rem] border border-white/10 bg-black/30 p-5">
                   <p className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Queue Status</p>
                   <div className="mt-4 space-y-3">
-                    {['Pedido recibido', 'Análisis automático', 'Técnico asignado'].map((item, index) => (
+                    {['Pedido recibido', 'Análisis automático', 'Notificación activa'].map((item, index) => (
                       <div key={item} className="flex items-center gap-3 rounded-2xl bg-white/[0.035] p-3">
                         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--ak-green)]/12 text-[var(--ak-green)]"><CheckCircle2 size={17} /></div>
                         <div>
@@ -135,12 +143,23 @@ export default function DashboardPage() {
             </AKCard>
 
             <AKCard className="p-6">
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Notifications</p>
-              <div className="mt-4 space-y-3">
-                <div className="flex gap-3 rounded-2xl bg-white/[0.035] p-3"><Bell size={18} className="text-[var(--ak-glow)]" /><span className="text-sm text-white/50">Nuevo workspace premium activo.</span></div>
-                <div className="flex gap-3 rounded-2xl bg-white/[0.035] p-3"><Download size={18} className="text-[var(--ak-green)]" /><span className="text-sm text-white/50">Descargas MOD preparadas para pedidos finalizados.</span></div>
-                <div className="flex gap-3 rounded-2xl bg-white/[0.035] p-3"><MessageCircle size={18} className="text-[var(--ak-blue)]" /><span className="text-sm text-white/50">Chat técnico llegará en el siguiente bloque.</span></div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Notifications</p>
+                  <h3 className="mt-1 text-xl font-black">Centro vivo</h3>
+                </div>
+                <Bell className="text-[var(--ak-glow)]" size={22} />
               </div>
+              <div className="mt-4 space-y-3">
+                {notificaciones.slice(0, 3).map((item) => (
+                  <Link key={item.id} href={item.pedido_id ? `/pedidos/${item.pedido_id}` : '/notificaciones'} className="block rounded-2xl bg-white/[0.035] p-3 transition hover:bg-white/[0.055]">
+                    <div className="text-sm font-black">{item.titulo}</div>
+                    <div className="mt-1 text-xs text-white/35">{item.mensaje || formatNotificationDate(item.created_at)}</div>
+                  </Link>
+                ))}
+                {notificaciones.length === 0 && <div className="rounded-2xl bg-white/[0.035] p-3 text-sm text-white/35">Sin avisos por ahora.</div>}
+              </div>
+              <Link href="/notificaciones" className="mt-4 inline-flex text-sm font-black text-[var(--ak-glow)]">Ver todo</Link>
             </AKCard>
           </aside>
         </div>
