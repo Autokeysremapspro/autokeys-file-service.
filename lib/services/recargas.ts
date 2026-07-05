@@ -47,6 +47,47 @@ export const PACKS_CREDITOS = [
   },
 ]
 
+export const METODOS_PAGO: {
+  key: RecargaMetodo
+  label: string
+  descripcion: string
+  instrucciones: string
+  requiereReferencia: boolean
+}[] = [
+  {
+    key: 'paypal',
+    label: 'PayPal',
+    descripcion: 'Pago rápido. Pega el ID de transacción o el email usado.',
+    instrucciones: 'Realiza el pago por PayPal y pega el ID de transacción en la referencia.',
+    requiereReferencia: true,
+  },
+  {
+    key: 'transferencia',
+    label: 'Transferencia',
+    descripcion: 'Transferencia bancaria. Pega concepto o número de operación.',
+    instrucciones: 'Haz la transferencia indicando tu email de AK Cloud como concepto.',
+    requiereReferencia: true,
+  },
+  {
+    key: 'tarjeta',
+    label: 'Tarjeta / TPV',
+    descripcion: 'Pago por enlace de tarjeta, SumUp o myPOS.',
+    instrucciones: 'Solicita enlace de pago y pega la referencia cuando lo completes.',
+    requiereReferencia: true,
+  },
+  {
+    key: 'otro',
+    label: 'Otro',
+    descripcion: 'Bizum, efectivo o acuerdo manual con Autokeys.',
+    instrucciones: 'Indica en notas cómo has realizado el pago para que podamos validarlo.',
+    requiereReferencia: false,
+  },
+]
+
+export function getMetodoPago(metodo: RecargaMetodo | string | null | undefined) {
+  return METODOS_PAGO.find((item) => item.key === metodo) || METODOS_PAGO[0]
+}
+
 export async function solicitarRecarga(payload: {
   creditos: number
   importe: number
@@ -54,20 +95,31 @@ export async function solicitarRecarga(payload: {
   referencia_pago?: string
   notas_cliente?: string
 }) {
+  const metodo = getMetodoPago(payload.metodo_pago)
+  const referencia = payload.referencia_pago?.trim() || ''
+
+  if (metodo.requiereReferencia && referencia.length < 3) {
+    throw new Error('Añade una referencia de pago para poder revisar la recarga.')
+  }
+
   const { data: userData } = await supabase.auth.getUser()
   const user = userData.user
+
+  if (!user?.id) {
+    throw new Error('Debes iniciar sesión para solicitar una recarga.')
+  }
 
   const { data, error } = await supabase
     .from('ak_creditos_recargas')
     .insert({
-      user_id: user?.id || null,
-      nombre_cliente: user?.user_metadata?.nombre || user?.user_metadata?.name || null,
-      email_cliente: user?.email || null,
+      user_id: user.id,
+      nombre_cliente: user.user_metadata?.nombre || user.user_metadata?.name || null,
+      email_cliente: user.email || null,
       creditos: payload.creditos,
       importe: payload.importe,
       metodo_pago: payload.metodo_pago,
-      referencia_pago: payload.referencia_pago || null,
-      notas_cliente: payload.notas_cliente || null,
+      referencia_pago: referencia || null,
+      notas_cliente: payload.notas_cliente?.trim() || null,
       estado: 'pendiente',
     })
     .select('*')
@@ -81,15 +133,15 @@ export async function getMisRecargas() {
   const { data: userData } = await supabase.auth.getUser()
   const userId = userData.user?.id
 
-  let query = supabase
+  if (!userId) return []
+
+  const { data, error } = await supabase
     .from('ak_creditos_recargas')
     .select('*')
+    .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(80)
 
-  if (userId) query = query.eq('user_id', userId)
-
-  const { data, error } = await query
   if (error) throw new Error(error.message)
   return (data || []) as RecargaCreditos[]
 }
@@ -118,24 +170,35 @@ export async function actualizarRecarga(id: string, payload: Partial<RecargaCred
 }
 
 export async function aprobarRecarga(recarga: RecargaCreditos, notas_admin?: string) {
+  if ((recarga.estado || 'pendiente') !== 'pendiente') {
+    throw new Error('Esta recarga ya fue revisada.')
+  }
+
+  if (!recarga.user_id) {
+    throw new Error('La recarga no tiene usuario asociado. No se pueden sumar créditos.')
+  }
+
   const { data: userData } = await supabase.auth.getUser()
   const adminId = userData.user?.id || null
 
-  const { data: movimientos } = await supabase
+  const { data: movimientos, error: saldoError } = await supabase
     .from('ak_creditos_movimientos')
     .select('saldo_resultante')
     .eq('user_id', recarga.user_id)
     .order('created_at', { ascending: false })
     .limit(1)
 
+  if (saldoError) throw new Error(saldoError.message)
+
   const saldoAnterior = Number(movimientos?.[0]?.saldo_resultante || 0)
-  const nuevoSaldo = saldoAnterior + Number(recarga.creditos || 0)
+  const creditos = Number(recarga.creditos || 0)
+  const nuevoSaldo = saldoAnterior + creditos
 
   const { error: movError } = await supabase.from('ak_creditos_movimientos').insert({
     user_id: recarga.user_id,
     tipo: 'recarga',
-    concepto: `Recarga aprobada: ${recarga.creditos} créditos`,
-    creditos: Number(recarga.creditos || 0),
+    concepto: `Recarga aprobada: ${creditos} créditos`,
+    creditos,
     saldo_resultante: nuevoSaldo,
   })
 
@@ -154,6 +217,9 @@ export async function aprobarRecarga(recarga: RecargaCreditos, notas_admin?: str
     .single()
 
   if (error) throw new Error(error.message)
+
+  await crearNotificacionRecarga(recarga.user_id, 'Recarga aprobada', `Se han añadido ${creditos} créditos a tu cuenta.`)
+
   return data as RecargaCreditos
 }
 
@@ -166,7 +232,28 @@ export async function rechazarRecarga(id: string, notas_admin?: string) {
     .single()
 
   if (error) throw new Error(error.message)
+
+  if (data?.user_id) {
+    await crearNotificacionRecarga(data.user_id, 'Recarga rechazada', notas_admin || 'La solicitud de recarga fue rechazada.')
+  }
+
   return data as RecargaCreditos
+}
+
+async function crearNotificacionRecarga(userId: string | null, titulo: string, mensaje: string) {
+  if (!userId) return
+
+  try {
+    await supabase.from('ak_notificaciones').insert({
+      user_id: userId,
+      tipo: 'creditos',
+      titulo,
+      mensaje,
+      leida: false,
+    })
+  } catch {
+    // La tabla de notificaciones puede no existir todavía en instalaciones antiguas.
+  }
 }
 
 export function estadoRecargaClass(estado?: string | null) {

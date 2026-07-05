@@ -55,10 +55,11 @@ export default function AdminRecargasPage() {
   const creditosPendientes = pending.reduce((acc, item) => acc + Number(item.creditos || 0), 0)
 
   async function approve(item: RecargaCreditos) {
-    if (!confirm(`¿Aprobar recarga de ${item.creditos} créditos?`)) return
+    if (!confirm(`¿Aprobar recarga de ${item.creditos} créditos por ${formatEuros(item.importe)}?`)) return
+    const note = prompt('Nota interna opcional para esta aprobación') || ''
     setWorking(item.id)
     try {
-      await aprobarRecarga(item)
+      await aprobarRecarga(item, note)
       toast.success('Recarga aprobada y créditos añadidos')
       await load()
     } catch (error: any) {
@@ -155,6 +156,9 @@ export default function AdminRecargasPage() {
                         </div>
                         <h3 className="text-xl font-black">{item.nombre_cliente || item.email_cliente || 'Distribuidor'}</h3>
                         <p className="mt-1 text-sm text-white/40">{item.email_cliente || 'Sin email'} · {item.metodo_pago || 'sin método'} · Ref: {item.referencia_pago || '—'}</p>
+                        {!item.referencia_pago && (item.metodo_pago === 'paypal' || item.metodo_pago === 'transferencia' || item.metodo_pago === 'tarjeta') && (
+                          <p className="mt-2 inline-flex rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-200">Pendiente de referencia de pago</p>
+                        )}
                         {item.notas_cliente && <p className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-sm text-white/55">{item.notas_cliente}</p>}
                       </div>
 

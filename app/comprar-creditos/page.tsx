@@ -2,12 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
-import { CheckCircle2, CreditCard, Loader2, ShieldCheck, Sparkles, Wallet } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, CreditCard, Loader2, ShieldCheck, Sparkles, Wallet } from 'lucide-react'
 import AKSidebar from '@/components/ak/AKSidebar'
 import {
+  METODOS_PAGO,
   PACKS_CREDITOS,
   estadoRecargaClass,
   formatEuros,
+  getMetodoPago,
   getMisRecargas,
   solicitarRecarga,
   type RecargaCreditos,
@@ -35,6 +37,8 @@ export default function ComprarCreditosPage() {
   const [saving, setSaving] = useState(false)
 
   const pack = useMemo(() => PACKS_CREDITOS.find((item) => item.key === packKey) || PACKS_CREDITOS[0], [packKey])
+  const metodoInfo = useMemo(() => getMetodoPago(metodo), [metodo])
+  const referenciaObligatoria = metodoInfo.requiereReferencia
 
   async function load() {
     setLoading(true)
@@ -133,30 +137,37 @@ export default function ComprarCreditosPage() {
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-4">
-                  {[
-                    ['paypal', 'PayPal'],
-                    ['transferencia', 'Transferencia'],
-                    ['tarjeta', 'Tarjeta'],
-                    ['otro', 'Otro'],
-                  ].map(([key, label]) => (
+                  {METODOS_PAGO.map((item) => (
                     <button
-                      key={key}
-                      onClick={() => setMetodo(key as RecargaMetodo)}
-                      className={`rounded-2xl border px-4 py-3 text-sm font-black transition ${metodo === key ? 'border-[var(--ak-red)]/70 bg-[var(--ak-red)]/15 text-white' : 'border-white/10 bg-black/25 text-white/45 hover:text-white'}`}
+                      key={item.key}
+                      onClick={() => setMetodo(item.key)}
+                      className={`rounded-2xl border px-4 py-3 text-left text-sm font-black transition ${metodo === item.key ? 'border-[var(--ak-red)]/70 bg-[var(--ak-red)]/15 text-white' : 'border-white/10 bg-black/25 text-white/45 hover:text-white'}`}
                     >
-                      {label}
+                      <span className="block">{item.label}</span>
+                      <span className="mt-1 block text-[11px] font-medium normal-case text-white/35">{item.requiereReferencia ? 'Requiere referencia' : 'Validación manual'}</span>
                     </button>
                   ))}
                 </div>
 
+                <div className="mt-5 rounded-2xl border border-blue-500/20 bg-blue-500/10 p-4 text-sm text-blue-100">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="mt-0.5 shrink-0 text-blue-300" size={18} />
+                    <div>
+                      <div className="font-black">Instrucciones de pago</div>
+                      <p className="mt-1 text-blue-100/70">{metodoInfo.instrucciones}</p>
+                      <p className="mt-2 text-xs text-blue-100/45">La recarga quedará pendiente hasta que Autokeys confirme el pago desde el panel interno.</p>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="mt-5 grid gap-4 md:grid-cols-2">
                   <label className="block">
-                    <span className="mb-2 block text-xs font-black uppercase tracking-[0.22em] text-white/35">Referencia / ID de pago</span>
-                    <input value={referencia} onChange={(e) => setReferencia(e.target.value)} className="w-full rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-white outline-none transition focus:border-[var(--ak-red)]/60" placeholder="Ej: PayPal TXN, transferencia..." />
+                    <span className="mb-2 block text-xs font-black uppercase tracking-[0.22em] text-white/35">Referencia / ID de pago {referenciaObligatoria ? '*' : ''}</span>
+                    <input value={referencia} onChange={(e) => setReferencia(e.target.value)} className="w-full rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-white outline-none transition focus:border-[var(--ak-red)]/60" placeholder="Ej: PayPal TXN, transferencia, Bizum..." />
                   </label>
                   <label className="block">
-                    <span className="mb-2 block text-xs font-black uppercase tracking-[0.22em] text-white/35">Notas</span>
-                    <input value={notas} onChange={(e) => setNotas(e.target.value)} className="w-full rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-white outline-none transition focus:border-[var(--ak-red)]/60" placeholder="Opcional" />
+                    <span className="mb-2 block text-xs font-black uppercase tracking-[0.22em] text-white/35">Notas / comprobante</span>
+                    <input value={notas} onChange={(e) => setNotas(e.target.value)} className="w-full rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-white outline-none transition focus:border-[var(--ak-red)]/60" placeholder="Opcional: nombre, email de pago, comprobante..." />
                   </label>
                 </div>
               </div>
@@ -180,11 +191,11 @@ export default function ComprarCreditosPage() {
 
                 <button
                   onClick={submit}
-                  disabled={saving}
+                  disabled={saving || (referenciaObligatoria && referencia.trim().length < 3)}
                   className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--ak-red)] px-5 py-4 text-sm font-black shadow-[0_0_55px_rgba(217,4,41,.35)] transition hover:scale-[1.02] hover:bg-[var(--ak-glow)] disabled:opacity-60"
                 >
                   {saving ? <Loader2 className="animate-spin" size={18} /> : <ShieldCheck size={18} />}
-                  Solicitar recarga
+                  {referenciaObligatoria && referencia.trim().length < 3 ? 'Añade referencia' : 'Solicitar recarga'}
                 </button>
               </div>
 
