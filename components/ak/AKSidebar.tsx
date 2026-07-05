@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Bell, Car, Cloud, FolderOpen, Home, Library, LifeBuoy, UploadCloud, UserCircle } from 'lucide-react'
+import { Bell, Car, Cloud, Coins, FolderOpen, Home, Library, LifeBuoy, UploadCloud, UserCircle } from 'lucide-react'
 
 const items = [
   { href: '/dashboard', label: 'Workspace', icon: Home },
@@ -7,6 +7,7 @@ const items = [
   { href: '/pedidos', label: 'Orders', icon: FolderOpen },
   { href: '/garage', label: 'Garage', icon: Car },
   { href: '/biblioteca', label: 'Library', icon: Library },
+  { href: '/creditos', label: 'Credits', icon: Coins },
   { href: '/notificaciones', label: 'Notifications', icon: Bell },
   { href: '/soporte', label: 'Support', icon: LifeBuoy },
   { href: '/perfil', label: 'Account', icon: UserCircle },
