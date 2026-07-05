@@ -205,6 +205,8 @@ export function formatBytes(bytes?: number | null) {
   }
   return `${value.toFixed(index === 0 ? 0 : 1)} ${units[index]}`
 }
+
+
 export function estadoColor(estado?: string | null) {
   switch (estado) {
     case 'pendiente':
@@ -223,12 +225,12 @@ export function estadoColor(estado?: string | null) {
 export async function actualizarPedidoAdmin(id: string, payload: Record<string, any>) {
   const { data, error } = await supabase
     .from('file_service_pedidos')
-    .update(payload)
+    .update({ ...payload, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select('*')
     .single()
 
   if (error) throw new Error(error.message)
 
-  return data
+  return data as FileServicePedido
 }
