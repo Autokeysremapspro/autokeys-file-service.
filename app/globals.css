@@ -2,45 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+:root {
+  --ak-black: #070707;
+  --ak-panel: #121212;
+  --ak-border: #232323;
+  --ak-red: #d90429;
+  --ak-glow: #ff1f44;
+  --ak-green: #13d26a;
+  --ak-blue: #1c8dff;
+}
+
 * { box-sizing: border-box; }
-body { margin: 0; background: #05080d; color: #fff; }
-
-.card {
-  border: 1px solid rgba(255,255,255,.10);
-  background: linear-gradient(145deg, rgba(18,28,43,.82), rgba(7,12,21,.78));
-  border-radius: 24px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 24px 80px rgba(0,0,0,.22);
-}
-
-.glass {
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(8,13,22,.72);
-  backdrop-filter: blur(18px);
-}
-
-.btn {
-  border-radius: 16px;
-  padding: .75rem 1rem;
-  font-weight: 900;
-  transition: .2s ease;
-}
-.btn-red { background: linear-gradient(135deg,#dc2626,#991b1b); color: white; box-shadow: 0 14px 40px rgba(220,38,38,.18); }
-.btn-red:hover { filter: brightness(1.08); transform: translateY(-1px); }
-.btn-dark { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.10); }
-.btn-dark:hover { background: rgba(255,255,255,.08); }
-input, select, textarea {
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(5,8,13,.82);
-  padding: .85rem 1rem;
-  outline: none;
-  width: 100%;
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(217,4,41,.22), transparent 28%),
+    radial-gradient(circle at 90% 12%, rgba(28,141,255,.13), transparent 25%),
+    var(--ak-black);
   color: white;
 }
-input:focus, select:focus, textarea:focus { border-color: rgba(239,68,68,.65); }
-
-.ak-grid {
-  background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
-  background-size: 42px 42px;
+input, textarea, select, button { font: inherit; }
+button { cursor: pointer; }
+.ak-noise:before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
 }
