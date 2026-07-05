@@ -19,8 +19,10 @@ export type FileServicePedido = {
   cambio: string | null
   servicios: string[] | null
   observaciones: string | null
+  notas_internas?: string | null
   estado: PedidoEstado | string
   prioridad: string | null
+  urgente?: boolean | null
   ori_nombre: string | null
   ori_bucket: string | null
   ori_path: string | null
@@ -126,14 +128,77 @@ export async function getMisPedidos() {
   return (data || []) as FileServicePedido[]
 }
 
-export async function getPedidosAdmin() {
+export async function getPedidoById(id: string) {
   const { data, error } = await supabase
+    .from('file_service_pedidos')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (error) throw new Error(error.message)
+  return data as FileServicePedido
+}
+
+export async function getPedidoPublicoById(id: string) {
+  const { data: authData } = await supabase.auth.getUser()
+  const user = authData.user
+
+  let query = supabase
+    .from('file_service_pedidos')
+    .select('*')
+    .eq('id', id)
+
+  if (user?.id) query = query.eq('user_id', user.id)
+
+  const { data, error } = await query.single()
+  if (error) throw new Error(error.message)
+  return data as FileServicePedido
+}
+
+export async function getPedidosAdmin(estado?: string) {
+  let query = supabase
     .from('file_service_pedidos')
     .select('*')
     .order('created_at', { ascending: false })
 
+  if (estado && estado !== 'todos') query = query.eq('estado', estado)
+
+  const { data, error } = await query
   if (error) throw new Error(error.message)
   return (data || []) as FileServicePedido[]
+}
+
+export async function actualizarPedidoAdmin(
+  id: string,
+  payload: Partial<FileServicePedido> & { estado?: string; notas_internas?: string | null; urgente?: boolean | null }
+) {
+  const { data, error } = await supabase
+    .from('file_service_pedidos')
+    .update({ ...payload, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select('*')
+    .single()
+
+  if (error) throw new Error(error.message)
+  return data as FileServicePedido
+}
+
+export async function subirModPedido(id: string, file: File) {
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+  const path = `mod/${id}/${Date.now()}-${safeName}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('file-service')
+    .upload(path, file, { upsert: false })
+
+  if (uploadError) throw new Error(uploadError.message)
+
+  return actualizarPedidoAdmin(id, {
+    mod_nombre: file.name,
+    mod_bucket: 'file-service',
+    mod_path: path,
+    estado: 'finalizado',
+  } as any)
 }
 
 export async function descargarArchivo(bucket: string, path: string) {
@@ -150,4 +215,18 @@ export function formatEstado(estado: string) {
     cancelado: 'Cancelado',
   }
   return map[estado] || estado
+}
+
+export function estadoColor(estado: string) {
+  if (estado === 'finalizado') return 'border-emerald-500/35 bg-emerald-500/10 text-emerald-300'
+  if (estado === 'en_proceso') return 'border-blue-500/35 bg-blue-500/10 text-blue-300'
+  if (estado === 'cancelado') return 'border-zinc-500/35 bg-zinc-500/10 text-zinc-300'
+  return 'border-yellow-500/35 bg-yellow-500/10 text-yellow-300'
+}
+
+export function formatBytes(size?: number | null) {
+  if (!size) return '—'
+  if (size < 1024) return `${size} B`
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
+  return `${(size / 1024 / 1024).toFixed(2)} MB`
 }
