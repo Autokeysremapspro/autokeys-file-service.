@@ -48,6 +48,7 @@ export type CrearPedidoPayload = {
   cambio?: string
   prioridad?: string
   ori?: File | null
+  precio?: number
 }
 
 export async function crearPedidoFileService(payload: CrearPedidoPayload) {
@@ -98,6 +99,7 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
       cv: payload.cv || null,
       cambio: payload.cambio || null,
       prioridad: payload.prioridad || 'normal',
+      precio: payload.precio || 0,
       estado: 'pendiente',
       ...oriInfo,
     })

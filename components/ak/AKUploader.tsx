@@ -1,15 +1,16 @@
-import { UploadCloud } from 'lucide-react'
+import { FileArchive, UploadCloud } from 'lucide-react'
 
-export default function AKUploader({ fileName, onFile }: { fileName?: string | null; onFile: (file: File) => void }) {
+export default function AKUploader({ fileName, onFile, compact = false }: { fileName?: string | null; onFile: (file: File) => void; compact?: boolean }) {
   return (
-    <label className="group flex min-h-[310px] cursor-pointer flex-col items-center justify-center rounded-[2.2rem] border border-dashed border-white/15 bg-[radial-gradient(circle_at_center,rgba(217,4,41,.18),transparent_45%),rgba(255,255,255,.03)] p-8 text-center transition hover:border-[var(--ak-red)]/60 hover:bg-white/[0.045]">
+    <label className={`group ak-card-hover relative flex cursor-pointer flex-col items-center justify-center rounded-[2.4rem] border border-dashed border-white/15 bg-[radial-gradient(circle_at_center,rgba(217,4,41,.22),transparent_45%),linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025))] p-8 text-center ${compact ? 'min-h-[230px]' : 'min-h-[370px]'}`}>
       <input type="file" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) onFile(file) }} />
-      <div className="flex h-20 w-20 items-center justify-center rounded-[1.8rem] bg-[var(--ak-red)]/15 text-[var(--ak-glow)] shadow-[0_0_50px_rgba(217,4,41,.22)] transition group-hover:scale-105">
-        <UploadCloud size={36} />
+      <div className="absolute inset-4 rounded-[2rem] border border-white/5" />
+      <div className="relative flex h-24 w-24 items-center justify-center rounded-[2rem] border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/15 text-[var(--ak-glow)] shadow-[0_0_60px_rgba(217,4,41,.28)] transition group-hover:scale-105">
+        {fileName ? <FileArchive size={40} /> : <UploadCloud size={42} />}
       </div>
-      <h2 className="mt-6 text-3xl font-black tracking-tight">Drop your ORI file</h2>
-      <p className="mt-2 max-w-md text-sm text-white/38">Drag your original file here or tap to select. AK Cloud will prepare the technical analysis workspace.</p>
-      {fileName && <div className="mt-5 rounded-full border border-[var(--ak-red)]/30 bg-[var(--ak-red)]/10 px-4 py-2 text-sm font-bold text-[var(--ak-glow)]">{fileName}</div>}
+      <h2 className="relative mt-7 text-3xl font-black tracking-tight md:text-4xl">{fileName ? 'File loaded' : 'Drop your ORI file'}</h2>
+      <p className="relative mt-3 max-w-lg text-sm leading-6 text-white/40">{fileName ? 'AK Cloud is ready to analyse this file and prepare your order workspace.' : 'Drag your original ECU file here or tap to select. Fast mode takes less than 60 seconds.'}</p>
+      {fileName && <div className="relative mt-6 rounded-full border border-[var(--ak-red)]/30 bg-[var(--ak-red)]/10 px-5 py-2 text-sm font-black text-[var(--ak-glow)]">{fileName}</div>}
     </label>
   )
 }
