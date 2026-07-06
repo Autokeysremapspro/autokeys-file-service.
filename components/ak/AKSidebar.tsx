@@ -1,65 +1,106 @@
-import Link from 'next/link'
-import { Bell, Brain, Car, Cloud, Coins, CreditCard, Database, FolderOpen, Home, Library, LifeBuoy, UploadCloud, UserCircle, ShieldCheck } from 'lucide-react'
+'use client'
 
-const items = [
-  { href: '/dashboard', label: 'Workspace', icon: Home },
-  { href: '/nuevo-pedido', label: 'New Job', icon: UploadCloud },
-  { href: '/intelligence', label: 'AK Intelligence', icon: Brain },
-  { href: '/pedidos', label: 'Orders', icon: FolderOpen },
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import {
+  Bell,
+  BookOpen,
+  Car,
+  Coins,
+  CreditCard,
+  Download,
+  FolderOpen,
+  Headphones,
+  Home,
+  LayoutDashboard,
+  LifeBuoy,
+  LogOut,
+  Settings,
+  ShieldCheck,
+  UploadCloud,
+  UserCircle,
+} from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+
+const clientItems = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/nuevo-pedido', label: 'Nuevo pedido', icon: UploadCloud },
+  { href: '/pedidos', label: 'Mis pedidos', icon: FolderOpen },
+  { href: '/descargas', label: 'Descargas', icon: Download },
+  { href: '/creditos', label: 'Créditos', icon: Coins },
+  { href: '/comprar-creditos', label: 'Comprar créditos', icon: CreditCard },
   { href: '/garage', label: 'Garage', icon: Car },
-  { href: '/biblioteca', label: 'Library', icon: Library },
-  { href: '/creditos', label: 'Credits', icon: Coins },
-  { href: '/comprar-creditos', label: 'Buy Credits', icon: CreditCard },
-  { href: '/notificaciones', label: 'Notifications', icon: Bell },
-  { href: '/soporte', label: 'Support', icon: LifeBuoy },
-  { href: '/perfil', label: 'Account', icon: UserCircle },
+  { href: '/biblioteca', label: 'Biblioteca', icon: BookOpen },
+  { href: '/soporte', label: 'Soporte', icon: LifeBuoy },
+  { href: '/notificaciones', label: 'Notificaciones', icon: Bell },
+  { href: '/perfil', label: 'Mi cuenta', icon: UserCircle },
 ]
 
 const adminItems = [
-  { href: '/admin/pedidos', label: 'Admin Orders', icon: ShieldCheck },
-  { href: '/admin/recargas', label: 'Admin Credits', icon: CreditCard },
-  { href: '/admin/ecu-database', label: 'ECU Database', icon: Database },
+  { href: '/admin/pedidos', label: 'Admin pedidos', icon: ShieldCheck },
+  { href: '/admin/recargas', label: 'Admin recargas', icon: CreditCard },
+  { href: '/admin/ecu-database', label: 'Base ECU', icon: Settings },
 ]
 
 export default function AKSidebar() {
+  const pathname = usePathname()
+  const router = useRouter()
+
+  async function logout() {
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
+
+  function NavLink({ href, label, icon: Icon }: { href: string; label: string; icon: any }) {
+    const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
+    return (
+      <Link
+        href={href}
+        className={`group flex items-center gap-3 rounded-2xl border px-4 py-3 text-[13px] font-black uppercase tracking-[0.02em] transition ${
+          active
+            ? 'border-red-500/45 bg-gradient-to-r from-red-700 to-red-600/50 text-white shadow-[0_0_45px_rgba(217,4,41,.28)]'
+            : 'border-transparent text-white/58 hover:border-white/10 hover:bg-white/[0.045] hover:text-white'
+        }`}
+      >
+        <Icon size={18} className={active ? 'text-white' : 'text-white/35 group-hover:text-red-400'} />
+        {label}
+      </Link>
+    )
+  }
+
   return (
-    <aside className="hidden h-screen w-[280px] shrink-0 border-r border-white/10 bg-black/35 p-6 lg:flex lg:flex-col">
-      <div className="mb-8 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--ak-red)] shadow-[0_0_40px_rgba(217,4,41,.35)]"><Cloud size={24} /></div>
-        <div>
-          <div className="text-xl font-black tracking-tight">AK CLOUD</div>
-          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/35">Autokeys Lab</div>
+    <aside className="hidden h-screen w-[282px] shrink-0 overflow-hidden border-r border-white/10 bg-[linear-gradient(180deg,rgba(10,10,12,.98),rgba(0,0,0,.96))] lg:sticky lg:top-0 lg:flex lg:flex-col">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_8%,rgba(217,4,41,.32),transparent_28%),radial-gradient(circle_at_100%_40%,rgba(255,255,255,.08),transparent_24%)]" />
+      <div className="relative flex h-full flex-col p-6">
+        <Link href="/dashboard" className="mb-7 block">
+          <div className="text-[26px] font-black italic leading-none tracking-tight text-white">
+            AUTOKEYS
+          </div>
+          <div className="text-[20px] font-black italic leading-none tracking-tight text-red-500">FILE SERVICE</div>
+          <div className="mt-2 text-[10px] font-black uppercase tracking-[0.38em] text-white/35">AK Cloud</div>
+        </Link>
+
+        <nav className="space-y-2">
+          {clientItems.map((item) => <NavLink key={item.href} {...item} />)}
+        </nav>
+
+        <div className="my-5 h-px bg-white/10" />
+        <div className="mb-2 px-4 text-[10px] font-black uppercase tracking-[0.25em] text-white/25">Autokeys interno</div>
+        <nav className="space-y-2">
+          {adminItems.map((item) => <NavLink key={item.href} {...item} />)}
+        </nav>
+
+        <div className="mt-auto space-y-4">
+          <div className="rounded-[1.6rem] border border-red-500/25 bg-red-500/10 p-4">
+            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-red-300">
+              <Headphones size={15} /> Soporte PRO
+            </div>
+            <p className="mt-2 text-sm leading-5 text-white/45">Pedidos, archivos y créditos conectados con Autokeys Core.</p>
+          </div>
+          <button onClick={logout} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-black text-white/65 hover:bg-white/[0.08] hover:text-white">
+            <LogOut size={17} /> Cerrar sesión
+          </button>
         </div>
-      </div>
-      <nav className="space-y-2">
-        {items.map((item) => {
-          const Icon = item.icon
-          return (
-            <Link key={item.href} href={item.href} className="group flex items-center gap-3 rounded-2xl border border-transparent px-4 py-3 text-sm font-bold text-white/55 transition hover:border-white/10 hover:bg-white/[0.04] hover:text-white">
-              <Icon size={19} className="text-white/35 group-hover:text-[var(--ak-glow)]" />
-              {item.label}
-            </Link>
-          )
-        })}
-      </nav>
-
-      <div className="my-5 h-px bg-white/10" />
-      <div className="mb-2 px-4 text-[10px] font-black uppercase tracking-[0.25em] text-white/25">Internal</div>
-      <nav className="space-y-2">
-        {adminItems.map((item) => {
-          const Icon = item.icon
-          return (
-            <Link key={item.href} href={item.href} className="group flex items-center gap-3 rounded-2xl border border-transparent px-4 py-3 text-sm font-bold text-white/45 transition hover:border-[var(--ak-red)]/25 hover:bg-[var(--ak-red)]/10 hover:text-white">
-              <Icon size={19} className="text-white/30 group-hover:text-[var(--ak-glow)]" />
-              {item.label}
-            </Link>
-          )
-        })}
-      </nav>
-
-      <div className="mt-auto rounded-[1.6rem] border border-[var(--ak-red)]/20 bg-[var(--ak-red)]/10 p-4">
-        <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--ak-glow)]">Professional</p>
-        <p className="mt-2 text-sm text-white/45">Fast tuning requests, ECU library and distributor workspace.</p>
       </div>
     </aside>
   )
