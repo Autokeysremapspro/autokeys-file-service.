@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation'
 import { AlertCircle, CheckCircle2, FileUp, Send, Sparkles } from 'lucide-react'
 import AKSidebar from '@/components/ak/AKSidebar'
 import AKUploader from '@/components/ak/AKUploader'
+import AKECUCard from '@/components/ak/AKECUCard'
 import AKServiceCard, { type AKService } from '@/components/ak/AKServiceCard'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import AKAnalysisProgress from '@/components/ak/AKAnalysisProgress'
-import AKIntelligencePanel from '@/components/ak/AKIntelligencePanel'
 import { crearPedidoFileService } from '@/lib/services/pedidos'
-import { analizarArchivoLocal, type AkDetectedEcu } from '@/lib/services/intelligence'
+import { detectEcuFromFile, type EcuDetection } from '@/lib/services/ecuDetector'
 
 const services: AKService[] = [
   { id: 'stage1', name: 'Stage 1', description: 'Safe performance calibration.', price: 35, icon: '🚀' },
@@ -20,7 +20,7 @@ const services: AKService[] = [
   { id: 'egr', name: 'EGR OFF', description: 'EGR solution and diagnostics.', price: 20, icon: '🌿' },
   { id: 'adblue', name: 'AdBlue OFF', description: 'SCR/AdBlue solution.', price: 35, icon: '💧' },
   { id: 'immo', name: 'IMMO OFF', description: 'Immobilizer solution.', price: 45, icon: '🔑' },
-  { id: 'pops', name: 'Pops & Bangs', description: 'Sport exhaust calibration.', price: 30, icon: '💥' },
+  { id: 'pops', name: 'Pops & Bangs', description: 'Sport exhaust calibration.', price: 30, icon: '💥', compatible: false },
   { id: 'hardcut', name: 'Hardcut', description: 'RPM limiter effect.', price: 25, icon: '🍿' },
 ]
 
@@ -36,43 +36,48 @@ export default function NuevoPedidoPage() {
   const [fileName, setFileName] = useState<string | null>(null)
   const [analysing, setAnalysing] = useState(false)
   const [analysed, setAnalysed] = useState(false)
-  const [detected, setDetected] = useState<AkDetectedEcu>(analizarArchivoLocal(null))
   const [selected, setSelected] = useState<string[]>([])
   const [observaciones, setObservaciones] = useState('')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [ecuInfo, setEcuInfo] = useState<EcuDetection | null>(null)
 
-  function handleFile(nextFile: File) {
+  async function handleFile(nextFile: File) {
     setFile(nextFile)
     setFileName(nextFile.name)
     setAnalysed(false)
     setAnalysing(true)
     setSelected([])
     setError(null)
+    setEcuInfo(null)
 
-    window.setTimeout(() => {
-      const analysis = analizarArchivoLocal(nextFile.name)
-      setDetected(analysis)
+    try {
+      const detected = await detectEcuFromFile(nextFile)
+      window.setTimeout(() => {
+        setEcuInfo(detected)
+        setAnalysing(false)
+        setAnalysed(true)
+      }, 950)
+    } catch (err: any) {
       setAnalysing(false)
       setAnalysed(true)
-      setSelected(analysis.compatibles.filter((id) => analysis.recomendaciones.some((name) => serviceNameById(id).toLowerCase().includes(name.toLowerCase().split(' ')[0]))).slice(0, 3))
-    }, 1550)
+      setError(err?.message || 'No se pudo analizar el archivo. Puedes continuar manualmente.')
+    }
   }
 
-  function serviceNameById(id: string) {
-    return services.find((item) => item.id === id)?.name || id
-  }
-
-  function isCompatible(id: string) {
-    return detected.compatibles.includes(id)
-  }
+  const compatibleIds = ecuInfo?.compatibleServiceIds || services.map((service) => service.id)
+  const dynamicServices = services.map((service) => ({
+    ...service,
+    compatible: compatibleIds.includes(service.id) && service.compatible !== false,
+  }))
 
   function toggle(id: string) {
-    if (!isCompatible(id)) return
+    const service = dynamicServices.find((item) => item.id === id)
+    if (service?.compatible === false) return
     setSelected((current) => current.includes(id) ? current.filter((x) => x !== id) : [...current, id])
   }
 
-  const selectedServices = services.filter((s) => selected.includes(s.id))
+  const selectedServices = dynamicServices.filter((s) => selected.includes(s.id))
   const total = useMemo(() => selectedServices.reduce((sum, item) => sum + item.price, 0), [selectedServices])
 
   async function enviarPedido() {
@@ -93,15 +98,14 @@ export default function NuevoPedidoPage() {
         servicios: selectedServices.map((service) => service.name),
         observaciones,
         precio: total,
-        marca: detected.marca,
-        modelo: detected.modelo,
-        motor: detected.motor,
-        anio: detected.anio,
-        ecu: detected.ecu,
-        hw: detected.hw,
-        sw: detected.sw,
-        cv: detected.cv,
-        cambio: detected.cambio,
+        marca: ecuInfo?.brand || undefined,
+        modelo: ecuInfo?.model || undefined,
+        motor: ecuInfo?.engine || undefined,
+        anio: ecuInfo?.year || undefined,
+        ecu: ecuInfo?.ecu || undefined,
+        hw: ecuInfo?.hw || undefined,
+        sw: ecuInfo?.sw || undefined,
+        cv: ecuInfo?.power || undefined,
       })
       router.push(`/pedidos/${pedido.id}`)
     } catch (err: any) {
@@ -117,16 +121,16 @@ export default function NuevoPedidoPage() {
       <section className="flex-1 p-4 lg:p-8">
         <div className="mb-7 flex flex-col justify-between gap-4 xl:flex-row xl:items-end">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.28em] text-[var(--ak-glow)]">AK Intelligence Request</p>
-            <h1 className="mt-2 text-4xl font-black tracking-tight md:text-5xl">Drop ORI. Detect ECU. Send job.</h1>
-            <p className="mt-2 max-w-2xl text-sm text-white/40">Nueva experiencia de pedido con análisis visual, servicios compatibles y recomendaciones AK Cloud.</p>
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[var(--ak-glow)]">Create Tuning Request</p>
+            <h1 className="mt-2 text-4xl font-black tracking-tight md:text-5xl">Upload. Analyse. Select. Send.</h1>
+            <p className="mt-2 max-w-2xl text-sm text-white/40">Una sola pantalla para subir el ORI, ver el análisis visual, seleccionar servicios y crear el pedido.</p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--ak-green)]/25 bg-[var(--ak-green)]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[var(--ak-green)]">
-            <CheckCircle2 size={15} /> Intelligence mode
+            <CheckCircle2 size={15} /> Fast mode enabled
           </div>
         </div>
 
-        <div className="grid gap-6 2xl:grid-cols-[1fr_460px]">
+        <div className="grid gap-6 2xl:grid-cols-[1fr_430px]">
           <div className="space-y-6">
             <AKUploader fileName={fileName} onFile={handleFile} />
             <AKAnalysisProgress active={analysing} done={analysed} />
@@ -136,7 +140,7 @@ export default function NuevoPedidoPage() {
                 <div className="mb-5 flex items-center justify-between gap-4">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--ak-glow)]">Compatible Services</p>
-                    <h2 className="mt-1 text-2xl font-black">Servicios disponibles para {detected.ecu}</h2>
+                    <h2 className="mt-1 text-2xl font-black">Selecciona servicios</h2>
                   </div>
                   <div className="rounded-full border border-white/10 bg-black/25 px-4 py-2 text-xs font-black text-white/45">{selected.length} selected</div>
                 </div>
@@ -146,13 +150,8 @@ export default function NuevoPedidoPage() {
                     <div key={group.title}>
                       <h3 className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-white/35">{group.title}</h3>
                       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                        {services.filter((service) => group.ids.includes(service.id)).map((service) => (
-                          <AKServiceCard
-                            key={service.id}
-                            service={{ ...service, compatible: isCompatible(service.id) }}
-                            selected={selected.includes(service.id)}
-                            onToggle={() => toggle(service.id)}
-                          />
+                        {dynamicServices.filter((service) => group.ids.includes(service.id)).map((service) => (
+                          <AKServiceCard key={service.id} service={service} selected={selected.includes(service.id)} onToggle={() => toggle(service.id)} />
                         ))}
                       </div>
                     </div>
@@ -163,19 +162,13 @@ export default function NuevoPedidoPage() {
           </div>
 
           <aside className="space-y-6 2xl:sticky 2xl:top-6 2xl:self-start">
-            <AKIntelligencePanel visible={analysed} info={detected} />
+            <AKECUCard visible={analysed} info={ecuInfo || undefined} />
 
             <AKCard className="p-6">
               <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--ak-glow)]">Order Summary</p>
               <div className="mt-5 space-y-3">
                 {!fileName && <p className="text-sm text-white/35">Sube un ORI para preparar el pedido.</p>}
                 {fileName && <div className="rounded-2xl border border-white/10 bg-black/25 p-3 text-sm"><FileUp size={16} className="mb-2 text-[var(--ak-glow)]" />{fileName}</div>}
-                {analysed && (
-                  <div className="rounded-2xl border border-white/10 bg-black/25 p-3 text-sm">
-                    <div className="font-black text-white">{detected.marca} {detected.modelo}</div>
-                    <div className="mt-1 text-xs text-white/35">{detected.ecu} · {detected.hw}</div>
-                  </div>
-                )}
                 {selectedServices.length === 0 ? (
                   <p className="text-sm text-white/35">Selecciona servicios compatibles para calcular el precio.</p>
                 ) : selectedServices.map((service) => (
