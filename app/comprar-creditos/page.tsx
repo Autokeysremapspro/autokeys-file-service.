@@ -2,14 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
-import { AlertTriangle, CheckCircle2, CreditCard, Loader2, ShieldCheck, Sparkles, Wallet } from 'lucide-react'
+import { CheckCircle2, CreditCard, Loader2, ShieldCheck, Sparkles, Wallet } from 'lucide-react'
 import AKSidebar from '@/components/ak/AKSidebar'
+import { supabase } from '@/lib/supabase'
 import {
-  METODOS_PAGO,
   PACKS_CREDITOS,
   estadoRecargaClass,
   formatEuros,
-  getMetodoPago,
   getMisRecargas,
   solicitarRecarga,
   type RecargaCreditos,
@@ -37,8 +36,6 @@ export default function ComprarCreditosPage() {
   const [saving, setSaving] = useState(false)
 
   const pack = useMemo(() => PACKS_CREDITOS.find((item) => item.key === packKey) || PACKS_CREDITOS[0], [packKey])
-  const metodoInfo = useMemo(() => getMetodoPago(metodo), [metodo])
-  const referenciaObligatoria = metodoInfo.requiereReferencia
 
   async function load() {
     setLoading(true)
@@ -55,7 +52,32 @@ export default function ComprarCreditosPage() {
     load()
   }, [])
 
-  async function submit() {
+  async function pagarConPayPal() {
+    setSaving(true)
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const token = sessionData.session?.access_token
+      if (!token) throw new Error('Inicia sesión para comprar créditos')
+
+      const response = await fetch('/api/paypal/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ packKey: pack.key }),
+      })
+
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload?.error || 'No se pudo iniciar PayPal')
+      window.location.href = payload.approveUrl
+    } catch (error: any) {
+      toast.error(error?.message || 'No se pudo iniciar el pago')
+      setSaving(false)
+    }
+  }
+
+  async function solicitarManual() {
     setSaving(true)
     try {
       await solicitarRecarga({
@@ -86,10 +108,10 @@ export default function ComprarCreditosPage() {
           <div className="mb-8 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
             <div>
               <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[var(--ak-red)]/30 bg-[var(--ak-red)]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.25em] text-[var(--ak-glow)]">
-                <Wallet size={15} /> Credit Top-up
+                <Wallet size={15} /> AK Cloud Payments
               </div>
               <h1 className="text-4xl font-black tracking-tight lg:text-6xl">Comprar créditos</h1>
-              <p className="mt-3 max-w-3xl text-white/45">Solicita una recarga para trabajar en AK Cloud. De momento la aprobación es manual para controlar pagos por PayPal, transferencia o tarjeta.</p>
+              <p className="mt-3 max-w-3xl text-white/45">Paga con PayPal y recibe los créditos automáticamente. También puedes dejar una solicitud manual si prefieres transferencia u otro método.</p>
             </div>
           </div>
 
@@ -99,7 +121,7 @@ export default function ComprarCreditosPage() {
                 <div className="mb-5 flex items-center justify-between gap-4">
                   <div>
                     <h2 className="text-2xl font-black">Selecciona un pack</h2>
-                    <p className="mt-1 text-sm text-white/40">Créditos para servicios Stage, DPF, EGR, AdBlue, IMMO y trabajos técnicos.</p>
+                    <p className="mt-1 text-sm text-white/40">Créditos para Stage, DPF, EGR, AdBlue, IMMO y trabajos técnicos.</p>
                   </div>
                   <Sparkles className="text-[var(--ak-glow)]" />
                 </div>
@@ -131,45 +153,66 @@ export default function ComprarCreditosPage() {
               </div>
 
               <div className="rounded-[2.2rem] border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl">
+                <div className="mb-5 flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-black">Pago automático PayPal</h2>
+                    <p className="mt-1 text-sm text-white/40">Se abre PayPal, confirmas el pago y AK Cloud añade los créditos automáticamente.</p>
+                  </div>
+                  <div className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-emerald-300">Auto</div>
+                </div>
+
+                <button
+                  onClick={pagarConPayPal}
+                  disabled={saving}
+                  className="flex w-full items-center justify-center gap-3 rounded-2xl bg-[#ffc439] px-5 py-4 text-sm font-black text-black shadow-[0_0_55px_rgba(255,196,57,.20)] transition hover:scale-[1.01] disabled:opacity-60"
+                >
+                  {saving && metodo === 'paypal' ? <Loader2 className="animate-spin" size={18} /> : <CreditCard size={18} />}
+                  Pagar con PayPal · {formatEuros(pack.precio)}
+                </button>
+              </div>
+
+              <div className="rounded-[2.2rem] border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl">
                 <div className="mb-5">
-                  <h2 className="text-2xl font-black">Método de pago</h2>
-                  <p className="mt-1 text-sm text-white/40">La solicitud queda pendiente hasta que Autokeys confirme el pago.</p>
+                  <h2 className="text-2xl font-black">Solicitud manual</h2>
+                  <p className="mt-1 text-sm text-white/40">Para transferencia, tarjeta externa, SumUp, myPOS u otro método pendiente de revisar por Autokeys.</p>
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-4">
-                  {METODOS_PAGO.map((item) => (
+                  {[
+                    ['transferencia', 'Transferencia'],
+                    ['tarjeta', 'Tarjeta'],
+                    ['manual', 'Manual'],
+                    ['otro', 'Otro'],
+                  ].map(([key, label]) => (
                     <button
-                      key={item.key}
-                      onClick={() => setMetodo(item.key)}
-                      className={`rounded-2xl border px-4 py-3 text-left text-sm font-black transition ${metodo === item.key ? 'border-[var(--ak-red)]/70 bg-[var(--ak-red)]/15 text-white' : 'border-white/10 bg-black/25 text-white/45 hover:text-white'}`}
+                      key={key}
+                      onClick={() => setMetodo(key as RecargaMetodo)}
+                      className={`rounded-2xl border px-4 py-3 text-sm font-black transition ${metodo === key ? 'border-[var(--ak-red)]/70 bg-[var(--ak-red)]/15 text-white' : 'border-white/10 bg-black/25 text-white/45 hover:text-white'}`}
                     >
-                      <span className="block">{item.label}</span>
-                      <span className="mt-1 block text-[11px] font-medium normal-case text-white/35">{item.requiereReferencia ? 'Requiere referencia' : 'Validación manual'}</span>
+                      {label}
                     </button>
                   ))}
                 </div>
 
-                <div className="mt-5 rounded-2xl border border-blue-500/20 bg-blue-500/10 p-4 text-sm text-blue-100">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="mt-0.5 shrink-0 text-blue-300" size={18} />
-                    <div>
-                      <div className="font-black">Instrucciones de pago</div>
-                      <p className="mt-1 text-blue-100/70">{metodoInfo.instrucciones}</p>
-                      <p className="mt-2 text-xs text-blue-100/45">La recarga quedará pendiente hasta que Autokeys confirme el pago desde el panel interno.</p>
-                    </div>
-                  </div>
-                </div>
-
                 <div className="mt-5 grid gap-4 md:grid-cols-2">
                   <label className="block">
-                    <span className="mb-2 block text-xs font-black uppercase tracking-[0.22em] text-white/35">Referencia / ID de pago {referenciaObligatoria ? '*' : ''}</span>
-                    <input value={referencia} onChange={(e) => setReferencia(e.target.value)} className="w-full rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-white outline-none transition focus:border-[var(--ak-red)]/60" placeholder="Ej: PayPal TXN, transferencia, Bizum..." />
+                    <span className="mb-2 block text-xs font-black uppercase tracking-[0.22em] text-white/35">Referencia / ID de pago</span>
+                    <input value={referencia} onChange={(e) => setReferencia(e.target.value)} className="w-full rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-white outline-none transition focus:border-[var(--ak-red)]/60" placeholder="Ej: transferencia, recibo SumUp..." />
                   </label>
                   <label className="block">
-                    <span className="mb-2 block text-xs font-black uppercase tracking-[0.22em] text-white/35">Notas / comprobante</span>
-                    <input value={notas} onChange={(e) => setNotas(e.target.value)} className="w-full rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-white outline-none transition focus:border-[var(--ak-red)]/60" placeholder="Opcional: nombre, email de pago, comprobante..." />
+                    <span className="mb-2 block text-xs font-black uppercase tracking-[0.22em] text-white/35">Notas</span>
+                    <input value={notas} onChange={(e) => setNotas(e.target.value)} className="w-full rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-white outline-none transition focus:border-[var(--ak-red)]/60" placeholder="Opcional" />
                   </label>
                 </div>
+
+                <button
+                  onClick={solicitarManual}
+                  disabled={saving}
+                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-4 text-sm font-black text-white/80 transition hover:border-[var(--ak-red)]/40 hover:bg-[var(--ak-red)]/10 disabled:opacity-60"
+                >
+                  {saving && metodo !== 'paypal' ? <Loader2 className="animate-spin" size={18} /> : <ShieldCheck size={18} />}
+                  Solicitar recarga manual
+                </button>
               </div>
             </section>
 
@@ -186,22 +229,22 @@ export default function ComprarCreditosPage() {
                 <div className="mt-6 rounded-[1.6rem] border border-white/10 bg-black/25 p-5">
                   <div className="flex justify-between text-white/45"><span>Créditos</span><strong className="text-white">{pack.creditos}</strong></div>
                   <div className="mt-3 flex justify-between text-white/45"><span>Importe</span><strong className="text-emerald-300">{formatEuros(pack.precio)}</strong></div>
-                  <div className="mt-3 flex justify-between text-white/45"><span>Método</span><strong className="capitalize text-white">{metodo}</strong></div>
+                  <div className="mt-3 flex justify-between text-white/45"><span>Pago recomendado</span><strong className="text-white">PayPal</strong></div>
                 </div>
 
                 <button
-                  onClick={submit}
-                  disabled={saving || (referenciaObligatoria && referencia.trim().length < 3)}
+                  onClick={pagarConPayPal}
+                  disabled={saving}
                   className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--ak-red)] px-5 py-4 text-sm font-black shadow-[0_0_55px_rgba(217,4,41,.35)] transition hover:scale-[1.02] hover:bg-[var(--ak-glow)] disabled:opacity-60"
                 >
                   {saving ? <Loader2 className="animate-spin" size={18} /> : <ShieldCheck size={18} />}
-                  {referenciaObligatoria && referencia.trim().length < 3 ? 'Añade referencia' : 'Solicitar recarga'}
+                  Pagar ahora
                 </button>
               </div>
 
               <div className="rounded-[2.2rem] border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl">
-                <h2 className="text-xl font-black">Mis solicitudes</h2>
-                <p className="mt-1 text-sm text-white/40">Estado de tus últimas recargas.</p>
+                <h2 className="text-xl font-black">Mis recargas</h2>
+                <p className="mt-1 text-sm text-white/40">Estado de tus últimas compras y solicitudes.</p>
 
                 {loading ? (
                   <div className="mt-5 flex items-center gap-2 text-white/45"><Loader2 className="animate-spin" size={18} /> Cargando...</div>
