@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Bell, Brain, Car, Cloud, Coins, CreditCard, FolderOpen, Home, Library, LifeBuoy, UploadCloud, UserCircle, ShieldCheck } from 'lucide-react'
+import { Bell, Brain, Car, Cloud, Coins, CreditCard, Database, FolderOpen, Home, Library, LifeBuoy, UploadCloud, UserCircle, ShieldCheck } from 'lucide-react'
 
 const items = [
   { href: '/dashboard', label: 'Workspace', icon: Home },
@@ -18,6 +18,7 @@ const items = [
 const adminItems = [
   { href: '/admin/pedidos', label: 'Admin Orders', icon: ShieldCheck },
   { href: '/admin/recargas', label: 'Admin Credits', icon: CreditCard },
+  { href: '/admin/ecu-database', label: 'ECU Database', icon: Database },
 ]
 
 export default function AKSidebar() {
