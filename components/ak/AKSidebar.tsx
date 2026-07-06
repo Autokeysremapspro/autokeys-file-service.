@@ -1,9 +1,10 @@
 import Link from 'next/link'
-import { Bell, Car, Cloud, Coins, CreditCard, FolderOpen, Home, Library, LifeBuoy, UploadCloud, UserCircle, ShieldCheck } from 'lucide-react'
+import { Bell, Brain, Car, Cloud, Coins, CreditCard, FolderOpen, Home, Library, LifeBuoy, UploadCloud, UserCircle, ShieldCheck } from 'lucide-react'
 
 const items = [
   { href: '/dashboard', label: 'Workspace', icon: Home },
   { href: '/nuevo-pedido', label: 'New Job', icon: UploadCloud },
+  { href: '/intelligence', label: 'AK Intelligence', icon: Brain },
   { href: '/pedidos', label: 'Orders', icon: FolderOpen },
   { href: '/garage', label: 'Garage', icon: Car },
   { href: '/biblioteca', label: 'Library', icon: Library },
