@@ -8,41 +8,47 @@ import {
   Car,
   CheckCircle2,
   CircleDollarSign,
+  Clock3,
   Download,
+  FileArchive,
   FileUp,
   Gauge,
-  Headphones,
-  Library,
-  MessageCircle,
+  LifeBuoy,
   ShieldCheck,
   Sparkles,
-  Timer,
-  TrendingUp,
+  Trophy,
   Wallet,
   Zap,
 } from 'lucide-react'
 import AKSidebar from '@/components/ak/AKSidebar'
-import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
-import AKStatCard from '@/components/ak/AKStatCard'
-import AKTimeline from '@/components/ak/AKTimeline'
 import AKNotificationBell from '@/components/ak/AKNotificationBell'
 import { getMisPedidos, type FileServicePedido, formatEstado } from '@/lib/services/pedidos'
-import { getMisNotificaciones, type FileServiceNotificacion } from '@/lib/services/notificaciones'
+import { getMisNotificaciones, type FileServiceNotificacion, formatNotificationDate } from '@/lib/services/notificaciones'
 import { getSaldoCreditos } from '@/lib/services/creditos'
 
-const actions = [
-  { href: '/nuevo-pedido', label: 'Nuevo trabajo', helper: 'Subir ORI', icon: FileUp, tone: 'red' },
-  { href: '/comprar-creditos', label: 'Comprar créditos', helper: 'PayPal automático', icon: Wallet, tone: 'green' },
-  { href: '/pedidos', label: 'Mis pedidos', helper: 'Timeline y descargas', icon: Gauge, tone: 'blue' },
-  { href: '/soporte', label: 'Soporte', helper: 'Chat técnico', icon: Headphones, tone: 'orange' },
+const quickActions = [
+  { href: '/nuevo-pedido', label: 'Nuevo trabajo', helper: 'Sube un ORI y crea una solicitud', icon: FileUp, accent: 'red' },
+  { href: '/comprar-creditos', label: 'Comprar créditos', helper: 'PayPal automático', icon: Wallet, accent: 'green' },
+  { href: '/garage', label: 'Mi garaje', helper: 'Historial por vehículo', icon: Car, accent: 'blue' },
+  { href: '/soporte', label: 'Soporte técnico', helper: 'Habla con Autokeys', icon: LifeBuoy, accent: 'orange' },
 ]
 
-const productBlocks = [
-  { href: '/garage', title: 'Mi Garaje', description: 'Vehículos, historial, ORI y MOD agrupados por coche.', icon: Car },
-  { href: '/biblioteca', title: 'Biblioteca', description: 'Busca archivos por ECU, HW, SW, vehículo o servicio.', icon: Library },
-  { href: '/intelligence', title: 'AK Intelligence', description: 'Análisis visual y detección progresiva de archivos ECU.', icon: Sparkles },
-]
+function money(value: number) {
+  return new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(value)
+}
+
+function estadoTone(estado?: string | null) {
+  if (estado === 'finalizado') return 'border-emerald-400/25 bg-emerald-500/10 text-emerald-300'
+  if (estado === 'en_proceso') return 'border-blue-400/25 bg-blue-500/10 text-blue-300'
+  if (estado === 'cancelado') return 'border-red-400/25 bg-red-500/10 text-red-300'
+  return 'border-amber-400/25 bg-amber-500/10 text-amber-300'
+}
+
+function serviceLabel(servicios?: string[] | null) {
+  if (!servicios?.length) return 'Servicio pendiente'
+  return servicios.slice(0, 3).join(' + ')
+}
 
 export default function DashboardPage() {
   const [pedidos, setPedidos] = useState<FileServicePedido[]>([])
@@ -63,253 +69,295 @@ export default function DashboardPage() {
 
   const stats = useMemo(() => {
     const abiertos = pedidos.filter((p) => p.estado !== 'finalizado' && p.estado !== 'cancelado').length
-    const finalizados = pedidos.filter((p) => p.estado === 'finalizado').length
     const proceso = pedidos.filter((p) => p.estado === 'en_proceso').length
+    const finalizados = pedidos.filter((p) => p.estado === 'finalizado').length
+    const descargas = pedidos.filter((p) => Boolean(p.mod_path)).length
     const sinLeer = notificaciones.filter((n) => !n.leida).length
-    const descargas = pedidos.filter((p) => p.mod_path).length
-    return { abiertos, finalizados, proceso, sinLeer, descargas }
+    const gasto = pedidos.reduce((acc, p) => acc + Number(p.precio || 0), 0)
+    return { abiertos, proceso, finalizados, descargas, sinLeer, gasto }
   }, [pedidos, notificaciones])
 
-  const ultimo = pedidos[0]
-  const pendientes = pedidos.filter((p) => p.estado === 'pendiente').slice(0, 5)
-  const progreso = pedidos.length ? Math.round((stats.finalizados / pedidos.length) * 100) : 0
+  const activeJobs = pedidos.filter((pedido) => pedido.estado !== 'finalizado' && pedido.estado !== 'cancelado').slice(0, 5)
+  const latestJobs = pedidos.slice(0, 6)
+  const latestNotifications = notificaciones.slice(0, 4)
+  const latestReady = pedidos.filter((p) => p.mod_path).slice(0, 3)
 
   return (
-    <main className="ak-noise ak-grid flex min-h-screen overflow-hidden">
+    <main className="ak-noise flex min-h-screen overflow-hidden bg-[#030303] text-white">
       <AKSidebar />
 
-      <section className="relative z-10 flex-1 overflow-auto p-4 lg:p-8">
-        <header className="mb-7 flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.34em] text-[var(--ak-glow)]">AK Cloud Client Portal</p>
-            <h1 className="mt-2 text-4xl font-black tracking-tight md:text-6xl">Workspace</h1>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/42">
-              Tu centro de trabajo para File Service: créditos, pedidos, descargas, garaje, biblioteca y soporte en un único panel premium.
-            </p>
-          </div>
+      <section className="relative z-10 flex-1 overflow-y-auto">
+        <div className="pointer-events-none fixed inset-0 z-0">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(217,4,41,.28),transparent_34%),radial-gradient(circle_at_78%_8%,rgba(255,255,255,.08),transparent_22%),linear-gradient(120deg,#030303,#07080b_55%,#100406)]" />
+          <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.12)_1px,transparent_1px)] [background-size:58px_58px]" />
+        </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <AKNotificationBell />
-            <AKButton href="/nuevo-pedido"><FileUp size={18} /> New Job</AKButton>
-            <AKButton href="/comprar-creditos" variant="ghost"><CircleDollarSign size={18} /> Buy credits</AKButton>
-          </div>
-        </header>
+        <div className="relative z-10 p-4 lg:p-8">
+          <header className="mb-6 flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-red-500/25 bg-red-500/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.32em] text-red-300 shadow-[0_0_35px_rgba(217,4,41,.16)]">
+                <Sparkles size={14} /> AK Cloud Command Center
+              </div>
+              <h1 className="mt-3 text-4xl font-black tracking-tight md:text-6xl">
+                Bienvenido, <span className="text-red-500">Carlos</span>
+              </h1>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-white/45">
+                Tu workspace de soluciones electrónicas: pedidos, créditos, descargas, garaje y soporte conectados con Autokeys Core.
+              </p>
+            </div>
 
-        <section className="mb-6 grid gap-5 md:grid-cols-2 2xl:grid-cols-4">
-          <AKStatCard label="Créditos" value={String(saldo)} helper="Saldo disponible" tone="green" />
-          <AKStatCard label="Pedidos abiertos" value={String(stats.abiertos)} helper={`${stats.proceso} en proceso`} tone="orange" />
-          <AKStatCard label="MOD listos" value={String(stats.descargas)} helper="Descargas disponibles" tone="blue" />
-          <AKStatCard label="Avisos" value={String(stats.sinLeer)} helper="Notificaciones pendientes" tone="red" />
-        </section>
+            <div className="flex flex-wrap items-center gap-3">
+              <AKNotificationBell />
+              <AKButton href="/nuevo-pedido"><FileUp size={18} /> Nuevo trabajo</AKButton>
+              <AKButton href="/soporte" variant="ghost"><LifeBuoy size={18} /> Soporte técnico</AKButton>
+            </div>
+          </header>
 
-        <section className="grid gap-6 2xl:grid-cols-[1fr_420px]">
-          <div className="space-y-6">
-            <AKCard className="relative overflow-hidden p-6 md:p-8">
-              <div className="absolute -right-24 -top-28 h-80 w-80 rounded-full bg-[var(--ak-red)]/22 blur-3xl" />
-              <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-[var(--ak-blue)]/12 blur-3xl" />
-
-              <div className="relative grid gap-8 xl:grid-cols-[1fr_320px] xl:items-center">
+          <section className="grid gap-5 md:grid-cols-2 2xl:grid-cols-5">
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-2xl shadow-black/30 backdrop-blur-xl">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-500/15 text-red-300 ring-1 ring-red-400/20"><Wallet size={26} /></div>
                 <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-[var(--ak-glow)]">
-                    <Sparkles size={15} /> Premium Experience
-                  </div>
-                  <h2 className="mt-5 text-3xl font-black tracking-tight md:text-5xl">
-                    Envia archivos, compra créditos y consulta tu historial sin salir del workspace.
-                  </h2>
-                  <p className="mt-4 max-w-2xl text-sm leading-7 text-white/45">
-                    AK Cloud ya conecta pagos PayPal, créditos, pedidos, soporte y biblioteca técnica en una experiencia pensada para distribuidores profesionales.
-                  </p>
+                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/35">Saldo disponible</p>
+                  <div className="mt-1 text-3xl font-black text-emerald-300">{money(saldo)}</div>
+                </div>
+              </div>
+              <Link href="/comprar-creditos" className="mt-4 inline-flex text-sm font-black text-red-300">+ Recargar saldo</Link>
+            </div>
 
-                  <div className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    {actions.map((action) => {
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-2xl shadow-black/30 backdrop-blur-xl">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/20"><CheckCircle2 size={26} /></div>
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/35">Trabajos realizados</p>
+                  <div className="mt-1 text-3xl font-black">{stats.finalizados}</div>
+                </div>
+              </div>
+              <Link href="/pedidos" className="mt-4 inline-flex text-sm font-black text-emerald-300">Ver historial</Link>
+            </div>
+
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-2xl shadow-black/30 backdrop-blur-xl">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-500/15 text-purple-300 ring-1 ring-purple-400/20"><Download size={26} /></div>
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/35">Archivos descargables</p>
+                  <div className="mt-1 text-3xl font-black">{stats.descargas}</div>
+                </div>
+              </div>
+              <Link href="/biblioteca" className="mt-4 inline-flex text-sm font-black text-purple-300">Ver archivos</Link>
+            </div>
+
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-2xl shadow-black/30 backdrop-blur-xl">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-300 ring-1 ring-amber-400/20"><Clock3 size={26} /></div>
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/35">En proceso</p>
+                  <div className="mt-1 text-3xl font-black">{stats.proceso}</div>
+                </div>
+              </div>
+              <Link href="/pedidos" className="mt-4 inline-flex text-sm font-black text-amber-300">Ver trabajos</Link>
+            </div>
+
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-2xl shadow-black/30 backdrop-blur-xl">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-300 ring-1 ring-sky-400/20"><Bell size={26} /></div>
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/35">Notificaciones</p>
+                  <div className="mt-1 text-3xl font-black">{stats.sinLeer}</div>
+                </div>
+              </div>
+              <Link href="/notificaciones" className="mt-4 inline-flex text-sm font-black text-sky-300">Abrir avisos</Link>
+            </div>
+          </section>
+
+          <section className="mt-6 grid gap-6 2xl:grid-cols-[1fr_420px]">
+            <div className="space-y-6">
+              <div className="relative overflow-hidden rounded-[2.4rem] border border-white/10 bg-white/[0.045] p-6 shadow-2xl shadow-black/40 backdrop-blur-xl md:p-8">
+                <div className="absolute inset-0 bg-[url('/images/ak-login-racing.png')] bg-cover bg-center opacity-[0.22]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black via-black/88 to-black/42" />
+                <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-red-600/25 blur-3xl" />
+
+                <div className="relative grid gap-8 xl:grid-cols-[1fr_360px] xl:items-center">
+                  <div>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-red-400/25 bg-red-500/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.25em] text-red-200">
+                      <Trophy size={15} /> Professional File Service
+                    </div>
+                    <h2 className="mt-5 max-w-3xl text-4xl font-black leading-[0.95] tracking-tight md:text-6xl">
+                      No vendemos archivos. <span className="text-red-500">Entregamos soluciones.</span>
+                    </h2>
+                    <p className="mt-5 max-w-2xl text-sm leading-7 text-white/55">
+                      Sube tu ORI, selecciona servicios y deja que Autokeys gestione el trabajo desde producción hasta descarga final.
+                    </p>
+                    <div className="mt-8 flex flex-wrap gap-3">
+                      <AKButton href="/nuevo-pedido"><Zap size={18} /> Crear nuevo trabajo</AKButton>
+                      <AKButton href="/intelligence" variant="ghost"><Gauge size={18} /> Analizar ECU</AKButton>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[2rem] border border-white/10 bg-black/55 p-5 shadow-2xl shadow-black/50 backdrop-blur-xl">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/35">Live order</p>
+                        <h3 className="mt-1 text-2xl font-black">Cola de producción</h3>
+                      </div>
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/12 text-emerald-300 ring-1 ring-emerald-400/20"><ShieldCheck size={24} /></div>
+                    </div>
+
+                    <div className="mt-5 space-y-3">
+                      {activeJobs.length === 0 ? (
+                        <div className="rounded-2xl border border-dashed border-white/10 p-5 text-sm text-white/35">No hay trabajos activos ahora mismo.</div>
+                      ) : activeJobs.map((pedido) => (
+                        <Link key={pedido.id} href={`/pedidos/${pedido.id}`} className="block rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition hover:border-red-400/35 hover:bg-white/[0.07]">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="truncate text-sm font-black">{pedido.numero || 'FS'} · {pedido.ecu || 'ECU pendiente'}</div>
+                              <div className="mt-1 truncate text-xs text-white/35">{serviceLabel(pedido.servicios)}</div>
+                            </div>
+                            <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${estadoTone(pedido.estado)}`}>
+                              {formatEstado(pedido.estado)}
+                            </span>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-6 xl:grid-cols-[1.15fr_.85fr]">
+                <div className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-6 shadow-2xl shadow-black/30 backdrop-blur-xl">
+                  <div className="mb-5 flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] font-black uppercase tracking-[0.24em] text-red-300">Últimos trabajos</p>
+                      <h2 className="mt-1 text-2xl font-black">Recent jobs</h2>
+                    </div>
+                    <Link href="/pedidos" className="text-sm font-black text-red-300">Ver todos</Link>
+                  </div>
+
+                  {loading ? (
+                    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 text-white/35">Cargando pedidos...</div>
+                  ) : latestJobs.length === 0 ? (
+                    <div className="rounded-3xl border border-dashed border-white/10 p-8 text-center text-white/35">Todavía no hay pedidos. Crea el primero desde Nuevo trabajo.</div>
+                  ) : (
+                    <div className="space-y-3">
+                      {latestJobs.map((pedido) => (
+                        <Link key={pedido.id} href={`/pedidos/${pedido.id}`} className="group flex items-center justify-between rounded-3xl border border-white/10 bg-white/[0.035] p-4 transition hover:border-red-400/40 hover:bg-white/[0.06]">
+                          <div className="min-w-0">
+                            <div className="truncate text-sm font-black">{pedido.numero || 'FS'} · {pedido.ecu || 'ECU pendiente'}</div>
+                            <div className="mt-1 truncate text-xs text-white/35">{[pedido.marca, pedido.modelo, pedido.motor].filter(Boolean).join(' · ') || pedido.ori_nombre || 'Archivo pendiente'}</div>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-3">
+                            <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${estadoTone(pedido.estado)}`}>{formatEstado(pedido.estado)}</span>
+                            <ArrowRight size={17} className="text-white/25 transition group-hover:translate-x-1 group-hover:text-red-300" />
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-6 shadow-2xl shadow-black/30 backdrop-blur-xl">
+                  <div className="mb-5 flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] font-black uppercase tracking-[0.24em] text-red-300">Acciones rápidas</p>
+                      <h2 className="mt-1 text-2xl font-black">Launchpad</h2>
+                    </div>
+                    <Sparkles className="text-red-300" size={22} />
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                    {quickActions.map((action) => {
                       const Icon = action.icon
                       return (
-                        <Link
-                          key={action.href}
-                          href={action.href}
-                          className="group rounded-[1.6rem] border border-white/10 bg-white/[0.035] p-4 transition hover:-translate-y-0.5 hover:border-[var(--ak-red)]/45 hover:bg-white/[0.06]"
-                        >
-                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-black/30 text-[var(--ak-glow)] transition group-hover:scale-105">
-                            <Icon size={22} />
+                        <Link key={action.href} href={action.href} className="group rounded-[1.6rem] border border-white/10 bg-black/25 p-4 transition hover:-translate-y-0.5 hover:border-red-400/40 hover:bg-white/[0.06]">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/12 text-red-300 ring-1 ring-red-400/20 transition group-hover:scale-105">
+                              <Icon size={21} />
+                            </div>
+                            <div>
+                              <div className="text-sm font-black">{action.label}</div>
+                              <div className="mt-1 text-xs text-white/35">{action.helper}</div>
+                            </div>
                           </div>
-                          <div className="mt-4 text-sm font-black">{action.label}</div>
-                          <div className="mt-1 text-xs text-white/35">{action.helper}</div>
                         </Link>
                       )
                     })}
                   </div>
                 </div>
-
-                <div className="rounded-[2rem] border border-white/10 bg-black/30 p-5 shadow-2xl shadow-black/30">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Plan actual</p>
-                      <h3 className="mt-1 text-2xl font-black">Distributor PRO</h3>
-                    </div>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--ak-green)]/12 text-[var(--ak-green)]">
-                      <ShieldCheck size={24} />
-                    </div>
-                  </div>
-
-                  <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-                    <div className="flex items-center justify-between text-sm font-black">
-                      <span>Rendimiento pedidos</span>
-                      <span className="text-[var(--ak-green)]">{progreso}%</span>
-                    </div>
-                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/5">
-                      <div className="h-full rounded-full bg-[linear-gradient(90deg,var(--ak-red),var(--ak-green))]" style={{ width: `${Math.max(8, progreso)}%` }} />
-                    </div>
-                    <p className="mt-3 text-xs text-white/35">Pedidos finalizados sobre el historial total de tu cuenta.</p>
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-2 gap-3">
-                    <MiniStat label="Finalizados" value={stats.finalizados} />
-                    <MiniStat label="En cola" value={pendientes.length} />
-                  </div>
-                </div>
               </div>
-            </AKCard>
+            </div>
 
-            <div className="grid gap-6 xl:grid-cols-[1.15fr_.85fr]">
-              <AKCard className="p-6">
-                <div className="mb-5 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--ak-glow)]">Últimos pedidos</p>
-                    <h2 className="mt-1 text-2xl font-black">Recent jobs</h2>
-                  </div>
-                  <Link href="/pedidos" className="text-sm font-black text-[var(--ak-glow)]">Ver todos</Link>
-                </div>
-
-                {loading ? (
-                  <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 text-white/35">Cargando pedidos...</div>
-                ) : pedidos.length === 0 ? (
-                  <div className="rounded-3xl border border-dashed border-white/10 p-8 text-center text-white/35">
-                    Todavía no hay pedidos. Crea el primero desde New Job.
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {pedidos.slice(0, 6).map((pedido) => (
-                      <Link key={pedido.id} href={`/pedidos/${pedido.id}`} className="group flex items-center justify-between rounded-3xl border border-white/10 bg-white/[0.035] p-4 transition hover:border-[var(--ak-red)]/40 hover:bg-white/[0.055]">
-                        <div>
-                          <div className="text-sm font-black">{pedido.numero || 'FS'} · {pedido.ecu || 'ECU pendiente'}</div>
-                          <div className="mt-1 text-xs text-white/35">{[pedido.marca, pedido.modelo, pedido.motor].filter(Boolean).join(' · ') || pedido.ori_nombre || 'Sin datos'}</div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="rounded-full border border-white/10 bg-black/25 px-3 py-1 text-xs font-black text-white/55">{formatEstado(pedido.estado)}</span>
-                          <ArrowRight size={17} className="text-white/25 transition group-hover:text-[var(--ak-glow)]" />
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </AKCard>
-
-              <AKCard className="p-6">
+            <aside className="space-y-6">
+              <div className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-6 shadow-2xl shadow-black/30 backdrop-blur-xl">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Ecosistema</p>
-                    <h2 className="mt-1 text-2xl font-black">Accesos premium</h2>
+                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-red-300">Mi plan</p>
+                    <h2 className="mt-2 text-3xl font-black">AK PRO</h2>
                   </div>
-                  <Zap className="text-[var(--ak-glow)]" size={24} />
+                  <span className="rounded-xl bg-red-500 px-3 py-1 text-xs font-black">PRO</span>
                 </div>
-
-                <div className="mt-5 space-y-3">
-                  {productBlocks.map((block) => {
-                    const Icon = block.icon
-                    return (
-                      <Link key={block.href} href={block.href} className="group block rounded-3xl border border-white/10 bg-black/25 p-4 transition hover:border-[var(--ak-red)]/35 hover:bg-white/[0.045]">
-                        <div className="flex items-start gap-3">
-                          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--ak-red)]/12 text-[var(--ak-glow)] transition group-hover:scale-105">
-                            <Icon size={20} />
-                          </div>
-                          <div>
-                            <div className="text-sm font-black">{block.title}</div>
-                            <div className="mt-1 text-xs leading-5 text-white/35">{block.description}</div>
-                          </div>
-                        </div>
-                      </Link>
-                    )
-                  })}
+                <div className="mt-5 space-y-3 text-sm text-white/70">
+                  <div className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-300" /> PayPal automático</div>
+                  <div className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-300" /> Soporte prioritario</div>
+                  <div className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-300" /> Core Sync activo</div>
+                  <div className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-300" /> Historial de vehículos</div>
                 </div>
-              </AKCard>
-            </div>
-          </div>
-
-          <aside className="space-y-6">
-            <AKCard className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Pedido activo</p>
-                  <h2 className="mt-1 text-2xl font-black">Live order</h2>
-                </div>
-                <Bell className="text-[var(--ak-glow)]" size={24} />
+                <AKButton href="/perfil" variant="ghost" className="mt-6 w-full">Gestionar plan</AKButton>
               </div>
 
-              {ultimo ? (
-                <div className="mt-5">
-                  <Link href={`/pedidos/${ultimo.id}`} className="block rounded-3xl border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 p-4 transition hover:bg-[var(--ak-red)]/14">
-                    <div className="text-lg font-black">{ultimo.numero || 'Pedido FS'}</div>
-                    <div className="mt-1 text-sm text-white/45">{[ultimo.marca, ultimo.modelo, ultimo.ecu].filter(Boolean).join(' · ') || ultimo.ori_nombre}</div>
-                    <div className="mt-4 inline-flex rounded-full border border-white/10 bg-black/25 px-3 py-1 text-xs font-black text-white/55">{formatEstado(ultimo.estado)}</div>
-                  </Link>
-                  <div className="mt-4"><AKTimeline estado={ultimo.estado} /></div>
+              <div className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-6 shadow-2xl shadow-black/30 backdrop-blur-xl">
+                <div className="mb-5 flex items-center justify-between">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-red-300">Descargas</p>
+                    <h2 className="mt-1 text-2xl font-black">Archivos listos</h2>
+                  </div>
+                  <Link href="/biblioteca" className="text-xs font-black text-red-300">Ver biblioteca</Link>
                 </div>
-              ) : (
-                <div className="mt-5 rounded-3xl border border-dashed border-white/10 p-8 text-center text-white/35">
-                  No hay pedidos activos. Sube un ORI para comenzar.
-                </div>
-              )}
-            </AKCard>
 
-            <AKCard className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Cola</p>
-                  <h2 className="mt-1 text-2xl font-black">Pendientes</h2>
-                </div>
-                <Timer className="text-orange-400" size={24} />
-              </div>
-              <div className="mt-5 space-y-3">
-                {pendientes.length === 0 ? (
-                  <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 text-sm text-white/35">Sin pedidos pendientes.</div>
-                ) : (
-                  pendientes.map((pedido) => (
-                    <Link key={pedido.id} href={`/pedidos/${pedido.id}`} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.035] p-4 transition hover:border-[var(--ak-red)]/35">
-                      <div>
-                        <div className="text-sm font-black">{pedido.numero}</div>
-                        <div className="mt-1 text-xs text-white/35">{pedido.ecu || pedido.ori_nombre}</div>
+                <div className="space-y-3">
+                  {latestReady.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-white/10 p-5 text-sm text-white/35">Aún no hay MOD disponibles.</div>
+                  ) : latestReady.map((pedido) => (
+                    <Link key={pedido.id} href={`/pedidos/${pedido.id}`} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.035] p-3 transition hover:border-red-400/35">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/12 text-emerald-300"><FileArchive size={19} /></div>
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-black">{pedido.mod_nombre || pedido.numero || 'Archivo MOD'}</div>
+                        <div className="truncate text-xs text-white/35">{pedido.ecu || 'ECU'} · {serviceLabel(pedido.servicios)}</div>
                       </div>
-                      <ArrowRight size={16} className="text-white/25" />
                     </Link>
-                  ))
-                )}
+                  ))}
+                </div>
               </div>
-            </AKCard>
 
-            <AKCard className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--ak-green)]/12 text-[var(--ak-green)]">
-                  <MessageCircle size={21} />
+              <div className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-6 shadow-2xl shadow-black/30 backdrop-blur-xl">
+                <div className="mb-5 flex items-center justify-between">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-red-300">Centro de avisos</p>
+                    <h2 className="mt-1 text-2xl font-black">Notificaciones</h2>
+                  </div>
+                  <Link href="/notificaciones" className="text-xs font-black text-red-300">Ver todas</Link>
                 </div>
-                <div>
-                  <h3 className="font-black">Soporte técnico</h3>
-                  <p className="text-xs text-white/35">Chat y tickets conectados con Autokeys.</p>
+
+                <div className="space-y-3">
+                  {latestNotifications.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-white/10 p-5 text-sm text-white/35">Sin avisos nuevos.</div>
+                  ) : latestNotifications.map((notification) => (
+                    <Link key={notification.id} href="/notificaciones" className="block rounded-2xl border border-white/10 bg-white/[0.035] p-4 transition hover:border-red-400/35">
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-500/12 text-red-300"><Bell size={16} /></div>
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-black">{notification.titulo}</div>
+                          <div className="mt-1 line-clamp-2 text-xs leading-5 text-white/35">{notification.mensaje}</div>
+                          <div className="mt-2 text-[10px] font-black uppercase tracking-wider text-white/25">{formatNotificationDate(notification.created_at)}</div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               </div>
-              <AKButton href="/soporte" variant="ghost" className="mt-5 w-full">Abrir soporte</AKButton>
-            </AKCard>
-          </aside>
-        </section>
+            </aside>
+          </section>
+        </div>
       </section>
     </main>
-  )
-}
-
-function MiniStat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-black/22 p-4">
-      <div className="text-2xl font-black">{value}</div>
-      <div className="mt-1 text-xs font-black uppercase tracking-[0.18em] text-white/30">{label}</div>
-    </div>
   )
 }
