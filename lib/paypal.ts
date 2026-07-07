@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { PACKS_CREDITOS } from '@/lib/services/recargas'
+import { FALLBACK_PLANES, type AkCloudPlan } from '@/lib/services/akCloudConfig'
 
 const PAYPAL_ENV = process.env.PAYPAL_ENV || 'sandbox'
 const PAYPAL_BASE_URL = PAYPAL_ENV === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com'
@@ -50,10 +50,27 @@ export async function getPayPalAccessToken() {
   return payload.access_token as string
 }
 
-export function getPackByKey(packKey: string) {
-  const pack = PACKS_CREDITOS.find((item) => item.key === packKey)
-  if (!pack) throw new Error('Pack de créditos no válido')
-  return pack
+export async function getPackByKey(packKey: string): Promise<AkCloudPlan> {
+  const supabase = getSupabaseAdmin()
+  const { data, error } = await supabase
+    .from('akcloud_planes')
+    .select('*')
+    .eq('slug', packKey)
+    .eq('activo', true)
+    .maybeSingle()
+
+  if (!error && data) {
+    return {
+      ...data,
+      precio_mensual: Number(data.precio_mensual || 0),
+      creditos_mes: Number(data.creditos_mes || 0),
+      ventajas: Array.isArray(data.ventajas) ? data.ventajas : [],
+    } as AkCloudPlan
+  }
+
+  const fallback = FALLBACK_PLANES.find((item) => item.slug === packKey)
+  if (!fallback) throw new Error('Pack de créditos no válido')
+  return fallback
 }
 
 export async function createPayPalOrder(input: {
@@ -61,7 +78,7 @@ export async function createPayPalOrder(input: {
   userId: string
   userEmail?: string | null
 }) {
-  const pack = getPackByKey(input.packKey)
+  const pack = await getPackByKey(input.packKey)
   const supabase = getSupabaseAdmin()
   const siteUrl = getSiteUrl()
 
@@ -70,8 +87,8 @@ export async function createPayPalOrder(input: {
     .insert({
       user_id: input.userId,
       email_cliente: input.userEmail || null,
-      creditos: pack.creditos,
-      importe: pack.precio,
+      creditos: pack.creditos_mes,
+      importe: pack.precio_mensual,
       metodo_pago: 'paypal',
       referencia_pago: null,
       notas_cliente: `Compra automática PayPal - ${pack.nombre}`,
@@ -102,10 +119,10 @@ export async function createPayPalOrder(input: {
         {
           reference_id: String(recarga.id),
           custom_id: String(recarga.id),
-          description: `AK Cloud - ${pack.nombre} (${pack.creditos} créditos)`,
+          description: `AK Cloud - ${pack.nombre} (${pack.creditos_mes} créditos)`,
           amount: {
             currency_code: 'EUR',
-            value: Number(pack.precio).toFixed(2),
+            value: Number(pack.precio_mensual).toFixed(2),
           },
         },
       ],
@@ -125,8 +142,8 @@ export async function createPayPalOrder(input: {
     paypal_order_id: order.id,
     estado: 'created',
     pack_key: input.packKey,
-    creditos: pack.creditos,
-    importe: pack.precio,
+    creditos: pack.creditos_mes,
+    importe: pack.precio_mensual,
     currency: 'EUR',
     raw_order: order,
   })

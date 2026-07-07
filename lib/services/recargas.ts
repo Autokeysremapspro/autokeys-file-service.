@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 
 export type RecargaEstado = 'pendiente' | 'aprobada' | 'rechazada' | 'cancelada'
-export type RecargaMetodo = 'paypal' | 'transferencia' | 'tarjeta' | 'manual' | 'otro'
+export type RecargaMetodo = 'paypal' | 'bizum' | 'transferencia' | 'tarjeta' | 'manual' | 'otro' | string
 
 export type RecargaCreditos = {
   id: string
@@ -56,9 +56,16 @@ export const METODOS_PAGO: {
 }[] = [
   {
     key: 'paypal',
-    label: 'PayPal',
+    label: 'PayPal / Tarjeta',
     descripcion: 'Pago rápido. Pega el ID de transacción o el email usado.',
     instrucciones: 'Realiza el pago por PayPal y pega el ID de transacción en la referencia.',
+    requiereReferencia: true,
+  },
+  {
+    key: 'bizum',
+    label: 'Bizum',
+    descripcion: 'Pago manual mediante Bizum.',
+    instrucciones: 'Haz Bizum al número indicado por Autokeys e indica tu email como concepto.',
     requiereReferencia: true,
   },
   {
@@ -95,7 +102,7 @@ export async function solicitarRecarga(payload: {
   referencia_pago?: string
   notas_cliente?: string
 }) {
-  const metodo = getMetodoPago(payload.metodo_pago)
+  const metodo = getMetodoPago(String(payload.metodo_pago))
   const referencia = payload.referencia_pago?.trim() || ''
 
   if (metodo.requiereReferencia && referencia.length < 3) {
@@ -117,7 +124,7 @@ export async function solicitarRecarga(payload: {
       email_cliente: user.email || null,
       creditos: payload.creditos,
       importe: payload.importe,
-      metodo_pago: payload.metodo_pago,
+      metodo_pago: String(payload.metodo_pago),
       referencia_pago: referencia || null,
       notas_cliente: payload.notas_cliente?.trim() || null,
       estado: 'pendiente',

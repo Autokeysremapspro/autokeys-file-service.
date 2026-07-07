@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CreditCard, Download, Loader2, Plus, ReceiptText, ShieldCheck, Sparkles, Wallet } from 'lucide-react'
 import AKSidebar from '@/components/ak/AKSidebar'
-import { getCreditoMovimientos, SERVICIOS_PRECIOS, type CreditoMovimiento } from '@/lib/services/creditos'
+import { getCreditoMovimientos, type CreditoMovimiento } from '@/lib/services/creditos'
+import { FALLBACK_SERVICIOS, getServiciosActivos, type AkCloudServicio } from '@/lib/services/akCloudConfig'
 
 function formatDate(date?: string | null) {
   if (!date) return '—'
@@ -25,6 +26,7 @@ function tipoClass(tipo: string) {
 
 export default function CreditosPage() {
   const [movimientos, setMovimientos] = useState<CreditoMovimiento[]>([])
+  const [servicios, setServicios] = useState<AkCloudServicio[]>(FALLBACK_SERVICIOS)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -32,7 +34,9 @@ export default function CreditosPage() {
     setLoading(true)
     setError(null)
     try {
-      setMovimientos(await getCreditoMovimientos())
+      const [movs, serviciosData] = await Promise.all([getCreditoMovimientos(), getServiciosActivos()])
+      setMovimientos(movs)
+      setServicios(serviciosData)
     } catch (err: any) {
       setError(err?.message || 'No se pudieron cargar los créditos')
     } finally {
@@ -108,18 +112,18 @@ export default function CreditosPage() {
               <div className="mb-5 flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-black">Tarifa de servicios</h2>
-                  <p className="mt-1 text-sm text-white/40">Precios base en créditos. Se podrán personalizar por distribuidor.</p>
+                  <p className="mt-1 text-sm text-white/40">Precios base en créditos. Se gestionan desde Autokeys Core y se actualizan automáticamente.</p>
                 </div>
                 <Sparkles className="text-[var(--ak-glow)]" />
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">
-                {SERVICIOS_PRECIOS.map((servicio) => (
-                  <div key={servicio.key} className="group rounded-[1.5rem] border border-white/10 bg-black/25 p-4 transition hover:-translate-y-0.5 hover:border-[var(--ak-red)]/45 hover:bg-[var(--ak-red)]/10">
+                {servicios.map((servicio) => (
+                  <div key={servicio.slug} className="group rounded-[1.5rem] border border-white/10 bg-black/25 p-4 transition hover:-translate-y-0.5 hover:border-[var(--ak-red)]/45 hover:bg-[var(--ak-red)]/10">
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <div className="text-[10px] font-black uppercase tracking-[0.24em] text-white/30">{servicio.categoria}</div>
-                        <h3 className="mt-2 text-lg font-black">{servicio.label}</h3>
+                        <h3 className="mt-2 text-lg font-black">{servicio.nombre}</h3>
                         <p className="mt-1 text-sm text-white/40">{servicio.descripcion}</p>
                       </div>
                       <div className="rounded-2xl border border-[var(--ak-red)]/30 bg-[var(--ak-red)]/15 px-3 py-2 text-lg font-black text-[var(--ak-glow)]">{servicio.creditos}</div>

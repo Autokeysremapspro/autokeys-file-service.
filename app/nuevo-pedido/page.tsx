@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertCircle, Car, FileUp, Gauge, Send, Wrench } from 'lucide-react'
 import AKPageShell from '@/components/ak/AKPageShell'
@@ -9,29 +9,34 @@ import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import AKServiceCard, { type AKService } from '@/components/ak/AKServiceCard'
 import { crearPedidoFileService } from '@/lib/services/pedidos'
-
-const services: AKService[] = [
-  { id: 'stage1', name: 'Stage 1', description: 'Reprogramación segura para uso diario.', price: 35, icon: '🚀' },
-  { id: 'stage2', name: 'Stage 2', description: 'Calibración para vehículos con hardware.', price: 55, icon: '🏁' },
-  { id: 'dpf', name: 'DPF OFF', description: 'Solución filtro partículas diesel.', price: 30, icon: '🚫' },
-  { id: 'egr', name: 'EGR OFF', description: 'Solución EGR y ajustes relacionados.', price: 20, icon: '🌿' },
-  { id: 'adblue', name: 'AdBlue OFF', description: 'Solución SCR / AdBlue.', price: 35, icon: '💧' },
-  { id: 'dtc', name: 'DTC OFF', description: 'Desactivación de códigos específicos.', price: 20, icon: '⚠️' },
-  { id: 'immo', name: 'IMMO OFF', description: 'Solución inmovilizador bajo solicitud.', price: 45, icon: '🔑' },
-  { id: 'pops', name: 'Pops & Bangs', description: 'Calibración sonido escape sport.', price: 30, icon: '💥' },
-  { id: 'hardcut', name: 'Hardcut', description: 'Limitador con efecto hardcut.', price: 25, icon: '🍿' },
-  { id: 'original', name: 'Original', description: 'Restaurar o preparar archivo original.', price: 15, icon: '⚙️' },
-]
-
-const groups = [
-  { title: 'Performance', ids: ['stage1', 'stage2'] },
-  { title: 'Anticontaminación', ids: ['dpf', 'egr', 'adblue', 'dtc'] },
-  { title: 'Opciones técnicas', ids: ['immo', 'pops', 'hardcut', 'original'] },
-]
+import {
+  aplicarReglasPrecios,
+  FALLBACK_SERVICIOS,
+  getReglasPreciosActivas,
+  getServiciosActivos,
+  groupServicios,
+  type AkCloudReglaPrecio,
+  type AkCloudServicio,
+  type ServicioCalculado,
+} from '@/lib/services/akCloudConfig'
 
 const initialVehicle = { marca: '', modelo: '', motor: '', anio: '', cv: '', cambio: '', ecu: '', hw: '', sw: '', lectura: '' }
-
 type VehicleForm = typeof initialVehicle
+
+function serviceToCard(service: ServicioCalculado): AKService {
+  const price = typeof service.precio_final === 'number' ? service.precio_final : Number(service.precio || service.creditos || 0)
+  return {
+    id: service.slug,
+    name: service.nombre,
+    description: service.incluido_por
+      ? `${service.descripcion || ''} Incluido por pack: ${service.incluido_por}.`
+      : service.descripcion || 'Servicio configurable desde Autokeys Core.',
+    price,
+    icon: service.icono || '⚙️',
+    compatible: service.activo !== false,
+    category: service.categoria,
+  }
+}
 
 export default function NuevoPedidoPage() {
   const router = useRouter()
@@ -40,8 +45,25 @@ export default function NuevoPedidoPage() {
   const [selected, setSelected] = useState<string[]>([])
   const [vehicle, setVehicle] = useState<VehicleForm>(initialVehicle)
   const [observaciones, setObservaciones] = useState('')
+  const [servicios, setServicios] = useState<AkCloudServicio[]>(FALLBACK_SERVICIOS)
+  const [reglas, setReglas] = useState<AkCloudReglaPrecio[]>([])
+  const [loadingConfig, setLoadingConfig] = useState(true)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function loadConfig() {
+      setLoadingConfig(true)
+      try {
+        const [serviciosData, reglasData] = await Promise.all([getServiciosActivos(), getReglasPreciosActivas()])
+        setServicios(serviciosData)
+        setReglas(reglasData)
+      } finally {
+        setLoadingConfig(false)
+      }
+    }
+    loadConfig()
+  }, [])
 
   function updateVehicle(key: keyof VehicleForm, value: string) {
     setVehicle((current) => ({ ...current, [key]: value }))
@@ -53,12 +75,16 @@ export default function NuevoPedidoPage() {
     setError(null)
   }
 
-  function toggle(id: string) {
-    setSelected((current) => current.includes(id) ? current.filter((x) => x !== id) : [...current, id])
+  function toggle(slug: string) {
+    setSelected((current) => current.includes(slug) ? current.filter((x) => x !== slug) : [...current, slug])
   }
 
-  const selectedServices = services.filter((service) => selected.includes(service.id))
-  const total = useMemo(() => selectedServices.reduce((sum, item) => sum + item.price, 0), [selectedServices])
+  const serviciosCalculados = useMemo(() => aplicarReglasPrecios(servicios, selected, reglas), [servicios, selected, reglas])
+  const grupos = useMemo(() => groupServicios(serviciosCalculados), [serviciosCalculados])
+  const selectedServices = serviciosCalculados.filter((service) => selected.includes(service.slug))
+  const total = useMemo(() => selectedServices.reduce((sum, item) => sum + Number(item.precio_final || 0), 0), [selectedServices])
+  const totalBase = useMemo(() => selectedServices.reduce((sum, item) => sum + Number(item.precio || item.creditos || 0), 0), [selectedServices])
+  const ahorro = Math.max(0, totalBase - total)
 
   async function enviarPedido() {
     if (!file) return setError('Sube primero el archivo ORI.')
@@ -71,7 +97,7 @@ export default function NuevoPedidoPage() {
     try {
       const pedido = await crearPedidoFileService({
         ori: file,
-        servicios: selectedServices.map((service) => service.name),
+        servicios: selectedServices.map((service) => service.nombre),
         observaciones,
         precio: total,
         marca: vehicle.marca,
@@ -95,7 +121,7 @@ export default function NuevoPedidoPage() {
   return (
     <AKPageShell
       title="Nuevo pedido"
-      subtitle="Sube el ORI, añade los datos técnicos manualmente y selecciona los servicios. Hemos quitado la detección automática para evitar errores."
+      subtitle="Sube el ORI, añade los datos técnicos manualmente y selecciona los servicios. Los precios, servicios y packs salen desde Autokeys Core."
       eyebrow="File Service"
     >
       <div className="grid gap-6 2xl:grid-cols-[1fr_430px]">
@@ -116,7 +142,7 @@ export default function NuevoPedidoPage() {
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-500/25 bg-red-500/10 text-red-300"><Car size={24} /></div>
               <div>
                 <h2 className="text-2xl font-black">Datos del vehículo</h2>
-                <p className="text-sm text-white/40">Estos datos los introduce el cliente. Si no sabe un campo, puede dejarlo vacío excepto marca, modelo y ECU.</p>
+                <p className="text-sm text-white/40">Estos datos los introduce el cliente manualmente. Nada de detección automática forzada.</p>
               </div>
             </div>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -134,7 +160,7 @@ export default function NuevoPedidoPage() {
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-500/25 bg-red-500/10 text-red-300"><Gauge size={24} /></div>
               <div>
                 <h2 className="text-2xl font-black">Datos ECU</h2>
-                <p className="text-sm text-white/40">Sin detección automática. El cliente rellena ECU / HW / SW manualmente.</p>
+                <p className="text-sm text-white/40">El cliente rellena ECU / HW / SW manualmente. Si no lo sabe, puede escribir “revisar”.</p>
               </div>
             </div>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -150,21 +176,30 @@ export default function NuevoPedidoPage() {
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-500/25 bg-red-500/10 text-red-300"><Wrench size={24} /></div>
               <div>
                 <h2 className="text-2xl font-black">Servicios</h2>
-                <p className="text-sm text-white/40">Selecciona uno o varios servicios para este archivo.</p>
+                <p className="text-sm text-white/40">Servicios, precios y reglas de packs se actualizan desde Autokeys Core.</p>
               </div>
             </div>
-            <div className="space-y-6">
-              {groups.map((group) => (
-                <div key={group.title}>
-                  <h3 className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-white/35">{group.title}</h3>
-                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    {services.filter((service) => group.ids.includes(service.id)).map((service) => (
-                      <AKServiceCard key={service.id} service={{ ...service, compatible: true }} selected={selected.includes(service.id)} onToggle={() => toggle(service.id)} />
-                    ))}
+            {loadingConfig ? (
+              <div className="rounded-2xl border border-white/10 bg-black/25 p-5 text-sm text-white/45">Cargando configuración desde Core...</div>
+            ) : (
+              <div className="space-y-6">
+                {Object.entries(grupos).map(([categoria, items]) => (
+                  <div key={categoria}>
+                    <h3 className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-white/35">{categoria}</h3>
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                      {items.map((service) => (
+                        <div key={service.slug} className="relative">
+                          <AKServiceCard service={serviceToCard(service)} selected={selected.includes(service.slug)} onToggle={() => toggle(service.slug)} />
+                          {service.incluido_por && selected.includes(service.slug) && (
+                            <div className="mt-2 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-300">Incluido: {service.incluido_por}</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </AKCard>
         </div>
 
@@ -179,13 +214,27 @@ export default function NuevoPedidoPage() {
             </div>
             <div className="mt-5 space-y-2">
               {selectedServices.length === 0 ? <p className="text-sm text-white/35">Sin servicios seleccionados.</p> : selectedServices.map((service) => (
-                <div key={service.id} className="flex items-center justify-between rounded-2xl bg-black/25 p-3 text-sm"><span>{service.icon} {service.name}</span><strong>{service.price} €</strong></div>
+                <div key={service.slug} className="flex items-center justify-between rounded-2xl bg-black/25 px-4 py-3 text-sm">
+                  <div>
+                    <span>{service.icono || '⚙️'} {service.nombre}</span>
+                    {service.incluido_por && <div className="text-xs text-emerald-300">Incluido por pack</div>}
+                  </div>
+                  <strong className={service.precio_final === 0 ? 'text-emerald-300' : 'text-white'}>{service.precio_final === 0 ? '0 €' : `${service.precio_final} €`}</strong>
+                </div>
               ))}
             </div>
-            <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} placeholder="Observaciones para el técnico..." className="ak-input mt-5 h-28" />
-            <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5"><span className="text-white/40">Total</span><strong className="text-4xl text-red-400">{total} €</strong></div>
+            <div className="mt-5 rounded-[1.6rem] border border-red-500/20 bg-red-500/10 p-4">
+              {ahorro > 0 && <div className="mb-2 flex justify-between text-sm text-emerald-300"><span>Ahorro pack</span><strong>-{ahorro} €</strong></div>}
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-white/45">Total</span>
+                <strong className="text-4xl font-black text-white">{total} €</strong>
+              </div>
+            </div>
             {error && <div className="mt-4 flex gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200"><AlertCircle size={18} /> {error}</div>}
-            <AKButton className="mt-5 w-full" disabled={sending} onClick={enviarPedido}><Send size={18} /> {sending ? 'Enviando...' : 'Enviar pedido'}</AKButton>
+            <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="mt-4 min-h-[120px] w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-red-500/60" placeholder="Observaciones para el técnico..." />
+            <AKButton onClick={enviarPedido} disabled={sending} className="mt-4 w-full">
+              <Send size={18} /> {sending ? 'Enviando...' : 'Enviar pedido'}
+            </AKButton>
           </AKCard>
         </aside>
       </div>
@@ -193,15 +242,15 @@ export default function NuevoPedidoPage() {
   )
 }
 
-function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string }) {
+function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
-    <label>
-      <span className="ak-label">{label}</span>
-      <input className="ak-input" value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
+    <label className="block">
+      <span className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-white/35">{label}</span>
+      <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-red-500/60" />
     </label>
   )
 }
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
-  return <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-black/20 px-4 py-3"><span className="text-white/35">{label}</span><strong className="max-w-[220px] truncate text-right text-white">{value}</strong></div>
+  return <div className="flex justify-between gap-4"><span className="text-white/35">{label}</span><strong className="max-w-[220px] truncate text-right text-white/75">{value}</strong></div>
 }
