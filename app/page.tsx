@@ -1,140 +1,236 @@
 import Link from 'next/link'
 import {
   ArrowRight,
-  CheckCircle2,
-  Cloud,
+  BadgeCheck,
+  ChevronRight,
+  Clock3,
+  CloudUpload,
   CreditCard,
-  Database,
+  FileCheck2,
   Gauge,
-  Lock,
-  MessageCircle,
+  KeyRound,
+  LockKeyhole,
+  MessageSquareText,
   ShieldCheck,
   Sparkles,
   UploadCloud,
+  Wrench,
   Zap,
 } from 'lucide-react'
 
-const stats = [
-  { label: 'Archivos procesados', value: '+12.800' },
-  { label: 'ECUs soportadas', value: '+1.200' },
-  { label: 'Tiempo medio', value: '18 min' },
+const services = [
+  { icon: Gauge, name: 'Stage 1', detail: 'Respuesta, par y rendimiento' },
+  { icon: Zap, name: 'Stage 2', detail: 'Configuraciones avanzadas' },
+  { icon: ShieldCheck, name: 'DPF / EGR', detail: 'Soluciones técnicas profesionales' },
+  { icon: Wrench, name: 'AdBlue', detail: 'Diagnóstico y solución especializada' },
+  { icon: KeyRound, name: 'IMMO', detail: 'Servicios de inmovilizador' },
+  { icon: FileCheck2, name: 'ORI / MOD', detail: 'Historial y archivos centralizados' },
 ]
 
-const features = [
-  { icon: UploadCloud, title: 'Subida rápida', text: 'Envía ORI, selecciona servicios y crea el pedido en segundos.' },
-  { icon: Sparkles, title: 'AK Intelligence', text: 'Detección progresiva de ECU, HW, SW y servicios compatibles.' },
-  { icon: CreditCard, title: 'Créditos automáticos', text: 'PayPal añade saldo automáticamente sin gestión manual.' },
-  { icon: MessageCircle, title: 'Soporte por pedido', text: 'Chat técnico y notificaciones vinculadas a cada trabajo.' },
+const steps = [
+  ['Solicita acceso', 'Completa el alta profesional de distribuidor.'],
+  ['Cuenta aprobada', 'Autokeys valida tu perfil y activa el workspace.'],
+  ['Envía el trabajo', 'Sube el ORI y añade manualmente los datos del vehículo.'],
+  ['Recibe la solución', 'Sigue el estado y descarga el archivo terminado.'],
+]
+
+const highlights = [
+  { icon: ShieldCheck, title: 'Seguridad total', text: 'Archivos y datos protegidos' },
+  { icon: Zap, title: 'Entrega rápida', text: 'Flujo directo con Autokeys' },
+  { icon: BadgeCheck, title: 'Experiencia real', text: 'Especialistas en electrónica' },
+]
+
+const benefits = [
+  { icon: Clock3, title: 'Entrega ágil', text: 'Flujo directo con el laboratorio, sin conversaciones dispersas.' },
+  { icon: LockKeyhole, title: 'Entorno seguro', text: 'Pagos, créditos, pedidos y archivos centralizados.' },
+  { icon: MessageSquareText, title: 'Soporte por pedido', text: 'Toda la conversación técnica queda vinculada al trabajo.' },
+  { icon: CreditCard, title: 'Pago automático', text: 'Compra de créditos integrada mediante PayPal Checkout.' },
 ]
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#030406] text-white">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/2 top-[-18rem] h-[38rem] w-[38rem] -translate-x-1/2 rounded-full bg-red-600/20 blur-[140px]" />
-        <div className="absolute bottom-[-18rem] right-[-12rem] h-[36rem] w-[36rem] rounded-full bg-blue-600/10 blur-[140px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.035)_1px,transparent_1px)] bg-[size:56px_56px] opacity-20" />
+    <main className="min-h-screen overflow-hidden bg-[#020304] text-white">
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_4%,rgba(220,38,38,.2),transparent_27%),radial-gradient(circle_at_88%_12%,rgba(255,30,60,.11),transparent_23%),linear-gradient(180deg,#030405,#05070b_55%,#020304)]" />
+        <div className="absolute inset-0 opacity-[.12] [background-image:linear-gradient(rgba(255,255,255,.045)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.045)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(circle_at_50%_20%,black,transparent_75%)]" />
+        <div className="absolute left-[-18rem] top-[20rem] h-[34rem] w-[34rem] rounded-full bg-red-700/20 blur-[150px]" />
       </div>
 
-      <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="grid h-11 w-11 place-items-center rounded-2xl border border-red-500/30 bg-red-600/15 shadow-lg shadow-red-950/40">
-            <Cloud size={23} className="text-red-400" />
-          </div>
-          <div>
-            <div className="text-xl font-black tracking-tight">AK <span className="text-red-500">CLOUD</span></div>
-            <div className="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-500">by Autokeys Lab</div>
-          </div>
-        </Link>
-
-        <nav className="hidden items-center gap-7 text-sm font-bold text-zinc-400 md:flex">
-          <a href="#features" className="hover:text-white">Plataforma</a>
-          <a href="#workflow" className="hover:text-white">Flujo</a>
-          <a href="#security" className="hover:text-white">Seguridad</a>
-        </nav>
-
-        <div className="flex items-center gap-3">
-          <Link href="/login" className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-black text-zinc-200 hover:bg-white/[0.08]">
-            Acceder
+      <header className="relative z-30 border-b border-white/[0.07] bg-black/45 backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-[1500px] items-center justify-between px-5 py-4 lg:px-8">
+          <Link href="/" className="group flex items-center gap-3">
+            <img src="/images/login/autokeys-logo-small.webp" alt="Autokeys" className="h-11 w-auto object-contain transition group-hover:scale-[1.03]" />
+            <div className="hidden border-l border-white/10 pl-3 sm:block">
+              <div className="text-sm font-black tracking-[.16em]">AK <span className="text-red-500">CLOUD</span></div>
+              <div className="mt-0.5 text-[9px] font-bold uppercase tracking-[.28em] text-zinc-600">Professional workspace</div>
+            </div>
           </Link>
-          <Link href="/register" className="hidden rounded-2xl bg-red-600 px-4 py-2 text-sm font-black text-white shadow-lg shadow-red-950/40 hover:bg-red-500 sm:inline-flex">
-            Crear cuenta
-          </Link>
+
+          <nav className="hidden items-center gap-8 text-xs font-black uppercase tracking-[.12em] text-zinc-500 lg:flex">
+            <a href="#plataforma" className="transition hover:text-white">Plataforma</a>
+            <a href="#servicios" className="transition hover:text-white">Servicios</a>
+            <a href="#flujo" className="transition hover:text-white">Cómo funciona</a>
+            <a href="#ventajas" className="transition hover:text-white">Ventajas</a>
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <Link href="/login" className="rounded-xl border border-white/10 bg-white/[0.035] px-4 py-2.5 text-xs font-black uppercase tracking-wide text-zinc-200 transition hover:border-white/20 hover:bg-white/[0.07]">
+              Acceder
+            </Link>
+            <Link href="/register" className="hidden items-center gap-2 rounded-xl bg-gradient-to-r from-red-700 to-red-500 px-4 py-2.5 text-xs font-black uppercase tracking-wide shadow-[0_14px_40px_rgba(185,28,28,.35)] transition hover:scale-[1.02] sm:inline-flex">
+              Solicitar acceso <ArrowRight size={15} />
+            </Link>
+          </div>
         </div>
       </header>
 
-      <section className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 pb-20 pt-10 lg:grid-cols-[1fr_.92fr] lg:px-8 lg:pb-28 lg:pt-16">
-        <div>
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-red-500/25 bg-red-500/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-red-300">
-            <Zap size={15} /> Professional File Service Platform
-          </div>
-          <h1 className="max-w-4xl text-5xl font-black leading-[0.95] tracking-tight md:text-7xl lg:text-8xl">
-            File Service con imagen de <span className="bg-gradient-to-r from-red-500 via-red-300 to-white bg-clip-text text-transparent">software premium.</span>
-          </h1>
-          <p className="mt-7 max-w-2xl text-lg leading-8 text-zinc-400">
-            AK Cloud centraliza pedidos, créditos, pagos, soporte, archivos, garaje e inteligencia ECU en una experiencia creada para distribuidores profesionales.
-          </p>
+      <section id="plataforma" className="relative z-10 min-h-[calc(100vh-78px)] overflow-hidden border-b border-white/[0.07]">
+        <div className="absolute inset-0 bg-[url('/images/ak-landing-racing-hero.webp')] bg-cover bg-center lg:bg-[center_top]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,.97)_0%,rgba(0,0,0,.9)_34%,rgba(0,0,0,.44)_66%,rgba(0,0,0,.82)_100%)]" />
+        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#020304] to-transparent" />
 
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Link href="/register" className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-red-950/50 hover:bg-red-500">
-              Solicitar acceso <ArrowRight size={18} className="transition group-hover:translate-x-1" />
-            </Link>
-            <Link href="/login" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-4 text-sm font-black uppercase tracking-wide text-white hover:bg-white/[0.08]">
-              Entrar al portal
-            </Link>
+        <div className="relative mx-auto grid min-h-[calc(100vh-78px)] max-w-[1500px] items-center gap-10 px-5 py-16 lg:grid-cols-[.9fr_1.1fr] lg:px-8">
+          <div className="max-w-3xl">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-950/45 px-4 py-2 text-[11px] font-black uppercase tracking-[.22em] text-red-300 shadow-[0_0_35px_rgba(220,38,38,.18)] backdrop-blur-xl">
+              <Sparkles size={15} /> Ecosistema profesional para distribuidores
+            </div>
+
+            <h1 className="text-5xl font-black uppercase leading-[.91] tracking-[-.045em] sm:text-6xl lg:text-[5.7rem]">
+              No vendemos archivos.
+              <span className="mt-2 block bg-gradient-to-r from-red-600 via-red-400 to-white bg-clip-text text-transparent">Entregamos soluciones.</span>
+            </h1>
+
+            <p className="mt-7 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
+              Pedidos, créditos, soporte, descargas y comunicación directa con el laboratorio en una plataforma creada por profesionales de la electrónica de vehículos.
+            </p>
+
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <Link href="/register" className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-red-700 via-red-600 to-red-500 px-6 py-4 text-sm font-black uppercase tracking-wide shadow-[0_18px_55px_rgba(185,28,28,.38)] transition hover:-translate-y-0.5 hover:brightness-110">
+                Solicitar acceso profesional <ArrowRight size={18} className="transition group-hover:translate-x-1" />
+              </Link>
+              <Link href="/login" className="inline-flex items-center justify-center gap-3 rounded-2xl border border-white/12 bg-black/45 px-6 py-4 text-sm font-black uppercase tracking-wide backdrop-blur-xl transition hover:border-red-500/40 hover:bg-white/[0.06]">
+                Entrar al portal <ChevronRight size={18} />
+              </Link>
+            </div>
+
+            <div className="mt-10 grid max-w-2xl gap-3 sm:grid-cols-3">
+              {highlights.map((item) => {
+                const Icon = item.icon
+                return (
+                  <div key={item.title} className="rounded-2xl border border-white/10 bg-black/50 p-4 backdrop-blur-xl transition hover:border-red-500/35 hover:bg-black/65">
+                    <Icon size={20} className="mb-3 text-red-500" />
+                    <div className="text-xs font-black uppercase tracking-wide">{item.title}</div>
+                    <div className="mt-1 text-xs leading-5 text-zinc-600">{item.text}</div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
 
-          <div className="mt-11 grid max-w-2xl grid-cols-3 gap-3">
-            {stats.map((stat) => (
-              <div key={stat.label} className="rounded-3xl border border-white/10 bg-white/[0.035] p-4 backdrop-blur-xl">
-                <div className="text-2xl font-black">{stat.value}</div>
-                <div className="mt-1 text-xs font-bold uppercase tracking-wider text-zinc-500">{stat.label}</div>
+          <div className="hidden justify-end lg:flex">
+            <div className="relative w-full max-w-[610px]">
+              <div className="absolute -inset-10 rounded-full bg-red-700/15 blur-[90px]" />
+              <div className="relative overflow-hidden rounded-[2rem] border border-white/12 bg-[#080a0e]/88 p-4 shadow-[0_45px_120px_rgba(0,0,0,.65)] backdrop-blur-2xl">
+                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-9 w-9 place-items-center rounded-xl bg-red-600/15 text-red-400"><CloudUpload size={19} /></div>
+                    <div>
+                      <div className="text-sm font-black">AK Cloud Workspace</div>
+                      <div className="text-[10px] uppercase tracking-[.18em] text-zinc-600">Distribuidor Professional</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-[10px] font-black uppercase text-emerald-300">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> Online
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-[1.6rem] border border-dashed border-red-500/35 bg-[radial-gradient(circle_at_center,rgba(220,38,38,.19),rgba(255,255,255,.025))] p-8 text-center">
+                  <UploadCloud className="mx-auto text-red-400" size={45} />
+                  <div className="mt-4 text-xl font-black uppercase">Nuevo trabajo</div>
+                  <div className="mt-2 text-sm text-zinc-500">Sube el ORI y completa los datos manualmente.</div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-3 gap-3">
+                  {[
+                    ['Créditos', '845'],
+                    ['En proceso', '3'],
+                    ['Listos', '2'],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded-2xl border border-white/10 bg-black/35 p-4">
+                      <div className="text-2xl font-black">{value}</div>
+                      <div className="mt-1 text-[10px] font-black uppercase tracking-[.14em] text-zinc-600">{label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black/35">
+                  <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+                    <div className="text-xs font-black uppercase tracking-[.15em]">Últimos pedidos</div>
+                    <div className="text-[10px] font-bold text-red-400">Ver todos</div>
+                  </div>
+                  {[
+                    ['BMW 320d', 'Stage 1', 'En proceso', 'text-amber-400'],
+                    ['Audi A4', 'DPF + EGR', 'Completado', 'text-emerald-400'],
+                    ['Golf GTI', 'Stage 2', 'Pendiente', 'text-sky-400'],
+                  ].map(([vehicle, service, status, color]) => (
+                    <div key={vehicle} className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-white/[0.06] px-4 py-3 last:border-0">
+                      <div>
+                        <div className="text-sm font-black">{vehicle}</div>
+                        <div className="mt-0.5 text-xs text-zinc-600">{service}</div>
+                      </div>
+                      <div className={`text-[10px] font-black uppercase ${color}`}>{status}</div>
+                      <ChevronRight size={15} className="text-zinc-700" />
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
+      </section>
 
-        <div className="relative">
-          <div className="absolute -inset-4 rounded-[2.2rem] bg-gradient-to-br from-red-600/30 via-white/5 to-blue-600/10 blur-2xl" />
-          <div className="relative overflow-hidden rounded-[2.2rem] border border-white/10 bg-[#080b12]/90 p-5 shadow-2xl shadow-black/60 backdrop-blur-2xl">
-            <div className="mb-5 flex items-center justify-between rounded-3xl border border-white/10 bg-white/[0.035] px-4 py-3">
-              <div className="text-sm font-black">Live Workspace</div>
-              <div className="flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-black text-emerald-300">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" /> Online
+      <section id="servicios" className="relative z-10 mx-auto max-w-[1500px] px-5 py-24 lg:px-8">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="text-xs font-black uppercase tracking-[.28em] text-red-500">Servicios técnicos</div>
+          <h2 className="mt-4 text-4xl font-black uppercase tracking-[-.035em] sm:text-5xl">Todo tu trabajo, dentro de un único ecosistema.</h2>
+          <p className="mt-5 text-zinc-500">Selecciona los servicios disponibles en el portal, sigue el proceso y recibe los resultados sin perder trazabilidad.</p>
+        </div>
+
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {services.map((service) => {
+            const Icon = service.icon
+            return (
+              <div key={service.name} className="group relative overflow-hidden rounded-[1.7rem] border border-white/10 bg-gradient-to-b from-white/[0.055] to-white/[0.018] p-6 transition duration-300 hover:-translate-y-1 hover:border-red-500/40 hover:shadow-[0_28px_70px_rgba(185,28,28,.14)]">
+                <div className="absolute right-[-2rem] top-[-2rem] h-28 w-28 rounded-full bg-red-600/10 blur-3xl transition group-hover:bg-red-600/20" />
+                <div className="grid h-12 w-12 place-items-center rounded-2xl border border-red-500/25 bg-red-600/10 text-red-400"><Icon size={23} /></div>
+                <div className="mt-5 text-xl font-black uppercase">{service.name}</div>
+                <div className="mt-2 text-sm leading-6 text-zinc-600">{service.detail}</div>
+                <div className="mt-5 flex items-center gap-2 text-xs font-black uppercase tracking-wide text-red-400">Disponible en AK Cloud <ChevronRight size={15} /></div>
               </div>
+            )
+          })}
+        </div>
+      </section>
+
+      <section id="flujo" className="relative z-10 border-y border-white/[0.07] bg-white/[0.018]">
+        <div className="mx-auto max-w-[1500px] px-5 py-24 lg:px-8">
+          <div className="grid gap-12 lg:grid-cols-[.72fr_1.28fr] lg:items-start">
+            <div className="lg:sticky lg:top-28">
+              <div className="text-xs font-black uppercase tracking-[.28em] text-red-500">Flujo profesional</div>
+              <h2 className="mt-4 text-4xl font-black uppercase leading-[.98] tracking-[-.035em] sm:text-5xl">Del ORI a la solución, sin caos.</h2>
+              <p className="mt-5 max-w-xl text-zinc-500">AK Cloud conecta al distribuidor directamente con Autokeys Core para que cada pedido tenga estado, historial, archivos y soporte.</p>
+              <Link href="/register" className="mt-8 inline-flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-600/10 px-5 py-3 text-xs font-black uppercase tracking-wide text-red-300 transition hover:bg-red-600 hover:text-white">
+                Empezar ahora <ArrowRight size={16} />
+              </Link>
             </div>
 
-            <div className="rounded-[1.7rem] border border-dashed border-red-500/35 bg-[radial-gradient(circle_at_center,rgba(220,38,38,.18),rgba(255,255,255,.035))] p-8 text-center">
-              <UploadCloud className="mx-auto text-red-300" size={46} />
-              <div className="mt-4 text-2xl font-black">Drop your ORI</div>
-              <p className="mt-2 text-sm text-zinc-400">Analiza ECU, HW/SW y servicios compatibles.</p>
-            </div>
-
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <div className="rounded-3xl border border-white/10 bg-black/30 p-5">
-                <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-red-300"><Gauge size={15} /> ECU reconocida</div>
-                <div className="text-2xl font-black">Bosch EDC17C64</div>
-                <div className="mt-1 text-sm text-zinc-500">Audi A4 · 2.0 TDI · Checksum OK</div>
-                <div className="mt-4 flex flex-wrap gap-2 text-xs font-black text-zinc-300">
-                  {['Flex', 'KESS3', 'Autotuner'].map((tool) => <span key={tool} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">{tool}</span>)}
-                </div>
-              </div>
-
-              <div className="rounded-3xl border border-white/10 bg-black/30 p-5">
-                <div className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-zinc-500">Pedido</div>
-                <div className="space-y-2 text-sm font-bold text-zinc-300">
-                  <div className="flex justify-between"><span>Stage 1</span><span>35 €</span></div>
-                  <div className="flex justify-between"><span>DPF OFF</span><span>30 €</span></div>
-                  <div className="h-px bg-white/10" />
-                  <div className="flex justify-between text-lg font-black text-white"><span>Total</span><span>65 €</span></div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-5 grid grid-cols-4 gap-3">
-              {['Stage 1', 'DPF', 'EGR', 'AdBlue'].map((service) => (
-                <div key={service} className="rounded-2xl border border-red-500/25 bg-red-500/10 px-3 py-4 text-center text-xs font-black text-white shadow-lg shadow-red-950/20">
-                  {service}
+            <div className="grid gap-4 sm:grid-cols-2">
+              {steps.map(([title, text], index) => (
+                <div key={title} className="relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-black/35 p-6">
+                  <div className="absolute right-4 top-2 text-7xl font-black text-white/[0.025]">0{index + 1}</div>
+                  <div className="grid h-10 w-10 place-items-center rounded-full bg-red-600 text-sm font-black shadow-[0_0_32px_rgba(220,38,38,.35)]">{index + 1}</div>
+                  <div className="mt-5 text-xl font-black uppercase">{title}</div>
+                  <div className="mt-2 text-sm leading-6 text-zinc-600">{text}</div>
                 </div>
               ))}
             </div>
@@ -142,63 +238,68 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="features" className="relative z-10 mx-auto max-w-7xl px-6 pb-24 lg:px-8">
-        <div className="mb-8 flex items-end justify-between gap-6">
-          <div>
-            <div className="text-sm font-black uppercase tracking-[0.25em] text-red-400">Ecosistema</div>
-            <h2 className="mt-3 text-4xl font-black tracking-tight">Más que un portal de archivos.</h2>
-          </div>
-          <p className="hidden max-w-xl text-zinc-400 md:block">AK Cloud conecta distribuidores, pagos, créditos, soporte, descargas y Autokeys Core en una sola plataforma.</p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {features.map((feature) => {
-            const Icon = feature.icon
+      <section id="ventajas" className="relative z-10 mx-auto max-w-[1500px] px-5 py-24 lg:px-8">
+        <div className="grid gap-4 lg:grid-cols-4">
+          {benefits.map((benefit) => {
+            const Icon = benefit.icon
             return (
-              <div key={feature.title} className="rounded-[1.7rem] border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition hover:-translate-y-1 hover:border-red-500/35 hover:bg-white/[0.055]">
-                <div className="mb-5 grid h-12 w-12 place-items-center rounded-2xl bg-red-600/15 text-red-300"><Icon size={22} /></div>
-                <h3 className="text-xl font-black">{feature.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-zinc-500">{feature.text}</p>
+              <div key={benefit.title} className="rounded-[1.6rem] border border-white/10 bg-white/[0.025] p-6">
+                <Icon size={23} className="text-red-500" />
+                <div className="mt-5 text-lg font-black uppercase">{benefit.title}</div>
+                <div className="mt-2 text-sm leading-6 text-zinc-600">{benefit.text}</div>
               </div>
             )
           })}
         </div>
-      </section>
 
-      <section id="workflow" className="relative z-10 border-y border-white/10 bg-white/[0.025]">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-20 lg:grid-cols-[.85fr_1fr] lg:px-8">
-          <div>
-            <div className="text-sm font-black uppercase tracking-[0.25em] text-red-400">Workflow</div>
-            <h2 className="mt-3 text-4xl font-black tracking-tight">De ORI a MOD sin WhatsApp, sin llamadas y sin caos.</h2>
-            <p className="mt-5 text-zinc-400">El cliente envía, Autokeys trabaja desde Core y el distribuidor descarga el resultado desde AK Cloud.</p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {['Subir ORI', 'Detectar ECU', 'Seleccionar servicios', 'Pagar créditos', 'Producción Core', 'Descargar MOD'].map((step, index) => (
-              <div key={step} className="rounded-3xl border border-white/10 bg-black/30 p-5">
-                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-red-600 text-sm font-black">{index + 1}</div>
-                <div className="font-black">{step}</div>
-                <div className="mt-1 text-sm text-zinc-500">Flujo conectado con Autokeys Core.</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="security" className="relative z-10 mx-auto max-w-7xl px-6 py-20 lg:px-8">
-        <div className="rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(220,38,38,.18),rgba(255,255,255,.035))] p-8 md:p-10">
-          <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
-            <div>
-              <div className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.25em] text-red-300"><Lock size={16} /> Seguridad profesional</div>
-              <h2 className="mt-3 text-3xl font-black">Pagos, créditos y archivos protegidos.</h2>
-              <div className="mt-5 grid gap-3 text-sm text-zinc-300 sm:grid-cols-3">
-                {['SSL activo', 'PayPal Checkout', 'Storage privado'].map((item) => <div key={item} className="flex items-center gap-2"><CheckCircle2 size={17} className="text-emerald-400" /> {item}</div>)}
-              </div>
+        <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ['+12.800', 'Archivos procesados'],
+            ['+1.200', 'Referencias trabajadas'],
+            ['18 min', 'Tiempo medio'],
+            ['100%', 'Trazabilidad del pedido'],
+          ].map(([value, label]) => (
+            <div key={label} className="rounded-[1.5rem] border border-white/10 bg-gradient-to-b from-red-950/25 to-black/30 p-6 text-center">
+              <div className="text-4xl font-black text-white">{value}</div>
+              <div className="mt-2 text-[11px] font-black uppercase tracking-[.18em] text-zinc-600">{label}</div>
             </div>
-            <Link href="/register" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-6 py-4 text-sm font-black uppercase tracking-wide text-black hover:bg-zinc-200">
-              Empezar ahora <ArrowRight size={18} />
-            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="relative z-10 px-5 pb-24 lg:px-8">
+        <div className="mx-auto max-w-[1500px] overflow-hidden rounded-[2rem] border border-red-500/20 bg-[radial-gradient(circle_at_18%_30%,rgba(220,38,38,.28),transparent_35%),linear-gradient(130deg,#0d0d10,#050608)] p-8 shadow-[0_35px_100px_rgba(0,0,0,.55)] sm:p-12">
+          <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div>
+              <div className="text-xs font-black uppercase tracking-[.28em] text-red-400">Acceso profesional</div>
+              <h2 className="mt-4 max-w-4xl text-4xl font-black uppercase leading-[.98] tracking-[-.035em] sm:text-5xl">Tu próximo trabajo empieza dentro de AK Cloud.</h2>
+              <p className="mt-4 max-w-2xl text-zinc-500">Solicita tu cuenta de distribuidor y trabaja conectado directamente con Autokeys Lab.</p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+              <Link href="/register" className="inline-flex min-w-56 items-center justify-center gap-2 rounded-2xl bg-red-600 px-6 py-4 text-sm font-black uppercase shadow-[0_20px_55px_rgba(185,28,28,.35)] transition hover:bg-red-500">
+                Crear cuenta <ArrowRight size={18} />
+              </Link>
+              <Link href="/login" className="inline-flex min-w-56 items-center justify-center gap-2 rounded-2xl border border-white/12 bg-black/25 px-6 py-4 text-sm font-black uppercase transition hover:bg-white/[0.06]">
+                Ya tengo acceso
+              </Link>
+            </div>
           </div>
         </div>
       </section>
+
+      <footer className="relative z-10 border-t border-white/[0.07] bg-black/45">
+        <div className="mx-auto flex max-w-[1500px] flex-col gap-6 px-5 py-8 text-sm text-zinc-600 sm:flex-row sm:items-center sm:justify-between lg:px-8">
+          <div className="flex items-center gap-3">
+            <img src="/images/login/autokeys-logo-small.webp" alt="Autokeys" className="h-8 w-auto object-contain opacity-80" />
+            <span>AK Cloud · Autokeys Remaps Pro</span>
+          </div>
+          <div className="flex flex-wrap gap-5 text-xs font-bold uppercase tracking-wide">
+            <Link href="/login" className="hover:text-white">Acceder</Link>
+            <Link href="/register" className="hover:text-white">Solicitar cuenta</Link>
+            <span>© 2026 Autokeys Lab</span>
+          </div>
+        </div>
+      </footer>
     </main>
   )
 }
