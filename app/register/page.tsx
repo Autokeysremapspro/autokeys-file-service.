@@ -51,7 +51,7 @@ export default function RegisterPage() {
 
   async function submit() {
     setLoading(true)
-    const { error } = await supabase.auth.signUp({
+    const { data: signUp, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
       options: {
@@ -64,17 +64,48 @@ export default function RegisterPage() {
           especialidad: form.especialidad,
           herramientas: form.herramientas,
           tipo_usuario: 'distribuidor',
+          estado_acceso: 'pendiente',
         },
       },
     })
-    setLoading(false)
 
     if (error) {
+      setLoading(false)
       toast.error(error.message)
       return
     }
 
-    toast.success('Solicitud creada. Revisa tu email o inicia sesión si ya está activa.')
+    if (!signUp.user) {
+      setLoading(false)
+      toast.error('No se pudo crear la solicitud de acceso')
+      return
+    }
+
+    // Sin esto, la cuenta se creaba pero Autokeys Core nunca se enteraba de
+    // que existía — la persona se quedaba esperando una aprobación que nadie
+    // podía ver ni conceder. Esta es la fila que Core necesita para poder
+    // aprobar al distribuidor desde /ak-cloud.
+    const { error: solicitudError } = await supabase.from('akcloud_solicitudes_distribuidores').insert({
+      auth_user_id: signUp.user.id,
+      email: form.email.trim().toLowerCase(),
+      empresa: form.empresa.trim(),
+      nif: form.nif.trim() || null,
+      nombre: form.nombre.trim(),
+      telefono: form.telefono.trim() || null,
+      ciudad: form.ciudad.trim() || null,
+      especialidad: form.especialidad || null,
+      herramientas: form.herramientas,
+      estado: 'pendiente',
+    })
+
+    setLoading(false)
+
+    if (solicitudError) {
+      toast.error('Tu cuenta se creó, pero hubo un problema enviando la solicitud. Contacta con soporte.')
+      return
+    }
+
+    toast.success('Solicitud enviada a Autokeys Core. Te avisaremos por email cuando esté aprobada.')
     router.push('/login')
   }
 

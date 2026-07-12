@@ -14,6 +14,7 @@ import {
   Gauge,
   MessageSquare,
   Save,
+  ScanLine,
   Star,
   UploadCloud,
   User,
@@ -60,6 +61,7 @@ export default function AdminPedidoDetallePage() {
   const [mod, setMod] = useState<File | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [confirmandoEcu, setConfirmandoEcu] = useState(false)
 
   async function load() {
     setLoading(true)
@@ -113,6 +115,45 @@ export default function AdminPedidoDetallePage() {
       toast.error(error?.message || 'No se pudo subir el MOD')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function confirmarEcu() {
+    if (!pedido) return
+    if (!pedido.ori_bucket || !pedido.ori_path) {
+      toast.error('Este pedido no tiene archivo ORI para calcular la huella')
+      return
+    }
+    setConfirmandoEcu(true)
+    try {
+      const blob = await descargarArchivo(pedido.ori_bucket, pedido.ori_path)
+      const buffer = await blob.arrayBuffer()
+      const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
+      const sha256 = Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, '0')).join('')
+
+      const res = await fetch('/api/ecu/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sha256,
+          vehiculo: [pedido.marca, pedido.modelo].filter(Boolean).join(' ') || null,
+          marca: pedido.marca || null,
+          modelo: pedido.modelo || null,
+          motor: pedido.motor || null,
+          ecu: pedido.ecu || null,
+          hw: pedido.hw || null,
+          sw: pedido.sw || null,
+          pedido_id: pedido.id,
+          file_size: pedido.ori_size || null,
+        }),
+      })
+      const payload = await res.json()
+      if (!res.ok) throw new Error(payload.error)
+      toast.success('Huella guardada — el próximo archivo idéntico se identificará al instante')
+    } catch (error: any) {
+      toast.error(error?.message || 'No se pudo guardar la huella')
+    } finally {
+      setConfirmandoEcu(false)
     }
   }
 
@@ -216,6 +257,20 @@ export default function AdminPedidoDetallePage() {
                 <Info label="HW / SW" value={[pedido.hw, pedido.sw].filter(Boolean).join(' / ') || '—'} />
                 <Info label="Potencia / Cambio" value={[pedido.cv, pedido.cambio].filter(Boolean).join(' · ') || '—'} />
                 <Info label="Precio" value={`${Number(pedido.precio || 0).toFixed(2)} €`} />
+              </div>
+              <div className="mt-4 rounded-2xl border border-blue-500/20 bg-blue-500/[.06] p-4">
+                <p className="text-sm text-zinc-400">
+                  ¿Los datos de arriba son correctos? Confirma la huella de este archivo ORI para que la
+                  próxima vez que llegue uno idéntico se identifique al instante, sin depender de heurística.
+                </p>
+                <button
+                  onClick={confirmarEcu}
+                  disabled={confirmandoEcu || !pedido.ecu}
+                  className="mt-3 inline-flex items-center gap-2 rounded-2xl border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-xs font-black uppercase tracking-wider text-blue-300 hover:bg-blue-500/20 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ScanLine size={16} /> {confirmandoEcu ? 'Guardando huella...' : 'Confirmar identificación ECU'}
+                </button>
+                {!pedido.ecu && <p className="mt-2 text-xs text-zinc-500">Rellena el campo ECU antes de confirmar.</p>}
               </div>
             </Panel>
           </section>

@@ -10,6 +10,8 @@ export type EcuDbRule = {
   modelo?: string | null
   motor?: string | null
   potencia?: string | null
+  par_nm?: string | null
+  potencia_stage1?: string | null
   anios?: string | null
   herramientas?: string[] | null
   servicios?: string[] | null
