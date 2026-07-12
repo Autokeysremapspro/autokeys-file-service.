@@ -63,27 +63,43 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Alguno de los servicios seleccionados no existe o no está activo' }, { status: 400 })
     }
 
-    // Descuento de plan: solo se aplica a los servicios cuyo "grupo de
-    // facturación" (anulacion / tuning) esté entre los que cubre el plan del
-    // distribuidor. Si pide algo fuera de lo que cubre su plan (p. ej. Stage 1
-    // con el plan Essential), lo paga al precio completo — "aparte" del plan,
-    // tal como se decidió.
+    // Descuento de plan — dos niveles, por orden de prioridad:
+    // 1º akcloud_plan_servicios: si hay una fila explícita para este plan +
+    //    este servicio, manda ella (incluido sí/no, y su descuento propio).
+    // 2º Si no hay fila explícita: se usa el sistema de grupos (anulacion/
+    //    tuning) como respaldo, para no romper planes ya configurados así.
     let grupoIncluidos: string[] = []
     let descuentoPct = 0
+    let planServiciosMap = new Map<string, { incluido: boolean; descuento_pct: number | null }>()
+
     if (distribuidor.plan_id) {
-      const { data: plan } = await admin
-        .from('akcloud_planes')
-        .select('grupos_incluidos, descuento_plan_pct')
-        .eq('id', distribuidor.plan_id)
-        .maybeSingle()
+      const [{ data: plan }, { data: planServicios }] = await Promise.all([
+        admin.from('akcloud_planes').select('grupos_incluidos, descuento_plan_pct').eq('id', distribuidor.plan_id).maybeSingle(),
+        admin.from('akcloud_plan_servicios').select('servicio_id, incluido, descuento_pct').eq('plan_id', distribuidor.plan_id),
+      ])
       grupoIncluidos = plan?.grupos_incluidos || []
       descuentoPct = Number(plan?.descuento_plan_pct || 0)
+      for (const row of planServicios || []) {
+        planServiciosMap.set(row.servicio_id, { incluido: row.incluido, descuento_pct: row.descuento_pct })
+      }
     }
 
     const conDescuentoPlan = seleccionados.map((s) => {
-      const cubiertoPorPlan = s.grupo_facturacion && grupoIncluidos.includes(s.grupo_facturacion)
-      if (!cubiertoPorPlan || descuentoPct <= 0) return s
-      const factor = 1 - descuentoPct / 100
+      const override = s.id ? planServiciosMap.get(s.id) : undefined
+
+      let aplicaDescuento = false
+      let pctAplicado = 0
+
+      if (override) {
+        aplicaDescuento = override.incluido
+        pctAplicado = override.descuento_pct ?? descuentoPct
+      } else {
+        aplicaDescuento = Boolean(s.grupo_facturacion && grupoIncluidos.includes(s.grupo_facturacion))
+        pctAplicado = descuentoPct
+      }
+
+      if (!aplicaDescuento || pctAplicado <= 0) return s
+      const factor = 1 - pctAplicado / 100
       return {
         ...s,
         creditos_final: Math.round(Number(s.creditos_final ?? s.creditos ?? 0) * factor),
