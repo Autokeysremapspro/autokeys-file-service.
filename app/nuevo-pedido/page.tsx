@@ -145,8 +145,8 @@ export default function NuevoPedidoPage() {
       const pedido = await crearPedidoFileService({
         ori: file,
         servicios: selectedServices.map((service) => service.nombre),
+        serviciosSlugs: selected,
         observaciones,
-        precio: total,
         marca: vehicle.marca,
         modelo: vehicle.modelo,
         motor: vehicle.motor,

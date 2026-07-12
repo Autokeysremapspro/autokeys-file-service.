@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { FALLBACK_PLANES, type AkCloudPlan } from '@/lib/services/akCloudConfig'
+import { sendNotificationEmail } from '@/lib/email'
 
 const PAYPAL_ENV = process.env.PAYPAL_ENV || 'sandbox'
 const PAYPAL_BASE_URL = PAYPAL_ENV === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com'
@@ -253,6 +254,18 @@ export async function completePayPalPayment(orderId: string, rawPayload: any) {
     leida: false,
     metadata: { origen: 'paypal', creditos: pago.creditos },
   }).then(() => null)
+
+  if (pago.user_id) {
+    const { data: authUser } = await supabase.auth.admin.getUserById(pago.user_id)
+    await sendNotificationEmail({
+      to: authUser?.user?.email,
+      subject: 'Pago confirmado — créditos añadidos',
+      title: '¡Pago recibido!',
+      bodyHtml: `Tu pago por PayPal se ha confirmado correctamente y se han añadido <b>${pago.creditos} créditos</b> a tu saldo AK Cloud.`,
+      ctaHref: process.env.NEXT_PUBLIC_AKCLOUD_URL ? `${process.env.NEXT_PUBLIC_AKCLOUD_URL}/creditos` : undefined,
+      ctaLabel: 'Ver mis créditos',
+    })
+  }
 
   return updated
 }

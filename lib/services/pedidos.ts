@@ -37,6 +37,7 @@ export type FileServicePedido = {
 
 export type CrearPedidoPayload = {
   servicios: string[]
+  serviciosSlugs?: string[]
   observaciones?: string
   marca?: string
   modelo?: string
@@ -82,33 +83,36 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
     }
   }
 
-  const { data, error } = await supabase
-    .from('file_service_pedidos')
-    .insert({
-      user_id: user?.id || null,
-      cliente_nombre: user?.user_metadata?.name || user?.email || null,
-      cliente_email: user?.email || null,
-      servicios: payload.servicios,
-      observaciones: payload.observaciones || null,
-      marca: payload.marca || null,
-      modelo: payload.modelo || null,
-      motor: payload.motor || null,
-      anio: payload.anio || null,
-      ecu: payload.ecu || null,
-      hw: payload.hw || null,
-      sw: payload.sw || null,
-      cv: payload.cv || null,
-      cambio: payload.cambio || null,
-      prioridad: payload.prioridad || 'normal',
-      precio: payload.precio || null,
-      estado: 'pendiente',
-      ...oriInfo,
-    })
-    .select('*')
-    .single()
+  // El precio y el descuento de créditos se calculan en el servidor
+  // (/api/pedidos/crear) — nunca se manda el precio calculado en el
+  // navegador, así nadie puede manipular lo que paga por un pedido.
+  const response = await fetch('/api/pedidos/crear', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      servicios: payload.serviciosSlugs || [],
+      observaciones: payload.observaciones,
+      marca: payload.marca,
+      modelo: payload.modelo,
+      motor: payload.motor,
+      anio: payload.anio,
+      ecu: payload.ecu,
+      hw: payload.hw,
+      sw: payload.sw,
+      cv: payload.cv,
+      cambio: payload.cambio,
+      ori: {
+        nombre: oriInfo.ori_nombre,
+        bucket: oriInfo.ori_bucket,
+        path: oriInfo.ori_path,
+        size: oriInfo.ori_size,
+      },
+    }),
+  })
 
-  if (error) throw new Error(error.message)
-  return data as FileServicePedido
+  const result = await response.json()
+  if (!response.ok) throw new Error(result.error || 'No se pudo crear el pedido')
+  return result.pedido as FileServicePedido
 }
 
 export async function getMisPedidos() {
