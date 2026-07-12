@@ -29,12 +29,18 @@ export async function POST(request: Request) {
     // ya haya filtrado — alguien podría llamarla directamente).
     const { data: distribuidor } = await admin
       .from('akcloud_distribuidores')
-      .select('estado, plan_id')
+      .select('estado, plan_id, plan_expira_at')
       .eq('auth_user_id', user.id)
       .maybeSingle()
     if (!distribuidor || distribuidor.estado !== 'activo') {
       return NextResponse.json({ error: 'Cuenta no autorizada para crear pedidos' }, { status: 403 })
     }
+
+    // Si el plan tiene fecha de caducidad y ya pasó, se trata como si no
+    // tuviera plan (precio completo en todo) hasta que renueve o pase a
+    // Free — así no sigue recibiendo el descuento de una cuota sin pagar.
+    const planCaducado = Boolean(distribuidor.plan_expira_at && new Date(distribuidor.plan_expira_at).getTime() < Date.now())
+    const planIdEfectivo = planCaducado ? null : distribuidor.plan_id
 
     const body = await request.json()
     const serviciosSlugs: string[] = Array.isArray(body.servicios) ? body.servicios : []
@@ -72,10 +78,10 @@ export async function POST(request: Request) {
     let descuentoPct = 0
     let planServiciosMap = new Map<string, { incluido: boolean; descuento_pct: number | null; precio_override: number | null; creditos_override: number | null }>()
 
-    if (distribuidor.plan_id) {
+    if (planIdEfectivo) {
       const [{ data: plan }, { data: planServicios }] = await Promise.all([
-        admin.from('akcloud_planes').select('grupos_incluidos, descuento_plan_pct').eq('id', distribuidor.plan_id).maybeSingle(),
-        admin.from('akcloud_plan_servicios').select('servicio_id, incluido, descuento_pct, precio_override, creditos_override').eq('plan_id', distribuidor.plan_id),
+        admin.from('akcloud_planes').select('grupos_incluidos, descuento_plan_pct, limite_diario_pedidos, nombre').eq('id', planIdEfectivo).maybeSingle(),
+        admin.from('akcloud_plan_servicios').select('servicio_id, incluido, descuento_pct, precio_override, creditos_override').eq('plan_id', planIdEfectivo),
       ])
       grupoIncluidos = plan?.grupos_incluidos || []
       descuentoPct = Number(plan?.descuento_plan_pct || 0)
@@ -86,6 +92,26 @@ export async function POST(request: Request) {
           precio_override: row.precio_override,
           creditos_override: row.creditos_override,
         })
+      }
+
+      // Límite diario de pedidos del plan (no de créditos — un tope de
+      // "cuántos archivos al día"). Se cuentan los pedidos creados desde
+      // las 00:00 de hoy (hora del servidor).
+      if (plan?.limite_diario_pedidos) {
+        const inicioHoy = new Date()
+        inicioHoy.setHours(0, 0, 0, 0)
+        const { count } = await admin
+          .from('file_service_pedidos')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .gte('created_at', inicioHoy.toISOString())
+
+        if ((count || 0) >= plan.limite_diario_pedidos) {
+          return NextResponse.json(
+            { error: `Has llegado al límite diario de tu plan ${plan.nombre} (${plan.limite_diario_pedidos} pedidos al día). Vuelve mañana o pide algo fuera del plan.` },
+            { status: 429 }
+          )
+        }
       }
     }
 

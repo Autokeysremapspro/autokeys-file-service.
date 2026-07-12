@@ -27,6 +27,8 @@ export type AkCloudPlan = {
   orden?: number | null
   grupos_incluidos?: string[] | null
   descuento_plan_pct?: number | null
+  duracion_dias?: number | null
+  limite_diario_pedidos?: number | null
 }
 
 export type AkCloudMetodoPago = {

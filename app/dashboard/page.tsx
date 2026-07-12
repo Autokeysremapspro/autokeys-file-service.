@@ -85,6 +85,11 @@ export default function DashboardPage() {
   const [saldo, setSaldo] = useState(0)
   const [userName, setUserName] = useState('Distribuidor')
   const [planSlug, setPlanSlug] = useState<string | null>(null)
+  const [planExpiraAt, setPlanExpiraAt] = useState<string | null>(null)
+  const [pedidosHoy, setPedidosHoy] = useState(0)
+  const [renovando, setRenovando] = useState(false)
+  const [cambiando, setCambiando] = useState(false)
+  const [renovacionSolicitada, setRenovacionSolicitada] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -113,6 +118,18 @@ export default function DashboardPage() {
       const resolvedName = metadata.name || metadata.nombre || metadata.empresa || user?.email?.split('@')[0] || 'Distribuidor'
       setUserName(String(resolvedName))
       setPlanSlug(metadata.plan_slug || metadata.plan || null)
+
+      if (user?.id) {
+        const inicioHoy = new Date()
+        inicioHoy.setHours(0, 0, 0, 0)
+        const [{ data: dist }, { count }] = await Promise.all([
+          supabase.from('akcloud_distribuidores').select('plan_expira_at, solicito_renovacion').eq('auth_user_id', user.id).maybeSingle(),
+          supabase.from('file_service_pedidos').select('id', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', inicioHoy.toISOString()),
+        ])
+        setPlanExpiraAt(dist?.plan_expira_at || null)
+        setRenovacionSolicitada(Boolean(dist?.solicito_renovacion))
+        setPedidosHoy(count || 0)
+      }
     } catch (err: any) {
       console.error(err)
       setError(err?.message || 'No se pudo cargar el dashboard')
@@ -124,6 +141,35 @@ export default function DashboardPage() {
   useEffect(() => {
     loadDashboard()
   }, [])
+
+  async function solicitarRenovacion() {
+    setRenovando(true)
+    try {
+      const res = await fetch('/api/planes/solicitar-renovacion', { method: 'POST' })
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error)
+      setRenovacionSolicitada(true)
+    } catch (err: any) {
+      setError(err?.message || 'No se pudo enviar la solicitud')
+    } finally {
+      setRenovando(false)
+    }
+  }
+
+  async function cambiarAFree() {
+    if (!confirm('¿Pasar al plan Free? Dejarás de tener cuota mensual y cada solución se pagará por separado.')) return
+    setCambiando(true)
+    try {
+      const res = await fetch('/api/planes/cambiar-a-free', { method: 'POST' })
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error)
+      await loadDashboard()
+    } catch (err: any) {
+      setError(err?.message || 'No se pudo cambiar de plan')
+    } finally {
+      setCambiando(false)
+    }
+  }
 
   // El dashboard ya decía "En tiempo real" en las tarjetas de estadísticas,
   // pero no tenía ninguna suscripción — se cargaba una vez y ya está. Ahora
@@ -272,6 +318,31 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {planExpiraAt && new Date(planExpiraAt).getTime() < Date.now() && (
+          <div className="rounded-2xl border border-amber-400/25 bg-amber-500/10 p-5">
+            <p className="font-black uppercase text-amber-200">Tu plan {activePlan?.nombre || ''} ha caducado</p>
+            <p className="mt-1 text-sm text-amber-100/70">
+              Elige si quieres renovarlo (el staff confirma el pago y lo reactiva) o pasar al plan Free, donde pagas cada solución por separado sin cuota mensual.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <button
+                onClick={solicitarRenovacion}
+                disabled={renovando || renovacionSolicitada}
+                className="rounded-xl bg-amber-500 px-4 py-3 text-sm font-black uppercase text-black disabled:opacity-50"
+              >
+                {renovacionSolicitada ? 'Renovación solicitada — a la espera' : renovando ? 'Enviando...' : `Renovar ${activePlan?.nombre || 'mi plan'}`}
+              </button>
+              <button
+                onClick={cambiarAFree}
+                disabled={cambiando}
+                className="rounded-xl border border-white/15 bg-black/25 px-4 py-3 text-sm font-black uppercase text-white/80 disabled:opacity-50"
+              >
+                {cambiando ? 'Cambiando...' : 'Pasar a plan Free (pago por solución)'}
+              </button>
+            </div>
+          </div>
+        )}
+
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
             { label: 'Pedidos activos', value: activeOrders, detail: `${stats.pendientes} pendientes · ${stats.enProceso} en proceso`, icon: Clock3, tone: 'text-amber-300 bg-amber-400/10' },
@@ -400,6 +471,21 @@ export default function DashboardPage() {
                     <p className="text-[10px] font-black uppercase tracking-[.18em] text-white/30">Créditos</p>
                     <p className="mt-2 text-2xl font-black">{formatNumber(activePlan.creditos_mes)}</p>
                   </div>
+                  {planExpiraAt && (
+                    <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">
+                      <p className="text-[10px] font-black uppercase tracking-[.18em] text-white/30">Plan activo hasta</p>
+                      <p className="mt-2 text-lg font-black">{new Date(planExpiraAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}</p>
+                      <p className="mt-1 text-xs text-white/35">
+                        {Math.max(0, Math.ceil((new Date(planExpiraAt).getTime() - Date.now()) / 86400000))} días restantes
+                      </p>
+                    </div>
+                  )}
+                  {typeof activePlan.limite_diario_pedidos === 'number' && (
+                    <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">
+                      <p className="text-[10px] font-black uppercase tracking-[.18em] text-white/30">Pedidos hoy</p>
+                      <p className="mt-2 text-2xl font-black">{pedidosHoy} / {activePlan.limite_diario_pedidos}</p>
+                    </div>
+                  )}
                 </div>
               )}
               <Link href="/creditos" className="mt-4 inline-flex items-center gap-2 text-xs font-black uppercase text-red-300">
