@@ -1,7 +1,9 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import {
   Bell,
   BookOpen,
@@ -45,6 +47,28 @@ const adminItems = [
 export default function AKSidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const [isStaff, setIsStaff] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    async function checkStaff() {
+      const { data: userData } = await supabase.auth.getUser()
+      const userId = userData.user?.id
+      if (!userId) return
+      const { data } = await supabase
+        .from('usuarios_app')
+        .select('rol, activo')
+        .eq('auth_user_id', userId)
+        .maybeSingle()
+      if (!active) return
+      const staff = !!data && data.activo !== false && ['admin', 'desarrollo', 'atencion_cliente'].includes(data.rol)
+      setIsStaff(staff)
+    }
+    checkStaff()
+    return () => {
+      active = false
+    }
+  }, [])
 
   async function logout() {
     await supabase.auth.signOut()
@@ -73,22 +97,30 @@ export default function AKSidebar() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_8%,rgba(217,4,41,.32),transparent_28%),radial-gradient(circle_at_100%_40%,rgba(255,255,255,.08),transparent_24%)]" />
       <div className="relative flex h-full flex-col p-6">
         <Link href="/dashboard" className="mb-7 block">
-          <div className="text-[26px] font-black italic leading-none tracking-tight text-white">
-            AUTOKEYS
-          </div>
-          <div className="text-[20px] font-black italic leading-none tracking-tight text-red-500">FILE SERVICE</div>
-          <div className="mt-2 text-[10px] font-black uppercase tracking-[0.38em] text-white/35">AK Cloud</div>
+          <Image
+            src="/images/login/autokeys-logo-wide.webp"
+            alt="Autokeys"
+            width={220}
+            height={56}
+            className="h-auto w-full max-w-[200px]"
+            priority
+          />
+          <div className="mt-2 text-[10px] font-black uppercase tracking-[0.38em] text-white/35">AK Cloud · File Service</div>
         </Link>
 
         <nav className="space-y-2">
           {clientItems.map((item) => <NavLink key={item.href} {...item} />)}
         </nav>
 
-        <div className="my-5 h-px bg-white/10" />
-        <div className="mb-2 px-4 text-[10px] font-black uppercase tracking-[0.25em] text-white/25">Autokeys interno</div>
-        <nav className="space-y-2">
-          {adminItems.map((item) => <NavLink key={item.href} {...item} />)}
-        </nav>
+        {isStaff && (
+          <>
+            <div className="my-5 h-px bg-white/10" />
+            <div className="mb-2 px-4 text-[10px] font-black uppercase tracking-[0.25em] text-white/25">Autokeys interno</div>
+            <nav className="space-y-2">
+              {adminItems.map((item) => <NavLink key={item.href} {...item} />)}
+            </nav>
+          </>
+        )}
 
         <div className="mt-auto space-y-4">
           <div className="rounded-[1.6rem] border border-red-500/25 bg-red-500/10 p-4">
