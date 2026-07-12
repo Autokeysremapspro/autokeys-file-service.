@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
+import { sendNotificationEmail } from '@/lib/email'
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -51,6 +52,17 @@ export async function POST() {
     await sendWhatsAppNotification(
       `🔁 Renovación pendiente\n${distribuidor.empresa} (${distribuidor.nombre_contacto}) quiere renovar ${nombrePlan}.\n\nConfirmar: /ak-cloud/distribuidores`
     )
+
+    if (process.env.STAFF_NOTIFICATION_EMAIL) {
+      await sendNotificationEmail({
+        to: process.env.STAFF_NOTIFICATION_EMAIL,
+        subject: `Renovación pendiente: ${distribuidor.empresa}`,
+        title: 'Solicitud de renovación de plan',
+        bodyHtml: `<b>${distribuidor.empresa}</b> (${distribuidor.nombre_contacto}) quiere renovar ${nombrePlan}. Confírmalo desde Core cuando tengas el pago.`,
+        ctaHref: '/ak-cloud/distribuidores',
+        ctaLabel: 'Revisar renovación',
+      })
+    }
 
     return NextResponse.json({ ok: true })
   } catch (error: any) {

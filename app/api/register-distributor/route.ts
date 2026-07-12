@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
+import { sendNotificationEmail } from '@/lib/email'
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -99,6 +100,17 @@ export async function POST(request: Request) {
     await sendWhatsAppNotification(
       `🆕 Nueva solicitud AK Cloud\n${empresa} (${nombre})\n${email}${clean(body.ciudad) ? `\nCiudad: ${body.ciudad}` : ''}${clean(body.especialidad) ? `\nEspecialidad: ${body.especialidad}` : ''}\n\nRevisar: ${process.env.NEXT_PUBLIC_CORE_URL ? `${process.env.NEXT_PUBLIC_CORE_URL}/ak-cloud/solicitudes` : '/ak-cloud/solicitudes'}`
     )
+
+    if (process.env.STAFF_NOTIFICATION_EMAIL) {
+      await sendNotificationEmail({
+        to: process.env.STAFF_NOTIFICATION_EMAIL,
+        subject: `Nueva solicitud de distribuidor: ${empresa}`,
+        title: 'Nueva solicitud de distribuidor',
+        bodyHtml: `<b>${empresa}</b> (${nombre}, ${email}) ha solicitado acceso como distribuidor en AK Cloud.${clean(body.ciudad) ? `<br>Ciudad: ${body.ciudad}` : ''}${clean(body.especialidad) ? `<br>Especialidad: ${body.especialidad}` : ''}`,
+        ctaHref: process.env.NEXT_PUBLIC_CORE_URL ? `${process.env.NEXT_PUBLIC_CORE_URL}/ak-cloud/solicitudes` : undefined,
+        ctaLabel: 'Revisar solicitud',
+      })
+    }
 
     return NextResponse.json({ ok: true, id: data.id })
   } catch (error: any) {
