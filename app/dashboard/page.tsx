@@ -125,6 +125,36 @@ export default function DashboardPage() {
     loadDashboard()
   }, [])
 
+  // El dashboard ya decía "En tiempo real" en las tarjetas de estadísticas,
+  // pero no tenía ninguna suscripción — se cargaba una vez y ya está. Ahora
+  // sí se actualiza solo cuando cambia un pedido o llega una notificación.
+  useEffect(() => {
+    let userId: string | null = null
+    let channel: ReturnType<typeof supabase.channel> | null = null
+
+    supabase.auth.getUser().then(({ data }) => {
+      userId = data.user?.id || null
+      if (!userId) return
+      channel = supabase
+        .channel(`dashboard-${userId}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'file_service_pedidos', filter: `user_id=eq.${userId}` },
+          () => loadDashboard()
+        )
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'file_service_notificaciones', filter: `user_id=eq.${userId}` },
+          () => loadDashboard()
+        )
+        .subscribe()
+    })
+
+    return () => {
+      if (channel) supabase.removeChannel(channel)
+    }
+  }, [])
+
   const stats = useMemo(() => {
     const pendientes = pedidos.filter((pedido) => pedido.estado === 'pendiente').length
     const enProceso = pedidos.filter((pedido) => pedido.estado === 'en_proceso').length
