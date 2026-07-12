@@ -75,3 +75,5 @@ values
 -- 110€/120cr, 15% descuento) son un punto de partida razonable a partir de
 -- tus planes anteriores — ajústalos tú mismo en el Table Editor de Supabase
 -- (tabla akcloud_planes) según lo que quieras cobrar de verdad.
+
+notify pgrst, 'reload schema';

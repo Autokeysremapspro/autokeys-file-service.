@@ -70,26 +70,41 @@ export async function POST(request: Request) {
     //    tuning) como respaldo, para no romper planes ya configurados así.
     let grupoIncluidos: string[] = []
     let descuentoPct = 0
-    let planServiciosMap = new Map<string, { incluido: boolean; descuento_pct: number | null }>()
+    let planServiciosMap = new Map<string, { incluido: boolean; descuento_pct: number | null; precio_override: number | null; creditos_override: number | null }>()
 
     if (distribuidor.plan_id) {
       const [{ data: plan }, { data: planServicios }] = await Promise.all([
         admin.from('akcloud_planes').select('grupos_incluidos, descuento_plan_pct').eq('id', distribuidor.plan_id).maybeSingle(),
-        admin.from('akcloud_plan_servicios').select('servicio_id, incluido, descuento_pct').eq('plan_id', distribuidor.plan_id),
+        admin.from('akcloud_plan_servicios').select('servicio_id, incluido, descuento_pct, precio_override, creditos_override').eq('plan_id', distribuidor.plan_id),
       ])
       grupoIncluidos = plan?.grupos_incluidos || []
       descuentoPct = Number(plan?.descuento_plan_pct || 0)
       for (const row of planServicios || []) {
-        planServiciosMap.set(row.servicio_id, { incluido: row.incluido, descuento_pct: row.descuento_pct })
+        planServiciosMap.set(row.servicio_id, {
+          incluido: row.incluido,
+          descuento_pct: row.descuento_pct,
+          precio_override: row.precio_override,
+          creditos_override: row.creditos_override,
+        })
       }
     }
 
     const conDescuentoPlan = seleccionados.map((s) => {
       const override = s.id ? planServiciosMap.get(s.id) : undefined
 
+      // Prioridad 1: precio/créditos exactos puestos en "Planes AK" — manda
+      // siempre que el servicio esté incluido en el plan, sin cálculos.
+      if (override?.incluido && (override.precio_override != null || override.creditos_override != null)) {
+        return {
+          ...s,
+          precio_final: override.precio_override ?? s.precio_final ?? s.precio,
+          creditos_final: override.creditos_override ?? s.creditos_final ?? s.creditos,
+        }
+      }
+
+      // Prioridad 2: descuento en % (de la pestaña "Servicios por plan" o del grupo general).
       let aplicaDescuento = false
       let pctAplicado = 0
-
       if (override) {
         aplicaDescuento = override.incluido
         pctAplicado = override.descuento_pct ?? descuentoPct
