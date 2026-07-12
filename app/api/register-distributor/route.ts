@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { sendNotificationEmail } from '@/lib/email'
+import { sendWhatsAppNotification } from '@/lib/whatsapp'
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -31,6 +31,7 @@ export async function POST(request: Request) {
     const admin = adminClient()
     const { data: authData, error: authError } = await admin.auth.admin.getUserById(authUserId)
     if (authError || !authData.user) {
+      console.error('register-distributor: getUserById falló', authError?.message || 'sin usuario', { authUserId })
       return NextResponse.json({ error: 'No se ha podido verificar la cuenta creada' }, { status: 400 })
     }
     if ((authData.user.email || '').toLowerCase() !== email) {
@@ -95,16 +96,9 @@ export async function POST(request: Request) {
       accion_texto: 'Revisar solicitud',
     })
 
-    if (process.env.STAFF_NOTIFICATION_EMAIL) {
-      await sendNotificationEmail({
-        to: process.env.STAFF_NOTIFICATION_EMAIL,
-        subject: `Nueva solicitud de distribuidor: ${empresa}`,
-        title: 'Nueva solicitud de distribuidor',
-        bodyHtml: `<b>${empresa}</b> (${nombre}, ${email}) ha solicitado acceso como distribuidor en AK Cloud.${clean(body.ciudad) ? `<br>Ciudad: ${body.ciudad}` : ''}${clean(body.especialidad) ? `<br>Especialidad: ${body.especialidad}` : ''}`,
-        ctaHref: process.env.NEXT_PUBLIC_CORE_URL ? `${process.env.NEXT_PUBLIC_CORE_URL}/ak-cloud/solicitudes` : undefined,
-        ctaLabel: 'Revisar solicitud',
-      })
-    }
+    await sendWhatsAppNotification(
+      `🆕 Nueva solicitud AK Cloud\n${empresa} (${nombre})\n${email}${clean(body.ciudad) ? `\nCiudad: ${body.ciudad}` : ''}${clean(body.especialidad) ? `\nEspecialidad: ${body.especialidad}` : ''}\n\nRevisar: ${process.env.NEXT_PUBLIC_CORE_URL ? `${process.env.NEXT_PUBLIC_CORE_URL}/ak-cloud/solicitudes` : '/ak-cloud/solicitudes'}`
+    )
 
     return NextResponse.json({ ok: true, id: data.id })
   } catch (error: any) {
