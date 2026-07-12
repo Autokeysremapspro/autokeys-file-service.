@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertCircle, Car, FileUp, Gauge, Send, Wrench } from 'lucide-react'
+import { AlertCircle, Car, FileUp, Gauge, ScanLine, Send, Sparkles, Wrench } from 'lucide-react'
 import AKPageShell from '@/components/ak/AKPageShell'
 import AKUploader from '@/components/ak/AKUploader'
 import AKCard from '@/components/ak/AKCard'
@@ -50,6 +50,20 @@ export default function NuevoPedidoPage() {
   const [loadingConfig, setLoadingConfig] = useState(true)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [detecting, setDetecting] = useState(false)
+  const [detection, setDetection] = useState<null | {
+    identified: boolean
+    method: string
+    confidence: number
+    sha256: string
+    vehiculo?: string | null
+    marca?: string | null
+    modelo?: string | null
+    motor?: string | null
+    ecu?: string | null
+    hw?: string | null
+    sw?: string | null
+  }>(null)
 
   useEffect(() => {
     async function loadConfig() {
@@ -73,6 +87,38 @@ export default function NuevoPedidoPage() {
     setFile(nextFile)
     setFileName(nextFile.name)
     setError(null)
+    setDetection(null)
+    detectarEcu(nextFile)
+  }
+
+  async function detectarEcu(nextFile: File) {
+    setDetecting(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', nextFile)
+      const res = await fetch('/api/ecu/detect', { method: 'POST', body: formData })
+      const payload = await res.json()
+      if (!res.ok) throw new Error(payload.error)
+      setDetection(payload)
+    } catch {
+      // La detección es una ayuda, no un requisito — si falla, el cliente sigue rellenando a mano.
+      setDetection(null)
+    } finally {
+      setDetecting(false)
+    }
+  }
+
+  function aplicarDeteccion() {
+    if (!detection) return
+    setVehicle((current) => ({
+      ...current,
+      marca: detection.marca || current.marca,
+      modelo: detection.modelo || current.modelo,
+      motor: detection.motor || current.motor,
+      ecu: detection.ecu || current.ecu,
+      hw: detection.hw || current.hw,
+      sw: detection.sw || current.sw,
+    }))
   }
 
   function toggle(slug: string) {
@@ -135,6 +181,41 @@ export default function NuevoPedidoPage() {
               </div>
             </div>
             <AKUploader fileName={fileName} onFile={handleFile} compact />
+
+            {detecting && (
+              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-white/60">
+                <ScanLine size={18} className="animate-pulse text-red-300" /> Analizando archivo (huella + patrones)...
+              </div>
+            )}
+
+            {!detecting && detection && (
+              <div className={`mt-4 rounded-2xl border p-4 ${detection.identified ? 'border-emerald-500/25 bg-emerald-500/[.06]' : 'border-white/10 bg-black/25'}`}>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-sm font-black">
+                    <Sparkles size={16} className={detection.identified ? 'text-emerald-300' : 'text-white/30'} />
+                    {detection.identified ? 'ECU detectada automáticamente' : 'No se ha podido identificar con confianza'}
+                  </div>
+                  <span className="rounded-full border border-white/10 bg-white/[.04] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white/50">
+                    {detection.method === 'huella_exacta' ? 'Huella exacta' : detection.method === 'heuristica' ? 'Coincidencia por patrones' : 'Sin coincidencia'} · {detection.confidence}%
+                  </span>
+                </div>
+                {detection.identified && (
+                  <>
+                    <p className="mt-3 text-sm text-white/55">
+                      {[detection.marca, detection.modelo, detection.motor].filter(Boolean).join(' ') || 'Vehículo no identificado'}
+                      {detection.ecu ? ` · ECU: ${detection.ecu}` : ''}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={aplicarDeteccion}
+                      className="mt-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-black uppercase tracking-wider text-emerald-300 hover:bg-emerald-500/20"
+                    >
+                      Usar estos datos en el formulario
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </AKCard>
 
           <AKCard className="p-5 md:p-6">
