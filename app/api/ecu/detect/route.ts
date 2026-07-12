@@ -29,8 +29,7 @@ function findByRegex(text: string, regex: RegExp) {
 function findHardware(text: string) {
   return (
     findByRegex(text, /HW[:_\s-]*([A-Z0-9.\/-]{5,24})/i) ||
-    findByRegex(text, /(\b1037\d{6,10}\b)/i) ||
-    findByRegex(text, /(\b0281\d{6,10}\b)/i)
+    findByRegex(text, /Hardware[:_\s-]*([A-Z0-9.\/-]{5,24})/i)
   )
 }
 function findSoftware(text: string) {
@@ -41,30 +40,51 @@ function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-function scoreAgainstRules(rules: EcuDbRule[], haystack: string, fileSize: number, hw: string | null, sw: string | null) {
-  let best: { rule: EcuDbRule; score: number; reasons: string[] } | null = null
+// Puntuación deliberadamente conservadora. Aprendimos con un caso real que
+// patrones "técnicos" genéricos (prefijos de nº de pieza Bosch tipo 1037xxxxx,
+// 0281xxxxx) NO son exclusivos de ningún fabricante — son números de
+// hardware que Bosch reutiliza entre marcas. Contarlos como evidencia de marca
+// producía falsos positivos (un archivo PSA identificado como Audi).
+// Ahora: la familia (patrón técnico) y la marca (nombre de texto) se puntúan
+// y exigen POR SEPARADO — nunca se asume una marca que no se ha visto de
+// verdad en el archivo.
+function scoreAgainstRules(rules: EcuDbRule[], haystack: string, fileSize: number) {
+  let best: { rule: EcuDbRule; score: number; reasons: string[]; brandConfirmed: boolean } | null = null
   for (const rule of rules) {
     if (rule.activo === false) continue
     let score = 0
     const reasons: string[] = []
+    let brandConfirmed = false
+
+    // Patrón de familia: solo cuenta si es suficientemente específico (no un
+    // simple prefijo numérico de 4 dígitos, que aparece por azar en binarios).
     for (const pattern of rule.patrones || []) {
+      const isGenericNumeric = !/[a-z]/i.test(pattern.replace(/\\d/g, '').replace(/[{}\\,+*?()|.^$-]/g, ''))
       try {
         if (new RegExp(pattern, 'i').test(haystack)) {
-          score += 22
-          reasons.push(pattern)
+          score += isGenericNumeric ? 6 : 20
+          reasons.push(`patrón ${pattern}`)
         }
       } catch {
-        if (haystack.toLowerCase().includes(pattern.toLowerCase())) score += 14
+        if (haystack.toLowerCase().includes(pattern.toLowerCase())) score += 6
       }
     }
+
+    // Marca: solo cuenta si el NOMBRE aparece literalmente como texto en el archivo.
     for (const brand of rule.marcas || []) {
       if (new RegExp(`\\b${escapeRegExp(brand)}\\b`, 'i').test(haystack)) {
-        score += 12
-        reasons.push(brand)
+        score += 30
+        reasons.push(`marca "${brand}" encontrada en el archivo`)
+        brandConfirmed = true
       }
     }
-    if (rule.tamanos?.some((size) => Math.abs(fileSize - size) <= size * 0.08)) score += 14
-    if (!best || score > best.score) best = { rule, score, reasons }
+
+    if (rule.tamanos?.some((size) => Math.abs(fileSize - size) <= size * 0.04)) {
+      score += 8
+      reasons.push('tamaño de archivo compatible')
+    }
+
+    if (!best || score > best.score) best = { rule, score, reasons, brandConfirmed }
   }
   return best
 }
@@ -129,22 +149,41 @@ export async function POST(request: Request) {
     const haystack = `${file.name}\n${ascii}`
     const hw = findHardware(ascii)
     const sw = findSoftware(ascii)
-    const best = scoreAgainstRules(rules, haystack, file.size, hw, sw)
+    const best = scoreAgainstRules(rules, haystack, file.size)
 
-    if (best && best.score >= 35) {
-      const confidence = Math.min(96, 35 + best.score)
+    // Umbral alto y exigente a propósito: preferimos decir "no estoy seguro"
+    // antes que dar una marca/modelo incorrectos. Solo se declara identificado
+    // si además la marca se ha visto de verdad como texto en el archivo — la
+    // pura coincidencia de un patrón técnico genérico nunca es suficiente sola.
+    if (best && best.score >= 50 && best.brandConfirmed) {
+      const confidence = Math.min(90, 40 + best.score)
       return NextResponse.json({
         identified: true,
         method: 'heuristica',
         confidence,
         sha256,
         ecu: best.rule.ecu,
-        marca: best.rule.marcas?.[0] || null,
+        marca: best.rule.marcas?.find((brand) => new RegExp(`\\b${brand}\\b`, 'i').test(haystack)) || null,
         modelo: best.rule.modelo || best.rule.vehiculo || null,
         motor: best.rule.motor || null,
         hw,
         sw,
         rule: best.rule,
+        reasons: best.reasons,
+      })
+    }
+
+    // Coincidencia parcial (familia probable pero SIN marca confirmada por texto):
+    // se informa como pista de baja confianza, nunca se autorrellenan marca/modelo.
+    if (best && best.score >= 20) {
+      return NextResponse.json({
+        identified: false,
+        method: 'pista_baja_confianza',
+        confidence: Math.min(45, best.score),
+        sha256,
+        posible_ecu: best.rule.ecu,
+        hw,
+        sw,
         reasons: best.reasons,
       })
     }

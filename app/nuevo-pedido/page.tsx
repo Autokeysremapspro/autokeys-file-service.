@@ -61,6 +61,7 @@ export default function NuevoPedidoPage() {
     modelo?: string | null
     motor?: string | null
     ecu?: string | null
+    posible_ecu?: string | null
     hw?: string | null
     sw?: string | null
   }>(null)
@@ -189,14 +190,18 @@ export default function NuevoPedidoPage() {
             )}
 
             {!detecting && detection && (
-              <div className={`mt-4 rounded-2xl border p-4 ${detection.identified ? 'border-emerald-500/25 bg-emerald-500/[.06]' : 'border-white/10 bg-black/25'}`}>
+              <div className={`mt-4 rounded-2xl border p-4 ${detection.identified ? 'border-emerald-500/25 bg-emerald-500/[.06]' : detection.method === 'pista_baja_confianza' ? 'border-amber-500/20 bg-amber-500/[.05]' : 'border-white/10 bg-black/25'}`}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2 text-sm font-black">
                     <Sparkles size={16} className={detection.identified ? 'text-emerald-300' : 'text-white/30'} />
-                    {detection.identified ? 'ECU detectada automáticamente' : 'No se ha podido identificar con confianza'}
+                    {detection.identified
+                      ? 'ECU detectada automáticamente'
+                      : detection.method === 'pista_baja_confianza'
+                      ? 'Posible coincidencia — sin confirmar'
+                      : 'No se ha podido identificar con confianza'}
                   </div>
                   <span className="rounded-full border border-white/10 bg-white/[.04] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white/50">
-                    {detection.method === 'huella_exacta' ? 'Huella exacta' : detection.method === 'heuristica' ? 'Coincidencia por patrones' : 'Sin coincidencia'} · {detection.confidence}%
+                    {detection.method === 'huella_exacta' ? 'Huella exacta' : detection.method === 'heuristica' ? 'Coincidencia por patrones' : detection.method === 'pista_baja_confianza' ? 'Pista débil' : 'Sin coincidencia'} · {detection.confidence}%
                   </span>
                 </div>
                 {detection.identified && (
@@ -213,6 +218,12 @@ export default function NuevoPedidoPage() {
                       Usar estos datos en el formulario
                     </button>
                   </>
+                )}
+                {!detection.identified && detection.method === 'pista_baja_confianza' && (
+                  <p className="mt-3 text-sm text-white/45">
+                    Podría ser un {detection.posible_ecu}, pero no hay suficiente certeza — no se ha encontrado
+                    el nombre de la marca en el archivo. Rellena los datos manualmente para no arriesgar un error.
+                  </p>
                 )}
               </div>
             )}
