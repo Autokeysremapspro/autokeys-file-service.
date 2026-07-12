@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 import {
   ArrowRight,
   Bell,
@@ -135,6 +136,8 @@ export default function DashboardPage() {
   const [renovando, setRenovando] = useState(false)
   const [cambiando, setCambiando] = useState(false)
   const [renovacionSolicitada, setRenovacionSolicitada] = useState(false)
+  const [mostrarOnboarding, setMostrarOnboarding] = useState(false)
+  const [eligiendoPlan, setEligiendoPlan] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -168,11 +171,12 @@ export default function DashboardPage() {
         const inicioHoy = new Date()
         inicioHoy.setHours(0, 0, 0, 0)
         const [{ data: dist }, { count }] = await Promise.all([
-          supabase.from('akcloud_distribuidores').select('plan_expira_at, solicito_renovacion').eq('auth_user_id', user.id).maybeSingle(),
+          supabase.from('akcloud_distribuidores').select('plan_expira_at, solicito_renovacion, onboarding_completado').eq('auth_user_id', user.id).maybeSingle(),
           supabase.from('file_service_pedidos').select('id', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', inicioHoy.toISOString()),
         ])
         setPlanExpiraAt(dist?.plan_expira_at || null)
         setRenovacionSolicitada(Boolean(dist?.solicito_renovacion))
+        setMostrarOnboarding(dist ? !dist.onboarding_completado : false)
         setPedidosHoy(count || 0)
       }
     } catch (err: any) {
@@ -198,6 +202,26 @@ export default function DashboardPage() {
       setError(err?.message || 'No se pudo enviar la solicitud')
     } finally {
       setRenovando(false)
+    }
+  }
+
+  async function elegirPlan(planId: string) {
+    setEligiendoPlan(planId)
+    try {
+      const res = await fetch('/api/planes/elegir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan_id: planId }),
+      })
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error)
+      setMostrarOnboarding(false)
+      toast.success(result.esFree ? 'Plan Free activado' : 'Elección guardada — te avisaremos cuando se confirme el pago.')
+      await loadDashboard()
+    } catch (err: any) {
+      setError(err?.message || 'No se pudo guardar tu elección de plan')
+    } finally {
+      setEligiendoPlan(null)
     }
   }
 
@@ -286,6 +310,66 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
+      {mostrarOnboarding && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/85 p-4 backdrop-blur-md">
+          <div className="relative w-full max-w-4xl overflow-hidden rounded-[2rem] border border-white/12 bg-[#0a0a0c] shadow-[0_50px_150px_rgba(0,0,0,.7)]">
+            <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-red-600/20 blur-[100px]" />
+            <div
+              className="h-1.5 w-full opacity-70"
+              style={{ backgroundImage: 'repeating-conic-gradient(#0a0a0a 0% 25%, #e5e5e5 0% 50%)', backgroundSize: '10px 10px' }}
+              aria-hidden="true"
+            />
+            <div className="relative p-7 sm:p-10">
+              <div className="mb-8 text-center">
+                <span className="inline-flex items-center gap-2 rounded-full border border-red-400/25 bg-red-500/10 px-3 py-1.5 text-[11px] font-black uppercase tracking-[.22em] text-red-300">
+                  <Sparkles size={14} /> Bienvenido a AK Cloud
+                </span>
+                <h2 className="mt-4 text-3xl font-black uppercase italic tracking-tight sm:text-4xl">Elige tu plan para empezar</h2>
+                <p className="mx-auto mt-3 max-w-xl text-sm text-white/45">
+                  Puedes cambiarlo cuando quieras desde tu panel. El plan Free se activa al instante; los planes de pago quedan activos en cuanto confirmemos tu pago.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                {planes.map((plan) => (
+                  <div
+                    key={plan.id}
+                    className={`flex flex-col rounded-[1.6rem] border p-6 ${plan.destacado ? 'border-red-400/40 bg-gradient-to-b from-red-600/[.12] to-transparent shadow-[0_0_50px_rgba(217,4,41,.15)]' : 'border-white/10 bg-white/[.02]'}`}
+                  >
+                    {plan.destacado && (
+                      <span className="mb-3 inline-flex w-fit items-center rounded-full bg-red-600 px-3 py-1 text-[10px] font-black uppercase tracking-wider">Recomendado</span>
+                    )}
+                    <h3 className="text-xl font-black uppercase">{plan.nombre}</h3>
+                    <p className="mt-1 min-h-[40px] text-xs leading-5 text-white/40">{plan.descripcion}</p>
+                    <p className="mt-4 text-3xl font-black tabular-nums">
+                      {plan.precio_mensual > 0 ? `${plan.precio_mensual.toFixed(0)} €` : 'Gratis'}
+                      {plan.precio_mensual > 0 && <span className="text-sm font-medium text-white/35">/mes</span>}
+                    </p>
+                    <p className="mt-1 text-xs font-bold uppercase tracking-wide text-red-300">{plan.creditos_mes > 0 ? `${formatNumber(plan.creditos_mes)} créditos/mes` : 'Pago por solución'}</p>
+                    <ul className="mt-4 flex-1 space-y-2 text-xs text-white/50">
+                      {(plan.ventajas || []).slice(0, 4).map((v) => (
+                        <li key={v} className="flex items-start gap-2"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-emerald-400" />{v}</li>
+                      ))}
+                    </ul>
+                    <button
+                      disabled={eligiendoPlan !== null}
+                      onClick={() => elegirPlan(plan.id!)}
+                      className={`mt-6 rounded-xl py-3 text-xs font-black uppercase tracking-wider transition disabled:opacity-50 ${plan.destacado ? 'bg-gradient-to-r from-red-700 to-red-500 text-white' : 'border border-white/15 bg-white/[.04] text-white hover:bg-white/[.08]'}`}
+                    >
+                      {eligiendoPlan === plan.id ? 'Guardando...' : `Empezar con ${plan.nombre}`}
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {planes.length === 0 && (
+                <p className="text-center text-sm text-white/40">Todavía no hay planes configurados — pídele a Autokeys que te asigne uno.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-6">
         <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-black/55 shadow-[0_35px_120px_rgba(0,0,0,.58)]">
           <div className="absolute inset-0 bg-[url('/images/ak-dashboard-hero-racing.webp')] bg-cover bg-center opacity-35" />
