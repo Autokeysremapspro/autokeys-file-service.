@@ -3,8 +3,8 @@ import { createMiddlewareSupabaseClient } from '@/lib/supabase/middleware'
 
 // Público: landing, login, alta de distribuidor y confirmación de PayPal (usa su propio token).
 const PUBLIC_PATHS = ['/', '/login', '/register', '/paypal']
-// Solo staff interno de Autokeys (comparte usuarios_app con Core).
-const STAFF_PATHS = ['/admin']
+// Solo staff interno de Autokeys puede entrar sin más (comparte usuarios_app con Core).
+const STAFF_ONLY_PATHS = ['/admin']
 
 function matches(pathname: string, list: string[]) {
   return list.some((path) => pathname === path || pathname.startsWith(`${path}/`))
@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (matches(pathname, PUBLIC_PATHS) && !matches(pathname, STAFF_PATHS)) {
+  if (matches(pathname, PUBLIC_PATHS)) {
     return response
   }
 
@@ -28,21 +28,30 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  if (matches(pathname, STAFF_PATHS)) {
-    const { data: usuario } = await supabase
-      .from('usuarios_app')
-      .select('rol, activo')
-      .eq('auth_user_id', user.id)
-      .maybeSingle()
+  // Un miembro del staff de Autokeys (tabla usuarios_app, compartida con Core)
+  // puede entrar a CUALQUIER parte del portal, sea o no también distribuidor.
+  const { data: usuario } = await supabase
+    .from('usuarios_app')
+    .select('rol, activo')
+    .eq('auth_user_id', user.id)
+    .maybeSingle()
 
-    const esStaff = !!usuario && usuario.activo !== false && ['admin', 'desarrollo', 'atencion_cliente'].includes(usuario.rol)
-    if (!esStaff) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
-    }
+  const esStaff = !!usuario && usuario.activo !== false && ['admin', 'desarrollo', 'atencion_cliente'].includes(usuario.rol)
+
+  if (esStaff) {
     return response
   }
 
-  // Resto de rutas privadas: exige ser distribuidor aprobado y activo.
+  // No es staff: las rutas /admin quedan cerradas, y el resto exige ser
+  // distribuidor aprobado y activo.
+  if (matches(pathname, STAFF_ONLY_PATHS)) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  if (pathname.startsWith('/pendiente-aprobacion')) {
+    return response
+  }
+
   const { data: distribuidor } = await supabase
     .from('akcloud_distribuidores')
     .select('estado')
@@ -50,9 +59,7 @@ export async function middleware(request: NextRequest) {
     .maybeSingle()
 
   if (!distribuidor || distribuidor.estado !== 'activo') {
-    if (pathname.startsWith('/pendiente-aprobacion')) return response
-    const pendingUrl = new URL('/pendiente-aprobacion', request.url)
-    return NextResponse.redirect(pendingUrl)
+    return NextResponse.redirect(new URL('/pendiente-aprobacion', request.url))
   }
 
   return response
