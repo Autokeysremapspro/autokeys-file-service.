@@ -98,7 +98,7 @@ export default function AKSidebar() {
       <div className="relative flex h-full flex-col p-6">
         <Link href="/dashboard" className="mb-7 block">
           <Image
-            src="/images/login/autokeys-logo-wide.webp"
+            src="/images/brand/autokeys-logo-wide-transparent.webp"
             alt="Autokeys"
             width={220}
             height={56}

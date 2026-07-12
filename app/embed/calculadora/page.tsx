@@ -41,7 +41,7 @@ export default function CalculadoraEmbedPage() {
       <div style={{ maxWidth: 860, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 20 }}>
           <Image
-            src="/images/login/autokeys-logo-wide.webp"
+            src="/images/brand/autokeys-logo-wide-transparent.webp"
             alt="Autokeys"
             width={180}
             height={44}

@@ -105,7 +105,7 @@ export default function PotenciasEmbedPage() {
 
       <div className="ak-embed-wrap">
         <div className="ak-embed-head">
-          <Image src="/images/login/autokeys-logo-wide.webp" alt="Autokeys" width={180} height={44} style={{ margin: '0 auto', height: 'auto', width: 160 }} />
+          <Image src="/images/brand/autokeys-logo-wide-transparent.webp" alt="Autokeys" width={180} height={44} style={{ margin: '0 auto', height: 'auto', width: 160 }} />
           <h1>Consulta potencia y par de tu vehículo</h1>
           <p>Elige tu marca y motor para ver la diferencia con Stage 1</p>
         </div>

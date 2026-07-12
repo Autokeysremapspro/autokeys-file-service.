@@ -59,7 +59,7 @@ export default function HomePage() {
       <header className="relative z-30 border-b border-white/[0.07] bg-black/45 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between px-5 py-4 lg:px-8">
           <Link href="/" className="group flex items-center gap-3">
-            <img src="/images/login/autokeys-logo-small.webp" alt="Autokeys" className="h-11 w-auto object-contain transition group-hover:scale-[1.03]" />
+            <img src="/images/brand/autokeys-logo-small-transparent.webp" alt="Autokeys" className="h-11 w-auto object-contain transition group-hover:scale-[1.03]" />
             <div className="hidden border-l border-white/10 pl-3 sm:block">
               <div className="text-sm font-black tracking-[.16em]">AK <span className="text-red-500">CLOUD</span></div>
               <div className="mt-0.5 text-[9px] font-bold uppercase tracking-[.28em] text-zinc-600">Professional workspace</div>
@@ -361,7 +361,7 @@ export default function HomePage() {
       <footer className="relative z-10 border-t border-white/[0.07] bg-black/45">
         <div className="mx-auto flex max-w-[1500px] flex-col gap-6 px-5 py-8 text-sm text-zinc-600 sm:flex-row sm:items-center sm:justify-between lg:px-8">
           <div className="flex items-center gap-3">
-            <img src="/images/login/autokeys-logo-small.webp" alt="Autokeys" className="h-8 w-auto object-contain opacity-80" />
+            <img src="/images/brand/autokeys-logo-small-transparent.webp" alt="Autokeys" className="h-8 w-auto object-contain opacity-80" />
             <span>AK Cloud · Autokeys Remaps Pro</span>
           </div>
           <div className="flex flex-wrap gap-5 text-xs font-bold uppercase tracking-wide">

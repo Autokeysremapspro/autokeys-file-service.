@@ -60,7 +60,7 @@ export default function LoginPage() {
             <div className="relative">
               <div className="mx-auto mb-8 flex justify-center">
                 <img
-                  src="/images/login/autokeys-logo-small.webp"
+                  src="/images/brand/autokeys-logo-small-transparent.webp"
                   alt="Autokeys Remaps Pro"
                   className="h-auto w-[210px] object-contain opacity-95"
                 />

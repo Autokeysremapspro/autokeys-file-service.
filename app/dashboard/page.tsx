@@ -9,7 +9,6 @@ import {
   Car,
   CheckCircle2,
   Clock3,
-  Coins,
   Download,
   FileText,
   Headphones,
@@ -75,6 +74,52 @@ function orderProgress(estado?: string | null) {
   if (estado === 'en_proceso') return 65
   if (estado === 'cancelado') return 0
   return 25
+}
+
+function CreditGauge({ saldo, max }: { saldo: number; max: number | null }) {
+  const pct = max && max > 0 ? Math.max(0, Math.min(100, (saldo / max) * 100)) : 100
+  const angle = -90 + (pct / 100) * 180 // -90deg (vacío) a +90deg (lleno)
+  const radius = 78
+  const circumference = Math.PI * radius // longitud de la media circunferencia
+  const dash = (pct / 100) * circumference
+
+  return (
+    <svg viewBox="0 0 200 118" className="w-full max-w-[220px]" aria-hidden="true">
+      <defs>
+        <linearGradient id="gaugeFill" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#7a0517" />
+          <stop offset="100%" stopColor="#ff2448" />
+        </linearGradient>
+      </defs>
+      {/* pista de fondo */}
+      <path d="M 22 100 A 78 78 0 0 1 178 100" fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="14" strokeLinecap="round" />
+      {/* marcas tipo cuentakilómetros */}
+      {Array.from({ length: 9 }).map((_, i) => {
+        const tickAngle = -90 + (i / 8) * 180
+        const rad = (tickAngle * Math.PI) / 180
+        const x1 = 100 + Math.sin(rad) * 68
+        const y1 = 100 - Math.cos(rad) * 68
+        const x2 = 100 + Math.sin(rad) * 78
+        const y2 = 100 - Math.cos(rad) * 78
+        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,.18)" strokeWidth="1.5" />
+      })}
+      {/* arco de saldo real */}
+      <path
+        d="M 22 100 A 78 78 0 0 1 178 100"
+        fill="none"
+        stroke="url(#gaugeFill)"
+        strokeWidth="14"
+        strokeLinecap="round"
+        strokeDasharray={`${dash} ${circumference}`}
+        style={{ transition: 'stroke-dasharray .6s ease' }}
+      />
+      {/* aguja */}
+      <g style={{ transform: `rotate(${angle}deg)`, transformOrigin: '100px 100px', transition: 'transform .6s ease' }}>
+        <line x1="100" y1="100" x2="100" y2="34" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx="100" cy="100" r="6" fill="#fff" />
+      </g>
+    </svg>
+  )
 }
 
 export default function DashboardPage() {
@@ -243,10 +288,9 @@ export default function DashboardPage() {
     <AppShell>
       <div className="space-y-6">
         <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-black/55 shadow-[0_35px_120px_rgba(0,0,0,.58)]">
-          <div className="absolute inset-0 bg-[url('/images/ak-dashboard-hero-racing.webp')] bg-cover bg-center opacity-65" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-black/15" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-transparent to-black/20" />
-          <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-red-600/25 blur-[110px]" />
+          <div className="absolute inset-0 bg-[url('/images/ak-dashboard-hero-racing.webp')] bg-cover bg-center opacity-35" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/85 to-black/40" />
+          <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-red-600/20 blur-[110px]" />
 
           <div className="relative grid min-h-[360px] gap-8 p-7 md:p-10 xl:grid-cols-[1fr_360px] xl:p-12">
             <div className="flex flex-col justify-center">
@@ -280,25 +324,21 @@ export default function DashboardPage() {
             </div>
 
             <div className="self-center rounded-[1.7rem] border border-white/10 bg-black/45 p-6 backdrop-blur-2xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[11px] font-black uppercase tracking-[.24em] text-white/40">Saldo disponible</p>
-                  <p className="mt-2 text-5xl font-black">{formatNumber(saldo)}</p>
-                  <p className="mt-1 text-sm text-white/45">créditos AK Cloud</p>
-                </div>
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-500/12 text-red-400 shadow-[0_0_40px_rgba(217,4,41,.18)]">
-                  <Coins size={34} />
-                </div>
+              <div className="flex flex-col items-center text-center">
+                <p className="text-[11px] font-black uppercase tracking-[.24em] text-white/40">Saldo disponible</p>
+                <CreditGauge saldo={saldo} max={activePlan?.creditos_mes || null} />
+                <p className="-mt-6 text-4xl font-black tabular-nums">{formatNumber(saldo)}</p>
+                <p className="text-sm text-white/45">créditos AK Cloud{activePlan?.creditos_mes ? ` de ${formatNumber(activePlan.creditos_mes)}` : ''}</p>
               </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="mt-5 grid grid-cols-2 gap-3">
                 <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">
                   <p className="text-[10px] font-black uppercase tracking-[.2em] text-white/35">Trabajos activos</p>
-                  <p className="mt-2 text-3xl font-black">{activeOrders}</p>
+                  <p className="mt-2 text-3xl font-black tabular-nums">{activeOrders}</p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">
                   <p className="text-[10px] font-black uppercase tracking-[.2em] text-white/35">Archivos listos</p>
-                  <p className="mt-2 text-3xl font-black">{stats.descargas}</p>
+                  <p className="mt-2 text-3xl font-black tabular-nums">{stats.descargas}</p>
                 </div>
               </div>
 
@@ -308,6 +348,16 @@ export default function DashboardPage() {
             </div>
           </div>
         </section>
+
+        <div
+          className="h-2 w-full rounded-full opacity-70"
+          style={{
+            backgroundImage:
+              'repeating-conic-gradient(#0a0a0a 0% 25%, #e5e5e5 0% 50%)',
+            backgroundSize: '10px 10px',
+          }}
+          aria-hidden="true"
+        />
 
         {error && (
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-red-400/25 bg-red-500/10 p-4 text-sm text-red-200">
@@ -419,8 +469,7 @@ export default function DashboardPage() {
             <div className="rounded-[1.8rem] border border-white/10 bg-black/45 p-5 shadow-2xl shadow-black/30">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[.22em] text-red-400">Accesos rápidos</p>
-                  <h2 className="mt-1 text-xl font-black uppercase">Trabaja más rápido</h2>
+                  <h2 className="text-lg font-black uppercase text-white/90">Trabaja más rápido</h2>
                 </div>
                 <Zap className="text-red-400" size={24} />
               </div>
@@ -499,8 +548,7 @@ export default function DashboardPage() {
           <div className="rounded-[1.8rem] border border-white/10 bg-black/45 p-5 shadow-2xl shadow-black/30">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[.22em] text-red-400">Descargas</p>
-                <h2 className="mt-1 text-xl font-black uppercase">Archivos listos</h2>
+                <h2 className="text-lg font-black uppercase text-white/90">Archivos listos</h2>
               </div>
               <Download className="text-red-400" size={22} />
             </div>
@@ -524,8 +572,7 @@ export default function DashboardPage() {
           <div className="rounded-[1.8rem] border border-white/10 bg-black/45 p-5 shadow-2xl shadow-black/30">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[.22em] text-red-400">Notificaciones</p>
-                <h2 className="mt-1 text-xl font-black uppercase">Novedades</h2>
+                <h2 className="text-lg font-black uppercase text-white/90">Novedades</h2>
               </div>
               <div className="relative">
                 <Bell className="text-red-400" size={22} />
@@ -550,8 +597,7 @@ export default function DashboardPage() {
             <div className="relative">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[.22em] text-red-400">Catálogo activo</p>
-                  <h2 className="mt-1 text-xl font-black uppercase">Soluciones Autokeys</h2>
+                  <h2 className="text-lg font-black uppercase text-white/90">Soluciones Autokeys</h2>
                 </div>
                 <Wrench className="text-red-400" size={22} />
               </div>
