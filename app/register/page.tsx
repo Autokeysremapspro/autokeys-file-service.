@@ -71,7 +71,11 @@ export default function RegisterPage() {
 
     if (error) {
       setLoading(false)
-      toast.error(error.message)
+      if (error.message?.toLowerCase().includes('rate limit')) {
+        toast.error('Estamos recibiendo muchos registros ahora mismo. Espera unos minutos y vuelve a intentarlo.')
+      } else {
+        toast.error(error.message)
+      }
       return
     }
 
