@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle2, Loader2, XCircle } from 'lucide-react'
 
-export default function PedidoCompletadoPage() {
+function PedidoCompletadoInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [estado, setEstado] = useState<'procesando' | 'ok' | 'error'>('procesando')
@@ -50,5 +50,13 @@ export default function PedidoCompletadoPage() {
         )}
       </div>
     </main>
+  )
+}
+
+export default function PedidoCompletadoPage() {
+  return (
+    <Suspense fallback={null}>
+      <PedidoCompletadoInner />
+    </Suspense>
   )
 }
