@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { sendNotificationEmail } from '@/lib/email'
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -77,6 +78,34 @@ export async function POST(request: Request) {
       .single()
 
     if (error) throw error
+
+    // Avisa a Core: sin esto, la solicitud se creaba bien en la base de
+    // datos pero nadie del staff se enteraba salvo que entrara a mirar
+    // /ak-cloud/solicitudes por su cuenta. Se inserta en el centro de
+    // notificaciones interno de Core (usuario_id null = para todo el
+    // staff) y, si hay RESEND_API_KEY, también un email al staff.
+    await admin.from('notificaciones').insert({
+      usuario_id: null,
+      titulo: 'Nueva solicitud de distribuidor AK Cloud',
+      mensaje: `${empresa} (${nombre}) ha solicitado acceso como distribuidor.`,
+      modulo: 'ak_cloud',
+      tipo: 'info',
+      prioridad: 'normal',
+      href: '/ak-cloud/solicitudes',
+      accion_texto: 'Revisar solicitud',
+    })
+
+    if (process.env.STAFF_NOTIFICATION_EMAIL) {
+      await sendNotificationEmail({
+        to: process.env.STAFF_NOTIFICATION_EMAIL,
+        subject: `Nueva solicitud de distribuidor: ${empresa}`,
+        title: 'Nueva solicitud de distribuidor',
+        bodyHtml: `<b>${empresa}</b> (${nombre}, ${email}) ha solicitado acceso como distribuidor en AK Cloud.${clean(body.ciudad) ? `<br>Ciudad: ${body.ciudad}` : ''}${clean(body.especialidad) ? `<br>Especialidad: ${body.especialidad}` : ''}`,
+        ctaHref: process.env.NEXT_PUBLIC_CORE_URL ? `${process.env.NEXT_PUBLIC_CORE_URL}/ak-cloud/solicitudes` : undefined,
+        ctaLabel: 'Revisar solicitud',
+      })
+    }
+
     return NextResponse.json({ ok: true, id: data.id })
   } catch (error: any) {
     return NextResponse.json(
