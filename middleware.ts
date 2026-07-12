@@ -3,7 +3,7 @@ import { createMiddlewareSupabaseClient } from '@/lib/supabase/middleware'
 
 // Público: landing, login, alta de distribuidor, confirmación de PayPal, y el
 // widget embebible de potencias (pensado para insertarse en webs externas).
-const PUBLIC_PATHS = ['/', '/login', '/register', '/paypal', '/embed']
+const PUBLIC_PATHS = ['/', '/login', '/register', '/paypal', '/embed', '/restablecer-contrasena']
 // Solo staff interno de Autokeys puede entrar sin más (comparte usuarios_app con Core).
 const STAFF_ONLY_PATHS = ['/admin']
 

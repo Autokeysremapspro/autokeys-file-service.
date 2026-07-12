@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [remember, setRemember] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
+  const [sendingReset, setSendingReset] = useState(false)
 
   async function login(e: React.FormEvent) {
     e.preventDefault()
@@ -29,6 +30,23 @@ export default function LoginPage() {
 
     toast.success('Acceso correcto')
     router.push('/dashboard')
+  }
+
+  async function recuperarContrasena() {
+    if (!email) {
+      toast.error('Escribe primero tu email arriba, para saber a quién mandarlo')
+      return
+    }
+    setSendingReset(true)
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/restablecer-contrasena`,
+    })
+    setSendingReset(false)
+    if (error) {
+      toast.error(error.message)
+      return
+    }
+    toast.success(`Te hemos enviado un email a ${email} para restablecer tu contraseña.`)
   }
 
   return (
@@ -125,8 +143,8 @@ export default function LoginPage() {
                   <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="sr-only" />
                   Recordar mi sesión
                 </label>
-                <button type="button" onClick={() => toast('Contacta con Autokeys para recuperar el acceso.')} className="font-bold text-red-400 transition hover:text-red-300">
-                  ¿Olvidaste tu contraseña?
+                <button type="button" disabled={sendingReset} onClick={recuperarContrasena} className="font-bold text-red-400 transition hover:text-red-300 disabled:opacity-50">
+                  {sendingReset ? 'Enviando...' : '¿Olvidaste tu contraseña?'}
                 </button>
               </div>
 
@@ -137,21 +155,6 @@ export default function LoginPage() {
               >
                 {loading ? 'Accediendo...' : 'Acceder al portal'}
                 <ArrowRight size={22} />
-              </button>
-
-              <div className="my-8 flex items-center gap-4 text-sm text-zinc-500">
-                <div className="h-px flex-1 bg-white/10" />
-                <span>o continúa con</span>
-                <div className="h-px flex-1 bg-white/10" />
-              </div>
-
-              <button
-                type="button"
-                onClick={() => toast('El acceso con PayPal se activará próximamente.')}
-                className="flex h-16 w-full items-center justify-center gap-3 rounded-xl border border-white/20 bg-black/25 text-base font-bold text-white transition hover:border-white/40 hover:bg-white/5"
-              >
-                <span className="text-3xl font-black italic">P</span>
-                Acceder con PayPal
               </button>
 
               <p className="mt-8 text-center text-sm text-zinc-400">
