@@ -68,6 +68,7 @@ export default function HomePage() {
 
           <nav className="hidden items-center gap-8 text-xs font-black uppercase tracking-[.12em] text-zinc-500 lg:flex">
             <a href="#plataforma" className="transition hover:text-white">Plataforma</a>
+            <a href="#deteccion" className="transition hover:text-white">Detección ECU</a>
             <a href="#servicios" className="transition hover:text-white">Servicios</a>
             <a href="#flujo" className="transition hover:text-white">Cómo funciona</a>
             <a href="#ventajas" className="transition hover:text-white">Ventajas</a>
@@ -85,7 +86,7 @@ export default function HomePage() {
       </header>
 
       <section id="plataforma" className="relative z-10 min-h-[calc(100vh-78px)] overflow-hidden border-b border-white/[0.07]">
-        <div className="absolute inset-0 bg-[url('/images/ak-landing-racing-hero.webp')] bg-cover bg-center lg:bg-[center_top]" />
+        <div className="absolute inset-0 bg-[url('/images/ak-login-racing.png')] bg-cover bg-center lg:bg-[center_top]" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,.97)_0%,rgba(0,0,0,.9)_34%,rgba(0,0,0,.44)_66%,rgba(0,0,0,.82)_100%)]" />
         <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#020304] to-transparent" />
 
@@ -189,6 +190,72 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section id="deteccion" className="relative z-10 mx-auto max-w-[1500px] px-5 py-24 lg:px-8">
+        <div className="grid gap-12 lg:grid-cols-[1fr_.85fr] lg:items-center">
+          <div>
+            <div className="text-xs font-black uppercase tracking-[.28em] text-red-500">AK Detection Engine</div>
+            <h2 className="mt-4 text-4xl font-black uppercase leading-[.98] tracking-[-.035em] sm:text-5xl">
+              La ECU se identifica sola. <span className="text-red-500">De verdad.</span>
+            </h2>
+            <p className="mt-5 max-w-xl text-zinc-500">
+              Subes el archivo original y el motor de detección busca primero una huella exacta contra
+              archivos ya procesados; si no la encuentra, analiza patrones técnicos reales. Nunca inventa
+              una marca — si no hay certeza suficiente, te lo dice y pasa a revisión manual.
+            </p>
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                <div className="text-2xl font-black text-emerald-400">99%</div>
+                <div className="mt-1 text-xs font-bold uppercase tracking-wide text-zinc-600">Huella exacta</div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                <div className="text-2xl font-black text-red-400">0</div>
+                <div className="mt-1 text-xs font-bold uppercase tracking-wide text-zinc-600">Marcas inventadas</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute -inset-8 rounded-full bg-red-700/10 blur-[80px]" />
+            <div className="ak-scan-card relative overflow-hidden rounded-[1.8rem] border border-white/12 bg-[#080a0e]/90 p-5 shadow-[0_40px_110px_rgba(0,0,0,.6)] backdrop-blur-2xl">
+              <div className="mb-4 flex items-center justify-between font-mono text-[11px] uppercase tracking-widest text-zinc-600">
+                <span>ak_ecu_scan.log</span>
+                <span className="flex gap-1.5"><i className="h-2 w-2 rounded-full bg-white/15" /><i className="h-2 w-2 rounded-full bg-white/15" /><i className="h-2 w-2 rounded-full bg-white/15" /></span>
+              </div>
+              <div className="ak-scan-screen relative rounded-xl border border-white/10 bg-black p-5 font-mono text-[13px]">
+                <div className="ak-scan-line flex justify-between border-b border-dashed border-white/[0.06] py-1.5"><span className="text-zinc-600">Archivo recibido</span><span className="text-emerald-400">ORI_0421.bin</span></div>
+                <div className="ak-scan-line flex justify-between border-b border-dashed border-white/[0.06] py-1.5"><span className="text-zinc-600">Huella SHA-256</span><span className="text-sky-400">coincidencia exacta</span></div>
+                <div className="ak-scan-line flex justify-between border-b border-dashed border-white/[0.06] py-1.5"><span className="text-zinc-600">Marca / Modelo</span><span className="text-emerald-400">Volkswagen Golf 8</span></div>
+                <div className="ak-scan-line flex justify-between border-b border-dashed border-white/[0.06] py-1.5"><span className="text-zinc-600">ECU</span><span className="text-sky-400">Bosch MG1CS181</span></div>
+                <div className="ak-scan-line flex justify-between border-b border-dashed border-white/[0.06] py-1.5"><span className="text-zinc-600">Sugerido</span><span className="text-amber-400">Stage 1 · EGR OFF</span></div>
+                <div className="ak-scan-line flex justify-between py-1.5"><span className="text-zinc-600">Coste</span><span className="text-white">55 créditos</span></div>
+                <div className="ak-scan-status mt-3 flex items-center gap-2 border-t border-white/10 pt-3 text-[12px] text-emerald-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_theme(colors.emerald.400)]" /> Detección completada — listo para enviar
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <style>{`
+        .ak-scan-screen::after {
+          content: ''; position: absolute; left: 0; right: 0; height: 40%;
+          background: linear-gradient(180deg, rgba(19,210,106,0) 0%, rgba(19,210,106,.09) 50%, rgba(19,210,106,0) 100%);
+          animation: akScanSweep 3.2s linear infinite;
+        }
+        @keyframes akScanSweep { 0% { top: -40%; } 100% { top: 100%; } }
+        .ak-scan-line { opacity: 0; animation: akScanReveal .4s ease forwards; }
+        .ak-scan-line:nth-child(1) { animation-delay: .3s; }
+        .ak-scan-line:nth-child(2) { animation-delay: .7s; }
+        .ak-scan-line:nth-child(3) { animation-delay: 1.1s; }
+        .ak-scan-line:nth-child(4) { animation-delay: 1.5s; }
+        .ak-scan-line:nth-child(5) { animation-delay: 1.9s; }
+        .ak-scan-line:nth-child(6) { animation-delay: 2.3s; }
+        .ak-scan-status { opacity: 0; animation: akScanReveal .4s ease forwards; animation-delay: 2.7s; }
+        @keyframes akScanReveal { to { opacity: 1; } }
+        @media (prefers-reduced-motion: reduce) { .ak-scan-screen::after, .ak-scan-line, .ak-scan-status { animation: none; opacity: 1; } }
+      `}</style>
+
       <section id="servicios" className="relative z-10 mx-auto max-w-[1500px] px-5 py-24 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <div className="text-xs font-black uppercase tracking-[.28em] text-red-500">Servicios técnicos</div>
@@ -268,20 +335,24 @@ export default function HomePage() {
       </section>
 
       <section className="relative z-10 px-5 pb-24 lg:px-8">
-        <div className="mx-auto max-w-[1500px] overflow-hidden rounded-[2rem] border border-red-500/20 bg-[radial-gradient(circle_at_18%_30%,rgba(220,38,38,.28),transparent_35%),linear-gradient(130deg,#0d0d10,#050608)] p-8 shadow-[0_35px_100px_rgba(0,0,0,.55)] sm:p-12">
-          <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div>
-              <div className="text-xs font-black uppercase tracking-[.28em] text-red-400">Acceso profesional</div>
-              <h2 className="mt-4 max-w-4xl text-4xl font-black uppercase leading-[.98] tracking-[-.035em] sm:text-5xl">Tu próximo trabajo empieza dentro de AK Cloud.</h2>
-              <p className="mt-4 max-w-2xl text-zinc-500">Solicita tu cuenta de distribuidor y trabaja conectado directamente con Autokeys Lab.</p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-              <Link href="/register" className="inline-flex min-w-56 items-center justify-center gap-2 rounded-2xl bg-red-600 px-6 py-4 text-sm font-black uppercase shadow-[0_20px_55px_rgba(185,28,28,.35)] transition hover:bg-red-500">
-                Crear cuenta <ArrowRight size={18} />
-              </Link>
-              <Link href="/login" className="inline-flex min-w-56 items-center justify-center gap-2 rounded-2xl border border-white/12 bg-black/25 px-6 py-4 text-sm font-black uppercase transition hover:bg-white/[0.06]">
-                Ya tengo acceso
-              </Link>
+        <div className="mx-auto max-w-[1500px] overflow-hidden rounded-[2rem] border border-red-500/20 shadow-[0_35px_100px_rgba(0,0,0,.55)]">
+          <div className="relative p-8 sm:p-12">
+            <div className="absolute inset-0 bg-[url('/akcloud/login-racing-reference.png')] bg-cover bg-center" />
+            <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(5,5,5,.95)_0%,rgba(5,5,5,.85)_45%,rgba(185,28,28,.25)_100%)]" />
+            <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+              <div>
+                <div className="text-xs font-black uppercase tracking-[.28em] text-red-400">Acceso profesional</div>
+                <h2 className="mt-4 max-w-4xl text-4xl font-black uppercase leading-[.98] tracking-[-.035em] sm:text-5xl">Tu próximo trabajo empieza dentro de AK Cloud.</h2>
+                <p className="mt-4 max-w-2xl text-zinc-300">Solicita tu cuenta de distribuidor y trabaja conectado directamente con Autokeys Lab.</p>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+                <Link href="/register" className="inline-flex min-w-56 items-center justify-center gap-2 rounded-2xl bg-red-600 px-6 py-4 text-sm font-black uppercase shadow-[0_20px_55px_rgba(185,28,28,.35)] transition hover:bg-red-500">
+                  Crear cuenta <ArrowRight size={18} />
+                </Link>
+                <Link href="/login" className="inline-flex min-w-56 items-center justify-center gap-2 rounded-2xl border border-white/20 bg-black/40 px-6 py-4 text-sm font-black uppercase backdrop-blur-xl transition hover:bg-white/[0.1]">
+                  Ya tengo acceso
+                </Link>
+              </div>
             </div>
           </div>
         </div>

@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createMiddlewareSupabaseClient } from '@/lib/supabase/middleware'
 
-// Público: landing, login, alta de distribuidor y confirmación de PayPal (usa su propio token).
-const PUBLIC_PATHS = ['/', '/login', '/register', '/paypal']
+// Público: landing, login, alta de distribuidor, confirmación de PayPal, y el
+// widget embebible de potencias (pensado para insertarse en webs externas).
+const PUBLIC_PATHS = ['/', '/login', '/register', '/paypal', '/embed']
 // Solo staff interno de Autokeys puede entrar sin más (comparte usuarios_app con Core).
 const STAFF_ONLY_PATHS = ['/admin']
 
