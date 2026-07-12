@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     // ya haya filtrado — alguien podría llamarla directamente).
     const { data: distribuidor } = await admin
       .from('akcloud_distribuidores')
-      .select('estado')
+      .select('estado, plan_id')
       .eq('auth_user_id', user.id)
       .maybeSingle()
     if (!distribuidor || distribuidor.estado !== 'activo') {
@@ -63,8 +63,36 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Alguno de los servicios seleccionados no existe o no está activo' }, { status: 400 })
     }
 
-    const totalCreditos = seleccionados.reduce((sum, s) => sum + Number(s.creditos_final ?? s.creditos ?? 0), 0)
-    const totalPrecio = seleccionados.reduce((sum, s) => sum + Number(s.precio_final ?? s.precio ?? 0), 0)
+    // Descuento de plan: solo se aplica a los servicios cuyo "grupo de
+    // facturación" (anulacion / tuning) esté entre los que cubre el plan del
+    // distribuidor. Si pide algo fuera de lo que cubre su plan (p. ej. Stage 1
+    // con el plan Essential), lo paga al precio completo — "aparte" del plan,
+    // tal como se decidió.
+    let grupoIncluidos: string[] = []
+    let descuentoPct = 0
+    if (distribuidor.plan_id) {
+      const { data: plan } = await admin
+        .from('akcloud_planes')
+        .select('grupos_incluidos, descuento_plan_pct')
+        .eq('id', distribuidor.plan_id)
+        .maybeSingle()
+      grupoIncluidos = plan?.grupos_incluidos || []
+      descuentoPct = Number(plan?.descuento_plan_pct || 0)
+    }
+
+    const conDescuentoPlan = seleccionados.map((s) => {
+      const cubiertoPorPlan = s.grupo_facturacion && grupoIncluidos.includes(s.grupo_facturacion)
+      if (!cubiertoPorPlan || descuentoPct <= 0) return s
+      const factor = 1 - descuentoPct / 100
+      return {
+        ...s,
+        creditos_final: Math.round(Number(s.creditos_final ?? s.creditos ?? 0) * factor),
+        precio_final: Number(((s.precio_final ?? s.precio ?? 0) * factor).toFixed(2)),
+      }
+    })
+
+    const totalCreditos = conDescuentoPlan.reduce((sum, s) => sum + Number(s.creditos_final ?? s.creditos ?? 0), 0)
+    const totalPrecio = conDescuentoPlan.reduce((sum, s) => sum + Number(s.precio_final ?? s.precio ?? 0), 0)
 
     // Crea el pedido primero (sin cobrar todavía)
     const { data: pedido, error: pedidoError } = await admin

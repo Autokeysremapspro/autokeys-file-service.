@@ -9,12 +9,15 @@ import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import AKServiceCard, { type AKService } from '@/components/ak/AKServiceCard'
 import { crearPedidoFileService } from '@/lib/services/pedidos'
+import { supabase } from '@/lib/supabase'
 import {
   aplicarReglasPrecios,
   FALLBACK_SERVICIOS,
+  getPlanesActivos,
   getReglasPreciosActivas,
   getServiciosActivos,
   groupServicios,
+  type AkCloudPlan,
   type AkCloudReglaPrecio,
   type AkCloudServicio,
   type ServicioCalculado,
@@ -47,6 +50,7 @@ export default function NuevoPedidoPage() {
   const [observaciones, setObservaciones] = useState('')
   const [servicios, setServicios] = useState<AkCloudServicio[]>(FALLBACK_SERVICIOS)
   const [reglas, setReglas] = useState<AkCloudReglaPrecio[]>([])
+  const [planGrupos, setPlanGrupos] = useState<string[]>([])
   const [loadingConfig, setLoadingConfig] = useState(true)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -73,6 +77,14 @@ export default function NuevoPedidoPage() {
         const [serviciosData, reglasData] = await Promise.all([getServiciosActivos(), getReglasPreciosActivas()])
         setServicios(serviciosData)
         setReglas(reglasData)
+
+        const { data: authData } = await supabase.auth.getUser()
+        const planSlug = authData.user?.user_metadata?.plan_slug || authData.user?.user_metadata?.plan
+        if (planSlug) {
+          const planes = await getPlanesActivos()
+          const plan = planes.find((p: AkCloudPlan) => p.slug === planSlug)
+          setPlanGrupos(plan?.grupos_incluidos || [])
+        }
       } finally {
         setLoadingConfig(false)
       }
@@ -305,15 +317,19 @@ export default function NuevoPedidoPage() {
               <SummaryRow label="ECU" value={vehicle.ecu || 'Pendiente'} />
             </div>
             <div className="mt-5 space-y-2">
-              {selectedServices.length === 0 ? <p className="text-sm text-white/35">Sin servicios seleccionados.</p> : selectedServices.map((service) => (
-                <div key={service.slug} className="flex items-center justify-between rounded-2xl bg-black/25 px-4 py-3 text-sm">
-                  <div>
-                    <span>{service.icono || '⚙️'} {service.nombre}</span>
-                    {service.incluido_por && <div className="text-xs text-emerald-300">Incluido por pack</div>}
+              {selectedServices.length === 0 ? <p className="text-sm text-white/35">Sin servicios seleccionados.</p> : selectedServices.map((service) => {
+                const fueraDePlan = planGrupos.length > 0 && service.grupo_facturacion && !planGrupos.includes(service.grupo_facturacion)
+                return (
+                  <div key={service.slug} className="flex items-center justify-between rounded-2xl bg-black/25 px-4 py-3 text-sm">
+                    <div>
+                      <span>{service.icono || '⚙️'} {service.nombre}</span>
+                      {service.incluido_por && <div className="text-xs text-emerald-300">Incluido por pack</div>}
+                      {fueraDePlan && <div className="text-xs text-amber-300">Fuera de tu plan — precio completo</div>}
+                    </div>
+                    <strong className={service.precio_final === 0 ? 'text-emerald-300' : 'text-white'}>{service.precio_final === 0 ? '0 €' : `${service.precio_final} €`}</strong>
                   </div>
-                  <strong className={service.precio_final === 0 ? 'text-emerald-300' : 'text-white'}>{service.precio_final === 0 ? '0 €' : `${service.precio_final} €`}</strong>
-                </div>
-              ))}
+                )
+              })}
             </div>
             <div className="mt-5 rounded-[1.6rem] border border-red-500/20 bg-red-500/10 p-4">
               {ahorro > 0 && <div className="mb-2 flex justify-between text-sm text-emerald-300"><span>Ahorro pack</span><strong>-{ahorro} €</strong></div>}
