@@ -9,17 +9,41 @@ import AKButton from '@/components/ak/AKButton'
 import AKTimeline from '@/components/ak/AKTimeline'
 import AKChat from '@/components/ak/AKChat'
 import { descargarArchivo, formatBytes, formatEstado, getPedidoById, type FileServicePedido } from '@/lib/services/pedidos'
+import { supabase } from '@/lib/supabase'
 
 export default function PedidoDetallePage({ params }: { params: { id: string } }) {
   const [pedido, setPedido] = useState<FileServicePedido | null>(null)
   const [loading, setLoading] = useState(true)
   const [downloading, setDownloading] = useState<string | null>(null)
+  const [justUpdated, setJustUpdated] = useState(false)
 
   useEffect(() => {
     getPedidoById(params.id)
       .then(setPedido)
       .catch(console.error)
       .finally(() => setLoading(false))
+  }, [params.id])
+
+  // Sin esto, el distribuidor tenía que refrescar la página a mano para
+  // enterarse de que su pedido cambió de estado — justo el momento en el
+  // que más pendiente está de la pantalla. Ahora se entera al instante.
+  useEffect(() => {
+    const channel = supabase
+      .channel(`pedido-${params.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'file_service_pedidos', filter: `id=eq.${params.id}` },
+        (payload) => {
+          setPedido((current) => (current ? { ...current, ...(payload.new as Partial<FileServicePedido>) } : current))
+          setJustUpdated(true)
+          setTimeout(() => setJustUpdated(false), 4000)
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [params.id])
 
   async function download(bucket?: string | null, path?: string | null, name?: string | null) {
@@ -60,7 +84,10 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
             <h1 className="mt-2 text-4xl font-black tracking-tight">{pedido.numero || 'Pedido File Service'}</h1>
             <p className="mt-2 text-sm text-white/40">{pedido.ecu || 'ECU pendiente'} · {formatEstado(pedido.estado)}</p>
           </div>
-          <div className="rounded-full border border-white/10 bg-black/25 px-4 py-2 text-sm font-black text-white/55">{formatEstado(pedido.estado)}</div>
+          <div className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-black transition-colors ${justUpdated ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300' : 'border-white/10 bg-black/25 text-white/55'}`}>
+            {justUpdated && <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />}
+            {formatEstado(pedido.estado)}
+          </div>
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
