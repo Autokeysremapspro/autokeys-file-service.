@@ -81,32 +81,34 @@ export default function RegisterPage() {
       return
     }
 
-    // Sin esto, la cuenta se creaba pero Autokeys Core nunca se enteraba de
-    // que existía — la persona se quedaba esperando una aprobación que nadie
-    // podía ver ni conceder. Esta es la fila que Core necesita para poder
-    // aprobar al distribuidor desde /ak-cloud.
-    const { error: solicitudError } = await supabase.from('akcloud_solicitudes_distribuidores').insert({
-      auth_user_id: signUp.user.id,
-      email: form.email.trim().toLowerCase(),
-      empresa: form.empresa.trim(),
-      nif: form.nif.trim() || null,
-      nombre: form.nombre.trim(),
-      telefono: form.telefono.trim() || null,
-      ciudad: form.ciudad.trim() || null,
-      especialidad: form.especialidad || null,
-      herramientas: form.herramientas,
-      estado: 'pendiente',
+    // La solicitud se registra mediante una ruta de servidor con service role.
+    // Así no depende de la sesión del navegador, de RLS ni de la confirmación de email.
+    const solicitudResponse = await fetch('/api/register-distributor', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        auth_user_id: signUp.user.id,
+        email: form.email,
+        empresa: form.empresa,
+        nombre: form.nombre,
+        telefono: form.telefono,
+        nif: form.nif,
+        ciudad: form.ciudad,
+        especialidad: form.especialidad,
+        herramientas: form.herramientas,
+      }),
     })
+    const solicitudPayload = await solicitudResponse.json()
 
     setLoading(false)
 
-    if (solicitudError) {
-      toast.error('Tu cuenta se creó, pero hubo un problema enviando la solicitud. Contacta con soporte.')
+    if (!solicitudResponse.ok) {
+      toast.error(solicitudPayload.error || 'La cuenta se creó, pero no se pudo enviar la solicitud a Core.')
       return
     }
 
-    toast.success('Solicitud enviada a Autokeys Core. Te avisaremos por email cuando esté aprobada.')
-    router.push('/login')
+    toast.success('Solicitud enviada a Autokeys Core. Te avisaremos cuando esté aprobada.')
+    router.push('/pendiente-aprobacion')
   }
 
   return (
