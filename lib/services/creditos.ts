@@ -51,11 +51,18 @@ export async function getCreditoMovimientos() {
 }
 
 export async function getSaldoCreditos() {
-  const movimientos = await getCreditoMovimientos()
-  if (!movimientos.length) return 0
-  const latest = movimientos.find((m) => typeof m.saldo_resultante === 'number')
-  if (latest) return Number(latest.saldo_resultante || 0)
-  return movimientos.reduce((acc, mov) => acc + Number(mov.creditos || 0), 0)
+  const { data: userData } = await supabase.auth.getUser()
+  const userId = userData.user?.id
+  if (!userId) return 0
+
+  const { data, error } = await supabase
+    .from('ak_creditos_saldos')
+    .select('saldo')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (error) throw new Error(error.message)
+  return Number(data?.saldo || 0)
 }
 
 export function calcularCreditosServicios(servicios: string[]) {

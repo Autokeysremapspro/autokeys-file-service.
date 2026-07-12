@@ -180,69 +180,36 @@ export async function aprobarRecarga(recarga: RecargaCreditos, notas_admin?: str
   if ((recarga.estado || 'pendiente') !== 'pendiente') {
     throw new Error('Esta recarga ya fue revisada.')
   }
-
   if (!recarga.user_id) {
     throw new Error('La recarga no tiene usuario asociado. No se pueden sumar créditos.')
   }
 
-  const { data: userData } = await supabase.auth.getUser()
-  const adminId = userData.user?.id || null
-
-  const { data: movimientos, error: saldoError } = await supabase
-    .from('ak_creditos_movimientos')
-    .select('saldo_resultante')
-    .eq('user_id', recarga.user_id)
-    .order('created_at', { ascending: false })
-    .limit(1)
-
-  if (saldoError) throw new Error(saldoError.message)
-
-  const saldoAnterior = Number(movimientos?.[0]?.saldo_resultante || 0)
-  const creditos = Number(recarga.creditos || 0)
-  const nuevoSaldo = saldoAnterior + creditos
-
-  const { error: movError } = await supabase.from('ak_creditos_movimientos').insert({
-    user_id: recarga.user_id,
-    tipo: 'recarga',
-    concepto: `Recarga aprobada: ${creditos} créditos`,
-    creditos,
-    saldo_resultante: nuevoSaldo,
+  // El descuento/suma de créditos ya no se hace nunca desde el navegador
+  // (ni siquiera desde el panel admin) — esta ruta usa service_role y la
+  // función atómica ak_anadir_creditos(), que evita condiciones de carrera.
+  const response = await fetch('/api/recargas/gestionar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: recarga.id, accion: 'aprobar', notas_admin }),
   })
+  const result = await response.json()
+  if (!response.ok) throw new Error(result.error || 'No se pudo aprobar la recarga')
 
-  if (movError) throw new Error(movError.message)
-
-  const { data, error } = await supabase
-    .from('ak_creditos_recargas')
-    .update({
-      estado: 'aprobado',
-      notas_admin: notas_admin || recarga.notas_admin || null,
-      aprobada_por: adminId,
-      aprobada_at: new Date().toISOString(),
-    })
-    .eq('id', recarga.id)
-    .select('*')
-    .single()
-
-  if (error) throw new Error(error.message)
-
-  await crearNotificacionRecarga(recarga.user_id, 'Recarga aprobada', `Se han añadido ${creditos} créditos a tu cuenta.`)
-
+  const { data } = await supabase.from('ak_creditos_recargas').select('*').eq('id', recarga.id).single()
   return data as RecargaCreditos
 }
 
 export async function rechazarRecarga(id: string, notas_admin?: string) {
-  const { data, error } = await supabase
-    .from('ak_creditos_recargas')
-    .update({ estado: 'rechazado', notas_admin: notas_admin || null })
-    .eq('id', id)
-    .select('*')
-    .single()
+  const response = await fetch('/api/recargas/gestionar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, accion: 'rechazar', notas_admin }),
+  })
+  const result = await response.json()
+  if (!response.ok) throw new Error(result.error || 'No se pudo rechazar la recarga')
 
+  const { data, error } = await supabase.from('ak_creditos_recargas').select('*').eq('id', id).single()
   if (error) throw new Error(error.message)
-
-  if (data?.user_id) {
-    await crearNotificacionRecarga(data.user_id, 'Recarga rechazada', notas_admin || 'La solicitud de recarga fue rechazada.')
-  }
 
   return data as RecargaCreditos
 }

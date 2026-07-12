@@ -66,24 +66,7 @@ export async function POST(request: Request) {
     const totalCreditos = seleccionados.reduce((sum, s) => sum + Number(s.creditos_final ?? s.creditos ?? 0), 0)
     const totalPrecio = seleccionados.reduce((sum, s) => sum + Number(s.precio_final ?? s.precio ?? 0), 0)
 
-    // Saldo actual real (último movimiento del usuario)
-    const { data: last } = await admin
-      .from('ak_creditos_movimientos')
-      .select('saldo_resultante')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    const saldoActual = Number(last?.saldo_resultante || 0)
-
-    if (saldoActual < totalCreditos) {
-      return NextResponse.json(
-        { error: `Saldo insuficiente: necesitas ${totalCreditos} créditos y tienes ${saldoActual}.` },
-        { status: 402 }
-      )
-    }
-
-    // Crea el pedido
+    // Crea el pedido primero (sin cobrar todavía)
     const { data: pedido, error: pedidoError } = await admin
       .from('file_service_pedidos')
       .insert({
@@ -114,21 +97,25 @@ export async function POST(request: Request) {
 
     if (pedidoError) throw pedidoError
 
-    // Descuenta el saldo — este es el movimiento que antes no existía.
-    const nuevoSaldo = saldoActual - totalCreditos
-    const { error: movError } = await admin.from('ak_creditos_movimientos').insert({
-      user_id: user.id,
-      tipo: 'consumo',
-      concepto: `Pedido ${pedido.numero || pedido.id} — ${seleccionados.map((s) => s.nombre).join(', ')}`,
-      pedido_id: pedido.id,
-      creditos: -totalCreditos,
-      saldo_resultante: nuevoSaldo,
+    // Descuento atómico — la función ak_consumir_creditos() (SQL) hace la
+    // comprobación de saldo y el descuento en una sola operación indivisible,
+    // así dos pedidos creados casi a la vez nunca pueden gastar más saldo
+    // del que hay de verdad, aunque las peticiones se solapen.
+    const { data: nuevoSaldo, error: movError } = await admin.rpc('ak_consumir_creditos', {
+      p_user_id: user.id,
+      p_creditos: totalCreditos,
+      p_concepto: `Pedido ${pedido.numero || pedido.id} — ${seleccionados.map((s) => s.nombre).join(', ')}`,
+      p_pedido_id: pedido.id,
     })
 
     if (movError) {
-      // El pedido ya se creó pero el descuento falló — se revierte el pedido
-      // en vez de dejar un trabajo "gratis" sin cobrar.
+      // El pedido ya se creó pero el descuento falló (normalmente por saldo
+      // insuficiente) — se revierte el pedido en vez de dejar un trabajo
+      // "gratis" sin cobrar.
       await admin.from('file_service_pedidos').delete().eq('id', pedido.id)
+      if (movError.message?.includes('saldo_insuficiente')) {
+        return NextResponse.json({ error: `Saldo insuficiente para este pedido (necesitas ${totalCreditos} créditos).` }, { status: 402 })
+      }
       throw movError
     }
 

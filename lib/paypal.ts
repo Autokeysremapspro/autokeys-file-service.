@@ -197,22 +197,11 @@ export async function completePayPalPayment(orderId: string, rawPayload: any) {
     throw new Error(`Pago no completado: ${status}`)
   }
 
-  const { data: movimientos } = await supabase
-    .from('ak_creditos_movimientos')
-    .select('saldo_resultante')
-    .eq('user_id', pago.user_id)
-    .order('created_at', { ascending: false })
-    .limit(1)
-
-  const saldoAnterior = Number(movimientos?.[0]?.saldo_resultante || 0)
-  const nuevoSaldo = saldoAnterior + Number(pago.creditos || 0)
-
-  const { error: movError } = await supabase.from('ak_creditos_movimientos').insert({
-    user_id: pago.user_id,
-    tipo: 'recarga',
-    concepto: `Recarga PayPal automática: ${pago.creditos} créditos`,
-    creditos: Number(pago.creditos || 0),
-    saldo_resultante: nuevoSaldo,
+  const { data: nuevoSaldo, error: movError } = await supabase.rpc('ak_anadir_creditos', {
+    p_user_id: pago.user_id,
+    p_creditos: Number(pago.creditos || 0),
+    p_concepto: `Recarga PayPal automática: ${pago.creditos} créditos`,
+    p_tipo: 'recarga',
   })
 
   if (movError) throw new Error(movError.message)
