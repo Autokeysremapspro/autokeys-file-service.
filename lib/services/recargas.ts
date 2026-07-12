@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase'
 
-export type RecargaEstado = 'pendiente' | 'aprobada' | 'rechazada' | 'cancelada'
+export type RecargaEstado = 'pendiente' | 'aprobado' | 'rechazado' | 'cancelada'
 export type RecargaMetodo = 'paypal' | 'bizum' | 'transferencia' | 'tarjeta' | 'manual' | 'otro' | string
 
 export type RecargaCreditos = {
@@ -214,7 +214,7 @@ export async function aprobarRecarga(recarga: RecargaCreditos, notas_admin?: str
   const { data, error } = await supabase
     .from('ak_creditos_recargas')
     .update({
-      estado: 'aprobada',
+      estado: 'aprobado',
       notas_admin: notas_admin || recarga.notas_admin || null,
       aprobada_por: adminId,
       aprobada_at: new Date().toISOString(),
@@ -233,7 +233,7 @@ export async function aprobarRecarga(recarga: RecargaCreditos, notas_admin?: str
 export async function rechazarRecarga(id: string, notas_admin?: string) {
   const { data, error } = await supabase
     .from('ak_creditos_recargas')
-    .update({ estado: 'rechazada', notas_admin: notas_admin || null })
+    .update({ estado: 'rechazado', notas_admin: notas_admin || null })
     .eq('id', id)
     .select('*')
     .single()
@@ -264,8 +264,8 @@ async function crearNotificacionRecarga(userId: string | null, titulo: string, m
 }
 
 export function estadoRecargaClass(estado?: string | null) {
-  if (estado === 'aprobada') return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-  if (estado === 'rechazada') return 'border-red-500/30 bg-red-500/10 text-red-300'
+  if (estado === 'aprobado') return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+  if (estado === 'rechazado') return 'border-red-500/30 bg-red-500/10 text-red-300'
   if (estado === 'cancelada') return 'border-zinc-500/30 bg-zinc-500/10 text-zinc-300'
   return 'border-amber-500/30 bg-amber-500/10 text-amber-300'
 }

@@ -221,7 +221,7 @@ export async function completePayPalPayment(orderId: string, rawPayload: any) {
   const { error: recargaError } = await supabase
     .from('ak_creditos_recargas')
     .update({
-      estado: 'aprobada',
+      estado: 'aprobado',
       referencia_pago: captureId || orderId,
       notas_admin: 'Pago confirmado automáticamente por PayPal',
       aprobada_at: paidAt,

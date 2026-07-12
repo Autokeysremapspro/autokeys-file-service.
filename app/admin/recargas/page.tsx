@@ -128,7 +128,7 @@ export default function AdminRecargasPage() {
                 <p className="mt-1 text-sm text-white/40">Revisa método de pago, referencia e importe antes de aprobar.</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                {['pendiente', 'aprobada', 'rechazada', 'todas'].map((item) => (
+                {['pendiente', 'aprobado', 'rechazado', 'todas'].map((item) => (
                   <button
                     key={item}
                     onClick={() => setFilter(item)}
