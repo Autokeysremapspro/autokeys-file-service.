@@ -18,7 +18,6 @@ import {
   RefreshCw,
   Sparkles,
   UploadCloud,
-  WalletCards,
   Wrench,
   Zap,
 } from 'lucide-react'
@@ -30,7 +29,6 @@ import {
   type FileServiceNotificacion,
   formatNotificationDate,
 } from '@/lib/services/notificaciones'
-import { getSaldoCreditos } from '@/lib/services/creditos'
 import {
   getPlanesActivos,
   getServiciosActivos,
@@ -77,8 +75,8 @@ function orderProgress(estado?: string | null) {
   return 25
 }
 
-function CreditGauge({ saldo, max }: { saldo: number; max: number | null }) {
-  const pct = max && max > 0 ? Math.max(0, Math.min(100, (saldo / max) * 100)) : 100
+function QuotaGauge({ value, max }: { value: number; max: number | null }) {
+  const pct = max && max > 0 ? Math.max(0, Math.min(100, (value / max) * 100)) : 100
   const angle = -90 + (pct / 100) * 180 // -90deg (vacío) a +90deg (lleno)
   const radius = 78
   const circumference = Math.PI * radius // longitud de la media circunferencia
@@ -128,7 +126,6 @@ export default function DashboardPage() {
   const [notificaciones, setNotificaciones] = useState<FileServiceNotificacion[]>([])
   const [planes, setPlanes] = useState<AkCloudPlan[]>([])
   const [servicios, setServicios] = useState<AkCloudServicio[]>([])
-  const [saldo, setSaldo] = useState(0)
   const [userName, setUserName] = useState('Distribuidor')
   const [planSlug, setPlanSlug] = useState<string | null>(null)
   const [planExpiraAt, setPlanExpiraAt] = useState<string | null>(null)
@@ -146,10 +143,9 @@ export default function DashboardPage() {
     setError(null)
 
     try {
-      const [pedidosData, notifData, saldoData, planesData, serviciosData, auth] = await Promise.all([
+      const [pedidosData, notifData, planesData, serviciosData, auth] = await Promise.all([
         getMisPedidos(),
         getMisNotificaciones(),
-        getSaldoCreditos(),
         getPlanesActivos(),
         getServiciosActivos(),
         supabase.auth.getUser(),
@@ -157,7 +153,6 @@ export default function DashboardPage() {
 
       setPedidos(pedidosData)
       setNotificaciones(notifData)
-      setSaldo(Number(saldoData || 0))
       setPlanes(planesData)
       setServicios(serviciosData)
 
@@ -301,7 +296,6 @@ export default function DashboardPage() {
 
   const quickActions = [
     { href: '/nuevo-pedido', label: 'Nuevo pedido', description: 'Envía un archivo en menos de un minuto', icon: UploadCloud, featured: true },
-    { href: '/comprar-creditos', label: 'Comprar créditos', description: 'Recarga tu saldo al instante', icon: WalletCards },
     { href: '/pedidos', label: 'Mis pedidos', description: 'Consulta estados y archivos', icon: FileText },
     { href: '/biblioteca', label: 'Biblioteca', description: 'Accede a tus ORI y MOD', icon: Library },
     { href: '/garage', label: 'Mi garaje', description: 'Historial por vehículo', icon: Car },
@@ -345,7 +339,7 @@ export default function DashboardPage() {
                       {plan.precio_mensual > 0 ? `${plan.precio_mensual.toFixed(0)} €` : 'Gratis'}
                       {plan.precio_mensual > 0 && <span className="text-sm font-medium text-white/35">/mes</span>}
                     </p>
-                    <p className="mt-1 text-xs font-bold uppercase tracking-wide text-red-300">{plan.creditos_mes > 0 ? `${formatNumber(plan.creditos_mes)} créditos/mes` : 'Pago por solución'}</p>
+                    <p className="mt-1 text-xs font-bold uppercase tracking-wide text-red-300">{plan.limite_diario_pedidos ? `${plan.limite_diario_pedidos} pedidos al día` : 'Sin límite diario'}</p>
                     <ul className="mt-4 flex-1 space-y-2 text-xs text-white/50">
                       {(plan.ventajas || []).slice(0, 4).map((v) => (
                         <li key={v} className="flex items-start gap-2"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-emerald-400" />{v}</li>
@@ -409,10 +403,19 @@ export default function DashboardPage() {
 
             <div className="self-center rounded-[1.7rem] border border-white/10 bg-black/45 p-6 backdrop-blur-2xl">
               <div className="flex flex-col items-center text-center">
-                <p className="text-[11px] font-black uppercase tracking-[.24em] text-white/40">Saldo disponible</p>
-                <CreditGauge saldo={saldo} max={activePlan?.creditos_mes || null} />
-                <p className="-mt-6 text-4xl font-black tabular-nums">{formatNumber(saldo)}</p>
-                <p className="text-sm text-white/45">créditos AK Cloud{activePlan?.creditos_mes ? ` de ${formatNumber(activePlan.creditos_mes)}` : ''}</p>
+                <p className="text-[11px] font-black uppercase tracking-[.24em] text-white/40">Pedidos disponibles hoy</p>
+                {activePlan?.limite_diario_pedidos ? (
+                  <>
+                    <QuotaGauge value={Math.max(0, activePlan.limite_diario_pedidos - pedidosHoy)} max={activePlan.limite_diario_pedidos} />
+                    <p className="-mt-6 text-4xl font-black tabular-nums">{Math.max(0, activePlan.limite_diario_pedidos - pedidosHoy)}</p>
+                    <p className="text-sm text-white/45">de {formatNumber(activePlan.limite_diario_pedidos)} al día · {activePlan.nombre}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="mt-4 text-4xl font-black uppercase text-emerald-300">Sin límite</p>
+                    <p className="text-sm text-white/45">{activePlan?.nombre || 'Tu plan'} · pide los que necesites</p>
+                  </>
+                )}
               </div>
 
               <div className="mt-5 grid grid-cols-2 gap-3">
@@ -426,8 +429,8 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <Link href="/comprar-creditos" className="mt-4 flex items-center justify-center gap-2 rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm font-black uppercase text-red-300 transition hover:bg-red-500/15">
-                Recargar créditos <ArrowRight size={17} />
+              <Link href="/nuevo-pedido" className="mt-4 flex items-center justify-center gap-2 rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm font-black uppercase text-red-300 transition hover:bg-red-500/15">
+                Crear nuevo pedido <ArrowRight size={17} />
               </Link>
             </div>
           </div>
@@ -601,8 +604,8 @@ export default function DashboardPage() {
                     <p className="mt-2 text-2xl font-black">{activePlan.precio_mensual.toFixed(2)} €</p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">
-                    <p className="text-[10px] font-black uppercase tracking-[.18em] text-white/30">Créditos</p>
-                    <p className="mt-2 text-2xl font-black">{formatNumber(activePlan.creditos_mes)}</p>
+                    <p className="text-[10px] font-black uppercase tracking-[.18em] text-white/30">Límite diario</p>
+                    <p className="mt-2 text-2xl font-black">{activePlan.limite_diario_pedidos ? `${activePlan.limite_diario_pedidos}/día` : 'Sin límite'}</p>
                   </div>
                   {planExpiraAt && (
                     <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4">
@@ -621,8 +624,8 @@ export default function DashboardPage() {
                   )}
                 </div>
               )}
-              <Link href="/creditos" className="mt-4 inline-flex items-center gap-2 text-xs font-black uppercase text-red-300">
-                Ver planes y créditos <ArrowRight size={15} />
+              <Link href="/pedidos" className="mt-4 inline-flex items-center gap-2 text-xs font-black uppercase text-red-300">
+                Ver mis pedidos <ArrowRight size={15} />
               </Link>
             </div>
           </div>

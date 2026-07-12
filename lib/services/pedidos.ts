@@ -112,7 +112,7 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
 
   const result = await response.json()
   if (!response.ok) throw new Error(result.error || 'No se pudo crear el pedido')
-  return result.pedido as FileServicePedido
+  return result as { ok: true; requierePago: boolean; pedido?: FileServicePedido; approveUrl?: string; importe?: number }
 }
 
 export async function getMisPedidos() {

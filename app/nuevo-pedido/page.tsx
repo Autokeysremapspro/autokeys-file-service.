@@ -154,7 +154,7 @@ export default function NuevoPedidoPage() {
     setSending(true)
     setError(null)
     try {
-      const pedido = await crearPedidoFileService({
+      const result = await crearPedidoFileService({
         ori: file,
         servicios: selectedServices.map((service) => service.nombre),
         serviciosSlugs: selected,
@@ -169,7 +169,17 @@ export default function NuevoPedidoPage() {
         cv: vehicle.cv,
         cambio: vehicle.cambio,
       })
-      router.push(`/pedidos/${pedido.id}`)
+
+      if (result.requierePago && result.approveUrl) {
+        // Hay que pagar antes de crear el pedido — se manda a PayPal, y
+        // vuelve automáticamente a /paypal/pedido-completado cuando termine.
+        window.location.href = result.approveUrl
+        return
+      }
+
+      if (result.pedido) {
+        router.push(`/pedidos/${result.pedido.id}`)
+      }
     } catch (err: any) {
       setError(err?.message || 'No se pudo crear el pedido')
     } finally {
