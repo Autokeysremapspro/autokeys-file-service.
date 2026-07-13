@@ -336,7 +336,7 @@ export default function NuevoPedidoPage() {
                       {service.incluido_por && <div className="text-xs text-emerald-300">Incluido por pack</div>}
                       {fueraDePlan && <div className="text-xs text-amber-300">Fuera de tu plan — precio completo</div>}
                     </div>
-                    <strong className={service.precio_final === 0 ? 'text-emerald-300' : 'text-white'}>{service.precio_final === 0 ? '0 €' : `${service.precio_final} €`}</strong>
+                    <strong className={service.precio_final === 0 ? 'text-emerald-300' : 'text-white'}>{service.precio_final === 0 ? '0 €' : `${Number(service.precio_final).toFixed(2)} €`}</strong>
                   </div>
                 )
               })}
@@ -345,14 +345,17 @@ export default function NuevoPedidoPage() {
               {ahorro > 0 && <div className="mb-2 flex justify-between text-sm text-emerald-300"><span>Ahorro pack</span><strong>-{ahorro} €</strong></div>}
               <div className="flex items-center justify-between">
                 <span className="text-sm text-white/45">Total</span>
-                <strong className="text-4xl font-black text-white">{total} €</strong>
+                <strong className="text-4xl font-black text-white">{total.toFixed(2)} €</strong>
               </div>
             </div>
             {error && <div className="mt-4 flex gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200"><AlertCircle size={18} /> {error}</div>}
             <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="mt-4 min-h-[120px] w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-red-500/60" placeholder="Observaciones para el técnico..." />
             <AKButton onClick={enviarPedido} disabled={sending} className="mt-4 w-full">
-              <Send size={18} /> {sending ? 'Enviando...' : 'Enviar pedido'}
+              <Send size={18} /> {sending ? 'Enviando...' : total > 0 ? `Pagar ${total.toFixed(2)} € con PayPal` : 'Enviar pedido (gratis, incluido en tu plan)'}
             </AKButton>
+            {total > 0 && !sending && (
+              <p className="mt-2 text-center text-xs text-white/35">Te llevaremos a PayPal para completar el pago — el pedido se crea en cuanto se confirme.</p>
+            )}
           </AKCard>
         </aside>
       </div>
