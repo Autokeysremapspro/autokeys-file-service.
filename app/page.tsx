@@ -50,6 +50,26 @@ const benefits = [
 export default function HomePage() {
   return (
     <main className="min-h-screen overflow-hidden bg-[#020304] text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'AutoRepair',
+            name: 'Autokeys Remaps Pro — AK Cloud',
+            url: 'https://akcloud.es',
+            logo: 'https://akcloud.es/images/brand/autokeys-logo-wide-transparent.webp',
+            image: 'https://akcloud.es/og-image.png',
+            description:
+              'Portal profesional de reprogramación y electrónica ECU para talleres y distribuidores: Stage 1, Stage 2, EGR/DPF/AdBlue OFF y más.',
+            areaServed: 'ES',
+            address: {
+              '@type': 'PostalAddress',
+              addressCountry: 'ES',
+            },
+          }),
+        }}
+      />
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_4%,rgba(220,38,38,.2),transparent_27%),radial-gradient(circle_at_88%_12%,rgba(255,30,60,.11),transparent_23%),linear-gradient(180deg,#030405,#05070b_55%,#020304)]" />
         <div className="absolute inset-0 opacity-[.12] [background-image:linear-gradient(rgba(255,255,255,.045)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.045)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(circle_at_50%_20%,black,transparent_75%)]" />
