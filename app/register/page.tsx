@@ -14,6 +14,7 @@ export default function RegisterPage() {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
+  const [aceptaTerminos, setAceptaTerminos] = useState(false)
   const [form, setForm] = useState({
     empresa: '',
     nombre: '',
@@ -50,6 +51,10 @@ export default function RegisterPage() {
   }
 
   async function submit() {
+    if (!aceptaTerminos) {
+      toast.error('Tienes que aceptar los Términos y la Política de Privacidad para crear la cuenta.')
+      return
+    }
     setLoading(true)
     const { data: signUp, error } = await supabase.auth.signUp({
       email: form.email,
@@ -205,6 +210,22 @@ export default function RegisterPage() {
               </div>
             )}
 
+            {step === 3 && (
+              <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 text-sm text-zinc-400">
+                <input
+                  type="checkbox"
+                  checked={aceptaTerminos}
+                  onChange={(e) => setAceptaTerminos(e.target.checked)}
+                  className="mt-0.5 h-5 w-5 shrink-0 accent-red-600"
+                />
+                <span>
+                  He leído y acepto los <a href="/legal/terminos" target="_blank" className="font-bold text-red-400 underline">Términos y Condiciones</a>, la{' '}
+                  <a href="/legal/privacidad" target="_blank" className="font-bold text-red-400 underline">Política de Privacidad</a> y el{' '}
+                  <a href="/legal/aviso-legal" target="_blank" className="font-bold text-red-400 underline">Aviso Legal</a> de AK Cloud.
+                </span>
+              </label>
+            )}
+
             <div className="mt-8 flex items-center justify-between gap-3">
               <button onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1} className="rounded-2xl border border-white/10 bg-white/[0.035] px-5 py-3 text-sm font-black text-zinc-300 disabled:opacity-40">
                 Atrás
@@ -214,7 +235,7 @@ export default function RegisterPage() {
                   Continuar <ArrowRight size={18} />
                 </button>
               ) : (
-                <button onClick={submit} disabled={loading} className="inline-flex items-center gap-2 rounded-2xl bg-red-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-red-950/40 hover:bg-red-500 disabled:opacity-60">
+                <button onClick={submit} disabled={loading || !aceptaTerminos} className="inline-flex items-center gap-2 rounded-2xl bg-red-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-red-950/40 hover:bg-red-500 disabled:opacity-40">
                   {loading ? 'Creando...' : 'Crear cuenta'} <ArrowRight size={18} />
                 </button>
               )}

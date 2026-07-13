@@ -367,6 +367,10 @@ export default function HomePage() {
           <div className="flex flex-wrap gap-5 text-xs font-bold uppercase tracking-wide">
             <Link href="/login" className="hover:text-white">Acceder</Link>
             <Link href="/register" className="hover:text-white">Solicitar cuenta</Link>
+            <Link href="/legal/terminos" className="hover:text-white">Términos</Link>
+            <Link href="/legal/privacidad" className="hover:text-white">Privacidad</Link>
+            <Link href="/legal/aviso-legal" className="hover:text-white">Aviso legal</Link>
+            <Link href="/legal/cookies" className="hover:text-white">Cookies</Link>
             <span>© 2026 Autokeys Lab</span>
           </div>
         </div>
