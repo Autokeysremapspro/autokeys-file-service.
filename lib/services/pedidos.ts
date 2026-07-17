@@ -51,6 +51,8 @@ export type CrearPedidoPayload = {
   prioridad?: string
   precio?: number
   ori?: File | null
+  legalAccepted?: boolean
+  legalVersion?: string
 }
 
 export async function crearPedidoFileService(payload: CrearPedidoPayload) {
@@ -101,6 +103,8 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
       sw: payload.sw,
       cv: payload.cv,
       cambio: payload.cambio,
+      legalAccepted: payload.legalAccepted === true,
+      legalVersion: payload.legalVersion,
       ori: {
         nombre: oriInfo.ori_nombre,
         bucket: oriInfo.ori_bucket,

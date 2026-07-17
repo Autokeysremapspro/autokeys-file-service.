@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertCircle, Car, Cog, FileUp, Gauge, ScanLine, Send, Sparkles, Truck, Wrench } from 'lucide-react'
+import { AlertCircle, Car, Cog, FileUp, Gauge, ScanLine, Send, Sparkles, Truck, Wrench, ShieldCheck, CheckCircle2 } from 'lucide-react'
 import AKPageShell from '@/components/ak/AKPageShell'
 import AKUploader from '@/components/ak/AKUploader'
 import AKCard from '@/components/ak/AKCard'
@@ -60,6 +60,8 @@ export default function NuevoPedidoPage() {
   const [planNombre, setPlanNombre] = useState<string | null>(null)
   const [loadingConfig, setLoadingConfig] = useState(true)
   const [sending, setSending] = useState(false)
+  const [legalOpen, setLegalOpen] = useState(false)
+  const [legalAccepted, setLegalAccepted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [detecting, setDetecting] = useState(false)
   const [detection, setDetection] = useState<null | {
@@ -171,6 +173,7 @@ export default function NuevoPedidoPage() {
   const ahorroPlan = Math.max(0, totalCatalogo - total)
 
   async function enviarPedido() {
+    if (!legalAccepted) { setLegalOpen(true); return }
     if (!file) return setError('Sube primero el archivo ORI.')
     if (!vehicle.marca.trim() || !vehicle.modelo.trim()) return setError('Añade al menos marca y modelo del vehículo.')
     if (!vehicle.ecu.trim()) return setError('Añade la ECU. Si no la sabes, escribe “No sé / revisar”.')
@@ -193,6 +196,8 @@ export default function NuevoPedidoPage() {
         sw: vehicle.sw,
         cv: vehicle.cv,
         cambio: vehicle.cambio,
+        legalAccepted: true,
+        legalVersion: 'AKCLOUD-LEGAL-2026-07-17',
       })
 
       if (result.requierePago && result.approveUrl) {
@@ -218,6 +223,11 @@ export default function NuevoPedidoPage() {
       subtitle="Sube el ORI, añade los datos técnicos manualmente y selecciona los servicios. Los precios, servicios y packs salen desde Autokeys Core."
       eyebrow="File Service"
     >
+      <div className="mb-6 grid gap-3 md:grid-cols-5">
+        {['1 · Archivo', '2 · Vehículo', '3 · ECU', '4 · Servicios', '5 · Revisar y enviar'].map((step) => (
+          <div key={step} className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-center text-xs font-black uppercase tracking-wider text-white/55">{step}</div>
+        ))}
+      </div>
       <div className="grid gap-6 2xl:grid-cols-[1fr_430px]">
         <div className="space-y-6">
           <AKCard className="p-5 md:p-6">
@@ -408,7 +418,11 @@ export default function NuevoPedidoPage() {
             </div>
             {error && <div className="mt-4 flex gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200"><AlertCircle size={18} /> {error}</div>}
             <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="mt-4 min-h-[120px] w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-red-500/60" placeholder="Observaciones para el técnico..." />
-            <AKButton onClick={enviarPedido} disabled={sending} className="mt-4 w-full">
+            <button type="button" onClick={()=>setLegalOpen(true)} className={`mt-4 flex w-full items-center gap-3 rounded-2xl border p-4 text-left ${legalAccepted ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-amber-500/30 bg-amber-500/10'}`}>
+              {legalAccepted ? <CheckCircle2 className="text-emerald-300"/> : <ShieldCheck className="text-amber-300"/>}
+              <div><div className="font-black">{legalAccepted ? 'Condiciones aceptadas' : 'Debes aceptar las condiciones'}</div><div className="text-xs text-white/45">Uso legal, responsabilidad del cliente y posible restricción en vía pública.</div></div>
+            </button>
+            <AKButton onClick={enviarPedido} disabled={sending || !legalAccepted} className="mt-4 w-full">
               <Send size={18} /> {sending ? 'Enviando...' : total > 0 ? `Pagar ${total.toFixed(2)} € con PayPal` : 'Enviar pedido (gratis, incluido en tu plan)'}
             </AKButton>
             {total > 0 && !sending && (
@@ -417,6 +431,21 @@ export default function NuevoPedidoPage() {
           </AKCard>
         </aside>
       </div>
+      {legalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-[2rem] border border-white/10 bg-[#0b1220] p-6 shadow-2xl md:p-8">
+            <div className="flex items-start gap-4"><div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300"><ShieldCheck size={28}/></div><div><p className="text-xs font-black uppercase tracking-[.2em] text-amber-300">Aviso obligatorio</p><h2 className="mt-1 text-3xl font-black">Condiciones de uso del servicio</h2></div></div>
+            <div className="mt-6 space-y-4 text-sm leading-7 text-white/65">
+              <p>Las soluciones suministradas se destinan exclusivamente a usos permitidos por la legislación aplicable, como competición, investigación, desarrollo, diagnóstico, exportación o utilización fuera de vías públicas cuando corresponda.</p>
+              <p>El cliente declara que dispone de autorización para solicitar el servicio y que verificará la legalidad de la instalación y del uso en su país o jurisdicción.</p>
+              <p>Determinadas modificaciones pueden ser ilegales en vehículos que circulen por vías públicas o estén sujetos a normativa de emisiones, seguridad, homologación o inspección técnica.</p>
+              <p>El cliente asume la responsabilidad exclusiva por el uso, instalación, comercialización y consecuencias de los archivos entregados. Autokeys Remaps Pro actúa únicamente como proveedor técnico del servicio solicitado.</p>
+            </div>
+            <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-black/25 p-4"><input type="checkbox" checked={legalAccepted} onChange={(e)=>setLegalAccepted(e.target.checked)} className="mt-1 h-5 w-5"/><span className="font-bold">He leído, comprendo y acepto estas condiciones y asumo la responsabilidad del uso solicitado.</span></label>
+            <div className="mt-6 flex gap-3"><button onClick={()=>setLegalOpen(false)} className="flex-1 rounded-2xl border border-white/10 px-4 py-3 font-black">Cancelar</button><button disabled={!legalAccepted} onClick={()=>setLegalOpen(false)} className="flex-1 rounded-2xl bg-red-600 px-4 py-3 font-black disabled:opacity-40">Aceptar y continuar</button></div>
+          </div>
+        </div>
+      )}
     </AKPageShell>
   )
 }

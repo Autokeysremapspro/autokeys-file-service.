@@ -40,6 +40,10 @@ export async function POST(request: Request) {
     const planIdEfectivo = planCaducado ? null : distribuidor.plan_id
 
     const body = await request.json()
+    if (body.legalAccepted !== true) return NextResponse.json({ error: 'Debes aceptar las condiciones del servicio' }, { status: 400 })
+    const legalVersion = String(body.legalVersion || 'AKCLOUD-LEGAL-2026-07-17')
+    const forwardedFor = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null
+
     const serviciosSlugs: string[] = Array.isArray(body.servicios) ? body.servicios : []
     if (serviciosSlugs.length === 0) {
       return NextResponse.json({ error: 'Selecciona al menos un servicio' }, { status: 400 })
@@ -137,6 +141,9 @@ export async function POST(request: Request) {
           cambio: body.cambio || null,
           prioridad: body.prioridad || 'normal',
           precio: 0,
+          precio_inicial: 0,
+          precio_final: 0,
+          legal_aceptado: true, legal_version: legalVersion, legal_aceptado_at: new Date().toISOString(), legal_ip: forwardedFor,
           estado: 'pendiente',
           ori_nombre: body.ori.nombre || null,
           ori_bucket: body.ori.bucket,
@@ -172,6 +179,7 @@ export async function POST(request: Request) {
         cv: body.cv || null,
         cambio: body.cambio || null,
         prioridad: body.prioridad || 'normal',
+        legal_aceptado: true, legal_version: legalVersion, legal_aceptado_at: new Date().toISOString(), legal_ip: forwardedFor,
         ori: body.ori,
       },
     })
