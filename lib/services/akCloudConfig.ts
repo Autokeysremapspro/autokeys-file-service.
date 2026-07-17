@@ -5,7 +5,6 @@ export type AkCloudServicio = {
   nombre: string
   slug: string
   categoria: string
-  grupo_facturacion?: string | null
   descripcion?: string | null
   precio: number
   creditos: number

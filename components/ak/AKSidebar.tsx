@@ -8,7 +8,6 @@ import {
   Bell,
   BookOpen,
   Car,
-  CreditCard,
   Download,
   FolderOpen,
   Headphones,
@@ -37,7 +36,6 @@ const clientItems = [
 
 const adminItems = [
   { href: '/admin/pedidos', label: 'Admin pedidos', icon: ShieldCheck },
-  { href: '/admin/recargas', label: 'Admin recargas', icon: CreditCard },
   { href: '/admin/ecu-database', label: 'Base ECU', icon: Settings },
 ]
 
