@@ -105,11 +105,55 @@ export const CATEGORIA_LABELS: Record<string, string> = {
   electronica: 'Electrónica',
   agricola: 'Agrícola',
   camion: 'Camión',
+  dsg: 'DSG',
   otros: 'Otros',
 }
 
 export function labelCategoria(categoria: string) {
   return CATEGORIA_LABELS[categoria] || categoria
+}
+
+export type Familia = {
+  slug: string
+  nombre: string
+  descripcion: string
+  icono: string
+  categorias: string[]
+}
+
+// Agrupación de más alto nivel que la "categoría" del servicio, pensada
+// para el primer paso de "Nuevo pedido": el distribuidor elige primero
+// el tipo de vehículo y solo entonces ve los servicios de esa familia.
+// Cualquier categoría que no esté listada aquí cae en "coches-motos"
+// por defecto (ver familiaDeCategoria), así nunca desaparece un servicio
+// nuevo por olvido de actualizar este mapa.
+export const FAMILIAS: Familia[] = [
+  {
+    slug: 'coches-motos',
+    nombre: 'Coches / Motos',
+    descripcion: 'Reprogramación, anticontaminación, electrónica y opciones',
+    icono: '🚗',
+    categorias: ['reprogramacion', 'anticontaminacion', 'opciones', 'electronica', 'otros'],
+  },
+  {
+    slug: 'camion-agricola',
+    nombre: 'Camión / Agrícola',
+    descripcion: 'Soluciones para maquinaria pesada y agrícola',
+    icono: '🚜',
+    categorias: ['camion', 'agricola'],
+  },
+  {
+    slug: 'dsg',
+    nombre: 'DSG',
+    descripcion: 'Cambios automáticos y doble embrague',
+    icono: '⚙️',
+    categorias: ['dsg'],
+  },
+]
+
+export function familiaDeCategoria(categoria: string): string {
+  const match = FAMILIAS.find((f) => f.categorias.includes(categoria))
+  return match?.slug || 'coches-motos'
 }
 
 function sortByOrden<T extends { orden?: number | null }>(items: T[]) {

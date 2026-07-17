@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertCircle, Car, FileUp, Gauge, ScanLine, Send, Sparkles, Wrench } from 'lucide-react'
+import { AlertCircle, Car, Cog, FileUp, Gauge, ScanLine, Send, Sparkles, Truck, Wrench } from 'lucide-react'
 import AKPageShell from '@/components/ak/AKPageShell'
 import AKUploader from '@/components/ak/AKUploader'
 import AKCard from '@/components/ak/AKCard'
@@ -13,6 +13,8 @@ import { supabase } from '@/lib/supabase'
 import {
   aplicarReglasPrecios,
   FALLBACK_SERVICIOS,
+  FAMILIAS,
+  familiaDeCategoria,
   getPlanesActivos,
   getReglasPreciosActivas,
   getServiciosActivos,
@@ -26,6 +28,12 @@ import {
 
 const initialVehicle = { marca: '', modelo: '', motor: '', anio: '', cv: '', cambio: '', ecu: '', hw: '', sw: '', lectura: '' }
 type VehicleForm = typeof initialVehicle
+
+const FAMILIA_ICONS: Record<string, any> = {
+  'coches-motos': Car,
+  'camion-agricola': Truck,
+  dsg: Cog,
+}
 
 function serviceToCard(service: ServicioCalculado): AKService {
   const price = typeof service.precio_final === 'number' ? service.precio_final : Number(service.precio || service.creditos || 0)
@@ -47,6 +55,7 @@ export default function NuevoPedidoPage() {
   const [file, setFile] = useState<File | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [selected, setSelected] = useState<string[]>([])
+  const [familia, setFamilia] = useState<string>(FAMILIAS[0].slug)
   const [vehicle, setVehicle] = useState<VehicleForm>(initialVehicle)
   const [observaciones, setObservaciones] = useState('')
   const [servicios, setServicios] = useState<AkCloudServicio[]>(FALLBACK_SERVICIOS)
@@ -141,6 +150,14 @@ export default function NuevoPedidoPage() {
 
   const serviciosCalculados = useMemo(() => aplicarReglasPrecios(servicios, selected, reglas), [servicios, selected, reglas])
   const grupos = useMemo(() => groupServicios(serviciosCalculados), [serviciosCalculados])
+  const gruposFamilia = useMemo(
+    () => Object.entries(grupos).filter(([categoria]) => familiaDeCategoria(categoria) === familia),
+    [grupos, familia],
+  )
+  const selectedFueraDeFamilia = useMemo(
+    () => serviciosCalculados.filter((s) => selected.includes(s.slug) && familiaDeCategoria(s.categoria) !== familia),
+    [serviciosCalculados, selected, familia],
+  )
   const selectedServices = serviciosCalculados.filter((service) => selected.includes(service.slug))
   const total = useMemo(() => selectedServices.reduce((sum, item) => sum + Number(item.precio_final || 0), 0), [selectedServices])
   const totalBase = useMemo(() => selectedServices.reduce((sum, item) => sum + Number(item.precio || item.creditos || 0), 0), [selectedServices])
@@ -298,7 +315,42 @@ export default function NuevoPedidoPage() {
               <div className="rounded-2xl border border-white/10 bg-black/25 p-5 text-sm text-white/45">Cargando configuración desde Core...</div>
             ) : (
               <div className="space-y-6">
-                {Object.entries(grupos).map(([categoria, items]) => (
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {FAMILIAS.map((f) => {
+                    const Icon = FAMILIA_ICONS[f.slug] || Wrench
+                    const activa = familia === f.slug
+                    return (
+                      <button
+                        key={f.slug}
+                        type="button"
+                        onClick={() => setFamilia(f.slug)}
+                        className={`rounded-2xl border p-4 text-left transition ${
+                          activa
+                            ? 'border-red-400/45 bg-red-500/10 shadow-[0_0_30px_rgba(217,4,41,.15)]'
+                            : 'border-white/10 bg-black/20 hover:border-white/25'
+                        }`}
+                      >
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${activa ? 'bg-red-500/15 text-red-300' : 'bg-white/5 text-white/50'}`}>
+                          <Icon size={20} />
+                        </div>
+                        <p className="mt-3 text-sm font-black uppercase">{f.nombre}</p>
+                        <p className="mt-1 text-xs leading-5 text-white/40">{f.descripcion}</p>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {selectedFueraDeFamilia.length > 0 && (
+                  <div className="rounded-2xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
+                    Tienes {selectedFueraDeFamilia.length} servicio{selectedFueraDeFamilia.length > 1 ? 's' : ''} seleccionado{selectedFueraDeFamilia.length > 1 ? 's' : ''} en otra categoría ({selectedFueraDeFamilia.map((s) => s.nombre).join(', ')}) — siguen incluidos en el resumen del pedido.
+                  </div>
+                )}
+
+                {gruposFamilia.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-white/10 p-6 text-center text-sm text-white/40">
+                    Todavía no hay servicios publicados en esta categoría.
+                  </div>
+                ) : gruposFamilia.map(([categoria, items]) => (
                   <div key={categoria}>
                     <h3 className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-white/35">{labelCategoria(categoria)}</h3>
                     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
