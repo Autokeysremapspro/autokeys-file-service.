@@ -75,42 +75,42 @@ export default function AKSidebar() {
     return (
       <Link
         href={href}
-        className={`group flex items-center gap-3 rounded-2xl border px-4 py-3 text-[13px] font-black uppercase tracking-[0.02em] transition ${
+        className={`ak-nav-item group flex items-center gap-3 rounded-[14px] border px-3.5 py-2.5 text-[12px] font-black uppercase tracking-[0.045em] transition duration-200 ${
           active
-            ? 'border-red-500/45 bg-gradient-to-r from-red-700 to-red-600/50 text-white shadow-[0_0_45px_rgba(217,4,41,.28)]'
-            : 'border-transparent text-white/58 hover:border-white/10 hover:bg-white/[0.045] hover:text-white'
+            ? 'ak-nav-active border-red-400/20 bg-gradient-to-r from-red-500/[.14] to-transparent text-white shadow-[inset_0_1px_0_rgba(255,255,255,.035)]'
+            : 'border-transparent text-white/48 hover:border-white/[.07] hover:bg-white/[.035] hover:text-white'
         }`}
       >
-        <Icon size={18} className={active ? 'text-white' : 'text-white/35 group-hover:text-red-400'} />
-        {label}
+        <span className={`relative z-10 grid h-8 w-8 place-items-center rounded-[10px] border transition ${active ? 'border-red-400/20 bg-red-500/10 text-red-300' : 'border-white/[.055] bg-white/[.02] text-white/32 group-hover:border-white/[.1] group-hover:text-white/70'}`}><Icon size={16} /></span>
+        <span className="relative z-10">{label}</span>
       </Link>
     )
   }
 
   return (
-    <aside className="hidden h-screen w-[282px] shrink-0 overflow-hidden border-r border-white/10 bg-[linear-gradient(180deg,rgba(10,10,12,.98),rgba(0,0,0,.96))] lg:sticky lg:top-0 lg:flex lg:flex-col">
+    <aside className="ak-sidebar-premium hidden h-screen w-[270px] shrink-0 overflow-hidden border-r border-white/[.065] lg:sticky lg:top-0 lg:flex lg:flex-col">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_8%,rgba(217,4,41,.32),transparent_28%),radial-gradient(circle_at_100%_40%,rgba(255,255,255,.08),transparent_24%)]" />
-      <div className="relative flex h-full flex-col p-6">
-        <Link href="/dashboard" className="mb-7 block">
+      <div className="relative flex h-full flex-col px-4 pb-4 pt-5">
+        <Link href="/dashboard" className="mb-6 block rounded-[18px] border border-white/[.06] bg-white/[.02] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,.03)] transition hover:border-white/[.11] hover:bg-white/[.035]">
           <Image
             src="/images/brand/autokeys-logo-wide-transparent.webp"
             alt="Autokeys"
             width={220}
             height={56}
-            className="h-auto w-full max-w-[200px]"
+            className="h-auto w-full max-w-[176px]"
             priority
           />
-          <div className="mt-2 text-[10px] font-black uppercase tracking-[0.38em] text-white/35">AK Cloud · File Service</div>
+          <div className="mt-2 flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.28em] text-white/30"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,.9)]" />AK Cloud · Online</div>
         </Link>
 
-        <nav className="space-y-2">
+        <nav className="space-y-1.5">
           {clientItems.map((item) => <NavLink key={item.href} {...item} />)}
         </nav>
 
         {isStaff && (
           <>
-            <div className="my-5 h-px bg-white/10" />
-            <div className="mb-2 px-4 text-[10px] font-black uppercase tracking-[0.25em] text-white/25">Autokeys interno</div>
+            <div className="my-4 h-px bg-gradient-to-r from-transparent via-white/[.08] to-transparent" />
+            <div className="mb-2 px-3 text-[9px] font-black uppercase tracking-[0.24em] text-white/22">Autokeys interno</div>
             <nav className="space-y-2">
               {adminItems.map((item) => <NavLink key={item.href} {...item} />)}
             </nav>
@@ -118,13 +118,13 @@ export default function AKSidebar() {
         )}
 
         <div className="mt-auto space-y-4">
-          <div className="rounded-[1.6rem] border border-red-500/25 bg-red-500/10 p-4">
+          <div className="rounded-[18px] border border-white/[.07] bg-gradient-to-br from-red-500/[.09] to-white/[.018] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,.035)]">
             <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-red-300">
               <Headphones size={15} /> Soporte PRO
             </div>
-            <p className="mt-2 text-sm leading-5 text-white/45">Pedidos, archivos y créditos conectados con Autokeys Core.</p>
+            <p className="mt-2 text-[12px] leading-5 text-white/38">Pedidos, archivos y créditos conectados con Autokeys Core.</p>
           </div>
-          <button onClick={logout} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-black text-white/65 hover:bg-white/[0.08] hover:text-white">
+          <button onClick={logout} className="flex w-full items-center justify-center gap-2 rounded-[14px] border border-white/[.07] bg-white/[.025] px-4 py-2.5 text-[12px] font-black text-white/45 transition hover:border-white/[.13] hover:bg-white/[.055] hover:text-white">
             <LogOut size={17} /> Cerrar sesión
           </button>
         </div>

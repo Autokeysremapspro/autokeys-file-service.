@@ -50,7 +50,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#030303] text-white">
+    <main className="ak-noise relative min-h-screen overflow-hidden bg-[#030303] text-white">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_35%_45%,rgba(220,0,32,.18),transparent_34%),radial-gradient(circle_at_80%_50%,rgba(255,255,255,.05),transparent_28%)]" />
       <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.06)_1px,transparent_1px)] [background-size:90px_90px]" />
 
@@ -70,7 +70,7 @@ export default function LoginPage() {
 
           <form
             onSubmit={login}
-            className="relative w-full max-w-[520px] rounded-[34px] border border-white/15 bg-[#090b0f]/88 p-6 shadow-[0_40px_130px_rgba(0,0,0,.78),0_0_90px_rgba(220,0,32,.16)] backdrop-blur-2xl sm:p-9 xl:p-11"
+            className="relative w-full max-w-[520px] overflow-hidden rounded-[30px] border border-white/[.11] bg-[#090b0f]/90 p-6 shadow-[0_50px_160px_rgba(0,0,0,.82),0_0_110px_rgba(220,0,32,.13),inset_0_1px_0_rgba(255,255,255,.06)] backdrop-blur-2xl sm:p-9 xl:p-11"
           >
             <div className="pointer-events-none absolute inset-0 rounded-[34px] bg-[radial-gradient(circle_at_18%_0%,rgba(220,0,32,.18),transparent_33%),linear-gradient(180deg,rgba(255,255,255,.065),transparent_42%)]" />
             <div className="pointer-events-none absolute -right-px top-20 h-72 w-px bg-gradient-to-b from-transparent via-red-500/60 to-transparent" />
@@ -85,7 +85,7 @@ export default function LoginPage() {
               </div>
 
               <div className="text-center">
-                <h1 className="text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl">
+                <h1 className="ak-premium-heading text-4xl font-black tracking-[-0.055em] sm:text-5xl">
                   Bienvenido <span className="text-red-500">de nuevo</span>
                 </h1>
                 <p className="mt-4 text-sm text-zinc-400 sm:text-base">Acceso para distribuidores y administración.</p>
@@ -94,7 +94,7 @@ export default function LoginPage() {
               <div className="mt-9 space-y-5">
                 <label className="block">
                   <span className="mb-2 block text-xs font-black uppercase tracking-[0.28em] text-zinc-500">Usuario / Email</span>
-                  <div className="group flex h-16 items-center overflow-hidden rounded-xl border border-white/15 bg-black/25 transition focus-within:border-red-500/60 focus-within:shadow-[0_0_40px_rgba(239,68,68,.12)]">
+                  <div className="group flex h-16 items-center overflow-hidden rounded-[15px] border border-white/[.09] bg-white/[.025] shadow-[inset_0_1px_0_rgba(255,255,255,.025)] transition hover:border-white/[.14] focus-within:border-red-500/60 focus-within:shadow-[0_0_40px_rgba(239,68,68,.12)]">
                     <div className="grid h-full w-16 place-items-center border-r border-white/10 text-zinc-500 group-focus-within:text-red-400">
                       <User size={22} />
                     </div>
@@ -111,7 +111,7 @@ export default function LoginPage() {
 
                 <label className="block">
                   <span className="mb-2 block text-xs font-black uppercase tracking-[0.28em] text-zinc-500">Contraseña</span>
-                  <div className="group flex h-16 items-center overflow-hidden rounded-xl border border-white/15 bg-black/25 transition focus-within:border-red-500/60 focus-within:shadow-[0_0_40px_rgba(239,68,68,.12)]">
+                  <div className="group flex h-16 items-center overflow-hidden rounded-[15px] border border-white/[.09] bg-white/[.025] shadow-[inset_0_1px_0_rgba(255,255,255,.025)] transition hover:border-white/[.14] focus-within:border-red-500/60 focus-within:shadow-[0_0_40px_rgba(239,68,68,.12)]">
                     <div className="grid h-full w-16 place-items-center border-r border-white/10 text-zinc-500 group-focus-within:text-red-400">
                       <Lock size={22} />
                     </div>
@@ -151,7 +151,7 @@ export default function LoginPage() {
               <button
                 disabled={loading}
                 type="submit"
-                className="mt-8 flex h-16 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-[#d90429] to-[#ff303d] text-base font-black uppercase tracking-wide text-white shadow-[0_20px_60px_rgba(217,4,41,.30)] transition hover:scale-[1.01] hover:shadow-[0_28px_80px_rgba(217,4,41,.42)] disabled:cursor-not-allowed disabled:opacity-70"
+                className="mt-8 flex h-16 w-full items-center justify-center gap-3 rounded-[15px] border border-red-400/25 bg-gradient-to-r from-[#b80725] to-[#f42647] text-base font-black uppercase tracking-wide text-white shadow-[0_20px_60px_rgba(217,4,41,.30)] transition hover:scale-[1.01] hover:shadow-[0_28px_80px_rgba(217,4,41,.42)] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loading ? 'Accediendo...' : 'Acceder al portal'}
                 <ArrowRight size={22} />

@@ -76,38 +76,38 @@ export default function HomePage() {
         <div className="absolute left-[-18rem] top-[20rem] h-[34rem] w-[34rem] rounded-full bg-red-700/20 blur-[150px]" />
       </div>
 
-      <header className="relative z-30 border-b border-white/[0.07] bg-black/45 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-[1500px] items-center justify-between px-5 py-4 lg:px-8">
+      <header className="sticky top-0 z-50 border-b border-white/[0.065] bg-[#050608]/75 shadow-[0_12px_45px_rgba(0,0,0,.24)] backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-[1540px] items-center justify-between px-5 py-3.5 lg:px-8">
           <Link href="/" className="group flex items-center gap-3">
-            <img src="/images/brand/autokeys-logo-small-transparent.webp" alt="Autokeys" className="h-11 w-auto object-contain transition group-hover:scale-[1.03]" />
+            <img src="/images/brand/autokeys-logo-small-transparent.webp" alt="Autokeys" className="h-10 w-auto object-contain transition duration-300 group-hover:scale-[1.035]" />
             <div className="hidden border-l border-white/10 pl-3 sm:block">
               <div className="text-sm font-black tracking-[.16em]">AK <span className="text-red-500">CLOUD</span></div>
               <div className="mt-0.5 text-[9px] font-bold uppercase tracking-[.28em] text-zinc-600">Professional workspace</div>
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-8 text-xs font-black uppercase tracking-[.12em] text-zinc-500 lg:flex">
-            <a href="#plataforma" className="transition hover:text-white">Plataforma</a>
-            <a href="#deteccion" className="transition hover:text-white">Detección ECU</a>
-            <a href="#servicios" className="transition hover:text-white">Servicios</a>
-            <a href="#flujo" className="transition hover:text-white">Cómo funciona</a>
-            <a href="#ventajas" className="transition hover:text-white">Ventajas</a>
+          <nav className="hidden items-center gap-1 rounded-full border border-white/[.055] bg-white/[.018] p-1 text-[10px] font-black uppercase tracking-[.13em] text-zinc-500 lg:flex">
+            <a href="#plataforma" className="rounded-full px-4 py-2.5 transition hover:bg-white/[.045] hover:text-white">Plataforma</a>
+            <a href="#deteccion" className="rounded-full px-4 py-2.5 transition hover:bg-white/[.045] hover:text-white">Detección ECU</a>
+            <a href="#servicios" className="rounded-full px-4 py-2.5 transition hover:bg-white/[.045] hover:text-white">Servicios</a>
+            <a href="#flujo" className="rounded-full px-4 py-2.5 transition hover:bg-white/[.045] hover:text-white">Cómo funciona</a>
+            <a href="#ventajas" className="rounded-full px-4 py-2.5 transition hover:bg-white/[.045] hover:text-white">Ventajas</a>
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link href="/login" className="rounded-xl border border-white/10 bg-white/[0.035] px-4 py-2.5 text-xs font-black uppercase tracking-wide text-zinc-200 transition hover:border-white/20 hover:bg-white/[0.07]">
+            <Link href="/login" className="rounded-[13px] border border-white/[.08] bg-white/[.025] px-4 py-2.5 text-[11px] font-black uppercase tracking-wide text-zinc-200 shadow-[inset_0_1px_0_rgba(255,255,255,.035)] transition hover:-translate-y-0.5 hover:border-white/[.16] hover:bg-white/[.06]">
               Acceder
             </Link>
-            <Link href="/register" className="hidden items-center gap-2 rounded-xl bg-gradient-to-r from-red-700 to-red-500 px-4 py-2.5 text-xs font-black uppercase tracking-wide shadow-[0_14px_40px_rgba(185,28,28,.35)] transition hover:scale-[1.02] sm:inline-flex">
+            <Link href="/register" className="group relative hidden items-center gap-2 overflow-hidden rounded-[13px] border border-red-400/25 bg-gradient-to-r from-[#b80725] to-[#ef2444] px-4 py-2.5 text-[11px] font-black uppercase tracking-wide shadow-[0_14px_40px_rgba(185,28,28,.27),inset_0_1px_0_rgba(255,255,255,.18)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_52px_rgba(185,28,28,.38)] sm:inline-flex">
               Solicitar acceso <ArrowRight size={15} />
             </Link>
           </div>
         </div>
       </header>
 
-      <section id="plataforma" className="relative z-10 min-h-[calc(100vh-78px)] overflow-hidden border-b border-white/[0.07]">
-        <div className="absolute inset-0 bg-[url('/images/ak-login-racing.png')] bg-cover bg-center lg:bg-[center_top]" />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,.97)_0%,rgba(0,0,0,.9)_34%,rgba(0,0,0,.44)_66%,rgba(0,0,0,.82)_100%)]" />
+      <section id="plataforma" className="relative z-10 min-h-[calc(100vh-70px)] overflow-hidden border-b border-white/[0.065]">
+        <div className="absolute inset-0 scale-[1.025] bg-[url('/images/ak-login-racing.png')] bg-cover bg-center opacity-90 lg:bg-[center_top]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,3,4,.985)_0%,rgba(2,3,4,.92)_36%,rgba(2,3,4,.48)_66%,rgba(2,3,4,.86)_100%)]" />
         <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#020304] to-transparent" />
 
         <div className="relative mx-auto grid min-h-[calc(100vh-78px)] max-w-[1500px] items-center gap-10 px-5 py-16 lg:grid-cols-[.9fr_1.1fr] lg:px-8">
@@ -116,9 +116,9 @@ export default function HomePage() {
               <Sparkles size={15} /> Ecosistema profesional para distribuidores
             </div>
 
-            <h1 className="text-5xl font-black uppercase leading-[.91] tracking-[-.045em] sm:text-6xl lg:text-[5.7rem]">
+            <h1 className="ak-premium-heading text-5xl font-black leading-[.94] tracking-[-.055em] sm:text-6xl lg:text-[5.75rem]">
               No vendemos archivos.
-              <span className="mt-2 block bg-gradient-to-r from-red-600 via-red-400 to-white bg-clip-text text-transparent">Entregamos soluciones.</span>
+              <span className="mt-2 block bg-gradient-to-r from-[#ff2448] via-[#ff6a7f] to-white bg-clip-text text-transparent drop-shadow-[0_0_36px_rgba(217,4,41,.2)]">Entregamos soluciones.</span>
             </h1>
 
             <p className="mt-7 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
@@ -138,7 +138,7 @@ export default function HomePage() {
               {highlights.map((item) => {
                 const Icon = item.icon
                 return (
-                  <div key={item.title} className="rounded-2xl border border-white/10 bg-black/50 p-4 backdrop-blur-xl transition hover:border-red-500/35 hover:bg-black/65">
+                  <div key={item.title} className="ak-card-hover rounded-[18px] border border-white/[.075] bg-black/40 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,.035)] backdrop-blur-xl">
                     <Icon size={20} className="mb-3 text-red-500" />
                     <div className="text-xs font-black uppercase tracking-wide">{item.title}</div>
                     <div className="mt-1 text-xs leading-5 text-zinc-600">{item.text}</div>
@@ -151,7 +151,7 @@ export default function HomePage() {
           <div className="hidden justify-end lg:flex">
             <div className="relative w-full max-w-[610px]">
               <div className="absolute -inset-10 rounded-full bg-red-700/15 blur-[90px]" />
-              <div className="relative overflow-hidden rounded-[2rem] border border-white/12 bg-[#080a0e]/88 p-4 shadow-[0_45px_120px_rgba(0,0,0,.65)] backdrop-blur-2xl">
+              <div className="ak-float relative overflow-hidden rounded-[28px] border border-white/[.1] bg-[#080a0e]/88 p-4 shadow-[0_55px_150px_rgba(0,0,0,.72),0_0_0_1px_rgba(255,255,255,.025)] backdrop-blur-2xl">
                 <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
                   <div className="flex items-center gap-3">
                     <div className="grid h-9 w-9 place-items-center rounded-xl bg-red-600/15 text-red-400"><CloudUpload size={19} /></div>
@@ -210,7 +210,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="deteccion" className="relative z-10 mx-auto max-w-[1500px] px-5 py-24 lg:px-8">
+      <section id="deteccion" className="ak-landing-section relative z-10 mx-auto max-w-[1500px] px-5 py-24 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[1fr_.85fr] lg:items-center">
           <div>
             <div className="text-xs font-black uppercase tracking-[.28em] text-red-500">AK Detection Engine</div>
@@ -276,7 +276,7 @@ export default function HomePage() {
         @media (prefers-reduced-motion: reduce) { .ak-scan-screen::after, .ak-scan-line, .ak-scan-status { animation: none; opacity: 1; } }
       `}</style>
 
-      <section id="servicios" className="relative z-10 mx-auto max-w-[1500px] px-5 py-24 lg:px-8">
+      <section id="servicios" className="ak-landing-section relative z-10 mx-auto max-w-[1500px] px-5 py-24 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <div className="text-xs font-black uppercase tracking-[.28em] text-red-500">Servicios técnicos</div>
           <h2 className="mt-4 text-4xl font-black uppercase tracking-[-.035em] sm:text-5xl">Todo tu trabajo, dentro de un único ecosistema.</h2>
@@ -325,7 +325,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="ventajas" className="relative z-10 mx-auto max-w-[1500px] px-5 py-24 lg:px-8">
+      <section id="ventajas" className="ak-landing-section relative z-10 mx-auto max-w-[1500px] px-5 py-24 lg:px-8">
         <div className="grid gap-4 lg:grid-cols-4">
           {benefits.map((benefit) => {
             const Icon = benefit.icon
@@ -378,7 +378,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="relative z-10 border-t border-white/[0.07] bg-black/45">
+      <footer className="ak-landing-section relative z-10 border-t border-white/[0.07] bg-black/45">
         <div className="mx-auto flex max-w-[1500px] flex-col gap-6 px-5 py-8 text-sm text-zinc-600 sm:flex-row sm:items-center sm:justify-between lg:px-8">
           <div className="flex items-center gap-3">
             <img src="/images/brand/autokeys-logo-small-transparent.webp" alt="Autokeys" className="h-8 w-auto object-contain opacity-80" />
