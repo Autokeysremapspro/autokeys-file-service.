@@ -11,19 +11,17 @@ import AKServiceCard, { type AKService } from '@/components/ak/AKServiceCard'
 import { crearPedidoFileService } from '@/lib/services/pedidos'
 import { supabase } from '@/lib/supabase'
 import {
-  aplicarReglasPrecios,
   FALLBACK_SERVICIOS,
   FAMILIAS,
   familiaDeCategoria,
-  getPlanesActivos,
-  getReglasPreciosActivas,
+  getPlanServiciosDe,
   getServiciosActivos,
   groupServicios,
   labelCategoria,
-  type AkCloudPlan,
-  type AkCloudReglaPrecio,
+  aplicarPrecioReal,
   type AkCloudServicio,
-  type ServicioCalculado,
+  type PlanServicioOverride,
+  type ServicioConPrecioReal,
 } from '@/lib/services/akCloudConfig'
 
 const initialVehicle = { marca: '', modelo: '', motor: '', anio: '', cv: '', cambio: '', ecu: '', hw: '', sw: '', lectura: '' }
@@ -35,15 +33,14 @@ const FAMILIA_ICONS: Record<string, any> = {
   dsg: Cog,
 }
 
-function serviceToCard(service: ServicioCalculado): AKService {
-  const price = typeof service.precio_final === 'number' ? service.precio_final : Number(service.precio || service.creditos || 0)
+function serviceToCard(service: ServicioConPrecioReal): AKService {
   return {
     id: service.slug,
     name: service.nombre,
-    description: service.incluido_por
-      ? `${service.descripcion || ''} Incluido por pack: ${service.incluido_por}.`
+    description: service.incluido_en_plan
+      ? `${service.descripcion || ''} Incluido en tu plan.`
       : service.descripcion || 'Servicio configurable desde Autokeys Core.',
-    price,
+    price: service.precio_final,
     icon: service.icono || '⚙️',
     compatible: service.activo !== false,
     category: service.categoria,
@@ -59,8 +56,8 @@ export default function NuevoPedidoPage() {
   const [vehicle, setVehicle] = useState<VehicleForm>(initialVehicle)
   const [observaciones, setObservaciones] = useState('')
   const [servicios, setServicios] = useState<AkCloudServicio[]>(FALLBACK_SERVICIOS)
-  const [reglas, setReglas] = useState<AkCloudReglaPrecio[]>([])
-  const [planGrupos, setPlanGrupos] = useState<string[]>([])
+  const [planServiciosMap, setPlanServiciosMap] = useState<Map<string, PlanServicioOverride>>(new Map())
+  const [planNombre, setPlanNombre] = useState<string | null>(null)
   const [loadingConfig, setLoadingConfig] = useState(true)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -84,16 +81,26 @@ export default function NuevoPedidoPage() {
     async function loadConfig() {
       setLoadingConfig(true)
       try {
-        const [serviciosData, reglasData] = await Promise.all([getServiciosActivos(), getReglasPreciosActivas()])
+        const [serviciosData, authData] = await Promise.all([getServiciosActivos(), supabase.auth.getUser()])
         setServicios(serviciosData)
-        setReglas(reglasData)
 
-        const { data: authData } = await supabase.auth.getUser()
-        const planSlug = authData.user?.user_metadata?.plan_slug || authData.user?.user_metadata?.plan
-        if (planSlug) {
-          const planes = await getPlanesActivos()
-          const plan = planes.find((p: AkCloudPlan) => p.slug === planSlug)
-          setPlanGrupos(plan?.grupos_incluidos || [])
+        const userId = authData.data.user?.id
+        if (userId) {
+          const { data: dist } = await supabase
+            .from('akcloud_distribuidores')
+            .select('plan_id, plan_expira_at, akcloud_planes(nombre)')
+            .eq('auth_user_id', userId)
+            .maybeSingle()
+
+          const caducado = Boolean(dist?.plan_expira_at && new Date(dist.plan_expira_at).getTime() < Date.now())
+          const planIdEfectivo = caducado ? null : (dist as any)?.plan_id || null
+          setPlanNombre(planIdEfectivo ? (dist as any)?.akcloud_planes?.nombre || 'tu plan' : null)
+
+          if (planIdEfectivo) {
+            const overrides = await getPlanServiciosDe(planIdEfectivo)
+            const map = new Map(overrides.filter((o) => o.incluido).map((o) => [o.servicio_id, o]))
+            setPlanServiciosMap(map)
+          }
         }
       } finally {
         setLoadingConfig(false)
@@ -148,20 +155,20 @@ export default function NuevoPedidoPage() {
     setSelected((current) => current.includes(slug) ? current.filter((x) => x !== slug) : [...current, slug])
   }
 
-  const serviciosCalculados = useMemo(() => aplicarReglasPrecios(servicios, selected, reglas), [servicios, selected, reglas])
-  const grupos = useMemo(() => groupServicios(serviciosCalculados), [serviciosCalculados])
+  const serviciosConPrecioReal = useMemo(() => aplicarPrecioReal(servicios, planServiciosMap), [servicios, planServiciosMap])
+  const grupos = useMemo(() => groupServicios(serviciosConPrecioReal), [serviciosConPrecioReal])
   const gruposFamilia = useMemo(
     () => Object.entries(grupos).filter(([categoria]) => familiaDeCategoria(categoria) === familia),
     [grupos, familia],
   )
   const selectedFueraDeFamilia = useMemo(
-    () => serviciosCalculados.filter((s) => selected.includes(s.slug) && familiaDeCategoria(s.categoria) !== familia),
-    [serviciosCalculados, selected, familia],
+    () => serviciosConPrecioReal.filter((s) => selected.includes(s.slug) && familiaDeCategoria(s.categoria) !== familia),
+    [serviciosConPrecioReal, selected, familia],
   )
-  const selectedServices = serviciosCalculados.filter((service) => selected.includes(service.slug))
+  const selectedServices = serviciosConPrecioReal.filter((service) => selected.includes(service.slug))
   const total = useMemo(() => selectedServices.reduce((sum, item) => sum + Number(item.precio_final || 0), 0), [selectedServices])
-  const totalBase = useMemo(() => selectedServices.reduce((sum, item) => sum + Number(item.precio || item.creditos || 0), 0), [selectedServices])
-  const ahorro = Math.max(0, totalBase - total)
+  const totalCatalogo = useMemo(() => selectedServices.reduce((sum, item) => sum + Number(item.precio || item.creditos || 0), 0), [selectedServices])
+  const ahorroPlan = Math.max(0, totalCatalogo - total)
 
   async function enviarPedido() {
     if (!file) return setError('Sube primero el archivo ORI.')
@@ -308,7 +315,7 @@ export default function NuevoPedidoPage() {
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-500/25 bg-red-500/10 text-red-300"><Wrench size={24} /></div>
               <div>
                 <h2 className="text-2xl font-black">Servicios</h2>
-                <p className="text-sm text-white/40">Servicios, precios y reglas de packs se actualizan desde Autokeys Core.</p>
+                <p className="text-sm text-white/40">Servicios y precios se actualizan desde Autokeys Core — lo que ves aquí es lo que se cobra.</p>
               </div>
             </div>
             {loadingConfig ? (
@@ -357,8 +364,10 @@ export default function NuevoPedidoPage() {
                       {items.map((service) => (
                         <div key={service.slug} className="relative">
                           <AKServiceCard service={serviceToCard(service)} selected={selected.includes(service.slug)} onToggle={() => toggle(service.slug)} />
-                          {service.incluido_por && selected.includes(service.slug) && (
-                            <div className="mt-2 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-300">Incluido: {service.incluido_por}</div>
+                          {service.incluido_en_plan && (
+                            <div className="mt-2 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-300">
+                              ✅ Incluido en {planNombre || 'tu plan'}
+                            </div>
                           )}
                         </div>
                       ))}
@@ -380,22 +389,18 @@ export default function NuevoPedidoPage() {
               <SummaryRow label="ECU" value={vehicle.ecu || 'Pendiente'} />
             </div>
             <div className="mt-5 space-y-2">
-              {selectedServices.length === 0 ? <p className="text-sm text-white/35">Sin servicios seleccionados.</p> : selectedServices.map((service) => {
-                const fueraDePlan = planGrupos.length > 0 && service.grupo_facturacion && !planGrupos.includes(service.grupo_facturacion)
-                return (
-                  <div key={service.slug} className="flex items-center justify-between rounded-2xl bg-black/25 px-4 py-3 text-sm">
-                    <div>
-                      <span>{service.icono || '⚙️'} {service.nombre}</span>
-                      {service.incluido_por && <div className="text-xs text-emerald-300">Incluido por pack</div>}
-                      {fueraDePlan && <div className="text-xs text-amber-300">Fuera de tu plan — precio completo</div>}
-                    </div>
-                    <strong className={service.precio_final === 0 ? 'text-emerald-300' : 'text-white'}>{service.precio_final === 0 ? '0 €' : `${Number(service.precio_final).toFixed(2)} €`}</strong>
+              {selectedServices.length === 0 ? <p className="text-sm text-white/35">Sin servicios seleccionados.</p> : selectedServices.map((service) => (
+                <div key={service.slug} className="flex items-center justify-between rounded-2xl bg-black/25 px-4 py-3 text-sm">
+                  <div>
+                    <span>{service.icono || '⚙️'} {service.nombre}</span>
+                    {service.incluido_en_plan && <div className="text-xs text-emerald-300">Incluido en {planNombre || 'tu plan'}</div>}
                   </div>
-                )
-              })}
+                  <strong className={service.precio_final === 0 ? 'text-emerald-300' : 'text-white'}>{service.precio_final === 0 ? '0 €' : `${Number(service.precio_final).toFixed(2)} €`}</strong>
+                </div>
+              ))}
             </div>
             <div className="mt-5 rounded-[1.6rem] border border-red-500/20 bg-red-500/10 p-4">
-              {ahorro > 0 && <div className="mb-2 flex justify-between text-sm text-emerald-300"><span>Ahorro pack</span><strong>-{ahorro} €</strong></div>}
+              {ahorroPlan > 0 && <div className="mb-2 flex justify-between text-sm text-emerald-300"><span>Incluido en tu plan</span><strong>-{ahorroPlan.toFixed(2)} €</strong></div>}
               <div className="flex items-center justify-between">
                 <span className="text-sm text-white/45">Total</span>
                 <strong className="text-4xl font-black text-white">{total.toFixed(2)} €</strong>

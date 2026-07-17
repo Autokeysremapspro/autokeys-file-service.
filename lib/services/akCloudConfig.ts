@@ -25,8 +25,6 @@ export type AkCloudPlan = {
   destacado?: boolean | null
   activo?: boolean | null
   orden?: number | null
-  grupos_incluidos?: string[] | null
-  descuento_plan_pct?: number | null
   duracion_dias?: number | null
   limite_diario_pedidos?: number | null
 }
@@ -42,23 +40,42 @@ export type AkCloudMetodoPago = {
   orden?: number | null
 }
 
-export type AkCloudReglaPrecio = {
-  id?: string
-  nombre: string
-  servicio_principal_slug: string
-  servicios_gratis: string[]
-  descuentos: Record<string, any>
-  solo_planes?: string[] | null
-  activo?: boolean | null
-  orden?: number | null
-  nota?: string | null
+export type PlanServicioOverride = {
+  servicio_id: string
+  incluido: boolean
+  precio_override: number | null
 }
 
-export type ServicioCalculado = AkCloudServicio & {
+// Precio REAL de un pedido: se basa únicamente en "Servicios por plan"
+// (akcloud_plan_servicios), que es lo mismo que usa /api/pedidos/crear
+// en el servidor para cobrar. Así lo que ve el distribuidor en pantalla
+// coincide siempre con lo que se le cobra.
+export async function getPlanServiciosDe(planId: string): Promise<PlanServicioOverride[]> {
+  const { data, error } = await supabase
+    .from('akcloud_plan_servicios')
+    .select('servicio_id, incluido, precio_override')
+    .eq('plan_id', planId)
+
+  if (error || !data) return []
+  return data as PlanServicioOverride[]
+}
+
+export type ServicioConPrecioReal = AkCloudServicio & {
   precio_final: number
-  creditos_final: number
-  incluido_por?: string | null
-  descuento_porcentaje?: number | null
+  incluido_en_plan: boolean
+}
+
+export function aplicarPrecioReal(
+  servicios: AkCloudServicio[],
+  planServiciosMap: Map<string, PlanServicioOverride>,
+): ServicioConPrecioReal[] {
+  return servicios.map((servicio) => {
+    const override = servicio.id ? planServiciosMap.get(servicio.id) : undefined
+    if (override?.incluido) {
+      return { ...servicio, precio_final: Number(override.precio_override ?? 0), incluido_en_plan: true }
+    }
+    return { ...servicio, precio_final: Number(servicio.precio ?? servicio.creditos ?? 0), incluido_en_plan: false }
+  })
 }
 
 export const FALLBACK_SERVICIOS: AkCloudServicio[] = [
@@ -72,6 +89,9 @@ export const FALLBACK_SERVICIOS: AkCloudServicio[] = [
   { nombre: 'Pops & Bangs', slug: 'pops-bangs', categoria: 'Opciones racing', descripcion: 'Configuración de petardeo bajo solicitud.', precio: 30, creditos: 30, icono: '💥', orden: 80 },
   { nombre: 'Hardcut', slug: 'hardcut', categoria: 'Opciones racing', descripcion: 'Limitador tipo hardcut según configuración solicitada.', precio: 25, creditos: 25, icono: '🍿', orden: 90 },
   { nombre: 'Launch Control', slug: 'launch-control', categoria: 'Opciones racing', descripcion: 'Salida asistida bajo configuración técnica.', precio: 30, creditos: 30, icono: '🏁', orden: 100 },
+  { nombre: 'Reset adaptaciones DSG', slug: 'dsg-reset', categoria: 'dsg', descripcion: 'Reset de adaptaciones de caja DSG bajo solicitud.', precio: 40, creditos: 40, icono: '⚙️', orden: 110 },
+  { nombre: 'Reprogramación Agrícola', slug: 'agricola-reprog', categoria: 'agricola', descripcion: 'Optimización para maquinaria agrícola bajo solicitud.', precio: 80, creditos: 80, icono: '🚜', orden: 120 },
+  { nombre: 'Reprogramación Camión', slug: 'camion-reprog', categoria: 'camion', descripcion: 'Optimización para vehículo pesado bajo solicitud.', precio: 90, creditos: 90, icono: '🚛', orden: 130 },
 ]
 
 export const FALLBACK_PLANES: AkCloudPlan[] = [
@@ -213,70 +233,6 @@ export async function getNovedadesActivas(): Promise<AkCloudNovedad[]> {
 
   if (error || !data) return []
   return data as AkCloudNovedad[]
-}
-
-export async function getReglasPreciosActivas(): Promise<AkCloudReglaPrecio[]> {
-  const { data, error } = await supabase
-    .from('akcloud_reglas_precios')
-    .select('*')
-    .eq('activo', true)
-    .order('orden', { ascending: true })
-
-  if (error || !data?.length) return []
-  return data.map((item: any) => ({
-    ...item,
-    servicios_gratis: Array.isArray(item.servicios_gratis) ? item.servicios_gratis : [],
-    descuentos: item.descuentos && typeof item.descuentos === 'object' ? item.descuentos : {},
-  }))
-}
-
-function readDiscountPercent(rule: AkCloudReglaPrecio, slug: string) {
-  const value = rule.descuentos?.[slug]
-  if (typeof value === 'number') return value
-  if (typeof value === 'string') return Number(value) || 0
-  if (value && typeof value === 'object') return Number(value.porcentaje || value.percent || value.descuento || 0) || 0
-  return 0
-}
-
-export function aplicarReglasPrecios(servicios: AkCloudServicio[], selectedSlugs: string[], reglas: AkCloudReglaPrecio[]): ServicioCalculado[] {
-  const selectedSet = new Set(selectedSlugs)
-
-  return servicios.map((servicio) => {
-    let precioFinal = Number(servicio.precio || servicio.creditos || 0)
-    let creditosFinal = Number(servicio.creditos || servicio.precio || 0)
-    let incluidoPor: string | null = null
-    let descuentoPorcentaje: number | null = null
-
-    for (const regla of reglas) {
-      if (!selectedSet.has(regla.servicio_principal_slug)) continue
-      if (regla.servicio_principal_slug === servicio.slug) continue
-
-      if (regla.servicios_gratis.includes(servicio.slug)) {
-        precioFinal = 0
-        creditosFinal = 0
-        incluidoPor = regla.nombre
-        descuentoPorcentaje = 100
-        break
-      }
-
-      const percent = readDiscountPercent(regla, servicio.slug)
-      if (percent > 0) {
-        const discount = Math.min(percent, 100)
-        precioFinal = Math.max(0, Math.round(precioFinal * (1 - discount / 100) * 100) / 100)
-        creditosFinal = Math.max(0, Math.round(creditosFinal * (1 - discount / 100)))
-        incluidoPor = regla.nombre
-        descuentoPorcentaje = discount
-      }
-    }
-
-    return {
-      ...servicio,
-      precio_final: precioFinal,
-      creditos_final: creditosFinal,
-      incluido_por: incluidoPor,
-      descuento_porcentaje: descuentoPorcentaje,
-    }
-  })
 }
 
 export function groupServicios<T extends AkCloudServicio>(servicios: T[]) {

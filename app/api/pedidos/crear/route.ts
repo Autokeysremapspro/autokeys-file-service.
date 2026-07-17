@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createPayPalOrderForPedido } from '@/lib/paypal'
-import { aplicarReglasPrecios, FALLBACK_SERVICIOS, type AkCloudServicio, type AkCloudReglaPrecio } from '@/lib/services/akCloudConfig'
+import { FALLBACK_SERVICIOS, type AkCloudServicio } from '@/lib/services/akCloudConfig'
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -51,15 +51,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Añade marca y modelo del vehículo' }, { status: 400 })
     }
 
-    const [{ data: serviciosData }, { data: reglasData }] = await Promise.all([
-      admin.from('akcloud_servicios').select('*').eq('activo', true),
-      admin.from('akcloud_reglas_precios').select('*').eq('activo', true),
-    ])
+    const { data: serviciosData } = await admin.from('akcloud_servicios').select('*').eq('activo', true)
     const servicios = (serviciosData && serviciosData.length ? serviciosData : FALLBACK_SERVICIOS) as AkCloudServicio[]
-    const reglas = (reglasData || []) as AkCloudReglaPrecio[]
 
-    const calculados = aplicarReglasPrecios(servicios, serviciosSlugs, reglas)
-    const seleccionados = calculados.filter((s) => serviciosSlugs.includes(s.slug))
+    const seleccionados = servicios.filter((s) => serviciosSlugs.includes(s.slug))
 
     if (seleccionados.length !== serviciosSlugs.length) {
       return NextResponse.json({ error: 'Alguno de los servicios seleccionados no existe o no está activo' }, { status: 400 })
