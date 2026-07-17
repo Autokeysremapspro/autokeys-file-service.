@@ -86,6 +86,18 @@ export const FALLBACK_METODOS: AkCloudMetodoPago[] = [
   { codigo: 'transferencia', nombre: 'Transferencia', descripcion: 'Pago manual por transferencia.', automatico: false, instrucciones: 'Indica tu email de AK Cloud como concepto.', orden: 30 },
 ]
 
+export type AkCloudNovedad = {
+  id?: string
+  titulo: string
+  contenido?: string | null
+  icono?: string | null
+  activo?: boolean | null
+  destacado?: boolean | null
+  orden?: number | null
+  publicado_en?: string | null
+  created_at?: string | null
+}
+
 function sortByOrden<T extends { orden?: number | null }>(items: T[]) {
   return [...items].sort((a, b) => Number(a.orden || 999) - Number(b.orden || 999))
 }
@@ -131,6 +143,18 @@ export async function getMetodosPagoActivos(): Promise<AkCloudMetodoPago[]> {
 
   if (error || !data?.length) return FALLBACK_METODOS
   return sortByOrden(data)
+}
+
+export async function getNovedadesActivas(): Promise<AkCloudNovedad[]> {
+  const { data, error } = await supabase
+    .from('akcloud_novedades')
+    .select('*')
+    .eq('activo', true)
+    .order('orden', { ascending: true })
+    .order('created_at', { ascending: false })
+
+  if (error || !data) return []
+  return data as AkCloudNovedad[]
 }
 
 export async function getReglasPreciosActivas(): Promise<AkCloudReglaPrecio[]> {

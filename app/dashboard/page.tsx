@@ -14,6 +14,7 @@ import {
   FileText,
   Headphones,
   Library,
+  Megaphone,
   PackageCheck,
   RefreshCw,
   Sparkles,
@@ -32,8 +33,10 @@ import {
 import {
   getPlanesActivos,
   getServiciosActivos,
+  getNovedadesActivas,
   type AkCloudPlan,
   type AkCloudServicio,
+  type AkCloudNovedad,
 } from '@/lib/services/akCloudConfig'
 
 function formatNumber(value: number) {
@@ -126,6 +129,7 @@ export default function DashboardPage() {
   const [notificaciones, setNotificaciones] = useState<FileServiceNotificacion[]>([])
   const [planes, setPlanes] = useState<AkCloudPlan[]>([])
   const [servicios, setServicios] = useState<AkCloudServicio[]>([])
+  const [novedades, setNovedades] = useState<AkCloudNovedad[]>([])
   const [userName, setUserName] = useState('Distribuidor')
   const [planSlug, setPlanSlug] = useState<string | null>(null)
   const [planExpiraAt, setPlanExpiraAt] = useState<string | null>(null)
@@ -143,11 +147,12 @@ export default function DashboardPage() {
     setError(null)
 
     try {
-      const [pedidosData, notifData, planesData, serviciosData, auth] = await Promise.all([
+      const [pedidosData, notifData, planesData, serviciosData, novedadesData, auth] = await Promise.all([
         getMisPedidos(),
         getMisNotificaciones(),
         getPlanesActivos(),
         getServiciosActivos(),
+        getNovedadesActivas(),
         supabase.auth.getUser(),
       ])
 
@@ -155,6 +160,7 @@ export default function DashboardPage() {
       setNotificaciones(notifData)
       setPlanes(planesData)
       setServicios(serviciosData)
+      setNovedades(novedadesData)
 
       const user = auth.data.user
       const metadata = user?.user_metadata || {}
@@ -446,6 +452,42 @@ export default function DashboardPage() {
           aria-hidden="true"
         />
 
+        {novedades.length > 0 && (
+          <section className="rounded-[1.8rem] border border-red-400/20 bg-gradient-to-br from-red-950/40 via-black/45 to-black/45 p-5 shadow-2xl shadow-black/30">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/10 text-red-300">
+                <Megaphone size={22} />
+              </div>
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[.22em] text-red-400">Novedades AK Cloud</p>
+                <h2 className="text-lg font-black uppercase text-white/90">Lo último del laboratorio</h2>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {novedades.slice(0, 6).map((novedad) => (
+                <div
+                  key={novedad.id}
+                  className={`rounded-2xl border p-4 ${
+                    novedad.destacado
+                      ? 'border-red-400/35 bg-red-500/[.08]'
+                      : 'border-white/10 bg-white/[.03]'
+                  }`}
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg leading-none">{novedad.icono || '📣'}</span>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-black uppercase text-white/90">{novedad.titulo}</p>
+                      {novedad.contenido && (
+                        <p className="mt-1 line-clamp-3 text-xs leading-5 text-white/45">{novedad.contenido}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {error && (
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-red-400/25 bg-red-500/10 p-4 text-sm text-red-200">
             <span>{error}</span>
@@ -659,7 +701,7 @@ export default function DashboardPage() {
           <div className="rounded-[1.8rem] border border-white/10 bg-black/45 p-5 shadow-2xl shadow-black/30">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-black uppercase text-white/90">Novedades</h2>
+                <h2 className="text-lg font-black uppercase text-white/90">Notificaciones</h2>
               </div>
               <div className="relative">
                 <Bell className="text-red-400" size={22} />
