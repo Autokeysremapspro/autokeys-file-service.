@@ -77,18 +77,22 @@ export default function CreditosPage() {
                 <Wallet size={15} /> AK Credits
               </div>
               <h1 className="text-4xl font-black tracking-tight lg:text-6xl">Créditos y precios</h1>
-              <p className="mt-3 max-w-3xl text-white/45">Controla tu saldo, historial de movimientos y coste por servicio dentro de AK Cloud.</p>
+              <p className="mt-3 max-w-3xl text-white/45">Historial de tu antiguo saldo de créditos en AK Cloud.</p>
             </div>
-            <button className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--ak-red)]/40 bg-[var(--ak-red)] px-5 py-3 text-sm font-black shadow-[0_0_45px_rgba(217,4,41,.35)] transition hover:scale-[1.02] hover:bg-[var(--ak-glow)]">
-              <Plus size={18} /> Solicitar recarga
-            </button>
+            <a href="/nuevo-pedido" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--ak-red)]/40 bg-[var(--ak-red)] px-5 py-3 text-sm font-black shadow-[0_0_45px_rgba(217,4,41,.35)] transition hover:scale-[1.02] hover:bg-[var(--ak-glow)]">
+              <Plus size={18} /> Crear un pedido
+            </a>
+          </div>
+
+          <div className="mb-6 rounded-2xl border border-amber-400/25 bg-amber-500/10 p-4 text-sm text-amber-200">
+            Los créditos ya no se usan para pagar pedidos — cada pedido se cobra en el momento (gratis si está incluido en tu plan, o con PayPal si no). Esta página se queda solo como historial de movimientos antiguos.
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 backdrop-blur-xl">
-              <div className="flex items-center justify-between text-white/40"><span className="text-xs font-black uppercase tracking-[0.22em]">Saldo</span><Wallet /></div>
+              <div className="flex items-center justify-between text-white/40"><span className="text-xs font-black uppercase tracking-[0.22em]">Saldo (histórico)</span><Wallet /></div>
               <div className="mt-4 text-4xl font-black text-emerald-300">{saldo}</div>
-              <p className="mt-1 text-sm text-white/35">créditos disponibles</p>
+              <p className="mt-1 text-sm text-white/35">ya no se descuenta ni se puede gastar</p>
             </div>
             <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 backdrop-blur-xl">
               <div className="flex items-center justify-between text-white/40"><span className="text-xs font-black uppercase tracking-[0.22em]">Recargados</span><CreditCard /></div>
