@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import AppShell from '@/components/AppShell'
 import AKChat from '@/components/ak/AKChat'
+import CustomSelect from '@/components/ak/CustomSelect'
 import {
   actualizarPedidoAdmin,
   descargarArchivo,
@@ -221,9 +222,11 @@ export default function AdminPedidoDetallePage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="block">
                   <span className="mb-2 block text-xs font-black uppercase tracking-[0.18em] text-zinc-500">Estado</span>
-                  <select value={estado} onChange={(e) => setEstado(e.target.value)} className="w-full rounded-2xl border border-white/10 bg-black/35 px-4 py-3 font-bold outline-none focus:border-red-500">
-                    {estados.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-                  </select>
+                  <CustomSelect
+                    value={estado}
+                    onChange={setEstado}
+                    options={estados.map((item) => ({ value: item.value, label: item.label }))}
+                  />
                 </label>
                 <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/25 px-4 py-3">
                   <input type="checkbox" checked={urgente} onChange={(e) => setUrgente(e.target.checked)} className="h-5 w-5 accent-red-600" />

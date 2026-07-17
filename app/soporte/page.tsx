@@ -5,6 +5,7 @@ import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { ArrowRight, Headphones, LifeBuoy, MessageSquarePlus, Search, ShieldCheck, Sparkles, Ticket, X } from 'lucide-react'
 import AppShell from '@/components/AppShell'
+import CustomSelect from '@/components/ak/CustomSelect'
 import { crearTicketSoporte, estadoTicketColor, estadoTicketLabel, getTicketsSoporte, prioridadTicketColor, type AkCloudTicket, type TicketPrioridad } from '@/lib/services/soporte'
 
 const categorias = [
@@ -173,18 +174,24 @@ export default function SoportePage() {
               </label>
               <label>
                 <span className="mb-2 block text-sm font-bold text-zinc-300">Categoría</span>
-                <select value={form.categoria} onChange={(e) => setForm(prev => ({ ...prev, categoria: e.target.value }))} className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 outline-none focus:border-red-500/50">
-                  {categorias.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+                <CustomSelect
+                  value={form.categoria}
+                  onChange={(v) => setForm(prev => ({ ...prev, categoria: v }))}
+                  options={categorias.map(c => ({ value: c, label: c }))}
+                />
               </label>
               <label>
                 <span className="mb-2 block text-sm font-bold text-zinc-300">Prioridad</span>
-                <select value={form.prioridad} onChange={(e) => setForm(prev => ({ ...prev, prioridad: e.target.value as TicketPrioridad }))} className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 outline-none focus:border-red-500/50">
-                  <option value="baja">Baja</option>
-                  <option value="normal">Normal</option>
-                  <option value="alta">Alta</option>
-                  <option value="urgente">Urgente</option>
-                </select>
+                <CustomSelect
+                  value={form.prioridad}
+                  onChange={(v) => setForm(prev => ({ ...prev, prioridad: v as TicketPrioridad }))}
+                  options={[
+                    { value: 'baja', label: 'Baja' },
+                    { value: 'normal', label: 'Normal' },
+                    { value: 'alta', label: 'Alta' },
+                    { value: 'urgente', label: 'Urgente' },
+                  ]}
+                />
               </label>
               <label className="md:col-span-2">
                 <span className="mb-2 block text-sm font-bold text-zinc-300">ID pedido opcional</span>
