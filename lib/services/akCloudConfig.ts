@@ -98,6 +98,20 @@ export type AkCloudNovedad = {
   created_at?: string | null
 }
 
+export const CATEGORIA_LABELS: Record<string, string> = {
+  reprogramacion: 'Reprogramación',
+  anticontaminacion: 'Anticontaminación',
+  opciones: 'Opciones',
+  electronica: 'Electrónica',
+  agricola: 'Agrícola',
+  camion: 'Camión',
+  otros: 'Otros',
+}
+
+export function labelCategoria(categoria: string) {
+  return CATEGORIA_LABELS[categoria] || categoria
+}
+
 function sortByOrden<T extends { orden?: number | null }>(items: T[]) {
   return [...items].sort((a, b) => Number(a.orden || 999) - Number(b.orden || 999))
 }

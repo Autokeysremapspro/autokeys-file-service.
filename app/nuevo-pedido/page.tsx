@@ -17,6 +17,7 @@ import {
   getReglasPreciosActivas,
   getServiciosActivos,
   groupServicios,
+  labelCategoria,
   type AkCloudPlan,
   type AkCloudReglaPrecio,
   type AkCloudServicio,
@@ -299,7 +300,7 @@ export default function NuevoPedidoPage() {
               <div className="space-y-6">
                 {Object.entries(grupos).map(([categoria, items]) => (
                   <div key={categoria}>
-                    <h3 className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-white/35">{categoria}</h3>
+                    <h3 className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-white/35">{labelCategoria(categoria)}</h3>
                     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                       {items.map((service) => (
                         <div key={service.slug} className="relative">

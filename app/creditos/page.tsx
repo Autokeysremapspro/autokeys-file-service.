@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { CreditCard, Download, Loader2, Plus, ReceiptText, ShieldCheck, Sparkles, Wallet } from 'lucide-react'
 import AKSidebar from '@/components/ak/AKSidebar'
 import { getCreditoMovimientos, type CreditoMovimiento } from '@/lib/services/creditos'
-import { FALLBACK_SERVICIOS, getServiciosActivos, type AkCloudServicio } from '@/lib/services/akCloudConfig'
+import { FALLBACK_SERVICIOS, getServiciosActivos, labelCategoria, type AkCloudServicio } from '@/lib/services/akCloudConfig'
 
 function formatDate(date?: string | null) {
   if (!date) return '—'
@@ -122,7 +122,7 @@ export default function CreditosPage() {
                   <div key={servicio.slug} className="group rounded-[1.5rem] border border-white/10 bg-black/25 p-4 transition hover:-translate-y-0.5 hover:border-[var(--ak-red)]/45 hover:bg-[var(--ak-red)]/10">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <div className="text-[10px] font-black uppercase tracking-[0.24em] text-white/30">{servicio.categoria}</div>
+                        <div className="text-[10px] font-black uppercase tracking-[0.24em] text-white/30">{labelCategoria(servicio.categoria)}</div>
                         <h3 className="mt-2 text-lg font-black">{servicio.nombre}</h3>
                         <p className="mt-1 text-sm text-white/40">{servicio.descripcion}</p>
                       </div>
