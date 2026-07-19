@@ -149,6 +149,7 @@ export async function POST(request: Request) {
           ori_bucket: body.ori.bucket,
           ori_path: body.ori.path,
           ori_size: body.ori.size || null,
+          ori_sha256: body.ori.sha256 || null,
         })
         .select('*')
         .single()

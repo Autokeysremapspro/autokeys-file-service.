@@ -25,6 +25,7 @@ export type FileServicePedido = {
   ori_bucket: string | null
   ori_path: string | null
   ori_size: number | null
+  ori_sha256: string | null
   mod_nombre: string | null
   mod_bucket: string | null
   mod_path: string | null
@@ -64,12 +65,21 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
     ori_bucket?: string
     ori_path?: string
     ori_size?: number
+    ori_sha256?: string
   } = {}
 
   if (payload.ori) {
     const safeName = payload.ori.name.replace(/[^a-zA-Z0-9._-]/g, '_')
     const folder = user?.id || 'anon'
     const path = `ori/${folder}/${Date.now()}-${safeName}`
+
+    // Se calcula la huella del archivo aquí, en el momento de subirlo —
+    // así el pedido nace ya con su sha256 y el laboratorio no tiene que
+    // volver a descargar el archivo entero solo para poder "enseñarlo"
+    // al detector más adelante.
+    const buffer = await payload.ori.arrayBuffer()
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
+    const sha256 = Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, '0')).join('')
 
     const { error: uploadError } = await supabase.storage
       .from('file-service')
@@ -82,6 +92,7 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
       ori_bucket: 'file-service',
       ori_path: path,
       ori_size: payload.ori.size,
+      ori_sha256: sha256,
     }
   }
 
@@ -110,6 +121,7 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
         bucket: oriInfo.ori_bucket,
         path: oriInfo.ori_path,
         size: oriInfo.ori_size,
+        sha256: oriInfo.ori_sha256,
       },
     }),
   })

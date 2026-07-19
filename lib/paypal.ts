@@ -425,6 +425,7 @@ export async function capturarYCrearPedido(pendienteId: string) {
       ori_bucket: payload.ori?.bucket,
       ori_path: payload.ori?.path,
       ori_size: payload.ori?.size || null,
+      ori_sha256: payload.ori?.sha256 || null,
     })
     .select('*')
     .single()
