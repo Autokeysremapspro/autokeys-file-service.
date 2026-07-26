@@ -2,25 +2,20 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertCircle, Bike, Car, Cog, FileUp, Gauge, ScanLine, Send, Sparkles, Truck, Wrench, ShieldCheck, CheckCircle2 } from 'lucide-react'
+import { AlertCircle, Bike, Car, Check, ChevronDown, Cog, FileUp, Gauge, ScanLine, Send, Sparkles, Truck, Wrench, ShieldCheck, CheckCircle2, X } from 'lucide-react'
 import AKPageShell from '@/components/ak/AKPageShell'
 import AKUploader from '@/components/ak/AKUploader'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import AKServiceCard, { type AKService } from '@/components/ak/AKServiceCard'
 import { crearPedidoFileService } from '@/lib/services/pedidos'
-import { supabase } from '@/lib/supabase'
 import {
   FALLBACK_SERVICIOS,
   FAMILIAS,
   familiaDeCategoria,
-  getPlanServiciosDe,
   getServiciosActivos,
   groupServicios,
-  labelCategoria,
-  aplicarPrecioReal,
   type AkCloudServicio,
-  type PlanServicioOverride,
   type ServicioConPrecioReal,
 } from '@/lib/services/akCloudConfig'
 
@@ -39,9 +34,7 @@ function serviceToCard(service: ServicioConPrecioReal): AKService {
   return {
     id: service.slug,
     name: service.nombre,
-    description: service.incluido_en_plan
-      ? `${service.descripcion || ''} Incluido en tu plan.`
-      : service.descripcion || 'Servicio configurable desde Autokeys Core.',
+    description: service.descripcion || 'Servicio configurable desde Autokeys Core.',
     price: service.precio_final,
     icon: service.icono || '⚙️',
     compatible: service.activo !== false,
@@ -58,8 +51,6 @@ export default function NuevoPedidoPage() {
   const [vehicle, setVehicle] = useState<VehicleForm>(initialVehicle)
   const [observaciones, setObservaciones] = useState('')
   const [servicios, setServicios] = useState<AkCloudServicio[]>(FALLBACK_SERVICIOS)
-  const [planServiciosMap, setPlanServiciosMap] = useState<Map<string, PlanServicioOverride>>(new Map())
-  const [planNombre, setPlanNombre] = useState<string | null>(null)
   const [loadingConfig, setLoadingConfig] = useState(true)
   const [sending, setSending] = useState(false)
   const [legalOpen, setLegalOpen] = useState(false)
@@ -88,27 +79,8 @@ export default function NuevoPedidoPage() {
     async function loadConfig() {
       setLoadingConfig(true)
       try {
-        const [serviciosData, authData] = await Promise.all([getServiciosActivos(), supabase.auth.getUser()])
+        const serviciosData = await getServiciosActivos()
         setServicios(serviciosData)
-
-        const userId = authData.data.user?.id
-        if (userId) {
-          const { data: dist } = await supabase
-            .from('akcloud_distribuidores')
-            .select('plan_id, plan_expira_at, akcloud_planes(nombre)')
-            .eq('auth_user_id', userId)
-            .maybeSingle()
-
-          const caducado = Boolean(dist?.plan_expira_at && new Date(dist.plan_expira_at).getTime() < Date.now())
-          const planIdEfectivo = caducado ? null : (dist as any)?.plan_id || null
-          setPlanNombre(planIdEfectivo ? (dist as any)?.akcloud_planes?.nombre || 'tu plan' : null)
-
-          if (planIdEfectivo) {
-            const overrides = await getPlanServiciosDe(planIdEfectivo)
-            const map = new Map(overrides.filter((o) => o.incluido).map((o) => [o.servicio_id, o]))
-            setPlanServiciosMap(map)
-          }
-        }
       } finally {
         setLoadingConfig(false)
       }
@@ -162,20 +134,34 @@ export default function NuevoPedidoPage() {
     setSelected((current) => current.includes(slug) ? current.filter((x) => x !== slug) : [...current, slug])
   }
 
-  const serviciosConPrecioReal = useMemo(() => aplicarPrecioReal(servicios, planServiciosMap), [servicios, planServiciosMap])
-  const grupos = useMemo(() => groupServicios(serviciosConPrecioReal), [serviciosConPrecioReal])
-  const gruposFamilia = useMemo(
-    () => Object.entries(grupos).filter(([categoria]) => familiaDeCategoria(categoria) === familia),
-    [grupos, familia],
+  // Precio: siempre el precio real del catálogo — pago por archivo, sin planes.
+  const serviciosConPrecioReal: ServicioConPrecioReal[] = useMemo(
+    () => servicios.map((s) => ({ ...s, precio_final: Number(s.precio ?? 0), incluido_en_plan: false })),
+    [servicios],
   )
+  const grupos = useMemo(() => groupServicios(serviciosConPrecioReal), [serviciosConPrecioReal])
+  const serviciosDeFamilia = useMemo(() => grupos[familia] || [], [grupos, familia])
   const selectedFueraDeFamilia = useMemo(
     () => serviciosConPrecioReal.filter((s) => selected.includes(s.slug) && familiaDeCategoria(s.categoria) !== familia),
     [serviciosConPrecioReal, selected, familia],
   )
   const selectedServices = serviciosConPrecioReal.filter((service) => selected.includes(service.slug))
   const total = useMemo(() => selectedServices.reduce((sum, item) => sum + Number(item.precio_final || 0), 0), [selectedServices])
-  const totalCatalogo = useMemo(() => selectedServices.reduce((sum, item) => sum + Number(item.precio || item.creditos || 0), 0), [selectedServices])
-  const ahorroPlan = Math.max(0, totalCatalogo - total)
+
+  // Progreso del pedido — para el indicador de pasos.
+  const stepsDone = {
+    archivo: Boolean(file),
+    vehiculo: Boolean(vehicle.marca.trim() && vehicle.modelo.trim()),
+    ecu: Boolean(vehicle.ecu.trim()),
+    servicios: selected.length > 0,
+  }
+  const steps = [
+    { label: 'Archivo', done: stepsDone.archivo },
+    { label: 'Vehículo', done: stepsDone.vehiculo },
+    { label: 'ECU', done: stepsDone.ecu },
+    { label: 'Servicios', done: stepsDone.servicios },
+    { label: 'Revisar y enviar', done: stepsDone.archivo && stepsDone.vehiculo && stepsDone.ecu && stepsDone.servicios && legalAccepted },
+  ]
 
   async function enviarPedido() {
     if (!legalAccepted) { setLegalOpen(true); return }
@@ -225,21 +211,35 @@ export default function NuevoPedidoPage() {
   return (
     <AKPageShell
       title="Nuevo pedido"
-      subtitle="Sube el ORI, añade los datos técnicos manualmente y selecciona los servicios. Los precios, servicios y packs salen desde Autokeys Core."
+      subtitle="Sube el ORI, añade los datos técnicos manualmente y elige los servicios por vehículo. Pagas solo lo que pidas."
       eyebrow="File Service"
     >
-      <div className="mb-6 grid gap-3 md:grid-cols-5">
-        {['1 · Archivo', '2 · Vehículo', '3 · ECU', '4 · Servicios', '5 · Revisar y enviar'].map((step) => (
-          <div key={step} className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-center text-xs font-black uppercase tracking-wider text-white/55">{step}</div>
+      {/* Indicador de progreso — se colorea solo con lo que ya has completado */}
+      <div className="mb-6 grid grid-cols-2 gap-2.5 sm:grid-cols-5">
+        {steps.map((step, index) => (
+          <div
+            key={step.label}
+            className={`flex items-center gap-2.5 rounded-2xl border px-3.5 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+              step.done
+                ? 'border-[#e2954d]/35 bg-[#e2954d]/[.09] text-[#ffb870]'
+                : 'border-white/10 bg-black/25 text-white/45'
+            }`}
+          >
+            <span className={`ak-mono grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] ${step.done ? 'bg-[#e2954d] text-[#0a0d12]' : 'bg-white/10 text-white/50'}`}>
+              {step.done ? <Check size={13} /> : index + 1}
+            </span>
+            <span className="truncate">{step.label}</span>
+          </div>
         ))}
       </div>
+
       <div className="grid gap-6 2xl:grid-cols-[1fr_430px]">
         <div className="space-y-6">
           <AKCard className="p-5 md:p-6">
             <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-500/25 bg-red-500/10 text-red-300"><FileUp size={24} /></div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#e2954d]/25 bg-[#e2954d]/10 text-[#ffb870]"><FileUp size={24} /></div>
               <div>
-                <h2 className="text-2xl font-black">Archivo ORI</h2>
+                <h2 className="text-2xl font-bold">Archivo ORI</h2>
                 <p className="text-sm text-white/40">Formatos recomendados: .bin, .ori, .hex, .mod, .zip.</p>
               </div>
             </div>
@@ -247,18 +247,18 @@ export default function NuevoPedidoPage() {
 
             {detecting && (
               <div className="mt-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-white/60">
-                <ScanLine size={18} className="animate-pulse text-red-300" /> Analizando archivo (huella + patrones)...
+                <ScanLine size={18} className="animate-pulse text-[#5eead4]" /> Analizando archivo (huella + patrones)...
               </div>
             )}
 
             {!detecting && detection && (
               <div className={`mt-4 rounded-2xl border p-4 ${detection.identified ? 'border-emerald-500/25 bg-emerald-500/[.06]' : 'border-amber-500/25 bg-amber-500/[.06]'}`}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 text-sm font-black">
+                  <div className="flex items-center gap-2 text-sm font-bold">
                     {detection.identified ? <Sparkles size={16} className="text-emerald-300" /> : <AlertCircle size={16} className="text-amber-300" />}
                     {detection.identified ? 'ECU identificada con evidencia verificada' : 'ECU NO IDENTIFICADA — añadir información faltante'}
                   </div>
-                  <span className="rounded-full border border-white/10 bg-white/[.04] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white/50">
+                  <span className="ak-mono rounded-full border border-white/10 bg-white/[.04] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/50">
                     {detection.method === 'huella_exacta_confirmada' ? 'Huella exacta confirmada' : detection.method === 'firma_verificada' ? 'Firma verificada' : 'Sin identificación'}
                   </span>
                 </div>
@@ -273,7 +273,7 @@ export default function NuevoPedidoPage() {
                         {detection.evidence.map((item) => <span key={item} className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-bold text-emerald-200">{item}</span>)}
                       </div>
                     ) : null}
-                    <button type="button" onClick={aplicarDeteccion} className="mt-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-black uppercase tracking-wider text-emerald-300 hover:bg-emerald-500/20">
+                    <button type="button" onClick={aplicarDeteccion} className="mt-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-emerald-300 hover:bg-emerald-500/20">
                       Usar datos verificados
                     </button>
                   </>
@@ -294,9 +294,9 @@ export default function NuevoPedidoPage() {
 
           <AKCard className="p-5 md:p-6">
             <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-500/25 bg-red-500/10 text-red-300"><Car size={24} /></div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#e2954d]/25 bg-[#e2954d]/10 text-[#ffb870]"><Car size={24} /></div>
               <div>
-                <h2 className="text-2xl font-black">Datos del vehículo</h2>
+                <h2 className="text-2xl font-bold">Datos del vehículo</h2>
                 <p className="text-sm text-white/40">Estos datos los introduce el cliente manualmente. Nada de detección automática forzada.</p>
               </div>
             </div>
@@ -312,9 +312,9 @@ export default function NuevoPedidoPage() {
 
           <AKCard className="p-5 md:p-6">
             <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-500/25 bg-red-500/10 text-red-300"><Gauge size={24} /></div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#e2954d]/25 bg-[#e2954d]/10 text-[#ffb870]"><Gauge size={24} /></div>
               <div>
-                <h2 className="text-2xl font-black">Datos ECU</h2>
+                <h2 className="text-2xl font-bold">Datos ECU</h2>
                 <p className="text-sm text-white/40">El cliente rellena ECU / HW / SW manualmente. Si no lo sabe, puede escribir “revisar”.</p>
               </div>
             </div>
@@ -328,68 +328,75 @@ export default function NuevoPedidoPage() {
 
           <AKCard className="p-5 md:p-6">
             <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-500/25 bg-red-500/10 text-red-300"><Wrench size={24} /></div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#e2954d]/25 bg-[#e2954d]/10 text-[#ffb870]"><Wrench size={24} /></div>
               <div>
-                <h2 className="text-2xl font-black">Servicios</h2>
-                <p className="text-sm text-white/40">Servicios y precios se actualizan desde Autokeys Core — lo que ves aquí es lo que se cobra.</p>
+                <h2 className="text-2xl font-bold">Servicios</h2>
+                <p className="text-sm text-white/40">Elige el tipo de vehículo y selecciona los servicios — el precio de cada uno se cobra por archivo.</p>
               </div>
             </div>
+
             {loadingConfig ? (
-              <div className="rounded-2xl border border-white/10 bg-black/25 p-5 text-sm text-white/45">Cargando configuración desde Core...</div>
+              <div className="rounded-2xl border border-white/10 bg-black/25 p-5 text-sm text-white/45">Cargando catálogo desde Core...</div>
             ) : (
-              <div className="space-y-6">
-                <div className="grid gap-3 sm:grid-cols-3">
+              <div className="space-y-5">
+                {/* Selector de familia — pestañas compactas, sin toda la parrilla abierta a la vez */}
+                <div className="flex flex-wrap gap-2">
                   {FAMILIAS.map((f) => {
                     const Icon = FAMILIA_ICONS[f.slug] || Wrench
                     const activa = familia === f.slug
+                    const count = (grupos[f.slug] || []).length
                     return (
                       <button
                         key={f.slug}
                         type="button"
                         onClick={() => setFamilia(f.slug)}
-                        className={`rounded-2xl border p-4 text-left transition ${
+                        className={`flex items-center gap-2.5 rounded-2xl border px-4 py-3 text-sm font-bold transition ${
                           activa
-                            ? 'border-red-400/45 bg-red-500/10 shadow-[0_0_30px_rgba(217,4,41,.15)]'
-                            : 'border-white/10 bg-black/20 hover:border-white/25'
+                            ? 'border-[#e2954d]/45 bg-[#e2954d]/[.12] text-white shadow-[0_0_28px_rgba(226,149,77,.14)]'
+                            : 'border-white/10 bg-black/20 text-white/55 hover:border-white/25 hover:text-white'
                         }`}
                       >
-                        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${activa ? 'bg-red-500/15 text-red-300' : 'bg-white/5 text-white/50'}`}>
-                          <Icon size={20} />
-                        </div>
-                        <p className="mt-3 text-sm font-black uppercase">{f.nombre}</p>
-                        <p className="mt-1 text-xs leading-5 text-white/40">{f.descripcion}</p>
+                        <span className={`flex h-8 w-8 items-center justify-center rounded-xl ${activa ? 'bg-[#e2954d]/20 text-[#ffb870]' : 'bg-white/5 text-white/45'}`}>
+                          <Icon size={16} />
+                        </span>
+                        {f.nombre}
+                        <span className={`ak-mono rounded-full px-1.5 py-0.5 text-[10px] ${activa ? 'bg-[#e2954d]/25 text-[#ffb870]' : 'bg-white/5 text-white/30'}`}>{count}</span>
+                        <ChevronDown size={14} className={`transition-transform ${activa ? 'rotate-180 text-[#ffb870]' : 'text-white/30'}`} />
                       </button>
                     )
                   })}
                 </div>
 
                 {selectedFueraDeFamilia.length > 0 && (
-                  <div className="rounded-2xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
-                    Tienes {selectedFueraDeFamilia.length} servicio{selectedFueraDeFamilia.length > 1 ? 's' : ''} seleccionado{selectedFueraDeFamilia.length > 1 ? 's' : ''} en otra categoría ({selectedFueraDeFamilia.map((s) => s.nombre).join(', ')}) — siguen incluidos en el resumen del pedido.
+                  <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
+                    <span className="font-bold">También en tu pedido, de otra categoría:</span>
+                    {selectedFueraDeFamilia.map((s) => (
+                      <button
+                        key={s.slug}
+                        type="button"
+                        onClick={() => toggle(s.slug)}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/25 bg-amber-500/10 px-2.5 py-1 font-semibold hover:bg-amber-500/20"
+                      >
+                        {s.nombre} <X size={12} />
+                      </button>
+                    ))}
                   </div>
                 )}
 
-                {gruposFamilia.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-white/10 p-6 text-center text-sm text-white/40">
-                    Todavía no hay servicios publicados en esta categoría.
-                  </div>
-                ) : gruposFamilia.map(([categoria, items]) => (
-                  <div key={categoria}>
-                    <h3 className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-white/35">{labelCategoria(categoria)}</h3>
+                {/* Panel desplegable de la familia activa — se anima al cambiar de pestaña */}
+                <div key={familia} className="ak-expand-in rounded-[1.6rem] border border-white/10 bg-black/20 p-4 sm:p-5">
+                  {serviciosDeFamilia.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-white/10 p-6 text-center text-sm text-white/40">
+                      Todavía no hay servicios publicados en esta categoría.
+                    </div>
+                  ) : (
                     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                      {items.map((service) => (
-                        <div key={service.slug} className="relative">
-                          <AKServiceCard service={serviceToCard(service)} selected={selected.includes(service.slug)} onToggle={() => toggle(service.slug)} />
-                          {service.incluido_en_plan && (
-                            <div className="mt-2 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-300">
-                              ✅ Incluido en {planNombre || 'tu plan'}
-                            </div>
-                          )}
-                        </div>
+                      {serviciosDeFamilia.map((service) => (
+                        <AKServiceCard key={service.slug} service={serviceToCard(service)} selected={selected.includes(service.slug)} onToggle={() => toggle(service.slug)} />
                       ))}
                     </div>
-                  </div>
-                ))}
+                  )}
+                </div>
               </div>
             )}
           </AKCard>
@@ -397,8 +404,8 @@ export default function NuevoPedidoPage() {
 
         <aside className="space-y-6 2xl:sticky 2xl:top-24 2xl:self-start">
           <AKCard className="p-6">
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-red-400">Resumen</p>
-            <h2 className="mt-2 text-3xl font-black">Pedido</h2>
+            <p className="ak-mono text-xs font-bold uppercase tracking-[0.22em] text-[#ffb870]">Resumen</p>
+            <h2 className="mt-2 text-3xl font-bold">Pedido</h2>
             <div className="mt-5 space-y-3 text-sm">
               <SummaryRow label="Archivo" value={fileName || 'Sin archivo'} />
               <SummaryRow label="Vehículo" value={[vehicle.marca, vehicle.modelo, vehicle.motor].filter(Boolean).join(' ') || 'Pendiente'} />
@@ -406,30 +413,29 @@ export default function NuevoPedidoPage() {
             </div>
             <div className="mt-5 space-y-2">
               {selectedServices.length === 0 ? <p className="text-sm text-white/35">Sin servicios seleccionados.</p> : selectedServices.map((service) => (
-                <div key={service.slug} className="flex items-center justify-between rounded-2xl bg-black/25 px-4 py-3 text-sm">
-                  <div>
-                    <span>{service.icono || '⚙️'} {service.nombre}</span>
-                    {service.incluido_en_plan && <div className="text-xs text-emerald-300">Incluido en {planNombre || 'tu plan'}</div>}
+                <div key={service.slug} className="flex items-center justify-between gap-3 rounded-2xl bg-black/25 px-4 py-3 text-sm">
+                  <span className="truncate">{service.icono || '⚙️'} {service.nombre}</span>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <strong className="ak-mono text-white">{Number(service.precio_final).toFixed(2)} €</strong>
+                    <button type="button" onClick={() => toggle(service.slug)} aria-label={`Quitar ${service.nombre}`} className="text-white/30 hover:text-white/70"><X size={15} /></button>
                   </div>
-                  <strong className={service.precio_final === 0 ? 'text-emerald-300' : 'text-white'}>{service.precio_final === 0 ? '0 €' : `${Number(service.precio_final).toFixed(2)} €`}</strong>
                 </div>
               ))}
             </div>
-            <div className="mt-5 rounded-[1.6rem] border border-red-500/20 bg-red-500/10 p-4">
-              {ahorroPlan > 0 && <div className="mb-2 flex justify-between text-sm text-emerald-300"><span>Incluido en tu plan</span><strong>-{ahorroPlan.toFixed(2)} €</strong></div>}
+            <div className="mt-5 rounded-[1.6rem] border border-[#e2954d]/25 bg-[#e2954d]/[.08] p-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-white/45">Total</span>
-                <strong className="text-4xl font-black text-white">{total.toFixed(2)} €</strong>
+                <span className="text-sm text-white/50">Total a pagar</span>
+                <strong className="ak-mono text-4xl font-bold text-white">{total.toFixed(2)} €</strong>
               </div>
             </div>
             {error && <div className="mt-4 flex gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200"><AlertCircle size={18} /> {error}</div>}
-            <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="mt-4 min-h-[120px] w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-red-500/60" placeholder="Observaciones para el técnico..." />
+            <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="mt-4 min-h-[120px] w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-[#e2954d]/60" placeholder="Observaciones para el técnico..." />
             <button type="button" onClick={()=>setLegalOpen(true)} className={`mt-4 flex w-full items-center gap-3 rounded-2xl border p-4 text-left ${legalAccepted ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-amber-500/30 bg-amber-500/10'}`}>
               {legalAccepted ? <CheckCircle2 className="text-emerald-300"/> : <ShieldCheck className="text-amber-300"/>}
-              <div><div className="font-black">{legalAccepted ? 'Condiciones aceptadas' : 'Debes aceptar las condiciones'}</div><div className="text-xs text-white/45">Uso legal, responsabilidad del cliente y posible restricción en vía pública.</div></div>
+              <div><div className="font-bold">{legalAccepted ? 'Condiciones aceptadas' : 'Debes aceptar las condiciones'}</div><div className="text-xs text-white/45">Uso legal, responsabilidad del cliente y posible restricción en vía pública.</div></div>
             </button>
             <AKButton onClick={enviarPedido} disabled={sending || !legalAccepted} className="mt-4 w-full">
-              <Send size={18} /> {sending ? 'Enviando...' : total > 0 ? `Pagar ${total.toFixed(2)} € con PayPal` : 'Enviar pedido (gratis, incluido en tu plan)'}
+              <Send size={18} /> {sending ? 'Enviando...' : total > 0 ? `Pagar ${total.toFixed(2)} € con PayPal` : 'Enviar pedido (sin coste)'}
             </AKButton>
             {total > 0 && !sending && (
               <p className="mt-2 text-center text-xs text-white/35">Te llevaremos a PayPal para completar el pago — el pedido se crea en cuanto se confirme.</p>
@@ -439,16 +445,19 @@ export default function NuevoPedidoPage() {
       </div>
       {legalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-[2rem] border border-white/10 bg-[#0b1220] p-6 shadow-2xl md:p-8">
-            <div className="flex items-start gap-4"><div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300"><ShieldCheck size={28}/></div><div><p className="text-xs font-black uppercase tracking-[.2em] text-amber-300">Aviso obligatorio</p><h2 className="mt-1 text-3xl font-black">Condiciones de uso del servicio</h2></div></div>
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-[2rem] border border-white/10 bg-[#0b0e14] p-6 shadow-2xl md:p-8">
+            <div className="flex items-start gap-4"><div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300"><ShieldCheck size={28}/></div><div><p className="text-xs font-bold uppercase tracking-[.2em] text-amber-300">Aviso obligatorio</p><h2 className="mt-1 text-3xl font-bold">Condiciones de uso del servicio</h2></div></div>
             <div className="mt-6 space-y-4 text-sm leading-7 text-white/65">
               <p>Las soluciones suministradas se destinan exclusivamente a usos permitidos por la legislación aplicable, como competición, investigación, desarrollo, diagnóstico, exportación o utilización fuera de vías públicas cuando corresponda.</p>
               <p>El cliente declara que dispone de autorización para solicitar el servicio y que verificará la legalidad de la instalación y del uso en su país o jurisdicción.</p>
               <p>Determinadas modificaciones pueden ser ilegales en vehículos que circulen por vías públicas o estén sujetos a normativa de emisiones, seguridad, homologación o inspección técnica.</p>
               <p>El cliente asume la responsabilidad exclusiva por el uso, instalación, comercialización y consecuencias de los archivos entregados. Autokeys Remaps Pro actúa únicamente como proveedor técnico del servicio solicitado.</p>
             </div>
-            <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-black/25 p-4"><input type="checkbox" checked={legalAccepted} onChange={(e)=>setLegalAccepted(e.target.checked)} className="mt-1 h-5 w-5"/><span className="font-bold">He leído, comprendo y acepto estas condiciones y asumo la responsabilidad del uso solicitado.</span></label>
-            <div className="mt-6 flex gap-3"><button onClick={()=>setLegalOpen(false)} className="flex-1 rounded-2xl border border-white/10 px-4 py-3 font-black">Cancelar</button><button disabled={!legalAccepted} onClick={()=>setLegalOpen(false)} className="flex-1 rounded-2xl bg-red-600 px-4 py-3 font-black disabled:opacity-40">Aceptar y continuar</button></div>
+            <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-black/25 p-4"><input type="checkbox" checked={legalAccepted} onChange={(e)=>setLegalAccepted(e.target.checked)} className="mt-1 h-5 w-5"/><span className="font-semibold">He leído, comprendo y acepto estas condiciones y asumo la responsabilidad del uso solicitado.</span></label>
+            <div className="mt-6 flex gap-3">
+              <button onClick={()=>setLegalOpen(false)} className="flex-1 rounded-2xl border border-white/10 px-4 py-3 font-bold">Cancelar</button>
+              <button disabled={!legalAccepted} onClick={()=>setLegalOpen(false)} className="flex-1 rounded-2xl bg-gradient-to-r from-[#8a4a1f] to-[#e2954d] px-4 py-3 font-bold text-[#0a0d12] disabled:opacity-40">Aceptar y continuar</button>
+            </div>
           </div>
         </div>
       )}
@@ -459,8 +468,8 @@ export default function NuevoPedidoPage() {
 function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-white/35">{label}</span>
-      <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-red-500/60" />
+      <span className="ak-mono mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-white/35">{label}</span>
+      <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-[#e2954d]/60" />
     </label>
   )
 }

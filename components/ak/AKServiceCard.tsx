@@ -27,8 +27,8 @@ export default function AKServiceCard({ service, selected, onToggle }: { service
       <div className="mt-4 text-base font-black text-white">{service.name}</div>
       <div className="mt-1 min-h-[38px] text-xs leading-5 text-white/38">{service.description}</div>
       <div className="mt-4 flex items-center justify-between">
-        <span className="text-sm font-black text-[var(--ak-glow)]">{service.price} €</span>
-        <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${locked ? 'bg-white/5 text-white/25' : 'bg-[var(--ak-green)]/10 text-[var(--ak-green)]'}`}>{locked ? 'Locked' : 'Compatible'}</span>
+        <span className="ak-mono text-sm font-bold text-[var(--ak-glow)]">{service.price} €</span>
+        <span className={`ak-mono rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${locked ? 'bg-white/5 text-white/25' : 'bg-[var(--ak-green)]/10 text-[var(--ak-green)]'}`}>{locked ? 'Locked' : 'Compatible'}</span>
       </div>
     </button>
   )
