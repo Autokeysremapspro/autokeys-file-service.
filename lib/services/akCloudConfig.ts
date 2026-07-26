@@ -77,20 +77,47 @@ export function aplicarPrecioReal(
   })
 }
 
+// Catálogo de servicios de AK Cloud, organizado por las 5 categorías de
+// negocio (coches, motos, agricola, camion, especiales). Esta es la lista
+// que se usa si Supabase no responde; la real vive en akcloud_servicios
+// (ver migración v25_categorias_precios_file_service.sql).
 export const FALLBACK_SERVICIOS: AkCloudServicio[] = [
-  { nombre: 'Stage 1', slug: 'stage-1', categoria: 'Reprogramación', descripcion: 'Optimización de potencia segura para uso diario.', precio: 40, creditos: 40, icono: '🚀', orden: 10 },
-  { nombre: 'Stage 2', slug: 'stage-2', categoria: 'Reprogramación', descripcion: 'Calibración avanzada para vehículos con hardware modificado.', precio: 65, creditos: 65, icono: '🏁', orden: 20 },
-  { nombre: 'DPF OFF', slug: 'dpf-off', categoria: 'Anticontaminación', descripcion: 'Solución para sistema DPF según solicitud del profesional.', precio: 35, creditos: 35, icono: '🚫', orden: 30 },
-  { nombre: 'EGR OFF', slug: 'egr-off', categoria: 'Anticontaminación', descripcion: 'Solución para sistema EGR según solicitud del profesional.', precio: 25, creditos: 25, icono: '🌿', orden: 40 },
-  { nombre: 'AdBlue OFF', slug: 'adblue-off', categoria: 'Anticontaminación', descripcion: 'Solución SCR / AdBlue.', precio: 45, creditos: 45, icono: '💧', orden: 50 },
-  { nombre: 'DTC OFF', slug: 'dtc-off', categoria: 'Opciones técnicas', descripcion: 'Desactivación de códigos específicos bajo solicitud.', precio: 20, creditos: 20, icono: '⚠️', orden: 60 },
-  { nombre: 'IMMO OFF', slug: 'immo-off', categoria: 'Electrónica', descripcion: 'Solución inmovilizador para trabajos de laboratorio.', precio: 50, creditos: 50, icono: '🔑', orden: 70 },
-  { nombre: 'Pops & Bangs', slug: 'pops-bangs', categoria: 'Opciones racing', descripcion: 'Configuración de petardeo bajo solicitud.', precio: 30, creditos: 30, icono: '💥', orden: 80 },
-  { nombre: 'Hardcut', slug: 'hardcut', categoria: 'Opciones racing', descripcion: 'Limitador tipo hardcut según configuración solicitada.', precio: 25, creditos: 25, icono: '🍿', orden: 90 },
-  { nombre: 'Launch Control', slug: 'launch-control', categoria: 'Opciones racing', descripcion: 'Salida asistida bajo configuración técnica.', precio: 30, creditos: 30, icono: '🏁', orden: 100 },
-  { nombre: 'Reset adaptaciones DSG', slug: 'dsg-reset', categoria: 'dsg', descripcion: 'Reset de adaptaciones de caja DSG bajo solicitud.', precio: 40, creditos: 40, icono: '⚙️', orden: 110 },
-  { nombre: 'Reprogramación Agrícola', slug: 'agricola-reprog', categoria: 'agricola', descripcion: 'Optimización para maquinaria agrícola bajo solicitud.', precio: 80, creditos: 80, icono: '🚜', orden: 120 },
-  { nombre: 'Reprogramación Camión', slug: 'camion-reprog', categoria: 'camion', descripcion: 'Optimización para vehículo pesado bajo solicitud.', precio: 90, creditos: 90, icono: '🚛', orden: 130 },
+  // --- COCHES ---
+  { nombre: 'Stage 1', slug: 'stage-1-coche', categoria: 'coches', descripcion: 'Optimización de potencia segura para uso diario.', precio: 35, creditos: 35, icono: '🚀', orden: 10 },
+  { nombre: 'Stage 2', slug: 'stage-2-coche', categoria: 'coches', descripcion: 'Calibración avanzada para vehículos con hardware modificado.', precio: 55, creditos: 55, icono: '🏁', orden: 20 },
+  { nombre: 'DPF OFF', slug: 'dpf-off-coche', categoria: 'coches', descripcion: 'Solución para sistema DPF según solicitud del profesional.', precio: 30, creditos: 30, icono: '🚫', orden: 30 },
+  { nombre: 'EGR OFF', slug: 'egr-off-coche', categoria: 'coches', descripcion: 'Solución para sistema EGR según solicitud del profesional.', precio: 30, creditos: 30, icono: '🌿', orden: 40 },
+  { nombre: 'AdBlue OFF', slug: 'adblue-off-coche', categoria: 'coches', descripcion: 'Solución SCR / AdBlue.', precio: 30, creditos: 30, icono: '💧', orden: 50 },
+  { nombre: 'Decat', slug: 'decat-coche', categoria: 'coches', descripcion: 'Eliminación lógica del catalizador según solicitud.', precio: 25, creditos: 25, icono: '⚠️', orden: 60 },
+  { nombre: 'Pops & Bangs', slug: 'pops-bangs-coche', categoria: 'coches', descripcion: 'Configuración de petardeo bajo solicitud.', precio: 20, creditos: 20, icono: '💥', orden: 70 },
+  { nombre: 'Hardcut', slug: 'hardcut-coche', categoria: 'coches', descripcion: 'Limitador tipo hardcut según configuración solicitada.', precio: 20, creditos: 20, icono: '🍿', orden: 80 },
+  { nombre: 'Launch Control', slug: 'launch-control-coche', categoria: 'coches', descripcion: 'Salida asistida bajo configuración técnica.', precio: 25, creditos: 25, icono: '🏁', orden: 90 },
+  { nombre: 'Reset adaptaciones DSG', slug: 'dsg-reset-coche', categoria: 'coches', descripcion: 'Reset de adaptaciones de caja DSG bajo solicitud.', precio: 30, creditos: 30, icono: '⚙️', orden: 100 },
+
+  // --- MOTOS ---
+  { nombre: 'Stage 1', slug: 'stage-1-moto', categoria: 'motos', descripcion: 'Optimización de potencia segura para moto.', precio: 25, creditos: 25, icono: '🚀', orden: 110 },
+  { nombre: 'Quickshifter / Limitador OFF', slug: 'quickshifter-limitador-off-moto', categoria: 'motos', descripcion: 'Configuración de quickshifter o eliminación de limitador según solicitud.', precio: 20, creditos: 20, icono: '⚙️', orden: 120 },
+  { nombre: 'DPF/EGR/AdBlue OFF', slug: 'anulaciones-off-moto', categoria: 'motos', descripcion: 'Solución para sistemas DPF/EGR/AdBlue en motos que lo incorporan.', precio: 25, creditos: 25, icono: '🚫', orden: 130 },
+
+  // --- AGRÍCOLA ---
+  { nombre: 'Stage 1', slug: 'stage-1-agricola', categoria: 'agricola', descripcion: 'Optimización de potencia para maquinaria agrícola.', precio: 150, creditos: 150, icono: '🚜', orden: 140 },
+  { nombre: 'Stage 2', slug: 'stage-2-agricola', categoria: 'agricola', descripcion: 'Calibración avanzada para maquinaria agrícola.', precio: 200, creditos: 200, icono: '🚜', orden: 150 },
+  { nombre: 'DPF/EGR/AdBlue OFF', slug: 'anulaciones-off-agricola', categoria: 'agricola', descripcion: 'Solución para sistemas DPF/EGR/AdBlue en maquinaria agrícola.', precio: 80, creditos: 80, icono: '🚫', orden: 160 },
+
+  // --- CAMIÓN ---
+  { nombre: 'Stage 1', slug: 'stage-1-camion', categoria: 'camion', descripcion: 'Optimización de potencia para vehículo pesado.', precio: 180, creditos: 180, icono: '🚛', orden: 170 },
+  { nombre: 'Stage 2', slug: 'stage-2-camion', categoria: 'camion', descripcion: 'Calibración avanzada para vehículo pesado.', precio: 230, creditos: 230, icono: '🚛', orden: 180 },
+  { nombre: 'DPF/EGR/AdBlue OFF', slug: 'anulaciones-off-camion', categoria: 'camion', descripcion: 'Solución para sistemas DPF/EGR/AdBlue en vehículo pesado.', precio: 90, creditos: 90, icono: '🚫', orden: 190 },
+  { nombre: 'Decat', slug: 'decat-camion', categoria: 'camion', descripcion: 'Eliminación lógica del catalizador en vehículo pesado.', precio: 70, creditos: 70, icono: '⚠️', orden: 200 },
+
+  // --- SERVICIOS ESPECIALES (transversal, precio distinto según vehículo) ---
+  { nombre: 'IMMO OFF (coche / moto)', slug: 'immo-off-ligero', categoria: 'especiales', descripcion: 'Solución inmovilizador estándar para coche o moto, vía archivo.', precio: 90, creditos: 90, icono: '🔑', orden: 210 },
+  { nombre: 'IMMO OFF (camión / agrícola)', slug: 'immo-off-pesado', categoria: 'especiales', descripcion: 'Solución inmovilizador estándar para vehículo pesado o agrícola, vía archivo.', precio: 180, creditos: 180, icono: '🔑', orden: 220 },
+  { nombre: 'IMMO OFF MD1MG1 (coche / moto)', slug: 'immo-off-md1mg1-ligero', categoria: 'especiales', descripcion: 'Solución inmovilizador de máxima dificultad para coche o moto.', precio: 150, creditos: 150, icono: '🔐', orden: 230 },
+  { nombre: 'IMMO OFF MD1MG1 (camión / agrícola)', slug: 'immo-off-md1mg1-pesado', categoria: 'especiales', descripcion: 'Solución inmovilizador de máxima dificultad para vehículo pesado o agrícola.', precio: 250, creditos: 250, icono: '🔐', orden: 240 },
+  { nombre: 'Airbag crash data (coche / moto)', slug: 'airbag-crash-data-ligero', categoria: 'especiales', descripcion: 'Reset de datos de colisión de airbag para coche o moto, vía archivo.', precio: 70, creditos: 70, icono: '🛟', orden: 250 },
+  { nombre: 'Airbag crash data (camión / agrícola)', slug: 'airbag-crash-data-pesado', categoria: 'especiales', descripcion: 'Reset de datos de colisión de airbag para vehículo pesado o agrícola.', precio: 120, creditos: 120, icono: '🛟', orden: 260 },
+  { nombre: 'Corrección de kilometraje', slug: 'correccion-kilometraje', categoria: 'especiales', descripcion: 'Corrección de kilometraje vía archivo. El profesional es responsable de cumplir la normativa aplicable al usar este servicio.', precio: 60, creditos: 60, icono: '📟', orden: 270 },
 ]
 
 export const FALLBACK_PLANES: AkCloudPlan[] = [
@@ -118,14 +145,11 @@ export type AkCloudNovedad = {
 }
 
 export const CATEGORIA_LABELS: Record<string, string> = {
-  reprogramacion: 'Reprogramación',
-  anticontaminacion: 'Anticontaminación',
-  opciones: 'Opciones',
-  electronica: 'Electrónica',
+  coches: 'Coches',
+  motos: 'Motos',
   agricola: 'Agrícola',
   camion: 'Camión',
-  dsg: 'DSG',
-  otros: 'Otros',
+  especiales: 'Servicios especiales',
 }
 
 export function labelCategoria(categoria: string) {
@@ -142,37 +166,52 @@ export type Familia = {
 
 // Agrupación de más alto nivel que la "categoría" del servicio, pensada
 // para el primer paso de "Nuevo pedido": el distribuidor elige primero
-// el tipo de vehículo y solo entonces ve los servicios de esa familia.
-// Cualquier categoría que no esté listada aquí cae en "coches-motos"
-// por defecto (ver familiaDeCategoria), así nunca desaparece un servicio
-// nuevo por olvido de actualizar este mapa.
+// el tipo de vehículo/servicio y solo entonces ve los servicios de esa
+// familia. Aquí familia y categoría coinciden 1:1 (son las 5 categorías
+// de negocio). Cualquier categoría que no esté listada aquí cae en
+// "coches" por defecto (ver familiaDeCategoria), así nunca desaparece un
+// servicio nuevo por olvido de actualizar este mapa.
 export const FAMILIAS: Familia[] = [
   {
-    slug: 'coches-motos',
-    nombre: 'Coches / Motos',
-    descripcion: 'Reprogramación, anticontaminación, electrónica y opciones',
+    slug: 'coches',
+    nombre: 'Coches',
+    descripcion: 'Reprogramación, anulaciones y opciones para turismos',
     icono: '🚗',
-    categorias: ['reprogramacion', 'anticontaminacion', 'opciones', 'electronica', 'otros'],
+    categorias: ['coches'],
   },
   {
-    slug: 'camion-agricola',
-    nombre: 'Camión / Agrícola',
-    descripcion: 'Soluciones para maquinaria pesada y agrícola',
+    slug: 'motos',
+    nombre: 'Motos',
+    descripcion: 'Reprogramación y anulaciones para motocicletas',
+    icono: '🏍️',
+    categorias: ['motos'],
+  },
+  {
+    slug: 'agricola',
+    nombre: 'Agrícola',
+    descripcion: 'Soluciones para maquinaria y tractores agrícolas',
     icono: '🚜',
-    categorias: ['camion', 'agricola'],
+    categorias: ['agricola'],
   },
   {
-    slug: 'dsg',
-    nombre: 'DSG',
-    descripcion: 'Cambios automáticos y doble embrague',
-    icono: '⚙️',
-    categorias: ['dsg'],
+    slug: 'camion',
+    nombre: 'Camión',
+    descripcion: 'Soluciones para vehículo pesado',
+    icono: '🚛',
+    categorias: ['camion'],
+  },
+  {
+    slug: 'especiales',
+    nombre: 'Servicios especiales',
+    descripcion: 'IMMO OFF, airbag crash data, corrección de kilometraje y otros servicios de alta especialización',
+    icono: '⭐',
+    categorias: ['especiales'],
   },
 ]
 
 export function familiaDeCategoria(categoria: string): string {
   const match = FAMILIAS.find((f) => f.categorias.includes(categoria))
-  return match?.slug || 'coches-motos'
+  return match?.slug || 'coches'
 }
 
 function sortByOrden<T extends { orden?: number | null }>(items: T[]) {

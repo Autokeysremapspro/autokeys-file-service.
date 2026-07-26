@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertCircle, Car, Cog, FileUp, Gauge, ScanLine, Send, Sparkles, Truck, Wrench, ShieldCheck, CheckCircle2 } from 'lucide-react'
+import { AlertCircle, Bike, Car, Cog, FileUp, Gauge, ScanLine, Send, Sparkles, Truck, Wrench, ShieldCheck, CheckCircle2 } from 'lucide-react'
 import AKPageShell from '@/components/ak/AKPageShell'
 import AKUploader from '@/components/ak/AKUploader'
 import AKCard from '@/components/ak/AKCard'
@@ -28,9 +28,11 @@ const initialVehicle = { marca: '', modelo: '', motor: '', anio: '', cv: '', cam
 type VehicleForm = typeof initialVehicle
 
 const FAMILIA_ICONS: Record<string, any> = {
-  'coches-motos': Car,
-  'camion-agricola': Truck,
-  dsg: Cog,
+  coches: Car,
+  motos: Bike,
+  agricola: Cog,
+  camion: Truck,
+  especiales: ShieldCheck,
 }
 
 function serviceToCard(service: ServicioConPrecioReal): AKService {
