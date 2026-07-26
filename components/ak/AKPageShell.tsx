@@ -30,13 +30,13 @@ export default function AKPageShell({
             </div>
           </div>
           <div className="flex items-center gap-2.5">
-            <Link href="/nuevo-pedido" className="group relative hidden overflow-hidden rounded-[14px] border border-red-400/25 bg-gradient-to-r from-[#b80725] to-[#ef2444] px-4 py-2.5 text-sm font-black text-white shadow-[0_12px_38px_rgba(217,4,41,.25),inset_0_1px_0_rgba(255,255,255,.18)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_50px_rgba(217,4,41,.34)] md:inline-flex md:items-center md:gap-2">
-              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/15 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+            <Link href="/nuevo-pedido" className="group relative hidden overflow-hidden rounded-[14px] border border-[#ffb870]/30 bg-gradient-to-r from-[#8a4a1f] to-[#e2954d] px-4 py-2.5 text-sm font-bold text-[#0a0d12] shadow-[0_12px_38px_rgba(226,149,77,.24),inset_0_1px_0_rgba(255,255,255,.28)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_50px_rgba(226,149,77,.32)] md:inline-flex md:items-center md:gap-2">
+              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
               <UploadCloud size={17} className="relative" /> <span className="relative">Nuevo pedido</span>
             </Link>
             <Link href="/notificaciones" aria-label="Notificaciones" className="relative rounded-[14px] border border-white/[.08] bg-white/[.035] p-3 text-white/65 shadow-[inset_0_1px_0_rgba(255,255,255,.025)] transition hover:border-white/[.15] hover:bg-white/[.07] hover:text-white">
               <Bell size={18} />
-              <span className="absolute -right-1 -top-1 flex h-[19px] min-w-[19px] items-center justify-center rounded-full border-2 border-[#07080b] bg-red-500 px-1 text-[9px] font-black">3</span>
+              <span className="absolute -right-1 -top-1 flex h-[19px] min-w-[19px] items-center justify-center rounded-full border-2 border-[#07080b] bg-[#e2954d] px-1 text-[9px] font-bold text-[#0a0d12]">3</span>
             </Link>
           </div>
         </header>
@@ -44,8 +44,8 @@ export default function AKPageShell({
           {(title || subtitle) && (
             <div className="mb-8 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
               <div>
-                <p className="ak-eyebrow text-[10px] font-black uppercase tracking-[0.26em] text-red-300">{eyebrow}</p>
-                {title && <h1 className="ak-premium-heading mt-4 text-4xl font-black tracking-[-.045em] md:text-5xl">{title}</h1>}
+                <p className="ak-eyebrow text-[10px] font-bold uppercase tracking-[0.26em] text-[#ffb870]">{eyebrow}</p>
+                {title && <h1 className="ak-premium-heading mt-4 text-4xl font-bold tracking-[-.03em] md:text-5xl">{title}</h1>}
                 {subtitle && <p className="mt-3 max-w-3xl text-sm leading-6 text-white/42">{subtitle}</p>}
               </div>
               {actions}

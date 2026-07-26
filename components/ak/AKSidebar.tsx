@@ -75,13 +75,13 @@ export default function AKSidebar() {
     return (
       <Link
         href={href}
-        className={`ak-nav-item group flex items-center gap-3 rounded-[14px] border px-3.5 py-2.5 text-[12px] font-black uppercase tracking-[0.045em] transition duration-200 ${
+        className={`ak-nav-item group flex items-center gap-3 rounded-[14px] border px-3.5 py-2.5 text-[12px] font-bold uppercase tracking-[0.045em] transition duration-200 ${
           active
-            ? 'ak-nav-active border-red-400/20 bg-gradient-to-r from-red-500/[.14] to-transparent text-white shadow-[inset_0_1px_0_rgba(255,255,255,.035)]'
+            ? 'ak-nav-active border-[#e2954d]/25 bg-gradient-to-r from-[#e2954d]/[.14] to-transparent text-white shadow-[inset_0_1px_0_rgba(255,255,255,.035)]'
             : 'border-transparent text-white/48 hover:border-white/[.07] hover:bg-white/[.035] hover:text-white'
         }`}
       >
-        <span className={`relative z-10 grid h-8 w-8 place-items-center rounded-[10px] border transition ${active ? 'border-red-400/20 bg-red-500/10 text-red-300' : 'border-white/[.055] bg-white/[.02] text-white/32 group-hover:border-white/[.1] group-hover:text-white/70'}`}><Icon size={16} /></span>
+        <span className={`relative z-10 grid h-8 w-8 place-items-center rounded-[10px] border transition ${active ? 'border-[#e2954d]/25 bg-[#e2954d]/10 text-[#ffb870]' : 'border-white/[.055] bg-white/[.02] text-white/32 group-hover:border-white/[.1] group-hover:text-white/70'}`}><Icon size={16} /></span>
         <span className="relative z-10">{label}</span>
       </Link>
     )
@@ -89,7 +89,7 @@ export default function AKSidebar() {
 
   return (
     <aside className="ak-sidebar-premium hidden h-screen w-[270px] shrink-0 overflow-hidden border-r border-white/[.065] lg:sticky lg:top-0 lg:flex lg:flex-col">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_8%,rgba(217,4,41,.32),transparent_28%),radial-gradient(circle_at_100%_40%,rgba(255,255,255,.08),transparent_24%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_8%,rgba(226,149,77,.24),transparent_28%),radial-gradient(circle_at_100%_40%,rgba(255,255,255,.08),transparent_24%)]" />
       <div className="relative flex h-full flex-col px-4 pb-4 pt-5">
         <Link href="/dashboard" className="mb-6 block rounded-[18px] border border-white/[.06] bg-white/[.02] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,.03)] transition hover:border-white/[.11] hover:bg-white/[.035]">
           <Image
@@ -118,8 +118,8 @@ export default function AKSidebar() {
         )}
 
         <div className="mt-auto space-y-4">
-          <div className="rounded-[18px] border border-white/[.07] bg-gradient-to-br from-red-500/[.09] to-white/[.018] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,.035)]">
-            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-red-300">
+          <div className="rounded-[18px] border border-white/[.07] bg-gradient-to-br from-[#e2954d]/[.09] to-white/[.018] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,.035)]">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-[#ffb870]">
               <Headphones size={15} /> Soporte PRO
             </div>
             <p className="mt-2 text-[12px] leading-5 text-white/38">Pedidos, archivos y créditos conectados con Autokeys Core.</p>

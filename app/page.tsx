@@ -42,14 +42,18 @@ const highlights = [
 
 const benefits = [
   { icon: Clock3, title: 'Entrega ágil', text: 'Flujo directo con el laboratorio, sin conversaciones dispersas.' },
-  { icon: LockKeyhole, title: 'Entorno seguro', text: 'Pagos, créditos, pedidos y archivos centralizados.' },
+  { icon: LockKeyhole, title: 'Entorno seguro', text: 'Pagos, pedidos y archivos centralizados.' },
   { icon: MessageSquareText, title: 'Soporte por pedido', text: 'Toda la conversación técnica queda vinculada al trabajo.' },
-  { icon: CreditCard, title: 'Pago automático', text: 'Compra de créditos integrada mediante PayPal Checkout.' },
+  { icon: CreditCard, title: 'Pago por archivo', text: 'Pagas solo lo que pides, integrado con PayPal Checkout.' },
 ]
+
+function PinRow({ pos = '42%' }: { pos?: string }) {
+  return <div className="ak-pinrow mx-auto max-w-[1180px]" style={{ ['--ak-pin-pos' as any]: pos }} />
+}
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#020304] text-white">
+    <main className="min-h-screen overflow-hidden bg-[#05060a] text-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -71,22 +75,22 @@ export default function HomePage() {
         }}
       />
       <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_4%,rgba(220,38,38,.2),transparent_27%),radial-gradient(circle_at_88%_12%,rgba(255,30,60,.11),transparent_23%),linear-gradient(180deg,#030405,#05070b_55%,#020304)]" />
-        <div className="absolute inset-0 opacity-[.12] [background-image:linear-gradient(rgba(255,255,255,.045)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.045)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(circle_at_50%_20%,black,transparent_75%)]" />
-        <div className="absolute left-[-18rem] top-[20rem] h-[34rem] w-[34rem] rounded-full bg-red-700/20 blur-[150px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_4%,rgba(226,149,77,.16),transparent_27%),radial-gradient(circle_at_88%_12%,rgba(94,234,212,.09),transparent_23%),linear-gradient(180deg,#05060a,#070a10_55%,#05060a)]" />
+        <div className="absolute inset-0 opacity-[.10] [background-image:linear-gradient(rgba(255,255,255,.045)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.045)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(circle_at_50%_20%,black,transparent_75%)]" />
+        <div className="absolute left-[-18rem] top-[20rem] h-[34rem] w-[34rem] rounded-full bg-[#8a4a1f]/20 blur-[150px]" />
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-white/[0.065] bg-[#050608]/75 shadow-[0_12px_45px_rgba(0,0,0,.24)] backdrop-blur-2xl">
+      <header className="sticky top-0 z-50 border-b border-white/[0.065] bg-[#05060a]/78 shadow-[0_12px_45px_rgba(0,0,0,.24)] backdrop-blur-2xl">
         <div className="mx-auto flex max-w-[1540px] items-center justify-between px-5 py-3.5 lg:px-8">
           <Link href="/" className="group flex items-center gap-3">
             <img src="/images/brand/autokeys-logo-small-transparent.webp" alt="Autokeys" className="h-10 w-auto object-contain transition duration-300 group-hover:scale-[1.035]" />
             <div className="hidden border-l border-white/10 pl-3 sm:block">
-              <div className="text-sm font-black tracking-[.16em]">AK <span className="text-red-500">CLOUD</span></div>
-              <div className="mt-0.5 text-[9px] font-bold uppercase tracking-[.28em] text-zinc-600">Professional workspace</div>
+              <div className="font-display text-sm font-bold tracking-[.14em]">AK <span className="text-[#ffb870]">CLOUD</span></div>
+              <div className="ak-mono mt-0.5 text-[9px] font-medium uppercase tracking-[.24em] text-zinc-600">Professional workspace</div>
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-1 rounded-full border border-white/[.055] bg-white/[.018] p-1 text-[10px] font-black uppercase tracking-[.13em] text-zinc-500 lg:flex">
+          <nav className="ak-mono hidden items-center gap-1 rounded-full border border-white/[.055] bg-white/[.018] p-1 text-[10px] font-bold uppercase tracking-[.1em] text-zinc-500 lg:flex">
             <a href="#plataforma" className="rounded-full px-4 py-2.5 transition hover:bg-white/[.045] hover:text-white">Plataforma</a>
             <a href="#deteccion" className="rounded-full px-4 py-2.5 transition hover:bg-white/[.045] hover:text-white">Detección ECU</a>
             <a href="#servicios" className="rounded-full px-4 py-2.5 transition hover:bg-white/[.045] hover:text-white">Servicios</a>
@@ -95,10 +99,10 @@ export default function HomePage() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link href="/login" className="rounded-[13px] border border-white/[.08] bg-white/[.025] px-4 py-2.5 text-[11px] font-black uppercase tracking-wide text-zinc-200 shadow-[inset_0_1px_0_rgba(255,255,255,.035)] transition hover:-translate-y-0.5 hover:border-white/[.16] hover:bg-white/[.06]">
+            <Link href="/login" className="rounded-[13px] border border-white/[.08] bg-white/[.025] px-4 py-2.5 text-[11px] font-bold uppercase tracking-wide text-zinc-200 shadow-[inset_0_1px_0_rgba(255,255,255,.035)] transition hover:-translate-y-0.5 hover:border-white/[.16] hover:bg-white/[.06]">
               Acceder
             </Link>
-            <Link href="/register" className="group relative hidden items-center gap-2 overflow-hidden rounded-[13px] border border-red-400/25 bg-gradient-to-r from-[#b80725] to-[#ef2444] px-4 py-2.5 text-[11px] font-black uppercase tracking-wide shadow-[0_14px_40px_rgba(185,28,28,.27),inset_0_1px_0_rgba(255,255,255,.18)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_52px_rgba(185,28,28,.38)] sm:inline-flex">
+            <Link href="/register" className="group relative hidden items-center gap-2 overflow-hidden rounded-[13px] border border-[#ffb870]/30 bg-gradient-to-r from-[#8a4a1f] to-[#e2954d] px-4 py-2.5 text-[11px] font-bold uppercase tracking-wide text-[#0a0d12] shadow-[0_14px_40px_rgba(226,149,77,.24),inset_0_1px_0_rgba(255,255,255,.24)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_52px_rgba(226,149,77,.32)] sm:inline-flex">
               Solicitar acceso <ArrowRight size={15} />
             </Link>
           </div>
@@ -107,29 +111,29 @@ export default function HomePage() {
 
       <section id="plataforma" className="relative z-10 min-h-[calc(100vh-70px)] overflow-hidden border-b border-white/[0.065]">
         <div className="absolute inset-0 scale-[1.025] bg-[url('/images/ak-login-racing.png')] bg-cover bg-center opacity-90 lg:bg-[center_top]" />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,3,4,.985)_0%,rgba(2,3,4,.92)_36%,rgba(2,3,4,.48)_66%,rgba(2,3,4,.86)_100%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#020304] to-transparent" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,6,10,.985)_0%,rgba(5,6,10,.92)_36%,rgba(5,6,10,.48)_66%,rgba(5,6,10,.86)_100%)]" />
+        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#05060a] to-transparent" />
 
         <div className="relative mx-auto grid min-h-[calc(100vh-78px)] max-w-[1500px] items-center gap-10 px-5 py-16 lg:grid-cols-[.9fr_1.1fr] lg:px-8">
           <div className="max-w-3xl">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-950/45 px-4 py-2 text-[11px] font-black uppercase tracking-[.22em] text-red-300 shadow-[0_0_35px_rgba(220,38,38,.18)] backdrop-blur-xl">
+            <div className="ak-mono mb-6 inline-flex items-center gap-2 rounded-full border border-[#e2954d]/30 bg-[#3a2412]/55 px-4 py-2 text-[11px] font-bold uppercase tracking-[.18em] text-[#ffb870] shadow-[0_0_35px_rgba(226,149,77,.14)] backdrop-blur-xl">
               <Sparkles size={15} /> Ecosistema profesional para distribuidores
             </div>
 
-            <h1 className="ak-premium-heading text-5xl font-black leading-[.94] tracking-[-.055em] sm:text-6xl lg:text-[5.75rem]">
+            <h1 className="ak-premium-heading text-5xl font-bold leading-[.96] tracking-[-.035em] sm:text-6xl lg:text-[5.25rem]">
               No vendemos archivos.
-              <span className="mt-2 block bg-gradient-to-r from-[#ff2448] via-[#ff6a7f] to-white bg-clip-text text-transparent drop-shadow-[0_0_36px_rgba(217,4,41,.2)]">Entregamos soluciones.</span>
+              <span className="mt-2 block bg-gradient-to-r from-[#ffb870] via-[#f2d4a6] to-white bg-clip-text text-transparent drop-shadow-[0_0_36px_rgba(226,149,77,.18)]">Entregamos soluciones.</span>
             </h1>
 
             <p className="mt-7 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
-              Pedidos, créditos, soporte, descargas y comunicación directa con el laboratorio en una plataforma creada por profesionales de la electrónica de vehículos.
+              Pedidos, soporte, descargas y comunicación directa con el laboratorio en una plataforma creada por profesionales de la electrónica de vehículos.
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Link href="/register" className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-red-700 via-red-600 to-red-500 px-6 py-4 text-sm font-black uppercase tracking-wide shadow-[0_18px_55px_rgba(185,28,28,.38)] transition hover:-translate-y-0.5 hover:brightness-110">
+              <Link href="/register" className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-[#8a4a1f] via-[#c17a3b] to-[#e2954d] px-6 py-4 text-sm font-bold uppercase tracking-wide text-[#0a0d12] shadow-[0_18px_55px_rgba(226,149,77,.32)] transition hover:-translate-y-0.5 hover:brightness-105">
                 Solicitar acceso profesional <ArrowRight size={18} className="transition group-hover:translate-x-1" />
               </Link>
-              <Link href="/login" className="inline-flex items-center justify-center gap-3 rounded-2xl border border-white/12 bg-black/45 px-6 py-4 text-sm font-black uppercase tracking-wide backdrop-blur-xl transition hover:border-red-500/40 hover:bg-white/[0.06]">
+              <Link href="/login" className="inline-flex items-center justify-center gap-3 rounded-2xl border border-white/12 bg-black/45 px-6 py-4 text-sm font-bold uppercase tracking-wide backdrop-blur-xl transition hover:border-[#e2954d]/40 hover:bg-white/[0.06]">
                 Entrar al portal <ChevronRight size={18} />
               </Link>
             </div>
@@ -139,8 +143,8 @@ export default function HomePage() {
                 const Icon = item.icon
                 return (
                   <div key={item.title} className="ak-card-hover rounded-[18px] border border-white/[.075] bg-black/40 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,.035)] backdrop-blur-xl">
-                    <Icon size={20} className="mb-3 text-red-500" />
-                    <div className="text-xs font-black uppercase tracking-wide">{item.title}</div>
+                    <Icon size={20} className="mb-3 text-[#5eead4]" />
+                    <div className="text-xs font-bold uppercase tracking-wide">{item.title}</div>
                     <div className="mt-1 text-xs leading-5 text-zinc-600">{item.text}</div>
                   </div>
                 )
@@ -150,56 +154,56 @@ export default function HomePage() {
 
           <div className="hidden justify-end lg:flex">
             <div className="relative w-full max-w-[610px]">
-              <div className="absolute -inset-10 rounded-full bg-red-700/15 blur-[90px]" />
-              <div className="ak-float relative overflow-hidden rounded-[28px] border border-white/[.1] bg-[#080a0e]/88 p-4 shadow-[0_55px_150px_rgba(0,0,0,.72),0_0_0_1px_rgba(255,255,255,.025)] backdrop-blur-2xl">
+              <div className="absolute -inset-10 rounded-full bg-[#8a4a1f]/15 blur-[90px]" />
+              <div className="ak-float relative overflow-hidden rounded-[28px] border border-white/[.1] bg-[#0a0d12]/88 p-4 shadow-[0_55px_150px_rgba(0,0,0,.72),0_0_0_1px_rgba(255,255,255,.025)] backdrop-blur-2xl">
                 <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="grid h-9 w-9 place-items-center rounded-xl bg-red-600/15 text-red-400"><CloudUpload size={19} /></div>
+                    <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#e2954d]/15 text-[#ffb870]"><CloudUpload size={19} /></div>
                     <div>
-                      <div className="text-sm font-black">AK Cloud Workspace</div>
-                      <div className="text-[10px] uppercase tracking-[.18em] text-zinc-600">Distribuidor Professional</div>
+                      <div className="text-sm font-bold">AK Cloud Workspace</div>
+                      <div className="ak-mono text-[10px] uppercase tracking-[.16em] text-zinc-600">Distribuidor Professional</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-[10px] font-black uppercase text-emerald-300">
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> Online
+                  <div className="ak-mono flex items-center gap-2 rounded-full bg-[#5eead4]/10 px-3 py-1 text-[10px] font-bold uppercase text-[#5eead4]">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-[#5eead4]" /> Online
                   </div>
                 </div>
 
-                <div className="mt-4 rounded-[1.6rem] border border-dashed border-red-500/35 bg-[radial-gradient(circle_at_center,rgba(220,38,38,.19),rgba(255,255,255,.025))] p-8 text-center">
-                  <UploadCloud className="mx-auto text-red-400" size={45} />
-                  <div className="mt-4 text-xl font-black uppercase">Nuevo trabajo</div>
+                <div className="mt-4 rounded-[1.6rem] border border-dashed border-[#e2954d]/35 bg-[radial-gradient(circle_at_center,rgba(226,149,77,.16),rgba(255,255,255,.025))] p-8 text-center">
+                  <UploadCloud className="mx-auto text-[#ffb870]" size={45} />
+                  <div className="mt-4 text-xl font-bold uppercase">Nuevo trabajo</div>
                   <div className="mt-2 text-sm text-zinc-500">Sube el ORI y completa los datos manualmente.</div>
                 </div>
 
                 <div className="mt-4 grid grid-cols-3 gap-3">
                   {[
-                    ['Créditos', '845'],
                     ['En proceso', '3'],
                     ['Listos', '2'],
+                    ['Total mes', '14'],
                   ].map(([label, value]) => (
                     <div key={label} className="rounded-2xl border border-white/10 bg-black/35 p-4">
-                      <div className="text-2xl font-black">{value}</div>
-                      <div className="mt-1 text-[10px] font-black uppercase tracking-[.14em] text-zinc-600">{label}</div>
+                      <div className="ak-mono text-2xl font-bold">{value}</div>
+                      <div className="mt-1 text-[10px] font-bold uppercase tracking-[.12em] text-zinc-600">{label}</div>
                     </div>
                   ))}
                 </div>
 
                 <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black/35">
                   <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-                    <div className="text-xs font-black uppercase tracking-[.15em]">Últimos pedidos</div>
-                    <div className="text-[10px] font-bold text-red-400">Ver todos</div>
+                    <div className="text-xs font-bold uppercase tracking-[.15em]">Últimos pedidos</div>
+                    <div className="ak-mono text-[10px] font-bold text-[#ffb870]">Ver todos</div>
                   </div>
                   {[
                     ['BMW 320d', 'Stage 1', 'En proceso', 'text-amber-400'],
-                    ['Audi A4', 'DPF + EGR', 'Completado', 'text-emerald-400'],
+                    ['Audi A4', 'DPF + EGR', 'Completado', 'text-[#5eead4]'],
                     ['Golf GTI', 'Stage 2', 'Pendiente', 'text-sky-400'],
                   ].map(([vehicle, service, status, color]) => (
                     <div key={vehicle} className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-white/[0.06] px-4 py-3 last:border-0">
                       <div>
-                        <div className="text-sm font-black">{vehicle}</div>
+                        <div className="text-sm font-bold">{vehicle}</div>
                         <div className="mt-0.5 text-xs text-zinc-600">{service}</div>
                       </div>
-                      <div className={`text-[10px] font-black uppercase ${color}`}>{status}</div>
+                      <div className={`ak-mono text-[10px] font-bold uppercase ${color}`}>{status}</div>
                       <ChevronRight size={15} className="text-zinc-700" />
                     </div>
                   ))}
@@ -210,12 +214,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="deteccion" className="ak-landing-section relative z-10 mx-auto max-w-[1500px] px-5 py-24 lg:px-8">
+      <div className="relative z-10 py-10"><PinRow pos="30%" /></div>
+
+      <section id="deteccion" className="ak-landing-section relative z-10 mx-auto max-w-[1500px] px-5 py-16 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[1fr_.85fr] lg:items-center">
           <div>
-            <div className="text-xs font-black uppercase tracking-[.28em] text-red-500">AK Detection Engine</div>
-            <h2 className="mt-4 text-4xl font-black uppercase leading-[.98] tracking-[-.035em] sm:text-5xl">
-              La ECU se identifica sola. <span className="text-red-500">De verdad.</span>
+            <div className="ak-mono text-xs font-bold uppercase tracking-[.24em] text-[#5eead4]">AK Detection Engine</div>
+            <h2 className="mt-4 text-4xl font-bold uppercase leading-[.98] tracking-[-.03em] sm:text-5xl">
+              La ECU se identifica sola. <span className="text-[#ffb870]">De verdad.</span>
             </h2>
             <p className="mt-5 max-w-xl text-zinc-500">
               Subes el archivo original y el motor de detección busca primero una huella exacta contra
@@ -224,32 +230,32 @@ export default function HomePage() {
             </p>
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                <div className="text-2xl font-black text-emerald-400">99%</div>
+                <div className="ak-mono text-2xl font-bold text-[#5eead4]">99%</div>
                 <div className="mt-1 text-xs font-bold uppercase tracking-wide text-zinc-600">Huella exacta</div>
               </div>
               <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                <div className="text-2xl font-black text-red-400">0</div>
+                <div className="ak-mono text-2xl font-bold text-[#ffb870]">0</div>
                 <div className="mt-1 text-xs font-bold uppercase tracking-wide text-zinc-600">Marcas inventadas</div>
               </div>
             </div>
           </div>
 
           <div className="relative">
-            <div className="absolute -inset-8 rounded-full bg-red-700/10 blur-[80px]" />
-            <div className="ak-scan-card relative overflow-hidden rounded-[1.8rem] border border-white/12 bg-[#080a0e]/90 p-5 shadow-[0_40px_110px_rgba(0,0,0,.6)] backdrop-blur-2xl">
-              <div className="mb-4 flex items-center justify-between font-mono text-[11px] uppercase tracking-widest text-zinc-600">
+            <div className="absolute -inset-8 rounded-full bg-[#5eead4]/[.06] blur-[80px]" />
+            <div className="ak-scan-card relative overflow-hidden rounded-[1.8rem] border border-white/12 bg-[#0a0d12]/90 p-5 shadow-[0_40px_110px_rgba(0,0,0,.6)] backdrop-blur-2xl">
+              <div className="ak-mono mb-4 flex items-center justify-between text-[11px] uppercase tracking-widest text-zinc-600">
                 <span>ak_ecu_scan.log</span>
                 <span className="flex gap-1.5"><i className="h-2 w-2 rounded-full bg-white/15" /><i className="h-2 w-2 rounded-full bg-white/15" /><i className="h-2 w-2 rounded-full bg-white/15" /></span>
               </div>
               <div className="ak-scan-screen relative rounded-xl border border-white/10 bg-black p-5 font-mono text-[13px]">
-                <div className="ak-scan-line flex justify-between border-b border-dashed border-white/[0.06] py-1.5"><span className="text-zinc-600">Archivo recibido</span><span className="text-emerald-400">ORI_0421.bin</span></div>
+                <div className="ak-scan-line flex justify-between border-b border-dashed border-white/[0.06] py-1.5"><span className="text-zinc-600">Archivo recibido</span><span className="text-[#5eead4]">ORI_0421.bin</span></div>
                 <div className="ak-scan-line flex justify-between border-b border-dashed border-white/[0.06] py-1.5"><span className="text-zinc-600">Huella SHA-256</span><span className="text-sky-400">coincidencia exacta</span></div>
-                <div className="ak-scan-line flex justify-between border-b border-dashed border-white/[0.06] py-1.5"><span className="text-zinc-600">Marca / Modelo</span><span className="text-emerald-400">Volkswagen Golf 8</span></div>
+                <div className="ak-scan-line flex justify-between border-b border-dashed border-white/[0.06] py-1.5"><span className="text-zinc-600">Marca / Modelo</span><span className="text-[#5eead4]">Volkswagen Golf 8</span></div>
                 <div className="ak-scan-line flex justify-between border-b border-dashed border-white/[0.06] py-1.5"><span className="text-zinc-600">ECU</span><span className="text-sky-400">Bosch MG1CS181</span></div>
-                <div className="ak-scan-line flex justify-between border-b border-dashed border-white/[0.06] py-1.5"><span className="text-zinc-600">Sugerido</span><span className="text-amber-400">Stage 1 · EGR OFF</span></div>
-                <div className="ak-scan-line flex justify-between py-1.5"><span className="text-zinc-600">Coste</span><span className="text-white">55 créditos</span></div>
-                <div className="ak-scan-status mt-3 flex items-center gap-2 border-t border-white/10 pt-3 text-[12px] text-emerald-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_theme(colors.emerald.400)]" /> Detección completada — listo para enviar
+                <div className="ak-scan-line flex justify-between border-b border-dashed border-white/[0.06] py-1.5"><span className="text-zinc-600">Sugerido</span><span className="text-[#ffb870]">Stage 1 · EGR OFF</span></div>
+                <div className="ak-scan-line flex justify-between py-1.5"><span className="text-zinc-600">Precio</span><span className="text-white">65 €</span></div>
+                <div className="ak-scan-status mt-3 flex items-center gap-2 border-t border-white/10 pt-3 text-[12px] text-[#5eead4]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#5eead4] shadow-[0_0_8px_rgba(94,234,212,.9)]" /> Detección completada — listo para enviar
                 </div>
               </div>
             </div>
@@ -260,7 +266,7 @@ export default function HomePage() {
       <style>{`
         .ak-scan-screen::after {
           content: ''; position: absolute; left: 0; right: 0; height: 40%;
-          background: linear-gradient(180deg, rgba(19,210,106,0) 0%, rgba(19,210,106,.09) 50%, rgba(19,210,106,0) 100%);
+          background: linear-gradient(180deg, rgba(94,234,212,0) 0%, rgba(94,234,212,.09) 50%, rgba(94,234,212,0) 100%);
           animation: akScanSweep 3.2s linear infinite;
         }
         @keyframes akScanSweep { 0% { top: -40%; } 100% { top: 100%; } }
@@ -276,10 +282,12 @@ export default function HomePage() {
         @media (prefers-reduced-motion: reduce) { .ak-scan-screen::after, .ak-scan-line, .ak-scan-status { animation: none; opacity: 1; } }
       `}</style>
 
-      <section id="servicios" className="ak-landing-section relative z-10 mx-auto max-w-[1500px] px-5 py-24 lg:px-8">
+      <div className="relative z-10 py-10"><PinRow pos="66%" /></div>
+
+      <section id="servicios" className="ak-landing-section relative z-10 mx-auto max-w-[1500px] px-5 py-16 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="text-xs font-black uppercase tracking-[.28em] text-red-500">Servicios técnicos</div>
-          <h2 className="mt-4 text-4xl font-black uppercase tracking-[-.035em] sm:text-5xl">Todo tu trabajo, dentro de un único ecosistema.</h2>
+          <div className="ak-mono text-xs font-bold uppercase tracking-[.24em] text-[#ffb870]">Servicios técnicos</div>
+          <h2 className="mt-4 text-4xl font-bold uppercase tracking-[-.03em] sm:text-5xl">Todo tu trabajo, dentro de un único ecosistema.</h2>
           <p className="mt-5 text-zinc-500">Selecciona los servicios disponibles en el portal, sigue el proceso y recibe los resultados sin perder trazabilidad.</p>
         </div>
 
@@ -287,12 +295,12 @@ export default function HomePage() {
           {services.map((service) => {
             const Icon = service.icon
             return (
-              <div key={service.name} className="group relative overflow-hidden rounded-[1.7rem] border border-white/10 bg-gradient-to-b from-white/[0.055] to-white/[0.018] p-6 transition duration-300 hover:-translate-y-1 hover:border-red-500/40 hover:shadow-[0_28px_70px_rgba(185,28,28,.14)]">
-                <div className="absolute right-[-2rem] top-[-2rem] h-28 w-28 rounded-full bg-red-600/10 blur-3xl transition group-hover:bg-red-600/20" />
-                <div className="grid h-12 w-12 place-items-center rounded-2xl border border-red-500/25 bg-red-600/10 text-red-400"><Icon size={23} /></div>
-                <div className="mt-5 text-xl font-black uppercase">{service.name}</div>
+              <div key={service.name} className="group relative overflow-hidden rounded-[1.7rem] border border-white/10 bg-gradient-to-b from-white/[0.055] to-white/[0.018] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#e2954d]/40 hover:shadow-[0_28px_70px_rgba(226,149,77,.12)]">
+                <div className="absolute right-[-2rem] top-[-2rem] h-28 w-28 rounded-full bg-[#e2954d]/10 blur-3xl transition group-hover:bg-[#e2954d]/20" />
+                <div className="grid h-12 w-12 place-items-center rounded-2xl border border-[#e2954d]/25 bg-[#e2954d]/10 text-[#ffb870]"><Icon size={23} /></div>
+                <div className="mt-5 text-xl font-bold uppercase">{service.name}</div>
                 <div className="mt-2 text-sm leading-6 text-zinc-600">{service.detail}</div>
-                <div className="mt-5 flex items-center gap-2 text-xs font-black uppercase tracking-wide text-red-400">Disponible en AK Cloud <ChevronRight size={15} /></div>
+                <div className="ak-mono mt-5 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#5eead4]">Disponible en AK Cloud <ChevronRight size={15} /></div>
               </div>
             )
           })}
@@ -300,13 +308,13 @@ export default function HomePage() {
       </section>
 
       <section id="flujo" className="relative z-10 border-y border-white/[0.07] bg-white/[0.018]">
-        <div className="mx-auto max-w-[1500px] px-5 py-24 lg:px-8">
+        <div className="mx-auto max-w-[1500px] px-5 py-20 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-[.72fr_1.28fr] lg:items-start">
             <div className="lg:sticky lg:top-28">
-              <div className="text-xs font-black uppercase tracking-[.28em] text-red-500">Flujo profesional</div>
-              <h2 className="mt-4 text-4xl font-black uppercase leading-[.98] tracking-[-.035em] sm:text-5xl">Del ORI a la solución, sin caos.</h2>
+              <div className="ak-mono text-xs font-bold uppercase tracking-[.24em] text-[#ffb870]">Flujo profesional</div>
+              <h2 className="mt-4 text-4xl font-bold uppercase leading-[.98] tracking-[-.03em] sm:text-5xl">Del ORI a la solución, sin caos.</h2>
               <p className="mt-5 max-w-xl text-zinc-500">AK Cloud conecta al distribuidor directamente con Autokeys Core para que cada pedido tenga estado, historial, archivos y soporte.</p>
-              <Link href="/register" className="mt-8 inline-flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-600/10 px-5 py-3 text-xs font-black uppercase tracking-wide text-red-300 transition hover:bg-red-600 hover:text-white">
+              <Link href="/register" className="mt-8 inline-flex items-center gap-2 rounded-xl border border-[#e2954d]/30 bg-[#e2954d]/10 px-5 py-3 text-xs font-bold uppercase tracking-wide text-[#ffb870] transition hover:bg-[#e2954d] hover:text-[#0a0d12]">
                 Empezar ahora <ArrowRight size={16} />
               </Link>
             </div>
@@ -314,9 +322,9 @@ export default function HomePage() {
             <div className="grid gap-4 sm:grid-cols-2">
               {steps.map(([title, text], index) => (
                 <div key={title} className="relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-black/35 p-6">
-                  <div className="absolute right-4 top-2 text-7xl font-black text-white/[0.025]">0{index + 1}</div>
-                  <div className="grid h-10 w-10 place-items-center rounded-full bg-red-600 text-sm font-black shadow-[0_0_32px_rgba(220,38,38,.35)]">{index + 1}</div>
-                  <div className="mt-5 text-xl font-black uppercase">{title}</div>
+                  <div className="ak-mono absolute right-4 top-2 text-7xl font-bold text-white/[0.025]">0{index + 1}</div>
+                  <div className="ak-mono grid h-10 w-10 place-items-center rounded-full bg-[#e2954d] text-sm font-bold text-[#0a0d12] shadow-[0_0_32px_rgba(226,149,77,.32)]">{index + 1}</div>
+                  <div className="mt-5 text-xl font-bold uppercase">{title}</div>
                   <div className="mt-2 text-sm leading-6 text-zinc-600">{text}</div>
                 </div>
               ))}
@@ -325,14 +333,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="ventajas" className="ak-landing-section relative z-10 mx-auto max-w-[1500px] px-5 py-24 lg:px-8">
+      <section id="ventajas" className="ak-landing-section relative z-10 mx-auto max-w-[1500px] px-5 py-20 lg:px-8">
         <div className="grid gap-4 lg:grid-cols-4">
           {benefits.map((benefit) => {
             const Icon = benefit.icon
             return (
               <div key={benefit.title} className="rounded-[1.6rem] border border-white/10 bg-white/[0.025] p-6">
-                <Icon size={23} className="text-red-500" />
-                <div className="mt-5 text-lg font-black uppercase">{benefit.title}</div>
+                <Icon size={23} className="text-[#ffb870]" />
+                <div className="mt-5 text-lg font-bold uppercase">{benefit.title}</div>
                 <div className="mt-2 text-sm leading-6 text-zinc-600">{benefit.text}</div>
               </div>
             )
@@ -346,30 +354,30 @@ export default function HomePage() {
             ['18 min', 'Tiempo medio'],
             ['100%', 'Trazabilidad del pedido'],
           ].map(([value, label]) => (
-            <div key={label} className="rounded-[1.5rem] border border-white/10 bg-gradient-to-b from-red-950/25 to-black/30 p-6 text-center">
-              <div className="text-4xl font-black text-white">{value}</div>
-              <div className="mt-2 text-[11px] font-black uppercase tracking-[.18em] text-zinc-600">{label}</div>
+            <div key={label} className="rounded-[1.5rem] border border-white/10 bg-gradient-to-b from-[#8a4a1f]/20 to-black/30 p-6 text-center">
+              <div className="ak-mono text-4xl font-bold text-white">{value}</div>
+              <div className="mt-2 text-[11px] font-bold uppercase tracking-[.16em] text-zinc-600">{label}</div>
             </div>
           ))}
         </div>
       </section>
 
       <section className="relative z-10 px-5 pb-24 lg:px-8">
-        <div className="mx-auto max-w-[1500px] overflow-hidden rounded-[2rem] border border-red-500/20 shadow-[0_35px_100px_rgba(0,0,0,.55)]">
+        <div className="mx-auto max-w-[1500px] overflow-hidden rounded-[2rem] border border-[#e2954d]/20 shadow-[0_35px_100px_rgba(0,0,0,.55)]">
           <div className="relative p-8 sm:p-12">
             <div className="absolute inset-0 bg-[url('/akcloud/login-racing-reference.png')] bg-cover bg-center" />
-            <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(5,5,5,.95)_0%,rgba(5,5,5,.85)_45%,rgba(185,28,28,.25)_100%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(5,6,10,.95)_0%,rgba(5,6,10,.85)_45%,rgba(138,74,31,.32)_100%)]" />
             <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
               <div>
-                <div className="text-xs font-black uppercase tracking-[.28em] text-red-400">Acceso profesional</div>
-                <h2 className="mt-4 max-w-4xl text-4xl font-black uppercase leading-[.98] tracking-[-.035em] sm:text-5xl">Tu próximo trabajo empieza dentro de AK Cloud.</h2>
+                <div className="ak-mono text-xs font-bold uppercase tracking-[.24em] text-[#ffb870]">Acceso profesional</div>
+                <h2 className="mt-4 max-w-4xl text-4xl font-bold uppercase leading-[.98] tracking-[-.03em] sm:text-5xl">Tu próximo trabajo empieza dentro de AK Cloud.</h2>
                 <p className="mt-4 max-w-2xl text-zinc-300">Solicita tu cuenta de distribuidor y trabaja conectado directamente con Autokeys Lab.</p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-                <Link href="/register" className="inline-flex min-w-56 items-center justify-center gap-2 rounded-2xl bg-red-600 px-6 py-4 text-sm font-black uppercase shadow-[0_20px_55px_rgba(185,28,28,.35)] transition hover:bg-red-500">
+                <Link href="/register" className="inline-flex min-w-56 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#8a4a1f] to-[#e2954d] px-6 py-4 text-sm font-bold uppercase text-[#0a0d12] shadow-[0_20px_55px_rgba(226,149,77,.3)] transition hover:brightness-105">
                   Crear cuenta <ArrowRight size={18} />
                 </Link>
-                <Link href="/login" className="inline-flex min-w-56 items-center justify-center gap-2 rounded-2xl border border-white/20 bg-black/40 px-6 py-4 text-sm font-black uppercase backdrop-blur-xl transition hover:bg-white/[0.1]">
+                <Link href="/login" className="inline-flex min-w-56 items-center justify-center gap-2 rounded-2xl border border-white/20 bg-black/40 px-6 py-4 text-sm font-bold uppercase backdrop-blur-xl transition hover:bg-white/[0.1]">
                   Ya tengo acceso
                 </Link>
               </div>
@@ -384,7 +392,7 @@ export default function HomePage() {
             <img src="/images/brand/autokeys-logo-small-transparent.webp" alt="Autokeys" className="h-8 w-auto object-contain opacity-80" />
             <span>AK Cloud · Autokeys Remaps Pro</span>
           </div>
-          <div className="flex flex-wrap gap-5 text-xs font-bold uppercase tracking-wide">
+          <div className="ak-mono flex flex-wrap gap-5 text-xs font-bold uppercase tracking-wide">
             <Link href="/login" className="hover:text-white">Acceder</Link>
             <Link href="/register" className="hover:text-white">Solicitar cuenta</Link>
             <Link href="/legal/terminos" className="hover:text-white">Términos</Link>

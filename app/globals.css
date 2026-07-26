@@ -2,34 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================================================
+   AK CLOUD — Identidad visual "Bench" (mesa de trabajo ECU)
+   Paleta: cobre (soldadura) + señal (traza de osciloscopio)
+   sobre un antracita azulado, no negro puro ni rojo genérico.
+   ========================================================= */
 :root {
-  --ak-black: #050505;
-  --ak-graphite: #0b0d10;
-  --ak-panel: #101216;
-  --ak-panel-2: #151922;
+  --ak-black: #05060a;
+  --ak-graphite: #0a0d13;
+  --ak-panel: #10141c;
+  --ak-panel-2: #151b25;
   --ak-border: rgba(255,255,255,.10);
   --ak-border-strong: rgba(255,255,255,.16);
-  --ak-red: #d90429;
-  --ak-glow: #ff2448;
-  --ak-green: #13d26a;
-  --ak-blue: #1c8dff;
-  --ak-orange: #ff9f1c;
+
+  /* Marca */
+  --ak-copper: #e2954d;
+  --ak-copper-bright: #ffb870;
+  --ak-copper-deep: #8a4a1f;
+  --ak-signal: #5eead4;
+  --ak-signal-bright: #99f6e4;
+  --ak-chalk: #f5f1e8;
+
+  /* Compat: nombres antiguos usados en algunas páginas — ahora apuntan a la marca nueva */
+  --ak-red: var(--ak-copper);
+  --ak-glow: var(--ak-copper-bright);
+  --ak-green: #34d399;
+  --ak-blue: var(--ak-signal);
+  --ak-orange: #f2c14e;
 }
 
 * { box-sizing: border-box; }
 html, body { min-height: 100%; }
 body {
   margin: 0;
-  color: #fff;
+  color: var(--ak-chalk);
+  font-family: var(--font-body), Inter, ui-sans-serif, system-ui, sans-serif;
   background:
-    radial-gradient(circle at 18% -10%, rgba(217, 4, 41, .34), transparent 32%),
-    radial-gradient(circle at 88% 8%, rgba(28, 141, 255, .18), transparent 30%),
-    radial-gradient(circle at 50% 105%, rgba(217, 4, 41, .12), transparent 35%),
+    radial-gradient(circle at 16% -8%, rgba(226,149,77,.16), transparent 30%),
+    radial-gradient(circle at 90% 6%, rgba(94,234,212,.10), transparent 28%),
+    radial-gradient(circle at 50% 108%, rgba(226,149,77,.08), transparent 35%),
     var(--ak-black);
 }
 input, textarea, select, button { font: inherit; }
 button { cursor: pointer; }
 a { color: inherit; text-decoration: none; }
+h1, h2, h3, h4, .font-display { font-family: var(--font-display), 'Space Grotesk', ui-sans-serif, sans-serif; }
+code, .font-data, .ak-mono { font-family: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace; }
 
 .ak-noise::before {
   content: '';
@@ -37,7 +55,7 @@ a { color: inherit; text-decoration: none; }
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: .055;
+  opacity: .05;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
 }
 
@@ -47,7 +65,7 @@ a { color: inherit; text-decoration: none; }
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: .12;
+  opacity: .10;
   background-image:
     linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
@@ -57,9 +75,9 @@ a { color: inherit; text-decoration: none; }
 
 .ak-glass {
   border: 1px solid var(--ak-border);
-  background: linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.035));
+  background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.03));
   box-shadow: 0 28px 90px rgba(0,0,0,.45);
-  backdrop-filter: blur(24px);
+  backdrop-filter: blur(22px);
 }
 
 .ak-card-hover {
@@ -67,18 +85,18 @@ a { color: inherit; text-decoration: none; }
 }
 .ak-card-hover:hover {
   transform: translateY(-2px);
-  border-color: rgba(255,36,72,.44);
-  box-shadow: 0 24px 80px rgba(217,4,41,.16), 0 24px 90px rgba(0,0,0,.48);
+  border-color: rgba(226,149,77,.42);
+  box-shadow: 0 24px 80px rgba(226,149,77,.14), 0 24px 90px rgba(0,0,0,.48);
 }
 
-.ak-red-glow {
-  box-shadow: 0 0 38px rgba(217,4,41,.28), inset 0 0 22px rgba(255,255,255,.04);
+.ak-red-glow, .ak-copper-glow {
+  box-shadow: 0 0 38px rgba(226,149,77,.26), inset 0 0 22px rgba(255,255,255,.04);
 }
 
 .ak-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
 .ak-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,.04); border-radius: 999px; }
 .ak-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.16); border-radius: 999px; }
-.ak-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,36,72,.55); }
+.ak-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(226,149,77,.55); }
 
 @keyframes akPulse {
   0%, 100% { opacity: .45; transform: scale(1); }
@@ -103,6 +121,32 @@ a { color: inherit; text-decoration: none; }
   animation: akSweep 1.8s ease-in-out infinite;
 }
 
+/* ---------------------------------------------------------
+   Elemento de firma: fila de "pines" — como un conector real
+   (OBD-II, JTAG, cabezal de programador). Se usa como divisor
+   entre secciones en vez de una simple línea genérica.
+   --------------------------------------------------------- */
+.ak-pinrow {
+  position: relative;
+  height: 7px;
+  border-radius: 999px;
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.16) 0 6px, transparent 6px 18px);
+}
+.ak-pinrow::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: var(--ak-pin-pos, 42%);
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: 999px;
+  background: var(--ak-copper-bright);
+  box-shadow: 0 0 14px 3px rgba(226,149,77,.65), 0 0 4px rgba(255,255,255,.7);
+  animation: akPinLive 2.6s ease-in-out infinite;
+}
+@keyframes akPinLive { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+
 .card {
   border: 1px solid var(--ak-border);
   border-radius: 1.8rem;
@@ -116,51 +160,52 @@ a { color: inherit; text-decoration: none; }
   border-radius: 1.05rem;
   border: 1px solid rgba(255,255,255,.10);
   background: rgba(0,0,0,.30);
+  color: var(--ak-chalk);
   padding: .9rem 1rem;
-  color: white;
   outline: none;
   transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
 }
 .ak-input::placeholder { color: rgba(255,255,255,.25); }
 .ak-input:focus {
-  border-color: rgba(255,36,72,.66);
-  box-shadow: 0 0 0 4px rgba(217,4,41,.12);
+  border-color: rgba(226,149,77,.62);
+  box-shadow: 0 0 0 4px rgba(226,149,77,.12);
   background: rgba(0,0,0,.44);
 }
 
 .ak-label {
   display: block;
   margin-bottom: .55rem;
+  font-family: var(--font-mono), monospace;
   font-size: .68rem;
-  font-weight: 900;
-  letter-spacing: .22em;
+  font-weight: 700;
+  letter-spacing: .18em;
   text-transform: uppercase;
   color: rgba(255,255,255,.42);
 }
 
 table { width: 100%; border-collapse: collapse; }
-th { padding: 1rem; text-align: left; font-size: .72rem; text-transform: uppercase; letter-spacing: .18em; color: rgba(255,255,255,.38); border-bottom: 1px solid rgba(255,255,255,.08); }
+th { padding: 1rem; text-align: left; font-family: var(--font-mono), monospace; font-size: .68rem; text-transform: uppercase; letter-spacing: .14em; color: rgba(255,255,255,.38); border-bottom: 1px solid rgba(255,255,255,.08); }
 td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,.06); color: rgba(255,255,255,.78); }
 tr:hover td { background: rgba(255,255,255,.025); }
 
 .ak-racing-hero {
   background:
     linear-gradient(90deg, rgba(0,0,0,.92), rgba(0,0,0,.40), rgba(0,0,0,.92)),
-    radial-gradient(circle at 78% 18%, rgba(217,4,41,.38), transparent 25%),
+    radial-gradient(circle at 78% 18%, rgba(226,149,77,.30), transparent 25%),
     linear-gradient(135deg, #070707, #0b0f16 55%, #050505);
 }
 
-/* AK CLOUD PREMIUM VISUAL SYSTEM — UI only */
+/* AK CLOUD — SISTEMA VISUAL "BENCH" */
 :root {
-  --ak-canvas: #050608;
-  --ak-surface: rgba(14, 16, 21, .82);
-  --ak-surface-solid: #0d1015;
-  --ak-surface-elevated: rgba(19, 22, 29, .92);
+  --ak-canvas: #05060a;
+  --ak-surface: rgba(14, 17, 23, .82);
+  --ak-surface-solid: #0c0f15;
+  --ak-surface-elevated: rgba(19, 23, 30, .92);
   --ak-line: rgba(255, 255, 255, .075);
   --ak-line-hover: rgba(255, 255, 255, .15);
-  --ak-text: #f7f8fa;
-  --ak-muted: rgba(247, 248, 250, .46);
-  --ak-muted-2: rgba(247, 248, 250, .28);
+  --ak-text: var(--ak-chalk);
+  --ak-muted: rgba(245, 241, 232, .46);
+  --ak-muted-2: rgba(245, 241, 232, .28);
   --ak-radius-sm: 14px;
   --ak-radius-md: 20px;
   --ak-radius-lg: 28px;
@@ -170,11 +215,10 @@ tr:hover td { background: rgba(255,255,255,.025); }
 
 html { scroll-behavior: smooth; }
 body {
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   letter-spacing: -.01em;
   background-color: var(--ak-canvas);
 }
-::selection { background: rgba(255,36,72,.34); color: #fff; }
+::selection { background: rgba(226,149,77,.34); color: #05060a; }
 
 .ak-glass,
 .card {
@@ -182,9 +226,9 @@ body {
   border-color: var(--ak-line);
   background:
     linear-gradient(150deg, rgba(255,255,255,.055), transparent 34%),
-    linear-gradient(180deg, rgba(16,19,25,.91), rgba(8,10,14,.86));
+    linear-gradient(180deg, rgba(16,20,27,.91), rgba(8,10,14,.86));
   box-shadow: var(--ak-shadow-card);
-  backdrop-filter: blur(24px) saturate(125%);
+  backdrop-filter: blur(22px) saturate(120%);
 }
 .ak-glass::before,
 .card::before {
@@ -193,16 +237,16 @@ body {
   inset: 0;
   pointer-events: none;
   border-radius: inherit;
-  background: linear-gradient(115deg, rgba(255,255,255,.06), transparent 25%, transparent 72%, rgba(217,4,41,.035));
+  background: linear-gradient(115deg, rgba(255,255,255,.06), transparent 25%, transparent 72%, rgba(94,234,212,.03));
 }
 
 .ak-card-hover:hover {
   transform: translateY(-4px);
-  border-color: rgba(255,36,72,.34);
+  border-color: rgba(226,149,77,.32);
   background:
     linear-gradient(150deg, rgba(255,255,255,.072), transparent 34%),
-    linear-gradient(180deg, rgba(20,23,30,.95), rgba(10,12,17,.9));
-  box-shadow: 0 32px 100px rgba(0,0,0,.52), 0 0 0 1px rgba(255,36,72,.08), 0 20px 70px rgba(217,4,41,.10);
+    linear-gradient(180deg, rgba(21,25,32,.95), rgba(10,12,17,.9));
+  box-shadow: 0 32px 100px rgba(0,0,0,.52), 0 0 0 1px rgba(226,149,77,.08), 0 20px 70px rgba(226,149,77,.10);
 }
 
 .ak-input, input:not([type='checkbox']):not([type='radio']), textarea, select {
@@ -216,13 +260,13 @@ body {
 }
 .ak-input:hover { border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.035); }
 .ak-input:focus {
-  border-color: rgba(255,36,72,.62);
-  box-shadow: 0 0 0 4px rgba(217,4,41,.11), 0 14px 34px rgba(0,0,0,.24);
+  border-color: rgba(226,149,77,.58);
+  box-shadow: 0 0 0 4px rgba(226,149,77,.11), 0 14px 34px rgba(0,0,0,.24);
 }
 
 button, a { -webkit-tap-highlight-color: transparent; }
 button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
-  outline: 2px solid rgba(255,36,72,.8);
+  outline: 2px solid rgba(226,149,77,.85);
   outline-offset: 3px;
 }
 
@@ -238,9 +282,9 @@ tbody tr:hover td { background: rgba(255,255,255,.028); }
 
 .ak-premium-shell {
   background:
-    radial-gradient(circle at 14% -8%, rgba(217,4,41,.16), transparent 26%),
-    radial-gradient(circle at 92% 0%, rgba(28,141,255,.075), transparent 24%),
-    linear-gradient(180deg, #06070a 0%, #050608 100%);
+    radial-gradient(circle at 14% -8%, rgba(226,149,77,.13), transparent 26%),
+    radial-gradient(circle at 92% 0%, rgba(94,234,212,.07), transparent 24%),
+    linear-gradient(180deg, #06070b 0%, #05060a 100%);
 }
 .ak-premium-content {
   width: 100%;
@@ -249,11 +293,12 @@ tbody tr:hover td { background: rgba(255,255,255,.028); }
 }
 .ak-premium-topbar {
   border-color: rgba(255,255,255,.065);
-  background: rgba(5,6,8,.76);
+  background: rgba(5,6,10,.76);
   box-shadow: 0 12px 45px rgba(0,0,0,.22);
 }
 .ak-premium-heading {
   text-wrap: balance;
+  font-family: var(--font-display), 'Space Grotesk', sans-serif;
   background: linear-gradient(180deg,#fff 12%,#d8dbe2 100%);
   -webkit-background-clip: text;
   background-clip: text;
@@ -264,16 +309,17 @@ tbody tr:hover td { background: rgba(255,255,255,.028); }
   align-items: center;
   gap: .55rem;
   padding: .42rem .72rem;
-  border: 1px solid rgba(255,36,72,.2);
+  font-family: var(--font-mono), monospace;
+  border: 1px solid rgba(226,149,77,.24);
   border-radius: 999px;
-  background: rgba(217,4,41,.07);
+  background: rgba(226,149,77,.08);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
 }
 
 .ak-sidebar-premium {
   background:
-    radial-gradient(circle at 28% 0%, rgba(217,4,41,.19), transparent 23%),
-    linear-gradient(180deg, rgba(11,12,16,.99), rgba(5,6,8,.99));
+    radial-gradient(circle at 28% 0%, rgba(226,149,77,.15), transparent 23%),
+    linear-gradient(180deg, rgba(11,13,18,.99), rgba(5,6,10,.99));
   box-shadow: 18px 0 65px rgba(0,0,0,.28);
 }
 .ak-nav-item { position: relative; overflow: hidden; }
@@ -294,8 +340,8 @@ tbody tr:hover td { background: rgba(255,255,255,.028); }
   bottom: 22%;
   width: 3px;
   border-radius: 0 999px 999px 0;
-  background: linear-gradient(180deg,#ff4461,#d90429);
-  box-shadow: 0 0 16px rgba(255,36,72,.8);
+  background: linear-gradient(180deg,var(--ak-copper-bright),var(--ak-copper));
+  box-shadow: 0 0 16px rgba(226,149,77,.75);
 }
 
 .ak-landing-section { position: relative; }
