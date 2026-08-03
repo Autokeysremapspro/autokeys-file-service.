@@ -122,7 +122,7 @@ export default function AKSidebar() {
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-[#ffb870]">
               <Headphones size={15} /> Soporte PRO
             </div>
-            <p className="mt-2 text-[12px] leading-5 text-white/38">Pedidos, archivos y créditos conectados con Autokeys Core.</p>
+            <p className="mt-2 text-[12px] leading-5 text-white/38">Pedidos, archivos, precios y soporte conectados con Autokeys Core.</p>
           </div>
           <button onClick={logout} className="flex w-full items-center justify-center gap-2 rounded-[14px] border border-white/[.07] bg-white/[.025] px-4 py-2.5 text-[12px] font-black text-white/45 transition hover:border-white/[.13] hover:bg-white/[.055] hover:text-white">
             <LogOut size={17} /> Cerrar sesión
