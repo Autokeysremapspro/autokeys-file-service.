@@ -1,59 +1,10 @@
 'use client'
-
 import Link from 'next/link'
-import { Bell, Menu, Search, UploadCloud } from 'lucide-react'
+import { Bell, Command, Menu, Plus, Search } from 'lucide-react'
 import AKSidebar from './AKSidebar'
-
-export default function AKPageShell({
-  children,
-  title,
-  subtitle,
-  eyebrow = 'AK Cloud',
-  actions,
-}: {
-  children: React.ReactNode
-  title?: string
-  subtitle?: string
-  eyebrow?: string
-  actions?: React.ReactNode
-}) {
-  return (
-    <main className="ak-noise ak-grid ak-premium-shell flex min-h-screen text-white">
-      <AKSidebar />
-      <section className="relative z-10 min-w-0 flex-1">
-        <header className="ak-premium-topbar sticky top-0 z-40 flex min-h-[72px] items-center justify-between border-b px-4 backdrop-blur-2xl lg:px-7 xl:px-9">
-          <div className="flex min-w-0 items-center gap-3">
-            <button aria-label="Abrir menú" className="rounded-[14px] border border-white/[.08] bg-white/[.035] p-3 text-white/70 transition hover:border-white/[.15] hover:bg-white/[.065] hover:text-white lg:hidden"><Menu size={19} /></button>
-            <div className="hidden min-w-[310px] items-center gap-3 rounded-[14px] border border-white/[.075] bg-white/[.025] px-4 py-2.5 text-sm font-semibold text-white/30 shadow-[inset_0_1px_0_rgba(255,255,255,.025)] transition hover:border-white/[.13] hover:bg-white/[.04] md:flex">
-              <Search size={17} /> Buscar pedido, ECU, HW, SW...
-              <span className="ml-auto rounded-md border border-white/[.08] bg-black/20 px-2 py-1 text-[10px] font-black text-white/25">⌘ K</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2.5">
-            <Link href="/nuevo-pedido" className="group relative hidden overflow-hidden rounded-[14px] border border-[#ffb870]/30 bg-gradient-to-r from-[#8a4a1f] to-[#e2954d] px-4 py-2.5 text-sm font-bold text-[#0a0d12] shadow-[0_12px_38px_rgba(226,149,77,.24),inset_0_1px_0_rgba(255,255,255,.28)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_50px_rgba(226,149,77,.32)] md:inline-flex md:items-center md:gap-2">
-              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-              <UploadCloud size={17} className="relative" /> <span className="relative">Nuevo pedido</span>
-            </Link>
-            <Link href="/notificaciones" aria-label="Notificaciones" className="relative rounded-[14px] border border-white/[.08] bg-white/[.035] p-3 text-white/65 shadow-[inset_0_1px_0_rgba(255,255,255,.025)] transition hover:border-white/[.15] hover:bg-white/[.07] hover:text-white">
-              <Bell size={18} />
-              <span className="absolute -right-1 -top-1 flex h-[19px] min-w-[19px] items-center justify-center rounded-full border-2 border-[#07080b] bg-[#e2954d] px-1 text-[9px] font-bold text-[#0a0d12]">3</span>
-            </Link>
-          </div>
-        </header>
-        <div className="ak-premium-content p-4 sm:p-5 lg:p-7 xl:p-9">
-          {(title || subtitle) && (
-            <div className="mb-8 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
-              <div>
-                <p className="ak-eyebrow text-[10px] font-bold uppercase tracking-[0.26em] text-[#ffb870]">{eyebrow}</p>
-                {title && <h1 className="ak-premium-heading mt-4 text-4xl font-bold tracking-[-.03em] md:text-5xl">{title}</h1>}
-                {subtitle && <p className="mt-3 max-w-3xl text-sm leading-6 text-white/42">{subtitle}</p>}
-              </div>
-              {actions}
-            </div>
-          )}
-          {children}
-        </div>
-      </section>
-    </main>
-  )
+export default function AKPageShell({children,title,subtitle,eyebrow='AK Cloud',actions}:{children:React.ReactNode,title?:string,subtitle?:string,eyebrow?:string,actions?:React.ReactNode}){
+ return <main className="ak-v5-bg flex min-h-screen text-white"><AKSidebar/><section className="relative z-10 min-w-0 flex-1">
+  <header className="ak-v5-topbar sticky top-0 z-40 flex min-h-[76px] items-center justify-between px-4 lg:px-7"><div className="flex min-w-0 items-center gap-3"><button className="grid h-11 w-11 place-items-center rounded-[14px] border border-white/[.08] bg-white/[.035] lg:hidden"><Menu size={19}/></button><div className="hidden h-11 min-w-[360px] items-center gap-3 rounded-[14px] border border-white/[.075] bg-white/[.03] px-4 text-sm text-white/30 md:flex"><Search size={17}/><span>Buscar pedido, ECU, HW, SW...</span><span className="ml-auto flex items-center gap-1 rounded-lg border border-white/[.08] px-2 py-1 text-[10px]"><Command size={11}/> K</span></div></div><div className="flex items-center gap-2"><Link href="/nuevo-pedido" className="ak-v5-button !px-4 !py-2.5 text-xs"><Plus size={16}/> Nuevo servicio</Link><Link href="/notificaciones" className="relative grid h-11 w-11 place-items-center rounded-[14px] border border-white/[.08] bg-white/[.035] text-white/60"><Bell size={18}/><span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#e5a05d] shadow-[0_0_12px_rgba(229,160,93,.9)]"/></Link></div></header>
+  <div className="relative mx-auto max-w-[1680px] p-4 sm:p-6 lg:p-8 xl:p-10">{(title||subtitle)&&<div className="mb-9 flex flex-col justify-between gap-5 xl:flex-row xl:items-end"><div><div className="ak-v5-kicker">{eyebrow}</div>{title&&<h1 className="ak-v5-title mt-4 text-4xl sm:text-5xl xl:text-6xl">{title}</h1>}{subtitle&&<p className="mt-4 max-w-3xl text-sm leading-7 text-white/40">{subtitle}</p>}</div>{actions}</div>}<div className="ak-v5-reveal">{children}</div></div>
+ </section></main>
 }
