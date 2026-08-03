@@ -1,9 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import Link from 'next/link'
-import { Car, FileArchive, Gauge, Search, Sparkles, UploadCloud } from 'lucide-react'
-import AKSidebar from '@/components/ak/AKSidebar'
+import { Car, FileArchive, Search, Sparkles, UploadCloud } from 'lucide-react'
+import AKPageShell from '@/components/ak/AKPageShell'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import AKGarageVehicleCard from '@/components/ak/AKGarageVehicleCard'
@@ -48,10 +47,8 @@ export default function GaragePage() {
   }, [vehicles])
 
   return (
-    <main className="ak-noise flex min-h-screen">
-      <AKSidebar />
-      <section className="flex-1 p-4 lg:p-8">
-        <header className="mb-7 flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
+    <AKPageShell title="Mis vehículos" subtitle="Un garaje técnico vivo con el historial de cada ECU, servicio, archivo y versión." eyebrow="Vehicle Workspace" actions={<div className="flex flex-wrap gap-3"><AKButton href="/nuevo-pedido"><UploadCloud size={18}/> Nuevo trabajo</AKButton><AKButton href="/biblioteca" variant="ghost"><FileArchive size={18}/> Biblioteca</AKButton></div>}>
+        <header className="sr-only">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.3em] text-[var(--ak-glow)]">Private Garage</p>
             <h1 className="mt-2 text-4xl font-black tracking-tight md:text-5xl">Mi Garaje</h1>
@@ -59,17 +56,13 @@ export default function GaragePage() {
               Cada vehículo con su historial técnico, ORI, MOD, servicios realizados y pedidos asociados.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <AKButton href="/nuevo-pedido"><UploadCloud size={18} /> Nuevo trabajo</AKButton>
-            <AKButton href="/biblioteca" variant="ghost"><FileArchive size={18} /> Biblioteca</AKButton>
-          </div>
         </header>
 
         <div className="grid gap-5 md:grid-cols-2 2xl:grid-cols-4">
-          <AKCard className="p-5"><div className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Vehículos</div><div className="mt-3 text-4xl font-black">{stats.vehicles}</div><div className="mt-1 text-sm text-white/35">Garage privado</div></AKCard>
-          <AKCard className="p-5"><div className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Trabajos</div><div className="mt-3 text-4xl font-black">{stats.trabajos}</div><div className="mt-1 text-sm text-white/35">Historial acumulado</div></AKCard>
-          <AKCard className="p-5"><div className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Finalizados</div><div className="mt-3 text-4xl font-black text-emerald-300">{stats.finalizados}</div><div className="mt-1 text-sm text-white/35">MOD disponibles</div></AKCard>
-          <AKCard className="p-5"><div className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Abiertos</div><div className="mt-3 text-4xl font-black text-amber-300">{stats.abiertos}</div><div className="mt-1 text-sm text-white/35">En cola o proceso</div></AKCard>
+          <div className="ak-v6-panel p-5"><div className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Vehículos</div><div className="mt-3 text-4xl font-black">{stats.vehicles}</div><div className="mt-1 text-sm text-white/35">Garage privado</div></div>
+          <div className="ak-v6-panel p-5"><div className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Trabajos</div><div className="mt-3 text-4xl font-black">{stats.trabajos}</div><div className="mt-1 text-sm text-white/35">Historial acumulado</div></div>
+          <div className="ak-v6-panel p-5"><div className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Finalizados</div><div className="mt-3 text-4xl font-black text-emerald-300">{stats.finalizados}</div><div className="mt-1 text-sm text-white/35">MOD disponibles</div></div>
+          <div className="ak-v6-panel p-5"><div className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Abiertos</div><div className="mt-3 text-4xl font-black text-amber-300">{stats.abiertos}</div><div className="mt-1 text-sm text-white/35">En cola o proceso</div></div>
         </div>
 
         <AKCard className="mt-6 overflow-hidden p-5 md:p-6">
@@ -95,7 +88,7 @@ export default function GaragePage() {
               </div>
             </div>
           </div>
-        </AKCard>
+        </div>
 
         <div className="mt-6 grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
           {loading ? (
@@ -111,7 +104,6 @@ export default function GaragePage() {
             filtered.map((vehicle) => <AKGarageVehicleCard key={vehicle.key} vehicle={vehicle} />)
           )}
         </div>
-      </section>
-    </main>
+    </AKPageShell>
   )
 }
