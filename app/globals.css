@@ -376,174 +376,78 @@ tbody tr:hover td { background: rgba(255,255,255,.028); }
 }
 .ak-expand-in { animation: akExpandIn .32s cubic-bezier(.16,1,.3,1) both; }
 
-
 /* =========================================================
-   AK SIGNATURE UI V3 — capa visual premium, sin tocar lógica.
+   AK SIGNATURE V4 — CINEMATIC FUTURE SYSTEM
+   Capa visual integral. No altera lógica ni rutas.
    ========================================================= */
-:root {
-  --sig-void: #030508;
-  --sig-ink: #070a0f;
-  --sig-panel: rgba(13,17,23,.78);
-  --sig-panel-solid: #0c1016;
-  --sig-line: rgba(255,255,255,.075);
-  --sig-copper: #e79b52;
-  --sig-copper-hi: #ffc383;
-  --sig-cyan: #65f2df;
-  --sig-radius: 22px;
-  --sig-ease: cubic-bezier(.2,.8,.2,1);
+:root{
+  --ak-v4-bg:#03050a;
+  --ak-v4-panel:rgba(9,13,20,.72);
+  --ak-v4-panel-strong:rgba(12,17,26,.92);
+  --ak-v4-line:rgba(255,255,255,.075);
+  --ak-v4-copper:#f0a45a;
+  --ak-v4-copper-2:#ffd09b;
+  --ak-v4-cyan:#65f4df;
+  --ak-v4-text:#f5f7fb;
+  --ak-v4-muted:#8b95a7;
 }
+body{background:#03050a!important;color:var(--ak-v4-text);}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-2;background:
+ radial-gradient(900px 600px at 8% -10%,rgba(240,164,90,.16),transparent 62%),
+ radial-gradient(820px 520px at 105% 18%,rgba(101,244,223,.095),transparent 64%),
+ radial-gradient(650px 500px at 55% 115%,rgba(76,96,255,.08),transparent 65%),
+ linear-gradient(180deg,#03050a 0%,#050810 46%,#03050a 100%);}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.13;background-image:
+ linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+ linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+ background-size:72px 72px;mask-image:linear-gradient(to bottom,black,transparent 88%);}
 
-.ak-signature-shell,
-.ak-signature-landing {
-  position: relative;
-  isolation: isolate;
-  background:
-    radial-gradient(900px 540px at 12% -8%, rgba(231,155,82,.16), transparent 64%),
-    radial-gradient(800px 460px at 92% 2%, rgba(101,242,223,.09), transparent 66%),
-    linear-gradient(145deg, #030508 0%, #070b11 46%, #030508 100%);
-}
-.ak-signature-shell::before,
-.ak-signature-landing::before {
-  content:'';
-  position: fixed;
-  inset:0;
-  z-index:-2;
-  pointer-events:none;
-  background:
-    linear-gradient(115deg, transparent 0 46%, rgba(255,255,255,.018) 46.2% 46.35%, transparent 46.55%),
-    radial-gradient(circle at 50% 30%, transparent 0 28%, rgba(255,255,255,.018) 28.15% 28.3%, transparent 28.5%);
-  opacity:.9;
-}
-.ak-signature-shell::after,
-.ak-signature-landing::after {
-  content:'';
-  position:fixed;
-  inset:-25%;
-  z-index:-1;
-  pointer-events:none;
-  background: conic-gradient(from 210deg at 50% 50%, transparent, rgba(231,155,82,.045), transparent 27%, rgba(101,242,223,.028), transparent 58%);
-  animation: akSignatureOrbit 28s linear infinite;
-}
-@keyframes akSignatureOrbit { to { transform: rotate(360deg); } }
+.ak-premium-shell{background:transparent!important;isolation:isolate;}
+.ak-premium-content{max-width:1680px;margin:0 auto;width:100%;}
+.ak-premium-topbar{border-color:rgba(255,255,255,.07)!important;background:rgba(3,5,10,.68)!important;box-shadow:0 12px 50px rgba(0,0,0,.28),inset 0 -1px 0 rgba(255,255,255,.025);}
+.ak-sidebar-premium{position:relative;background:linear-gradient(180deg,rgba(8,12,19,.96),rgba(4,7,12,.98))!important;box-shadow:22px 0 80px rgba(0,0,0,.32);}
+.ak-sidebar-premium::after{content:"";position:absolute;right:0;top:10%;height:80%;width:1px;background:linear-gradient(transparent,rgba(240,164,90,.32),rgba(101,244,223,.16),transparent);}
+.ak-nav-item{position:relative;overflow:hidden;min-height:52px;}
+.ak-nav-item::after{content:"";position:absolute;inset:0;opacity:0;background:linear-gradient(90deg,rgba(240,164,90,.1),transparent 72%);transition:.25s ease;}
+.ak-nav-item:hover::after,.ak-nav-active::after{opacity:1;}
+.ak-nav-active{box-shadow:inset 3px 0 0 var(--ak-v4-copper),0 14px 32px rgba(0,0,0,.22)!important;}
 
-.ak-signature-sidebar {
-  position: relative;
-  background:
-    linear-gradient(180deg, rgba(11,15,21,.97), rgba(5,7,10,.96)),
-    radial-gradient(circle at 16% 0%, rgba(231,155,82,.18), transparent 30%);
-  box-shadow: 22px 0 80px rgba(0,0,0,.35), inset -1px 0 rgba(255,255,255,.025);
-  backdrop-filter: blur(26px) saturate(120%);
-}
-.ak-signature-sidebar::after {
-  content:'';
-  position:absolute;
-  right:-1px;
-  top:8%;
-  bottom:8%;
-  width:1px;
-  background:linear-gradient(transparent, rgba(231,155,82,.4), rgba(101,242,223,.18), transparent);
-  opacity:.55;
-}
-.ak-signature-nav {
-  position:relative;
-  overflow:hidden;
-  transform: translateZ(0);
-}
-.ak-signature-nav::before {
-  content:'';
-  position:absolute;
-  left:0;
-  top:18%;
-  bottom:18%;
-  width:2px;
-  border-radius:99px;
-  background:linear-gradient(var(--sig-copper-hi),var(--sig-copper));
-  box-shadow:0 0 18px rgba(231,155,82,.65);
-  transform:scaleY(0);
-  transition:transform .24s var(--sig-ease);
-}
-.ak-signature-nav:hover::before,
-.ak-signature-nav-active::before { transform:scaleY(1); }
-.ak-signature-nav:hover { transform:translateX(3px); }
-.ak-signature-nav-active {
-  box-shadow: inset 0 1px rgba(255,255,255,.05), 0 14px 40px rgba(0,0,0,.24), 0 0 0 1px rgba(231,155,82,.06);
-}
+.card,.ak-card,.ak-glass,.ak-premium-card{position:relative;border:1px solid var(--ak-v4-line)!important;background:
+ linear-gradient(145deg,rgba(255,255,255,.052),rgba(255,255,255,.014) 52%),
+ rgba(8,12,19,.72)!important;box-shadow:0 24px 70px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.045)!important;backdrop-filter:blur(24px) saturate(120%);border-radius:24px!important;}
+.card::before,.ak-premium-card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(120deg,rgba(255,255,255,.055),transparent 24%,transparent 76%,rgba(101,244,223,.02));opacity:.65;}
+.card:hover,.ak-card-hover:hover{border-color:rgba(240,164,90,.25)!important;transform:translateY(-2px);box-shadow:0 32px 90px rgba(0,0,0,.38),0 0 0 1px rgba(240,164,90,.05),inset 0 1px 0 rgba(255,255,255,.06)!important;}
+.ak-premium-heading{letter-spacing:-.045em!important;text-wrap:balance;}
+.ak-eyebrow{display:inline-flex;align-items:center;gap:.55rem;border:1px solid rgba(240,164,90,.18);background:rgba(240,164,90,.065);border-radius:999px;padding:.48rem .8rem;}
 
-.ak-signature-topbar {
-  border-color:rgba(255,255,255,.065);
-  background:linear-gradient(180deg, rgba(7,10,15,.86), rgba(7,10,15,.68));
-  box-shadow:0 18px 55px rgba(0,0,0,.28), inset 0 -1px rgba(255,255,255,.02);
-  backdrop-filter:blur(30px) saturate(135%);
-}
-.ak-signature-content { max-width:1680px; margin-inline:auto; }
-.ak-signature-heading {
-  text-wrap:balance;
-  background:linear-gradient(112deg,#fff 15%,#f6e9d8 55%,#c7d9d7 100%);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-  text-shadow:0 18px 60px rgba(255,255,255,.08);
-}
+.btn,.ak-button,button[type="submit"]{transition:transform .2s ease,box-shadow .25s ease,background .2s ease,border-color .2s ease;}
+.btn:hover,.ak-button:hover,button[type="submit"]:hover{transform:translateY(-1px);}
+.btn-red,.btn-primary,.ak-primary{background:linear-gradient(135deg,#784018,#d9893f 58%,#f6bc78)!important;color:#090b0f!important;border:1px solid rgba(255,208,155,.36)!important;box-shadow:0 14px 34px rgba(240,164,90,.20),inset 0 1px 0 rgba(255,255,255,.28)!important;}
+input,textarea,select,.ak-input{background:rgba(3,6,11,.62)!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:14px!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.02);}
+input:focus,textarea:focus,select:focus,.ak-input:focus{border-color:rgba(240,164,90,.55)!important;box-shadow:0 0 0 4px rgba(240,164,90,.09),0 12px 30px rgba(0,0,0,.22)!important;}
+.table-wrap{overflow:hidden!important;border-radius:22px!important;}
+table{border-collapse:separate!important;border-spacing:0!important;}
+th{background:rgba(255,255,255,.022);position:sticky;top:0;z-index:1;color:rgba(255,255,255,.42)!important;}
+td{transition:background .18s ease;color:rgba(245,247,251,.76)!important;}
+tr:hover td{background:rgba(240,164,90,.035)!important;}
+.badge{border-radius:999px!important;padding:.38rem .68rem!important;font-size:.68rem!important;letter-spacing:.06em;}
 
-.ak-signature-shell .card,
-.ak-signature-shell .ak-glass,
-.ak-signature-landing .card,
-.ak-signature-landing .ak-glass {
-  border-color:var(--sig-line);
-  background:
-    linear-gradient(135deg, rgba(255,255,255,.065), transparent 30%),
-    linear-gradient(180deg, rgba(16,21,29,.88), rgba(7,10,14,.84));
-  box-shadow: 0 26px 90px rgba(0,0,0,.44), inset 0 1px rgba(255,255,255,.045);
-  transition:transform .32s var(--sig-ease), border-color .32s var(--sig-ease), box-shadow .32s var(--sig-ease);
-}
-.ak-signature-shell .card:hover,
-.ak-signature-shell .ak-glass:hover,
-.ak-signature-landing .card:hover,
-.ak-signature-landing .ak-glass:hover {
-  transform:translateY(-5px) perspective(900px) rotateX(.35deg);
-  border-color:rgba(231,155,82,.26);
-  box-shadow:0 36px 120px rgba(0,0,0,.56), 0 14px 55px rgba(231,155,82,.08), inset 0 1px rgba(255,255,255,.065);
-}
+/* Cinematic utility surfaces */
+.ak-v4-orbit{position:absolute;border:1px solid rgba(255,255,255,.07);border-radius:999px;animation:akV4Spin 22s linear infinite;}
+.ak-v4-orbit::after{content:"";position:absolute;width:8px;height:8px;border-radius:50%;background:var(--ak-v4-copper);box-shadow:0 0 22px rgba(240,164,90,.75);top:50%;left:-4px;}
+@keyframes akV4Spin{to{transform:rotate(360deg)}}
+@keyframes akV4Float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes akV4Scan{0%{transform:translateY(-120%)}100%{transform:translateY(120%)}}
+.ak-v4-float{animation:akV4Float 6s ease-in-out infinite;}
+.ak-v4-scan{position:relative;overflow:hidden;}
+.ak-v4-scan::after{content:"";position:absolute;inset:-30% 0;height:35%;background:linear-gradient(transparent,rgba(101,244,223,.08),transparent);animation:akV4Scan 5.5s linear infinite;pointer-events:none;}
+.ak-v4-number{font-variant-numeric:tabular-nums;letter-spacing:-.055em;text-shadow:0 0 26px rgba(240,164,90,.08);}
+.ak-v4-panel-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-bottom:1rem;border-bottom:1px solid rgba(255,255,255,.06);}
+.ak-v4-status-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 14px rgba(74,222,128,.8);}
 
-.ak-signature-shell button,
-.ak-signature-shell a,
-.ak-signature-landing button,
-.ak-signature-landing a { transition-timing-function:var(--sig-ease); }
-.ak-signature-shell input,
-.ak-signature-shell textarea,
-.ak-signature-shell select {
-  background:linear-gradient(180deg,rgba(255,255,255,.038),rgba(255,255,255,.018));
-  border-color:rgba(255,255,255,.085);
+@media (max-width:768px){
+ .card,.ak-card,.ak-glass{border-radius:18px!important;}
+ .ak-premium-content{padding:18px!important;}
+ .ak-premium-heading{font-size:2.2rem!important;}
 }
-.ak-signature-shell input:focus,
-.ak-signature-shell textarea:focus,
-.ak-signature-shell select:focus {
-  border-color:rgba(231,155,82,.62);
-  box-shadow:0 0 0 4px rgba(231,155,82,.1),0 18px 60px rgba(0,0,0,.3);
-}
-
-.ak-signature-landing-header {
-  background:linear-gradient(180deg,rgba(3,5,8,.88),rgba(3,5,8,.62));
-  border-color:rgba(255,255,255,.06);
-  backdrop-filter:blur(28px) saturate(135%);
-}
-.ak-signature-landing section { position:relative; }
-.ak-signature-landing section::before {
-  content:'';
-  position:absolute;
-  left:50%;
-  top:0;
-  width:min(1180px,86vw);
-  height:1px;
-  transform:translateX(-50%);
-  background:linear-gradient(90deg,transparent,rgba(231,155,82,.28),rgba(101,242,223,.13),transparent);
-  opacity:.6;
-}
-
-@media (max-width: 1023px) {
-  .ak-signature-content { padding-bottom:6rem; }
-  .ak-signature-shell::after,.ak-signature-landing::after { animation:none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ak-signature-shell::after,.ak-signature-landing::after { animation:none!important; }
-}
+@media (prefers-reduced-motion:reduce){.ak-v4-orbit,.ak-v4-float,.ak-v4-scan::after{animation:none!important}.card,.ak-card-hover{transition:none!important}}

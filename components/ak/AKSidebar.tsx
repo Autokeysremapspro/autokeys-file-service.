@@ -75,9 +75,9 @@ export default function AKSidebar() {
     return (
       <Link
         href={href}
-        className={`ak-signature-nav group flex items-center gap-3 rounded-[14px] border px-3.5 py-2.5 text-[12px] font-bold uppercase tracking-[0.045em] transition duration-200 ${
+        className={`ak-nav-item group flex items-center gap-3 rounded-[14px] border px-3.5 py-2.5 text-[12px] font-bold uppercase tracking-[0.045em] transition duration-200 ${
           active
-            ? 'ak-signature-nav-active border-[#e2954d]/25 bg-gradient-to-r from-[#e2954d]/[.14] to-transparent text-white shadow-[inset_0_1px_0_rgba(255,255,255,.035)]'
+            ? 'ak-nav-active border-[#e2954d]/25 bg-gradient-to-r from-[#e2954d]/[.14] to-transparent text-white shadow-[inset_0_1px_0_rgba(255,255,255,.035)]'
             : 'border-transparent text-white/48 hover:border-white/[.07] hover:bg-white/[.035] hover:text-white'
         }`}
       >
@@ -88,7 +88,7 @@ export default function AKSidebar() {
   }
 
   return (
-    <aside className="ak-signature-sidebar hidden h-screen w-[270px] shrink-0 overflow-hidden border-r border-white/[.065] lg:sticky lg:top-0 lg:flex lg:flex-col">
+    <aside className="ak-sidebar-premium hidden h-screen w-[270px] shrink-0 overflow-hidden border-r border-white/[.065] lg:sticky lg:top-0 lg:flex lg:flex-col">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_8%,rgba(226,149,77,.24),transparent_28%),radial-gradient(circle_at_100%_40%,rgba(255,255,255,.08),transparent_24%)]" />
       <div className="relative flex h-full flex-col px-4 pb-4 pt-5">
         <Link href="/dashboard" className="mb-6 block rounded-[18px] border border-white/[.06] bg-white/[.02] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,.03)] transition hover:border-white/[.11] hover:bg-white/[.035]">
