@@ -88,7 +88,7 @@ export default function GaragePage() {
               </div>
             </div>
           </div>
-        </div>
+        </AKCard>
 
         <div className="mt-6 grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
           {loading ? (
