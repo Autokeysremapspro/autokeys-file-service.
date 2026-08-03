@@ -18,10 +18,10 @@ export default function AKPageShell({
   actions?: React.ReactNode
 }) {
   return (
-    <main className="ak-noise ak-grid ak-premium-shell flex min-h-screen text-white">
+    <main className="ak-noise ak-grid ak-signature-shell flex min-h-screen text-white">
       <AKSidebar />
       <section className="relative z-10 min-w-0 flex-1">
-        <header className="ak-premium-topbar sticky top-0 z-40 flex min-h-[72px] items-center justify-between border-b px-4 backdrop-blur-2xl lg:px-7 xl:px-9">
+        <header className="ak-signature-topbar sticky top-0 z-40 flex min-h-[72px] items-center justify-between border-b px-4 backdrop-blur-2xl lg:px-7 xl:px-9">
           <div className="flex min-w-0 items-center gap-3">
             <button aria-label="Abrir menú" className="rounded-[14px] border border-white/[.08] bg-white/[.035] p-3 text-white/70 transition hover:border-white/[.15] hover:bg-white/[.065] hover:text-white lg:hidden"><Menu size={19} /></button>
             <div className="hidden min-w-[310px] items-center gap-3 rounded-[14px] border border-white/[.075] bg-white/[.025] px-4 py-2.5 text-sm font-semibold text-white/30 shadow-[inset_0_1px_0_rgba(255,255,255,.025)] transition hover:border-white/[.13] hover:bg-white/[.04] md:flex">
@@ -40,12 +40,12 @@ export default function AKPageShell({
             </Link>
           </div>
         </header>
-        <div className="ak-premium-content p-4 sm:p-5 lg:p-7 xl:p-9">
+        <div className="ak-signature-content p-4 sm:p-5 lg:p-7 xl:p-9">
           {(title || subtitle) && (
             <div className="mb-8 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
               <div>
                 <p className="ak-eyebrow text-[10px] font-bold uppercase tracking-[0.26em] text-[#ffb870]">{eyebrow}</p>
-                {title && <h1 className="ak-premium-heading mt-4 text-4xl font-bold tracking-[-.03em] md:text-5xl">{title}</h1>}
+                {title && <h1 className="ak-signature-heading mt-4 text-4xl font-bold tracking-[-.03em] md:text-5xl">{title}</h1>}
                 {subtitle && <p className="mt-3 max-w-3xl text-sm leading-6 text-white/42">{subtitle}</p>}
               </div>
               {actions}

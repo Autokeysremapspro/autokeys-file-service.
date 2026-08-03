@@ -53,7 +53,7 @@ function PinRow({ pos = '42%' }: { pos?: string }) {
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#05060a] text-white">
+    <main className="ak-signature-landing min-h-screen overflow-hidden bg-[#05060a] text-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -80,7 +80,7 @@ export default function HomePage() {
         <div className="absolute left-[-18rem] top-[20rem] h-[34rem] w-[34rem] rounded-full bg-[#8a4a1f]/20 blur-[150px]" />
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-white/[0.065] bg-[#05060a]/78 shadow-[0_12px_45px_rgba(0,0,0,.24)] backdrop-blur-2xl">
+      <header className="ak-signature-landing-header sticky top-0 z-50 border-b border-white/[0.065] bg-[#05060a]/78 shadow-[0_12px_45px_rgba(0,0,0,.24)] backdrop-blur-2xl">
         <div className="mx-auto flex max-w-[1540px] items-center justify-between px-5 py-3.5 lg:px-8">
           <Link href="/" className="group flex items-center gap-3">
             <img src="/images/brand/autokeys-logo-small-transparent.webp" alt="Autokeys" className="h-10 w-auto object-contain transition duration-300 group-hover:scale-[1.035]" />
