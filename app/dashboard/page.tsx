@@ -27,7 +27,9 @@ export default function DashboardPage(){
   const latest=pedidos.slice(0,6);const unread=notifs.filter(n=>!n.leida).length
 
   return <AppShell><div className="space-y-6">
-    <section className="ak5-card ak5-gridline relative min-h-[360px] rounded-[28px] p-6 sm:p-8 lg:p-10">
+    <section className="ak5-card ak5-gridline relative min-h-[360px] overflow-hidden rounded-[28px] p-6 sm:p-8 lg:p-10">
+      <div className="absolute inset-y-0 right-0 w-[62%] bg-[url('/images/ak-dashboard-hero-racing.webp')] bg-cover bg-center opacity-70"/>
+      <div className="absolute inset-0 bg-gradient-to-r from-[#05070b] via-[#05070b]/85 to-transparent"/>
       <div className="absolute inset-y-0 right-0 w-[52%] bg-[radial-gradient(circle_at_center,rgba(255,66,90,.18),transparent_60%)]"/>
       <div className="absolute right-[-80px] top-[-90px] h-80 w-80 rounded-full border border-cyan-400/10"/>
       <div className="absolute right-[80px] top-[40px] h-52 w-52 rounded-full border border-red-400/10"/>
