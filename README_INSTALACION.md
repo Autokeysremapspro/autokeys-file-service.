@@ -1,27 +1,23 @@
-# AK Cloud — Portada comercial premium
+# AK Cloud Promo Premium V2
 
 ## Qué incluye
-- Hero enfocado en conversión.
-- Mensaje principal: pago por archivo, sin créditos.
-- Beneficios para talleres y distribuidores.
-- Flujo completo ORI → FINAL.
-- Bloque AK Intelligence.
-- FAQ comercial.
-- Varias llamadas a registro y acceso.
-- Diseño responsive usando el sistema visual actual de AK Cloud.
+- Portada comercial renovada con mensaje más directo.
+- Simulador interactivo de pedido.
+- Comparativa clara frente al sistema por créditos.
+- Bloque comercial para partners, niveles y referidos.
+- Nuevas llamadas a registro profesional.
+- Mantiene la identidad visual, Supabase y el área privada intactos.
 
 ## Instalación
-1. Haz una copia de seguridad del archivo actual `app/page.tsx`.
-2. Copia la carpeta `app` de este ZIP en la raíz del repositorio.
-3. Acepta reemplazar `app/page.tsx`.
-4. Ejecuta:
+1. Abre el repositorio `Autokeysremapspro/autokeys-file-service.`.
+2. Copia la carpeta `app` del ZIP sobre la carpeta `app` del proyecto.
+3. Copia la carpeta `components` del ZIP sobre la carpeta `components` del proyecto.
+4. Acepta reemplazar `app/page.tsx`.
+5. Sube los cambios a GitHub y deja que Vercel despliegue.
 
-```bash
-npm install
-npm run build
-```
-
-5. Si compila correctamente, sube los cambios a GitHub o despliega en Vercel.
+## Archivos modificados
+- `app/page.tsx`
+- `components/marketing/AkOrderSimulator.tsx`
 
 ## Importante
-Este paquete modifica únicamente la portada pública. No altera Supabase, autenticación, pedidos, precios ni el panel privado.
+Los precios del simulador son orientativos y solo se usan como demostración visual. Los precios reales siguen procediendo del sistema actual.

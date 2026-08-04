@@ -1,8 +1,9 @@
 import Link from 'next/link'
+import AkOrderSimulator from '@/components/marketing/AkOrderSimulator'
 import {
-  ArrowRight, BadgeCheck, Check, CheckCircle2, ChevronRight, Clock3, CloudCog,
+  ArrowRight, BadgeCheck, Check, CheckCircle2, ChevronRight, Clock3, CloudCog, CopyCheck,
   Cpu, FileCheck2, Fingerprint, Gauge, Headphones, LockKeyhole, MessageSquareText,
-  ScanLine, ShieldCheck, Sparkles, UploadCloud, Users, Workflow, Zap
+  ScanLine, ShieldCheck, Sparkles, UploadCloud, Users, Workflow, Zap, Gift, Euro, Layers3
 } from 'lucide-react'
 
 const workflow = [
@@ -43,6 +44,7 @@ export default function HomePage() {
           <nav className="hidden items-center gap-7 text-xs font-bold text-white/45 lg:flex">
             <a href="#ventajas" className="transition hover:text-white">Ventajas</a>
             <a href="#flujo" className="transition hover:text-white">Cómo funciona</a>
+            <a href="#simulador" className="transition hover:text-white">Simulador</a>
             <a href="#precision" className="transition hover:text-white">Tecnología</a>
             <a href="#faq" className="transition hover:text-white">Preguntas</a>
           </nav>
@@ -56,8 +58,8 @@ export default function HomePage() {
       <section className="relative z-10 mx-auto grid min-h-[820px] max-w-[1480px] items-center gap-12 px-5 py-20 lg:grid-cols-[.92fr_1.08fr] lg:px-8">
         <div className="ak-v5-reveal">
           <div className="ak-v5-pill"><span className="ak-v5-dot" /> Plataforma B2B · Pago por archivo</div>
-          <h1 className="ak-v5-title mt-8 text-6xl sm:text-7xl xl:text-[6.2rem]">Tu file service,<br /><span className="text-[#e5a05d]">sin perder el control.</span></h1>
-          <p className="mt-7 max-w-xl text-lg leading-8 text-white/48">Carga el ORI, selecciona las soluciones, habla con el laboratorio y descarga cada versión desde un workspace profesional. Sin créditos y sin conversaciones dispersas.</p>
+          <h1 className="ak-v5-title mt-8 text-6xl sm:text-7xl xl:text-[6.2rem]">Más rápido que WhatsApp.<br /><span className="text-[#e5a05d]">Más profesional que los créditos.</span></h1>
+          <p className="mt-7 max-w-xl text-lg leading-8 text-white/48">AK Cloud centraliza archivos, versiones, mensajes y pagos en un workspace diseñado para talleres. Cada trabajo tiene un precio claro, un estado visible y un historial completo.</p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link href="/register" className="ak-v5-button">Solicitar acceso profesional <ArrowRight size={18} /></Link>
             <a href="#flujo" className="ak-v5-button-secondary">Ver cómo funciona <ChevronRight size={18} /></a>
@@ -112,6 +114,24 @@ export default function HomePage() {
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{benefits.map(({ icon: Icon, title, text }) => <article key={title} className="ak-v5-card p-7"><div className="grid h-12 w-12 place-items-center rounded-2xl border border-[#e5a05d]/20 bg-[#e5a05d]/10 text-[#ffd09a]"><Icon /></div><h3 className="mt-7 text-2xl font-bold tracking-tight">{title}</h3><p className="mt-3 leading-7 text-white/40">{text}</p></article>)}</div>
       </section>
 
+      <section id="simulador" className="relative z-10 mx-auto max-w-[1480px] px-5 py-20 lg:px-8">
+        <AkOrderSimulator />
+      </section>
+
+      <section className="relative z-10 mx-auto max-w-[1480px] px-5 py-20 lg:px-8">
+        <div className="mb-10 max-w-3xl"><div className="ak-v5-kicker">La diferencia AK Cloud</div><h2 className="ak-v5-title mt-4 text-5xl sm:text-6xl">No compras saldo.<br />Compras una solución.</h2></div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="rounded-[30px] border border-white/[.07] bg-black/25 p-7 sm:p-9">
+            <div className="flex items-center gap-3 text-white/35"><Layers3 /><span className="text-xs font-black uppercase tracking-[.18em]">Sistema por créditos</span></div>
+            <div className="mt-7 space-y-4">{['Recargar antes de trabajar', 'Saldo inmovilizado', 'Coste difícil de interpretar', 'Conversaciones fuera del pedido'].map(x => <div key={x} className="flex items-center gap-3 text-white/38"><span className="grid h-6 w-6 place-items-center rounded-full border border-white/10 text-xs">×</span>{x}</div>)}</div>
+          </div>
+          <div className="ak-v5-card p-7 sm:p-9">
+            <div className="flex items-center gap-3 text-[#67e8d1]"><Euro /><span className="text-xs font-black uppercase tracking-[.18em]">AK Cloud · precio por archivo</span></div>
+            <div className="mt-7 space-y-4">{['Precio visible antes de enviar', 'Pagas solo el trabajo solicitado', 'Historial, mensajes y versiones unidos', 'Acceso profesional revisado'].map(x => <div key={x} className="flex items-center gap-3 text-white/72"><CheckCircle2 size={18} className="text-[#67e8d1]" />{x}</div>)}</div>
+          </div>
+        </div>
+      </section>
+
       <section id="flujo" className="relative z-10 mx-auto max-w-[1480px] px-5 py-20 lg:px-8">
         <div className="mb-10"><div className="ak-v5-kicker">Flujo profesional</div><h2 className="ak-v5-title mt-4 text-5xl sm:text-6xl">De ORI a FINAL.</h2></div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">{workflow.map(({ n, title, text, icon: Icon }) => <div key={n} className="ak-v5-card p-6"><div className="flex items-center justify-between"><span className="text-xs font-black text-[#e5a05d]">{n}</span><Icon size={21} className="text-white/35" /></div><h3 className="mt-12 text-xl font-bold">{title}</h3><p className="mt-3 text-sm leading-6 text-white/38">{text}</p></div>)}</div>
@@ -128,6 +148,13 @@ export default function HomePage() {
         <div className="grid gap-6 lg:grid-cols-[1fr_.85fr]">
           <div className="ak-v5-card p-8 sm:p-10"><div className="flex items-center gap-3 text-[#67e8d1]"><BadgeCheck /><span className="text-xs font-black uppercase tracking-[.2em]">Para distribuidores</span></div><h2 className="ak-v5-title mt-6 text-4xl sm:text-5xl">Una herramienta que también mejora tu imagen ante el cliente.</h2><p className="mt-5 max-w-2xl leading-8 text-white/42">Pedidos ordenados, información técnica completa y versiones identificadas. Menos errores internos y una forma de trabajar más profesional.</p><div className="mt-8 grid gap-3 sm:grid-cols-2">{['Seguimiento del pedido', 'Descarga de versiones', 'Historial técnico', 'Soporte centralizado'].map(x => <div key={x} className="flex items-center gap-3 rounded-2xl border border-white/[.07] bg-black/20 p-4 text-sm font-bold text-white/65"><Check size={17} className="text-[#e5a05d]" />{x}</div>)}</div></div>
           <div className="ak-v5-glass flex flex-col justify-between rounded-[30px] p-8 sm:p-10"><div><Headphones className="text-[#e5a05d]" size={34} /><h3 className="mt-6 text-3xl font-bold">Acceso profesional</h3><p className="mt-4 leading-7 text-white/42">Solicita tu cuenta. Revisamos el alta para mantener una comunidad formada por talleres y profesionales del sector.</p></div><Link href="/register" className="ak-v5-button mt-10 w-full justify-center">Solicitar acceso ahora <ArrowRight size={18} /></Link></div>
+        </div>
+      </section>
+
+      <section className="relative z-10 mx-auto max-w-[1480px] px-5 py-20 lg:px-8">
+        <div className="ak-v5-glass grid overflow-hidden rounded-[34px] lg:grid-cols-[1fr_.82fr]">
+          <div className="p-8 sm:p-12"><div className="flex items-center gap-3 text-[#e5a05d]"><Gift /><span className="text-xs font-black uppercase tracking-[.2em]">Programa para talleres</span></div><h2 className="ak-v5-title mt-5 text-5xl sm:text-6xl">Crece con AK Cloud.</h2><p className="mt-6 max-w-2xl leading-8 text-white/44">La V2 deja preparada la comunicación comercial para futuros niveles de distribuidor, promociones y recompensas por recomendación, sin obligarte a activarlos todavía.</p><div className="mt-8 grid gap-3 sm:grid-cols-3">{['Nivel profesional', 'Ventajas por volumen', 'Referidos verificados'].map(x => <div key={x} className="rounded-2xl border border-white/[.07] bg-black/20 p-4 text-sm font-bold text-white/65"><CopyCheck size={18} className="mb-3 text-[#67e8d1]" />{x}</div>)}</div></div>
+          <div className="border-t border-white/[.07] bg-[radial-gradient(circle_at_center,rgba(226,149,77,.13),transparent_60%)] p-8 lg:border-l lg:border-t-0"><div className="flex h-full min-h-[300px] flex-col justify-center rounded-[28px] border border-[#e5a05d]/20 bg-[#e5a05d]/[.07] p-7 text-center"><div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-[#e5a05d]/25 bg-[#e5a05d]/10 text-[#ffd09a]"><Users size={28} /></div><div className="mt-6 text-3xl font-black">Partners AK Cloud</div><p className="mt-3 text-sm leading-6 text-white/40">Acceso exclusivo para talleres, distribuidores y profesionales del sector.</p><Link href="/register" className="ak-v5-button mt-7 justify-center">Solicitar acceso <ArrowRight size={18} /></Link></div></div>
         </div>
       </section>
 
