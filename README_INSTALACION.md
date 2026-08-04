@@ -1,32 +1,27 @@
-# AK LAB OS — Project TITAN V4
+# AK LAB OS — TITAN V5 REAL
 
-Esta versión transforma la navegación completa del portal, no solo la portada.
+Esta versión sustituye la capa visual real del portal autenticado.
 
-## Incluye
-- Nueva identidad `AK LAB OS`.
-- Sidebar Mission Control totalmente rediseñada.
-- Cabecera operativa con estados del sistema.
-- Buscador global estilo command palette.
-- Navegación móvil renovada.
-- Identidad visual TITAN: grafito, cobre y señal turquesa.
-- Se conservan rutas, Supabase, autenticación, roles y lógica existente.
+## Copiar
 
-## Instalación
-1. Abre el repositorio `Autokeysremapspro/autokeys-file-service.`.
-2. Copia las carpetas `components` y `app` del ZIP sobre el proyecto.
-3. Reemplaza los dos componentes existentes.
-4. Abre `app/globals.css` y añade al final:
+1. Copia `components/ak/AKPageShell.tsx`.
+2. Copia `components/ak/AKSidebar.tsx`.
+3. Copia `app/dashboard/page.tsx`.
+4. Copia `app/titan-v5.css`.
+5. Al final de `app/globals.css`, añade:
 
 ```css
-@import './titan-v4.css';
+@import './titan-v5.css';
 ```
 
-5. Sube a GitHub y despliega en Vercel.
+## Qué conserva
 
-## Archivos modificados
-- `components/ak/AKSidebar.tsx`
-- `components/ak/AKPageShell.tsx`
-- `app/titan-v4.css` (nuevo)
+- Supabase y autenticación.
+- Pedidos y servicios existentes.
+- Roles y panel de laboratorio.
+- Actualización en tiempo real.
+- Rutas actuales.
 
-## Seguridad
-No modifica tablas, políticas RLS, APIs, pedidos, precios, sesiones ni configuración de Supabase.
+## Importante
+
+No copies la carpeta raíz completa. Copia únicamente los archivos anteriores respetando sus rutas.
