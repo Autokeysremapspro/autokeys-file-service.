@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import AkOrderSimulator from '@/components/marketing/AkOrderSimulator'
+import AkProfessionalFit from '@/components/marketing/AkProfessionalFit'
 import {
   ArrowRight, BadgeCheck, Check, CheckCircle2, ChevronRight, Clock3, CloudCog, CopyCheck,
   Cpu, FileCheck2, Fingerprint, Gauge, Headphones, LockKeyhole, MessageSquareText,
@@ -46,6 +47,7 @@ export default function HomePage() {
             <a href="#flujo" className="transition hover:text-white">Cómo funciona</a>
             <a href="#simulador" className="transition hover:text-white">Simulador</a>
             <a href="#precision" className="transition hover:text-white">Tecnología</a>
+            <a href="#acceso" className="transition hover:text-white">Acceso</a>
             <a href="#faq" className="transition hover:text-white">Preguntas</a>
           </nav>
           <div className="flex gap-2">
@@ -158,9 +160,17 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section id="acceso" className="relative z-10 mx-auto max-w-[1480px] px-5 py-20 lg:px-8">
+        <AkProfessionalFit />
+      </section>
+
       <section id="faq" className="relative z-10 mx-auto max-w-[1100px] px-5 py-20 lg:px-8"><div className="text-center"><div className="ak-v5-kicker">Preguntas frecuentes</div><h2 className="ak-v5-title mt-4 text-5xl">Todo claro antes de entrar.</h2></div><div className="mt-10 grid gap-4">{faqs.map(([q, a]) => <details key={q} className="ak-v5-card group p-6"><summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-lg font-bold"><span>{q}</span><span className="text-[#e5a05d] transition group-open:rotate-45">+</span></summary><p className="mt-4 max-w-3xl leading-7 text-white/42">{a}</p></details>)}</div></section>
 
       <section className="relative z-10 mx-auto max-w-[1480px] px-5 pb-24 pt-12 lg:px-8"><div className="ak-v5-glass relative overflow-hidden rounded-[36px] p-8 text-center sm:p-14"><div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(226,149,77,.20),transparent_48%)]" /><div className="relative"><Sparkles className="mx-auto text-[#e5a05d]" /><h2 className="ak-v5-title mx-auto mt-5 max-w-4xl text-5xl sm:text-6xl">Tu próximo archivo puede estar mejor organizado.</h2><p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-white/42">Entra en AK Cloud y trabaja con un file service creado alrededor del pedido, no alrededor de los créditos.</p><div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/register" className="ak-v5-button">Solicitar acceso <ArrowRight size={18} /></Link><Link href="/login" className="ak-v5-button-secondary">Ya tengo cuenta</Link></div></div></div></section>
+
+      <div className="fixed inset-x-3 bottom-3 z-50 rounded-2xl border border-white/10 bg-[#080a0f]/90 p-2 shadow-2xl backdrop-blur-xl sm:hidden">
+        <Link href="/register" className="ak-v5-button w-full justify-center">Solicitar acceso profesional <ArrowRight size={17} /></Link>
+      </div>
 
       <footer className="relative z-10 border-t border-white/[.07]"><div className="mx-auto flex max-w-[1480px] flex-col gap-5 px-5 py-10 text-sm text-white/30 sm:flex-row sm:items-center sm:justify-between lg:px-8"><div>© 2026 AK Cloud · Powered by Autokeys Lab</div><div className="flex gap-5"><Link href="/legal/terminos">Términos</Link><Link href="/legal/privacidad">Privacidad</Link><Link href="/login" className="text-[#e5a05d]">Acceder</Link></div></div></footer>
     </main>

@@ -1,23 +1,25 @@
-# AK Cloud Promo Premium V2
+# AK Cloud Promo Premium V3
 
-## Qué incluye
-- Portada comercial renovada con mensaje más directo.
-- Simulador interactivo de pedido.
-- Comparativa clara frente al sistema por créditos.
-- Bloque comercial para partners, niveles y referidos.
-- Nuevas llamadas a registro profesional.
-- Mantiene la identidad visual, Supabase y el área privada intactos.
+## Novedades de la V3
+- Mantiene todo lo incluido en V2.
+- Nuevo comprobador interactivo de encaje profesional.
+- Diferencia claramente talleres, distribuidores y particulares.
+- Registro enlazado con el perfil profesional seleccionado.
+- CTA fijo en móvil para aumentar solicitudes de acceso.
+- Mensaje B2B más claro y filtro previo de usuarios no profesionales.
+- Preparado para conectar posteriormente el perfil elegido con el formulario real de registro.
 
 ## Instalación
-1. Abre el repositorio `Autokeysremapspro/autokeys-file-service.`.
-2. Copia la carpeta `app` del ZIP sobre la carpeta `app` del proyecto.
-3. Copia la carpeta `components` del ZIP sobre la carpeta `components` del proyecto.
-4. Acepta reemplazar `app/page.tsx`.
-5. Sube los cambios a GitHub y deja que Vercel despliegue.
+1. Abre `Autokeysremapspro/autokeys-file-service.`.
+2. Copia las carpetas `app` y `components` del ZIP sobre el proyecto.
+3. Acepta reemplazar los archivos existentes.
+4. Sube los cambios a GitHub.
+5. Comprueba el despliegue de Vercel.
 
-## Archivos modificados
+## Archivos incluidos
 - `app/page.tsx`
 - `components/marketing/AkOrderSimulator.tsx`
+- `components/marketing/AkProfessionalFit.tsx`
 
-## Importante
-Los precios del simulador son orientativos y solo se usan como demostración visual. Los precios reales siguen procediendo del sistema actual.
+## Seguridad
+No modifica Supabase, autenticación, pedidos, precios reales ni el panel privado.
