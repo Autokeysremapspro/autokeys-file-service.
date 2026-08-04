@@ -17,7 +17,19 @@ const commands = [
   ['Mi cuenta', '/perfil'],
 ]
 
-export default function AKPageShell({ children }: { children: React.ReactNode }) {
+export default function AKPageShell({
+  children,
+  title,
+  subtitle,
+  eyebrow = 'AK LAB OS',
+  actions,
+}: {
+  children: React.ReactNode
+  title?: string
+  subtitle?: string
+  eyebrow?: string
+  actions?: React.ReactNode
+}) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [commandOpen, setCommandOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -65,7 +77,19 @@ export default function AKPageShell({ children }: { children: React.ReactNode })
             <Link href="/notificaciones" className="relative grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/[.035] text-white/65"><Bell size={18}/><span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[var(--ak5-red)] shadow-[0_0_12px_rgba(255,66,90,.9)]"/></Link>
           </div>
         </header>
-        <div className="mx-auto max-w-[1720px] p-4 pb-24 sm:p-6 lg:p-8 lg:pb-10 xl:p-10">{children}</div>
+        <div className="mx-auto max-w-[1720px] p-4 pb-24 sm:p-6 lg:p-8 lg:pb-10 xl:p-10">
+          {(title || subtitle || actions) && (
+            <div className="mb-8 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-[.22em] text-cyan-300/80">{eyebrow}</div>
+                {title && <h1 className="mt-3 text-4xl font-black tracking-tight text-white sm:text-5xl">{title}</h1>}
+                {subtitle && <p className="mt-3 max-w-3xl text-sm leading-7 text-white/45">{subtitle}</p>}
+              </div>
+              {actions && <div className="shrink-0">{actions}</div>}
+            </div>
+          )}
+          {children}
+        </div>
       </section>
 
       {commandOpen && <div className="fixed inset-0 z-[120] grid place-items-start bg-black/75 px-4 pt-[12vh] backdrop-blur-xl">

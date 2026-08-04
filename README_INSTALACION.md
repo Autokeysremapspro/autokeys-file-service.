@@ -25,3 +25,7 @@ Esta versión sustituye la capa visual real del portal autenticado.
 ## Importante
 
 No copies la carpeta raíz completa. Copia únicamente los archivos anteriores respetando sus rutas.
+
+
+## CORRECCIÓN BUILD
+Esta revisión añade compatibilidad completa de AKPageShell con title, subtitle, eyebrow y actions. Sustituye de nuevo components/ak/AKPageShell.tsx aunque ya hubieras instalado la V5 anterior.
