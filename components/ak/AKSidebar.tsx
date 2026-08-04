@@ -5,48 +5,31 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
-  Bell,
-  BookOpen,
-  BrainCircuit,
-  Car,
-  Download,
-  FolderOpen,
-  LayoutDashboard,
-  LifeBuoy,
-  LogOut,
-  Settings,
-  ShieldCheck,
-  UploadCloud,
-  UserCircle,
-  X,
+  Bell, BookOpen, BrainCircuit, Car, Download, FolderOpen, Gauge,
+  LayoutDashboard, LifeBuoy, LogOut, Settings, ShieldCheck,
+  UploadCloud, UserCircle, X, Zap,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 const clientItems = [
-  ['/dashboard', 'Inicio', LayoutDashboard],
-  ['/nuevo-pedido', 'Nuevo servicio', UploadCloud],
-  ['/pedidos', 'Trabajos', FolderOpen],
+  ['/dashboard', 'Mission Control', LayoutDashboard],
+  ['/nuevo-pedido', 'Nuevo archivo', UploadCloud],
+  ['/pedidos', 'Operaciones', FolderOpen],
   ['/descargas', 'Versiones', Download],
-  ['/garage', 'Mis vehículos', Car],
-  ['/biblioteca', 'Biblioteca', BookOpen],
+  ['/garage', 'Garage', Car],
+  ['/biblioteca', 'Knowledge Base', BookOpen],
   ['/intelligence', 'AK Intelligence', BrainCircuit],
-  ['/soporte', 'Soporte', LifeBuoy],
-  ['/notificaciones', 'Notificaciones', Bell],
-  ['/perfil', 'Mi cuenta', UserCircle],
+  ['/soporte', 'Soporte técnico', LifeBuoy],
+  ['/notificaciones', 'Actividad', Bell],
+  ['/perfil', 'Mi workspace', UserCircle],
 ] as const
 
 const adminItems = [
-  ['/admin/pedidos', 'Admin pedidos', ShieldCheck],
-  ['/admin/ecu-database', 'Base ECU', Settings],
+  ['/admin/pedidos', 'Lab Control', ShieldCheck],
+  ['/admin/ecu-database', 'ECU Intelligence', Settings],
 ] as const
 
-export default function AKSidebar({
-  mobile = false,
-  onClose,
-}: {
-  mobile?: boolean
-  onClose?: () => void
-}) {
+export default function AKSidebar({ mobile = false, onClose }: { mobile?: boolean; onClose?: () => void }) {
   const pathname = usePathname()
   const router = useRouter()
   const [isStaff, setIsStaff] = useState(false)
@@ -56,22 +39,10 @@ export default function AKSidebar({
     ;(async () => {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user?.id) return
-      const { data } = await supabase
-        .from('usuarios_app')
-        .select('rol, activo')
-        .eq('auth_user_id', userData.user.id)
-        .maybeSingle()
-      if (active) {
-        setIsStaff(
-          Boolean(data) &&
-            data?.activo !== false &&
-            ['admin', 'desarrollo', 'atencion_cliente'].includes(data?.rol)
-        )
-      }
+      const { data } = await supabase.from('usuarios_app').select('rol, activo').eq('auth_user_id', userData.user.id).maybeSingle()
+      if (active) setIsStaff(Boolean(data) && data?.activo !== false && ['admin', 'desarrollo', 'atencion_cliente'].includes(data?.rol))
     })()
-    return () => {
-      active = false
-    }
+    return () => { active = false }
   }, [])
 
   async function logout() {
@@ -83,82 +54,59 @@ export default function AKSidebar({
     const [href, label, Icon] = item
     const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
     return (
-      <Link
-        href={href}
-        onClick={onClose}
-        className={`ak-v6-nav group flex items-center gap-3 px-3 py-2.5 text-[12px] font-bold ${
-          active ? 'ak-v6-nav-active text-white' : 'text-white/43'
-        }`}
-      >
-        <span
-          className={`grid h-9 w-9 place-items-center rounded-xl border transition-all duration-300 ${
-            active
-              ? 'border-[#e5a05d]/35 bg-[#e5a05d]/12 text-[#ffd09a]'
-              : 'border-white/[.055] bg-white/[.02] text-white/30 group-hover:border-white/10 group-hover:text-white/65'
-          }`}
-        >
-          <Icon size={17} />
-        </span>
-        <span>{label}</span>
-        {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#e5a05d] shadow-[0_0_12px_rgba(229,160,93,.9)]" />}
+      <Link href={href} onClick={onClose} className={`titan-nav group ${active ? 'titan-nav-active' : ''}`}>
+        <span className="titan-nav-icon"><Icon size={17} /></span>
+        <span className="truncate">{label}</span>
+        {active && <span className="titan-nav-beacon" />}
       </Link>
     )
   }
 
   return (
-    <aside
-      className={`ak-v6-sidebar h-screen w-[286px] shrink-0 flex-col ${
-        mobile ? 'flex' : 'hidden lg:sticky lg:top-0 lg:flex'
-      }`}
-    >
-      <div className="flex h-full flex-col px-4 py-5">
-        <div className="mb-5 flex items-start gap-2">
-          <Link href="/dashboard" onClick={onClose} className="min-w-0 flex-1 rounded-[22px] border border-white/[.07] bg-white/[.025] p-4">
-            <Image
-              src="/images/brand/autokeys-logo-wide-transparent.webp"
-              alt="Autokeys"
-              width={220}
-              height={56}
-              className="h-auto w-[176px]"
-              priority
-            />
-            <div className="mt-3 flex items-center gap-2 text-[9px] font-black uppercase tracking-[.22em] text-white/30">
-              <span className="ak-v6-live-dot" /> AK Cloud · Workspace
+    <aside className={`titan-sidebar h-screen w-[292px] shrink-0 flex-col ${mobile ? 'flex' : 'hidden lg:sticky lg:top-0 lg:flex'}`}>
+      <div className="flex h-full flex-col p-4">
+        <div className="mb-5 flex gap-2">
+          <Link href="/dashboard" onClick={onClose} className="titan-brand min-w-0 flex-1">
+            <div className="flex items-center gap-3">
+              <Image src="/images/brand/autokeys-logo-small-transparent.webp" alt="Autokeys" width={52} height={52} className="h-11 w-auto" priority />
+              <div>
+                <div className="text-[15px] font-black tracking-[.2em]">AK LAB <span className="text-[#e5a05d]">OS</span></div>
+                <div className="mt-1 text-[8px] uppercase tracking-[.25em] text-white/28">File Intelligence System</div>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center justify-between rounded-xl border border-white/[.06] bg-black/20 px-3 py-2">
+              <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[.18em] text-white/32"><i className="titan-live" /> Network online</span>
+              <span className="font-mono text-[9px] text-[#67e8d1]">V4.0</span>
             </div>
           </Link>
-          {mobile && (
-            <button onClick={onClose} className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-white/[.04] text-white/60">
-              <X size={18} />
-            </button>
-          )}
+          {mobile && <button onClick={onClose} className="titan-icon-button"><X size={18}/></button>}
         </div>
 
-        <div className="mb-2 px-3 text-[9px] font-black uppercase tracking-[.2em] text-white/20">Workspace</div>
+        <div className="titan-section-label">Operations</div>
         <nav className="space-y-1">{clientItems.map((item) => <Nav key={item[0]} item={item} />)}</nav>
 
-        {isStaff && (
-          <>
-            <div className="my-5 h-px bg-white/[.06]" />
-            <div className="mb-2 px-3 text-[9px] font-black uppercase tracking-[.2em] text-white/20">Laboratorio</div>
-            <nav className="space-y-1">{adminItems.map((item) => <Nav key={item[0]} item={item} />)}</nav>
-          </>
-        )}
+        {isStaff && <>
+          <div className="my-5 h-px bg-white/[.055]" />
+          <div className="titan-section-label">Laboratory</div>
+          <nav className="space-y-1">{adminItems.map((item) => <Nav key={item[0]} item={item} />)}</nav>
+        </>}
 
-        <div className="mt-auto">
-          <div className="ak-v6-brief mb-3 p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <div className="text-xs font-bold text-[#ffd09a]">Pago por archivo</div>
-                <p className="mt-2 text-[11px] leading-5 text-white/32">Precio real, revisiones y soporte dentro del pedido.</p>
-              </div>
-              <div className="ak-v6-orbit" aria-hidden="true"><span /></div>
-            </div>
+        <div className="mt-auto space-y-3">
+          <Link href="/nuevo-pedido" className="titan-launch">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-black/25"><Zap size={18}/></span>
+            <span><strong className="block text-sm">Launch operation</strong><small className="text-white/35">ORI → solución → final</small></span>
+          </Link>
+          <div className="titan-system-card">
+            <div className="flex items-center justify-between text-[10px] uppercase tracking-[.16em] text-white/28"><span>System health</span><Gauge size={15}/></div>
+            <div className="mt-3 grid grid-cols-3 gap-2 text-center"><Metric value="99.9" label="Uptime"/><Metric value="256" label="AES"/><Metric value="LIVE" label="Sync"/></div>
           </div>
-          <button onClick={logout} className="ak-v5-button-secondary w-full !py-2.5 text-xs">
-            <LogOut size={16} /> Cerrar sesión
-          </button>
+          <button onClick={logout} className="titan-logout"><LogOut size={15}/> Cerrar sesión</button>
         </div>
       </div>
     </aside>
   )
+}
+
+function Metric({ value, label }: { value: string; label: string }) {
+  return <div className="rounded-xl border border-white/[.055] bg-white/[.025] py-2"><div className="font-mono text-[10px] font-bold text-white/68">{value}</div><div className="mt-1 text-[8px] uppercase tracking-wider text-white/22">{label}</div></div>
 }
