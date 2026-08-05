@@ -116,6 +116,28 @@ export default function DashboardPage(){
   </div></AppShell>
 }
 
-function Stat({label,value,sub,icon:Icon,tone}:{label:string;value:any;sub:string;icon:any;tone:'amber'|'green'|'cyan'|'red'|'purple'}){const map:any={amber:'text-amber-300 bg-amber-400/10 border-amber-400/20',green:'text-emerald-300 bg-emerald-400/10 border-emerald-400/20',cyan:'text-cyan-300 bg-cyan-400/10 border-cyan-400/20',red:'text-red-300 bg-red-400/10 border-red-400/20',purple:'text-purple-300 bg-purple-400/10 border-purple-400/20'};return <div className="ak5-card ak5-card-hover rounded-[22px] p-5"><div className="flex items-center justify-between"><div className={`grid h-10 w-10 place-items-center rounded-xl border ${map[tone]}`}><Icon size={19}/></div><span className="text-[9px] font-black uppercase tracking-[.14em] text-white/20">En vivo</span></div><div className="mt-5 text-3xl font-black xl:text-4xl">{value}</div><div className="mt-1 text-[11px] font-black uppercase tracking-[.14em] text-white/46">{label}</div><div className="mt-2 text-xs text-white/28">{sub}</div><div className="ak5-statline mt-3"/></div>}
+function Stat({label,value,sub,icon:Icon,tone}:{label:string;value:any;sub:string;icon:any;tone:'amber'|'green'|'cyan'|'red'|'purple'}){
+  const map:any={
+    amber:{badge:'text-amber-300 bg-amber-400/10 border-amber-400/20',glow:'rgba(245,158,11,.16)',line:'rgba(245,158,11,.35)',dot:'bg-amber-400'},
+    green:{badge:'text-emerald-300 bg-emerald-400/10 border-emerald-400/20',glow:'rgba(52,211,153,.16)',line:'rgba(52,211,153,.35)',dot:'bg-emerald-400'},
+    cyan:{badge:'text-cyan-300 bg-cyan-400/10 border-cyan-400/20',glow:'rgba(34,211,238,.16)',line:'rgba(34,211,238,.35)',dot:'bg-cyan-400'},
+    red:{badge:'text-red-300 bg-red-400/10 border-red-400/20',glow:'rgba(255,66,90,.18)',line:'rgba(255,66,90,.4)',dot:'bg-red-400'},
+    purple:{badge:'text-purple-300 bg-purple-400/10 border-purple-400/20',glow:'rgba(168,85,247,.16)',line:'rgba(168,85,247,.35)',dot:'bg-purple-400'},
+  }
+  const t=map[tone]
+  return (
+    <div className="ak5-card ak5-card-hover ak5-gridline relative overflow-hidden rounded-[22px] p-5">
+      <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full" style={{background:`radial-gradient(circle,${t.glow},transparent 70%)`}}/>
+      <div className="relative flex items-center justify-between">
+        <div className={`grid h-10 w-10 place-items-center rounded-xl border ${t.badge}`}><Icon size={19}/></div>
+        <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[.14em] text-white/25"><i className={`h-1.5 w-1.5 rounded-full ${t.dot} ak5-live`}/>En vivo</span>
+      </div>
+      <div className="relative mt-5 text-3xl font-black xl:text-4xl">{value}</div>
+      <div className="relative mt-1 text-[11px] font-black uppercase tracking-[.14em] text-white/46">{label}</div>
+      <div className="relative mt-2 text-xs text-white/28">{sub}</div>
+      <div className="relative mt-3 h-px w-full" style={{background:`linear-gradient(90deg,transparent,${t.line},transparent)`}}/>
+    </div>
+  )
+}
 function Quick({href,icon:Icon,label}:{href:string;icon:any;label:string}){return <Link href={href} className="group rounded-2xl border border-white/[.07] bg-white/[.025] p-4 transition hover:border-red-400/25 hover:bg-red-500/[.055]"><div className="flex items-center justify-between"><span className="grid h-9 w-9 place-items-center rounded-xl bg-black/25 text-red-300"><Icon size={17}/></span><ArrowRight size={15} className="text-white/20 transition group-hover:translate-x-1 group-hover:text-red-300"/></div><div className="mt-4 text-sm font-bold">{label}</div></Link>}
 function Health({label,value}:{label:string;value:string}){return <div className="flex items-center justify-between rounded-xl border border-white/[.06] bg-black/20 px-4 py-3 text-sm"><span className="text-white/45">{label}</span><span className="flex items-center gap-2 font-bold text-emerald-300"><i className="h-2 w-2 rounded-full bg-emerald-400"/>{value}</span></div>}
