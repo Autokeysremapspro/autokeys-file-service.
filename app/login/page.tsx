@@ -52,8 +52,8 @@ export default function LoginPage() {
   return (
     <main className="ak-v5-bg min-h-screen text-white">
       <section className="relative z-10 grid min-h-screen lg:grid-cols-[1.2fr_.8fr]">
-        <div className="relative hidden overflow-hidden lg:block">
-          <img src="/images/login/ak-login-hero.webp" alt="Autokeys Remaps Pro" className="absolute inset-0 h-full w-full object-cover object-top" />
+        <div className="relative hidden overflow-hidden bg-[#05070a] lg:block">
+          <img src="/images/login/ak-login-hero.webp" alt="Autokeys Remaps Pro" className="absolute inset-0 h-full w-full object-contain" />
           <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-r from-transparent to-[#05070a]" />
         </div>
         <div className="relative flex items-center justify-center px-5 py-10 lg:px-10">
