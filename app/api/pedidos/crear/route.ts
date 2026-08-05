@@ -13,10 +13,8 @@ function adminClient() {
 
 // POST /api/pedidos/crear
 // El precio SIEMPRE se recalcula aquí, en el servidor — nunca se confía en
-// nada que mande el navegador. Ya no se paga con créditos: si el servicio
-// está cubierto por tu plan, es gratis de verdad (solo limitado por el tope
-// diario de pedidos); si no lo está (o estás en el plan Free), se paga el
-// precio real en euros con PayPal antes de crear el pedido.
+// nada que mande el navegador. Modelo pago por archivo: cada servicio se
+// cobra a su precio real de catálogo, sin planes ni límites diarios.
 export async function POST(request: Request) {
   try {
     const userClient = createServerSupabaseClient()
@@ -27,17 +25,12 @@ export async function POST(request: Request) {
 
     const { data: distribuidor } = await admin
       .from('akcloud_distribuidores')
-      .select('estado, plan_id, plan_expira_at')
+      .select('estado')
       .eq('auth_user_id', user.id)
       .maybeSingle()
     if (!distribuidor || distribuidor.estado !== 'activo') {
       return NextResponse.json({ error: 'Cuenta no autorizada para crear pedidos' }, { status: 403 })
     }
-
-    // Plan caducado = se trata como si no tuviera plan (todo a precio completo)
-    // hasta que renueve o pase a Free.
-    const planCaducado = Boolean(distribuidor.plan_expira_at && new Date(distribuidor.plan_expira_at).getTime() < Date.now())
-    const planIdEfectivo = planCaducado ? null : distribuidor.plan_id
 
     const body = await request.json()
     if (body.legalAccepted !== true) return NextResponse.json({ error: 'Debes aceptar las condiciones del servicio' }, { status: 400 })
@@ -64,58 +57,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Alguno de los servicios seleccionados no existe o no está activo' }, { status: 400 })
     }
 
-    // Precio real por servicio, por orden de prioridad:
-    // 1º "Planes AK" (akcloud_plan_servicios.precio_override): el número
-    //    exacto que pusiste ahí manda siempre. 0 = gratis/ilimitado de verdad.
-    // 2º Si no hay fila explícita para este plan+servicio: precio completo
-    //    del catálogo — ya no hay descuentos por grupo/porcentaje, es
-    //    "cubierto por tu plan" o "precio real", sin término medio.
-    let planNombre = 'Free'
-    let limiteDiario: number | null = null
-    let planServiciosMap = new Map<string, { incluido: boolean; precio_override: number | null }>()
-
-    if (planIdEfectivo) {
-      const [{ data: plan }, { data: planServicios }] = await Promise.all([
-        admin.from('akcloud_planes').select('nombre, limite_diario_pedidos').eq('id', planIdEfectivo).maybeSingle(),
-        admin.from('akcloud_plan_servicios').select('servicio_id, incluido, precio_override').eq('plan_id', planIdEfectivo),
-      ])
-      planNombre = plan?.nombre || 'tu plan'
-      limiteDiario = plan?.limite_diario_pedidos ?? null
-      for (const row of planServicios || []) {
-        planServiciosMap.set(row.servicio_id, { incluido: row.incluido, precio_override: row.precio_override })
-      }
-    }
-
-    // Tope diario de pedidos (no de créditos) — se aplica siempre que el
-    // plan lo tenga configurado, cubra o no cubra todos los servicios pedidos.
-    if (limiteDiario) {
-      const inicioHoy = new Date()
-      inicioHoy.setHours(0, 0, 0, 0)
-      const { count } = await admin
-        .from('file_service_pedidos')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('created_at', inicioHoy.toISOString())
-
-      if ((count || 0) >= limiteDiario) {
-        return NextResponse.json(
-          { error: `Has llegado al límite diario de tu plan ${planNombre} (${limiteDiario} pedidos al día). Vuelve mañana.` },
-          { status: 429 }
-        )
-      }
-    }
-
-    const conPrecioReal = seleccionados.map((s) => {
-      const override = s.id ? planServiciosMap.get(s.id) : undefined
-      if (override?.incluido) {
-        // precio_override null también cuenta como "gratis" si está marcado
-        // incluido sin precio puesto — mejor pecar de gratis que de cobrar
-        // algo no configurado.
-        return { ...s, precio_final: Number(override.precio_override ?? 0) }
-      }
-      // No cubierto por el plan (o sin plan): precio real del catálogo, sin descuentos.
-      return { ...s, precio_final: Number(s.precio ?? 0) }
-    })
+    // Pago por archivo: siempre el precio real del catálogo, calculado en el
+    // servidor. Sin planes, sin descuentos, sin límite diario de pedidos.
+    const conPrecioReal = seleccionados.map((s) => ({ ...s, precio_final: Number(s.precio ?? 0) }))
 
     const totalPrecio = Number(conPrecioReal.reduce((sum, s) => sum + Number(s.precio_final ?? 0), 0).toFixed(2))
 

@@ -101,7 +101,7 @@ function PayPalSuccessContent() {
 
                 <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                   <AKButton href="/nuevo-pedido"><FileUp size={18} /> Crear nuevo trabajo</AKButton>
-                  <AKButton href="/creditos" variant="ghost"><Wallet size={18} /> Ver créditos</AKButton>
+                  <AKButton href="/dashboard" variant="ghost"><Wallet size={18} /> Ir al panel</AKButton>
                   <AKButton href="/dashboard" variant="dark">Volver al Workspace</AKButton>
                 </div>
               </div>

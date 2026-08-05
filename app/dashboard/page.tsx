@@ -44,13 +44,14 @@ export default function DashboardPage(){
 
   return <AppShell><div className="space-y-6">
     <section className="ak5-card ak5-gridline relative min-h-[360px] overflow-hidden rounded-[28px] p-6 sm:p-8 lg:p-10">
-      <div
-        className="absolute inset-y-0 right-0 w-[62%] bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "linear-gradient(90deg, #05070b 0%, rgba(5,7,11,.55) 30%, rgba(5,7,11,.15) 60%, transparent 100%), url('/images/ak-dashboard-hero-racing.webp')",
-        }}
-      />
+      <div className="absolute inset-y-0 right-0 w-[62%]">
+        <img
+          src="/images/ak-dashboard-hero-racing.webp"
+          alt=""
+          className="absolute inset-0 h-full w-full object-contain object-right"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#05070b] via-[#05070b]/45 to-transparent"/>
+      </div>
       <div className="absolute right-[-80px] top-[-90px] h-80 w-80 rounded-full border border-cyan-400/10"/>
       <div className="absolute right-[80px] top-[40px] h-52 w-52 rounded-full border border-red-400/10"/>
       <div className="relative grid gap-8 xl:grid-cols-[1fr_360px] xl:items-center">
