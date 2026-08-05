@@ -23,9 +23,9 @@
   --ak-signal-bright: #99f6e4;
   --ak-chalk: #f5f1e8;
 
-  /* Compat: nombres antiguos usados en algunas páginas — ahora apuntan a la marca nueva */
-  --ak-red: var(--ak-copper);
-  --ak-glow: var(--ak-copper-bright);
+  /* Compat: nombres antiguos usados en algunas páginas — ahora apuntan a la marca nueva (rojo AK LAB OS) */
+  --ak-red: #ff425a;
+  --ak-glow: #ff6378;
   --ak-green: #34d399;
   --ak-blue: var(--ak-signal);
   --ak-orange: #f2c14e;

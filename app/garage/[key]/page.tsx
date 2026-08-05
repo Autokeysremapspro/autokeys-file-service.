@@ -62,7 +62,7 @@ export default function GarageVehiclePage({ params }: { params: { key: string } 
           <>
             <header className="mb-7 grid gap-5 xl:grid-cols-[1fr_360px]">
               <AKCard className="overflow-hidden p-7 md:p-8">
-                <div className="inline-flex items-center gap-2 rounded-full border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-[var(--ak-glow)]">
+                <div className="inline-flex items-center gap-2 rounded-full border border-red-400/25 bg-red-400/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-red-300">
                   <Sparkles size={15} /> Vehicle Record
                 </div>
                 <h1 className="mt-5 text-4xl font-black tracking-tight md:text-6xl">{name}</h1>
@@ -82,7 +82,7 @@ export default function GarageVehiclePage({ params }: { params: { key: string } 
                   <div className="rounded-2xl bg-black/25 p-4"><FileArchive size={17} className="text-white/35" /><div className="mt-2 text-3xl font-black">{vehicle.trabajos}</div><div className="text-xs text-white/30">Trabajos</div></div>
                   <div className="rounded-2xl bg-black/25 p-4"><CheckCircle2 size={17} className="text-emerald-300" /><div className="mt-2 text-3xl font-black">{vehicle.finalizados}</div><div className="text-xs text-white/30">Finalizados</div></div>
                   <div className="rounded-2xl bg-black/25 p-4"><Clock3 size={17} className="text-amber-300" /><div className="mt-2 text-3xl font-black">{vehicle.pendientes}</div><div className="text-xs text-white/30">Abiertos</div></div>
-                  <div className="rounded-2xl bg-black/25 p-4"><Gauge size={17} className="text-[var(--ak-glow)]" /><div className="mt-2 text-3xl font-black">{vehicle.servicios.length}</div><div className="text-xs text-white/30">Servicios</div></div>
+                  <div className="rounded-2xl bg-black/25 p-4"><Gauge size={17} className="text-red-300" /><div className="mt-2 text-3xl font-black">{vehicle.servicios.length}</div><div className="text-xs text-white/30">Servicios</div></div>
                 </div>
               </AKCard>
             </header>
@@ -92,7 +92,7 @@ export default function GarageVehiclePage({ params }: { params: { key: string } 
                 <AKCard className="p-6">
                   <div className="mb-5 flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--ak-glow)]">Historial</p>
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-red-300">Historial</p>
                       <h2 className="mt-1 text-2xl font-black">Trabajos realizados</h2>
                     </div>
                     <AKButton href="/nuevo-pedido" variant="ghost"><UploadCloud size={17} /> Nuevo trabajo</AKButton>
@@ -100,7 +100,7 @@ export default function GarageVehiclePage({ params }: { params: { key: string } 
 
                   <div className="space-y-3">
                     {vehicle.pedidos.map((pedido) => (
-                      <Link key={pedido.id} href={`/pedidos/${pedido.id}`} className="block rounded-3xl border border-white/10 bg-white/[0.035] p-5 transition hover:border-[var(--ak-red)]/35 hover:bg-white/[0.055]">
+                      <Link key={pedido.id} href={`/pedidos/${pedido.id}`} className="block rounded-3xl border border-white/10 bg-white/[0.035] p-5 transition hover:border-red-400/35 hover:bg-white/[0.055]">
                         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
                           <div>
                             <div className="text-lg font-black">{pedido.numero || 'FS'} · {(pedido.servicios || []).join(' + ') || 'Servicio pendiente'}</div>
@@ -120,7 +120,7 @@ export default function GarageVehiclePage({ params }: { params: { key: string } 
                   <p className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Servicios usados</p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {vehicle.servicios.map((service) => (
-                      <span key={service} className="rounded-full border border-[var(--ak-red)]/20 bg-[var(--ak-red)]/10 px-3 py-1 text-xs font-black text-[var(--ak-glow)]">{service}</span>
+                      <span key={service} className="rounded-full border border-red-400/20 bg-red-400/10 px-3 py-1 text-xs font-black text-red-300">{service}</span>
                     ))}
                   </div>
                 </AKCard>
@@ -132,7 +132,7 @@ export default function GarageVehiclePage({ params }: { params: { key: string } 
                       <div className="rounded-2xl bg-white/[0.035] p-4 text-sm text-white/35">No hay archivos asociados.</div>
                     ) : (
                       files.map((file) => (
-                        <button key={`${file.tipo}-${file.pedido.id}-${file.nombre}`} onClick={() => downloadBlob(file.nombre, file.bucket, file.path)} className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.035] p-4 text-left transition hover:border-[var(--ak-red)]/35 hover:bg-white/[0.055]">
+                        <button key={`${file.tipo}-${file.pedido.id}-${file.nombre}`} onClick={() => downloadBlob(file.nombre, file.bucket, file.path)} className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.035] p-4 text-left transition hover:border-red-400/35 hover:bg-white/[0.055]">
                           <div>
                             <div className="text-sm font-black">{file.tipo} · {file.nombre}</div>
                             <div className="mt-1 text-xs text-white/35">{file.pedido.numero || 'FS'} · {formatBytes(file.size)}</div>

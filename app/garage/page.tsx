@@ -50,7 +50,7 @@ export default function GaragePage() {
     <AKPageShell title="Mis vehículos" subtitle="Un garaje técnico vivo con el historial de cada ECU, servicio, archivo y versión." eyebrow="Vehicle Workspace" actions={<div className="flex flex-wrap gap-3"><AKButton href="/nuevo-pedido"><UploadCloud size={18}/> Nuevo trabajo</AKButton><AKButton href="/biblioteca" variant="ghost"><FileArchive size={18}/> Biblioteca</AKButton></div>}>
         <header className="sr-only">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.3em] text-[var(--ak-glow)]">Private Garage</p>
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-red-300">Private Garage</p>
             <h1 className="mt-2 text-4xl font-black tracking-tight md:text-5xl">Mi Garaje</h1>
             <p className="mt-2 max-w-2xl text-sm text-white/40">
               Cada vehículo con su historial técnico, ORI, MOD, servicios realizados y pedidos asociados.
@@ -59,16 +59,16 @@ export default function GaragePage() {
         </header>
 
         <div className="grid gap-5 md:grid-cols-2 2xl:grid-cols-4">
-          <div className="ak-v6-panel p-5"><div className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Vehículos</div><div className="mt-3 text-4xl font-black">{stats.vehicles}</div><div className="mt-1 text-sm text-white/35">Garage privado</div></div>
-          <div className="ak-v6-panel p-5"><div className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Trabajos</div><div className="mt-3 text-4xl font-black">{stats.trabajos}</div><div className="mt-1 text-sm text-white/35">Historial acumulado</div></div>
-          <div className="ak-v6-panel p-5"><div className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Finalizados</div><div className="mt-3 text-4xl font-black text-emerald-300">{stats.finalizados}</div><div className="mt-1 text-sm text-white/35">MOD disponibles</div></div>
-          <div className="ak-v6-panel p-5"><div className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Abiertos</div><div className="mt-3 text-4xl font-black text-amber-300">{stats.abiertos}</div><div className="mt-1 text-sm text-white/35">En cola o proceso</div></div>
+          <GarageStat label="Vehículos" value={stats.vehicles} helper="Garage privado" glow="rgba(255,66,90,.14)" valueClass="" />
+          <GarageStat label="Trabajos" value={stats.trabajos} helper="Historial acumulado" glow="rgba(34,211,238,.14)" valueClass="" />
+          <GarageStat label="Finalizados" value={stats.finalizados} helper="MOD disponibles" glow="rgba(52,211,153,.14)" valueClass="text-emerald-300" />
+          <GarageStat label="Abiertos" value={stats.abiertos} helper="En cola o proceso" glow="rgba(245,158,11,.14)" valueClass="text-amber-300" />
         </div>
 
-        <AKCard className="mt-6 overflow-hidden p-5 md:p-6">
+        <AKCard className="ak5-gridline mt-6 overflow-hidden p-5 md:p-6">
           <div className="grid gap-5 xl:grid-cols-[1fr_330px] xl:items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-[var(--ak-glow)]">
+              <div className="ak5-chip border-red-400/20 bg-red-400/10 text-red-300">
                 <Sparkles size={15} /> Vehicle Intelligence
               </div>
               <h2 className="mt-4 text-3xl font-black tracking-tight">Historial técnico vivo por vehículo</h2>
@@ -95,7 +95,7 @@ export default function GaragePage() {
             <AKCard className="p-8 text-white/35">Cargando garaje...</AKCard>
           ) : filtered.length === 0 ? (
             <AKCard className="p-10 text-center md:col-span-2 2xl:col-span-3">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-[var(--ak-red)]/12 text-[var(--ak-glow)]"><Car size={30} /></div>
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-red-400/12 text-red-300"><Car size={30} /></div>
               <h3 className="mt-5 text-2xl font-black">Todavía no hay vehículos</h3>
               <p className="mx-auto mt-2 max-w-lg text-sm text-white/40">Cuando crees pedidos, AK Cloud agrupará automáticamente tus trabajos por vehículo y ECU.</p>
               <div className="mt-6"><AKButton href="/nuevo-pedido">Crear primer trabajo</AKButton></div>
@@ -105,5 +105,16 @@ export default function GaragePage() {
           )}
         </div>
     </AKPageShell>
+  )
+}
+
+function GarageStat({ label, value, helper, glow, valueClass }: { label: string; value: number; helper: string; glow: string; valueClass: string }) {
+  return (
+    <div className="ak5-card relative overflow-hidden rounded-[22px] p-5">
+      <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full" style={{ background: `radial-gradient(circle,${glow},transparent 70%)` }} />
+      <div className="relative text-xs font-black uppercase tracking-[0.22em] text-white/35">{label}</div>
+      <div className={`relative mt-3 text-4xl font-black ${valueClass}`}>{value}</div>
+      <div className="relative mt-1 text-sm text-white/35">{helper}</div>
+    </div>
   )
 }

@@ -51,17 +51,15 @@ export default function TerminosPage() {
       <h2>4. Precios y pago</h2>
       <p>
         Los precios de cada solución se muestran en el portal antes de confirmar el pedido, en euros e IVA
-        incluido salvo indicación en contrario. El pago se realiza en el momento de solicitar el servicio, a
-        través de PayPal, o queda incluido sin coste adicional cuando el servicio está cubierto por el plan de
-        suscripción activo del distribuidor, dentro de los límites de dicho plan.
+        incluido salvo indicación en contrario. El pago se realiza en el momento de solicitar el servicio,
+        a través de PayPal, por el precio real del servicio elegido.
       </p>
 
-      <h2>5. Planes de suscripción</h2>
+      <h2>5. Modelo de pago por archivo</h2>
       <p>
-        Los planes de suscripción (Free, Essential, Performance u otros que se publiquen) tienen una duración
-        determinada y pueden incluir un número máximo de solicitudes diarias y un catálogo de servicios cubiertos
-        sin coste adicional, según se detalla en el portal en el momento de la contratación. La renovación de un
-        plan de pago requiere confirmación por parte de Autokeys Remaps Pro tras verificar el cobro correspondiente.
+        AK Cloud funciona bajo un modelo de pago por archivo: cada solicitud se cobra según el precio publicado
+        en el portal para los servicios seleccionados en el momento del pedido, sin cuotas de suscripción ni
+        límites de solicitudes diarias.
       </p>
 
       <h2>6. Plazos de entrega</h2>

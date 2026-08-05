@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { AlertCircle, Bike, Car, Check, ChevronDown, Cog, FileUp, Gauge, ScanLine, Send, Sparkles, Truck, Wrench, ShieldCheck, CheckCircle2, X } from 'lucide-react'
 import AKPageShell from '@/components/ak/AKPageShell'
 import AKUploader from '@/components/ak/AKUploader'
@@ -234,11 +235,11 @@ export default function NuevoPedidoPage() {
             key={step.label}
             className={`flex items-center gap-2.5 rounded-2xl border px-3.5 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
               step.done
-                ? 'border-[#e2954d]/35 bg-[#e2954d]/[.09] text-[#ffb870]'
+                ? 'border-red-400/35 bg-red-400/[.09] text-red-300'
                 : 'border-white/10 bg-black/25 text-white/45'
             }`}
           >
-            <span className={`ak-mono grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] ${step.done ? 'bg-[#e2954d] text-[#0a0d12]' : 'bg-white/10 text-white/50'}`}>
+            <span className={`ak-mono grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] ${step.done ? 'bg-red-400 text-[#0a0d12]' : 'bg-white/10 text-white/50'}`}>
               {step.done ? <Check size={13} /> : index + 1}
             </span>
             <span className="truncate">{step.label}</span>
@@ -249,12 +250,17 @@ export default function NuevoPedidoPage() {
       <div className="grid gap-6 2xl:grid-cols-[1fr_430px]">
         <div className="space-y-6">
           <AKCard className="p-5 md:p-6">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#e2954d]/25 bg-[#e2954d]/10 text-[#ffb870]"><FileUp size={24} /></div>
-              <div>
-                <h2 className="text-2xl font-bold">Archivo ORI</h2>
-                <p className="text-sm text-white/40">Formatos recomendados: .bin, .ori, .hex, .mod, .zip.</p>
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-400/25 bg-red-400/10 text-red-300"><FileUp size={24} /></div>
+                <div>
+                  <h2 className="text-2xl font-bold">Archivo ORI</h2>
+                  <p className="text-sm text-white/40">Formatos recomendados: .bin, .ori, .hex, .mod, .zip.</p>
+                </div>
               </div>
+              <Link href="/intelligence" className="hidden shrink-0 items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-[11px] font-black uppercase tracking-wider text-cyan-300 transition hover:bg-cyan-400/20 sm:flex">
+                <Sparkles size={14}/> Analizar antes con AK Intelligence
+              </Link>
             </div>
             <AKUploader fileName={fileName} onFile={handleFile} compact />
 
@@ -307,7 +313,7 @@ export default function NuevoPedidoPage() {
 
           <AKCard className="p-5 md:p-6">
             <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#e2954d]/25 bg-[#e2954d]/10 text-[#ffb870]"><Car size={24} /></div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-400/25 bg-red-400/10 text-red-300"><Car size={24} /></div>
               <div>
                 <h2 className="text-2xl font-bold">Datos del vehículo</h2>
                 <p className="text-sm text-white/40">Estos datos los introduce el cliente manualmente. Nada de detección automática forzada.</p>
@@ -325,7 +331,7 @@ export default function NuevoPedidoPage() {
 
           <AKCard className="p-5 md:p-6">
             <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#e2954d]/25 bg-[#e2954d]/10 text-[#ffb870]"><Gauge size={24} /></div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-400/25 bg-red-400/10 text-red-300"><Gauge size={24} /></div>
               <div>
                 <h2 className="text-2xl font-bold">Datos ECU</h2>
                 <p className="text-sm text-white/40">El cliente rellena ECU / HW / SW manualmente. Si no lo sabe, puede escribir “revisar”.</p>
@@ -341,7 +347,7 @@ export default function NuevoPedidoPage() {
 
           <AKCard className="p-5 md:p-6">
             <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#e2954d]/25 bg-[#e2954d]/10 text-[#ffb870]"><Wrench size={24} /></div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-400/25 bg-red-400/10 text-red-300"><Wrench size={24} /></div>
               <div>
                 <h2 className="text-2xl font-bold">Servicios</h2>
                 <p className="text-sm text-white/40">Elige el tipo de vehículo y selecciona los servicios — el precio de cada uno se cobra por archivo.</p>
@@ -365,16 +371,16 @@ export default function NuevoPedidoPage() {
                         onClick={() => setFamilia(f.slug)}
                         className={`flex items-center gap-2.5 rounded-2xl border px-4 py-3 text-sm font-bold transition ${
                           activa
-                            ? 'border-[#e2954d]/45 bg-[#e2954d]/[.12] text-white shadow-[0_0_28px_rgba(226,149,77,.14)]'
+                            ? 'border-red-400/45 bg-red-400/[.12] text-white shadow-[0_0_28px_rgba(255,66,90,.18)]'
                             : 'border-white/10 bg-black/20 text-white/55 hover:border-white/25 hover:text-white'
                         }`}
                       >
-                        <span className={`flex h-8 w-8 items-center justify-center rounded-xl ${activa ? 'bg-[#e2954d]/20 text-[#ffb870]' : 'bg-white/5 text-white/45'}`}>
+                        <span className={`flex h-8 w-8 items-center justify-center rounded-xl ${activa ? 'bg-red-400/20 text-red-300' : 'bg-white/5 text-white/45'}`}>
                           <Icon size={16} />
                         </span>
                         {f.nombre}
-                        <span className={`ak-mono rounded-full px-1.5 py-0.5 text-[10px] ${activa ? 'bg-[#e2954d]/25 text-[#ffb870]' : 'bg-white/5 text-white/30'}`}>{count}</span>
-                        <ChevronDown size={14} className={`transition-transform ${activa ? 'rotate-180 text-[#ffb870]' : 'text-white/30'}`} />
+                        <span className={`ak-mono rounded-full px-1.5 py-0.5 text-[10px] ${activa ? 'bg-red-400/25 text-red-300' : 'bg-white/5 text-white/30'}`}>{count}</span>
+                        <ChevronDown size={14} className={`transition-transform ${activa ? 'rotate-180 text-red-300' : 'text-white/30'}`} />
                       </button>
                     )
                   })}
@@ -417,7 +423,7 @@ export default function NuevoPedidoPage() {
 
         <aside className="space-y-6 2xl:sticky 2xl:top-24 2xl:self-start">
           <AKCard className="p-6">
-            <p className="ak-mono text-xs font-bold uppercase tracking-[0.22em] text-[#ffb870]">Resumen</p>
+            <p className="ak-mono text-xs font-bold uppercase tracking-[0.22em] text-red-300">Resumen</p>
             <h2 className="mt-2 text-3xl font-bold">Pedido</h2>
             <div className="mt-5 space-y-3 text-sm">
               <SummaryRow label="Archivo" value={fileName || 'Sin archivo'} />
@@ -435,14 +441,14 @@ export default function NuevoPedidoPage() {
                 </div>
               ))}
             </div>
-            <div className="mt-5 rounded-[1.6rem] border border-[#e2954d]/25 bg-[#e2954d]/[.08] p-4">
+            <div className="mt-5 rounded-[1.6rem] border border-red-400/25 bg-red-400/[.08] p-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-white/50">Total a pagar</span>
                 <strong className="ak-mono text-4xl font-bold text-white">{total.toFixed(2)} €</strong>
               </div>
             </div>
             {error && <div className="mt-4 flex gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200"><AlertCircle size={18} /> {error}</div>}
-            <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="mt-4 min-h-[120px] w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-[#e2954d]/60" placeholder="Observaciones para el técnico..." />
+            <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="mt-4 min-h-[120px] w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-red-400/60" placeholder="Observaciones para el técnico..." />
             <button type="button" onClick={()=>setLegalOpen(true)} className={`mt-4 flex w-full items-center gap-3 rounded-2xl border p-4 text-left ${legalAccepted ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-amber-500/30 bg-amber-500/10'}`}>
               {legalAccepted ? <CheckCircle2 className="text-emerald-300"/> : <ShieldCheck className="text-amber-300"/>}
               <div><div className="font-bold">{legalAccepted ? 'Condiciones aceptadas' : 'Debes aceptar las condiciones'}</div><div className="text-xs text-white/45">Uso legal, responsabilidad del cliente y posible restricción en vía pública.</div></div>
@@ -469,7 +475,7 @@ export default function NuevoPedidoPage() {
             <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-black/25 p-4"><input type="checkbox" checked={legalAccepted} onChange={(e)=>setLegalAccepted(e.target.checked)} className="mt-1 h-5 w-5"/><span className="font-semibold">He leído, comprendo y acepto estas condiciones y asumo la responsabilidad del uso solicitado.</span></label>
             <div className="mt-6 flex gap-3">
               <button onClick={()=>setLegalOpen(false)} className="flex-1 rounded-2xl border border-white/10 px-4 py-3 font-bold">Cancelar</button>
-              <button disabled={!legalAccepted} onClick={()=>setLegalOpen(false)} className="flex-1 rounded-2xl bg-gradient-to-r from-[#8a4a1f] to-[#e2954d] px-4 py-3 font-bold text-[#0a0d12] disabled:opacity-40">Aceptar y continuar</button>
+              <button disabled={!legalAccepted} onClick={()=>setLegalOpen(false)} className="flex-1 rounded-2xl bg-gradient-to-r from-[#c9102b] to-[#ff425a] px-4 py-3 font-bold text-white disabled:opacity-40">Aceptar y continuar</button>
             </div>
           </div>
         </div>
@@ -482,7 +488,7 @@ function Field({ label, value, onChange, placeholder }: { label: string; value: 
   return (
     <label className="block">
       <span className="ak-mono mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-white/35">{label}</span>
-      <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-[#e2954d]/60" />
+      <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-red-400/60" />
     </label>
   )
 }
