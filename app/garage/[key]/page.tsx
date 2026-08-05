@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, CheckCircle2, Clock3, Download, FileArchive, Gauge, Sparkles, UploadCloud } from 'lucide-react'
-import AKSidebar from '@/components/ak/AKSidebar'
+import AppShell from '@/components/AppShell'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import AKTimeline from '@/components/ak/AKTimeline'
@@ -47,9 +47,8 @@ export default function GarageVehiclePage({ params }: { params: { key: string } 
   }, [vehicle])
 
   return (
-    <main className="ak-noise flex min-h-screen">
-      <AKSidebar />
-      <section className="flex-1 p-4 lg:p-8">
+    <AppShell>
+      <section className="flex-1">
         <Link href="/garage" className="mb-6 inline-flex items-center gap-2 text-sm font-black text-white/45 hover:text-white">
           <ArrowLeft size={17} /> Volver al garaje
         </Link>
@@ -148,6 +147,6 @@ export default function GarageVehiclePage({ params }: { params: { key: string } 
           </>
         )}
       </section>
-    </main>
+    </AppShell>
   )
 }

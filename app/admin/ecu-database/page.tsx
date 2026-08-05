@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { Cpu, Plus, Search, Trash2, Save, ShieldCheck } from 'lucide-react'
-import AKSidebar from '@/components/ak/AKSidebar'
+import AppShell from '@/components/AppShell'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import { DEFAULT_SERVICES, DEFAULT_TOOLS, SERVICE_LABELS, createEcuRule, csvToArray, csvToNumberArray, deleteEcuRule, getAllEcuRules, type EcuDbRule } from '@/lib/services/ecuDatabase'
@@ -45,9 +45,8 @@ export default function EcuDatabasePage() {
   }
 
   return (
-    <main className="ak-noise flex min-h-screen">
-      <AKSidebar />
-      <section className="flex-1 p-4 lg:p-8">
+    <AppShell>
+      <section className="flex-1">
         <div className="mb-7 flex flex-col justify-between gap-4 xl:flex-row xl:items-end">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.28em] text-[var(--ak-glow)]">AK Detection Engine</p>
@@ -82,7 +81,7 @@ export default function EcuDatabasePage() {
           </div>
         </div>
       </section>
-    </main>
+    </AppShell>
   )
 }
 function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string }) { return <label className="block"><span className="mb-2 block text-xs font-black uppercase tracking-[0.18em] text-white/35">{label}</span><input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-[var(--ak-red)]/60" /></label> }
