@@ -87,7 +87,7 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
     >
       <Link href="/pedidos" className="mb-5 inline-flex items-center gap-2 text-sm font-black text-white/40 transition hover:text-white"><ArrowLeft size={17} /> Volver a trabajos</Link>
 
-      <div className="ak-v6-panel mb-6 p-4 md:p-5">
+      <div className="ak5-card mb-6 p-4 md:p-5">
         <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <Info label="ECU" value={pedido.ecu || 'No identificada'} />
@@ -101,26 +101,30 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
         </div>
       </div>
 
-      <div className="ak-v6-tabs mb-6">
-        <button onClick={() => setActiveTab('resumen')} className={`ak-v6-tab ${activeTab === 'resumen' ? 'ak-v6-tab-active' : ''}`}><ShieldCheck size={14} className="mr-2 inline"/>Resumen</button>
-        <button onClick={() => setActiveTab('versiones')} className={`ak-v6-tab ${activeTab === 'versiones' ? 'ak-v6-tab-active' : ''}`}><Layers3 size={14} className="mr-2 inline"/>Versiones</button>
-        <button onClick={() => setActiveTab('conversacion')} className={`ak-v6-tab ${activeTab === 'conversacion' ? 'ak-v6-tab-active' : ''}`}><MessageSquare size={14} className="mr-2 inline"/>Conversación</button>
-        <button onClick={() => setActiveTab('historial')} className={`ak-v6-tab ${activeTab === 'historial' ? 'ak-v6-tab-active' : ''}`}><History size={14} className="mr-2 inline"/>Historial</button>
+      <div className="flex gap-1.5 overflow-auto rounded-2xl border border-white/[.075] bg-black/20 p-1.5">
+        {[
+          ['resumen', 'Resumen', ShieldCheck],
+          ['versiones', 'Versiones', Layers3],
+          ['conversacion', 'Conversación', MessageSquare],
+          ['historial', 'Historial', History],
+        ].map(([key, label, Icon]: any) => (
+          <button key={key} onClick={() => setActiveTab(key)} className={`whitespace-nowrap rounded-xl px-3.5 py-2.5 text-[11px] font-black transition ${activeTab === key ? 'bg-red-400/12 text-red-300' : 'text-white/38 hover:text-white/60'}`}><Icon size={14} className="mr-2 inline"/>{label}</button>
+        ))}
       </div>
 
       {activeTab === 'resumen' && (
         <div className="grid gap-6 xl:grid-cols-[1fr_390px]">
           <section className="space-y-6">
-            <div className="ak-v6-panel p-6">
+            <div className="ak5-card p-6">
               <div className="flex items-start justify-between gap-4">
-                <div><div className="ak-v6-kicker">Ficha técnica</div><h2 className="mt-3 text-3xl font-black">{pedido.ecu || 'ECU pendiente'}</h2><p className="mt-2 text-sm text-white/38">{[pedido.marca, pedido.modelo, pedido.motor, pedido.cv].filter(Boolean).join(' · ') || 'Datos del vehículo pendientes'}</p></div>
-                <div className="grid h-14 w-14 place-items-center rounded-2xl border border-[#e5a05d]/20 bg-[#e5a05d]/10 text-[#ffd09a]"><ShieldCheck size={26}/></div>
+                <div><div className="ak5-kicker text-red-300">Ficha técnica</div><h2 className="mt-3 text-3xl font-black">{pedido.ecu || 'ECU pendiente'}</h2><p className="mt-2 text-sm text-white/38">{[pedido.marca, pedido.modelo, pedido.motor, pedido.cv].filter(Boolean).join(' · ') || 'Datos del vehículo pendientes'}</p></div>
+                <div className="grid h-14 w-14 place-items-center rounded-2xl border border-red-400/20 bg-red-400/10 text-red-300"><ShieldCheck size={26}/></div>
               </div>
-              <div className="mt-6 flex flex-wrap gap-2">{(pedido.servicios || []).map((servicio) => <span key={servicio} className="rounded-full border border-[#e5a05d]/18 bg-[#e5a05d]/8 px-4 py-2 text-xs font-black text-[#ffd09a]">{servicio}</span>)}</div>
+              <div className="mt-6 flex flex-wrap gap-2">{(pedido.servicios || []).map((servicio) => <span key={servicio} className="rounded-full border border-red-400/18 bg-red-400/8 px-4 py-2 text-xs font-black text-red-300">{servicio}</span>)}</div>
               {pedido.observaciones && <div className="mt-6 rounded-2xl border border-white/7 bg-black/20 p-4 text-sm leading-6 text-white/45">{pedido.observaciones}</div>}
             </div>
-            <div className="ak-v6-panel p-6">
-              <div className="ak-v6-kicker">Archivos del trabajo</div>
+            <div className="ak5-card p-6">
+              <div className="ak5-kicker text-red-300">Archivos del trabajo</div>
               <div className="mt-5 grid gap-4 md:grid-cols-2">
                 <FileBox title="Archivo original" name={pedido.ori_nombre} size={formatBytes(pedido.ori_size)} ready={!!pedido.ori_path} loading={downloading === pedido.ori_path} onClick={() => download(pedido.ori_bucket, pedido.ori_path, pedido.ori_nombre)} />
                 <FileBox title="Última versión" name={pedido.mod_nombre} size={pedido.mod_path ? 'Disponible' : 'En preparación'} ready={!!pedido.mod_path} loading={downloading === pedido.mod_path} onClick={() => download(pedido.mod_bucket, pedido.mod_path, pedido.mod_nombre)} />
@@ -132,8 +136,8 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
       )}
 
       {activeTab === 'versiones' && (
-        <div className="ak-v6-panel p-6">
-          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center"><div><div className="ak-v6-kicker">Control de revisiones</div><h2 className="mt-2 text-2xl font-black">Versiones entregadas</h2><p className="mt-2 text-sm text-white/38">Cada revisión queda vinculada al pedido y nunca sustituye el historial anterior.</p></div></div>
+        <div className="ak5-card p-6">
+          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center"><div><div className="ak5-kicker text-red-300">Control de revisiones</div><h2 className="mt-2 text-2xl font-black">Versiones entregadas</h2><p className="mt-2 text-sm text-white/38">Cada revisión queda vinculada al pedido y nunca sustituye el historial anterior.</p></div></div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <FileBox title="ORI · Base" name={pedido.ori_nombre} size={formatBytes(pedido.ori_size)} ready={!!pedido.ori_path} loading={downloading === pedido.ori_path} onClick={() => download(pedido.ori_bucket, pedido.ori_path, pedido.ori_nombre)} />
             <FileBox title={pedido.mod_path ? 'V1 · Última entrega' : 'V1 · Pendiente'} name={pedido.mod_nombre} size={pedido.mod_path ? 'Versión disponible' : 'El laboratorio está trabajando'} ready={!!pedido.mod_path} loading={downloading === pedido.mod_path} onClick={() => download(pedido.mod_bucket, pedido.mod_path, pedido.mod_nombre)} />
@@ -153,8 +157,8 @@ function Info({ label, value }: { label: string; value: string }) {
 
 function FileBox({ title, name, size, ready, loading, onClick }: { title: string; name?: string | null; size?: string; ready: boolean; loading?: boolean; onClick: () => void }) {
   return (
-    <button disabled={!ready || loading} onClick={onClick} className="ak-v6-file p-5 text-left disabled:cursor-not-allowed disabled:opacity-50">
-      <FileArchive className="text-[var(--ak-glow)]" size={24} />
+    <button disabled={!ready || loading} onClick={onClick} className="rounded-[22px] border border-white/[.08] bg-black/20 p-5 text-left transition hover:-translate-y-0.5 hover:border-red-400/25 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:border-white/[.08]">
+      <FileArchive className="text-red-300" size={24} />
       <div className="mt-3 text-lg font-black">{title}</div>
       <div className="mt-1 truncate text-sm text-white/35">{name || 'No disponible'}</div>
       <div className="mt-4 flex items-center justify-between text-xs font-black uppercase tracking-[0.18em] text-white/35"><span>{size || '—'}</span>{ready && (loading ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />)}</div>
