@@ -13,8 +13,6 @@ export default function robots(): MetadataRoute.Robots {
           '/garage',
           '/biblioteca',
           '/soporte',
-          '/creditos',
-          '/comprar-creditos',
           '/admin',
           '/pendiente-aprobacion',
           '/restablecer-contrasena',
