@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Car, Cpu, Download, FileArchive, History, ShieldCheck, Sparkles } from 'lucide-react'
-import AKSidebar from '@/components/ak/AKSidebar'
+import AppShell from '@/components/AppShell'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import AKLibraryFileCard from '@/components/ak/AKLibraryFileCard'
@@ -34,10 +34,8 @@ export default function BibliotecaPedidoPage({ params }: { params: { id: string 
   }, [pedido])
 
   return (
-    <main className="ak-noise ak-grid flex min-h-screen overflow-hidden">
-      <AKSidebar />
-
-      <section className="relative z-10 flex-1 p-4 lg:p-8">
+    <AppShell>
+      <section className="relative z-10 flex-1">
         <div className="mb-6">
           <Link href="/biblioteca" className="inline-flex items-center gap-2 text-sm font-black text-white/45 transition hover:text-white">
             <ArrowLeft size={16} /> Volver a biblioteca
@@ -117,7 +115,7 @@ export default function BibliotecaPedidoPage({ params }: { params: { id: string 
                     <div className="flex justify-between gap-4 border-b border-white/10 pb-3"><span className="text-white/35">Año</span><span className="font-bold">{pedido.anio || '—'}</span></div>
                     <div className="flex justify-between gap-4 border-b border-white/10 pb-3"><span className="text-white/35">CV</span><span className="font-bold">{pedido.cv || '—'}</span></div>
                     <div className="flex justify-between gap-4 border-b border-white/10 pb-3"><span className="text-white/35">Cambio</span><span className="font-bold">{pedido.cambio || '—'}</span></div>
-                    <div className="flex justify-between gap-4"><span className="text-white/35">Precio</span><span className="font-bold">{pedido.precio ? `${pedido.precio} créditos` : '—'}</span></div>
+                    <div className="flex justify-between gap-4"><span className="text-white/35">Precio</span><span className="font-bold">{pedido.precio ? `${pedido.precio} €` : '—'}</span></div>
                   </div>
                 </AKCard>
 
@@ -133,6 +131,6 @@ export default function BibliotecaPedidoPage({ params }: { params: { id: string 
           </>
         )}
       </section>
-    </main>
+    </AppShell>
   )
 }

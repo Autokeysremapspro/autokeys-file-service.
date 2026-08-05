@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Bell, CheckCheck, ExternalLink, Loader2, Trash2 } from 'lucide-react'
-import AKSidebar from '@/components/ak/AKSidebar'
+import AppShell from '@/components/AppShell'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import {
@@ -51,9 +51,8 @@ export default function NotificacionesPage() {
   }
 
   return (
-    <main className="ak-noise flex min-h-screen">
-      <AKSidebar />
-      <section className="flex-1 p-4 lg:p-8">
+    <AppShell>
+      <section className="flex-1">
         <header className="mb-7 flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.3em] text-[var(--ak-glow)]">Live Center</p>
@@ -123,6 +122,6 @@ export default function NotificacionesPage() {
           )}
         </AKCard>
       </section>
-    </main>
+    </AppShell>
   )
 }
