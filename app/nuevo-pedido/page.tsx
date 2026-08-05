@@ -88,6 +88,19 @@ export default function NuevoPedidoPage() {
     loadConfig()
   }, [])
 
+  // Si viene de AK Intelligence con un análisis ya hecho, lo recuperamos una vez.
+  useEffect(() => {
+    try {
+      const handoff = sessionStorage.getItem('ak-intel-handoff')
+      if (handoff) {
+        setDetection(JSON.parse(handoff))
+        sessionStorage.removeItem('ak-intel-handoff')
+      }
+    } catch {
+      // handoff opcional — si falla, el cliente simplemente sube el archivo aquí
+    }
+  }, [])
+
   function updateVehicle(key: keyof VehicleForm, value: string) {
     setVehicle((current) => ({ ...current, [key]: value }))
   }
