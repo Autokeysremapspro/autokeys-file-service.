@@ -49,8 +49,12 @@ export default function DashboardPage(){
           src="/images/ak-hero-car-crop.webp"
           alt=""
           className="absolute inset-0 h-full w-full object-contain object-bottom"
+          style={{
+            WebkitMaskImage: 'radial-gradient(125% 85% at 80% 52%, #000 32%, transparent 98%)',
+            maskImage: 'radial-gradient(125% 85% at 80% 52%, #000 32%, transparent 98%)',
+          }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#05070b] via-[#05070b]/25 to-transparent"/>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#05070b] via-[#05070b]/20 to-transparent"/>
       </div>
       <div className="relative max-w-2xl">
         <div className="flex flex-wrap gap-2"><span className="ak5-chip border-emerald-400/20 bg-emerald-400/10 text-emerald-300"><i className="ak5-live h-2 w-2 rounded-full bg-emerald-400"/> Laboratorio operativo</span><span className="ak5-chip border-red-400/20 bg-red-400/10 text-red-300"><Sparkles size={13}/> Mission Control V5</span></div>
