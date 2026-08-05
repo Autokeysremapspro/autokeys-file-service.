@@ -43,30 +43,21 @@ export default function DashboardPage(){
     return list},[pedidos,unread])
 
   return <AppShell><div className="space-y-6">
-    <section className="ak5-card ak5-gridline relative min-h-[360px] overflow-hidden rounded-[28px] p-6 sm:p-8 lg:p-10">
-      <div className="absolute inset-y-0 right-0 w-[62%]">
+    <section className="ak5-card ak5-gridline relative min-h-[380px] overflow-hidden rounded-[28px] p-6 sm:p-8 lg:p-10">
+      <div className="absolute inset-y-0 right-0 w-[58%] sm:w-[52%]">
         <img
-          src="/images/ak-dashboard-hero-racing.webp"
+          src="/images/ak-hero-car-crop.webp"
           alt=""
-          className="absolute inset-0 h-full w-full object-contain object-right"
+          className="absolute inset-0 h-full w-full object-contain object-bottom"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#05070b] via-[#05070b]/45 to-transparent"/>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#05070b] via-[#05070b]/25 to-transparent"/>
       </div>
-      <div className="absolute right-[-80px] top-[-90px] h-80 w-80 rounded-full border border-cyan-400/10"/>
-      <div className="absolute right-[80px] top-[40px] h-52 w-52 rounded-full border border-red-400/10"/>
-      <div className="relative grid gap-8 xl:grid-cols-[1fr_360px] xl:items-center">
-        <div>
-          <div className="flex flex-wrap gap-2"><span className="ak5-chip border-emerald-400/20 bg-emerald-400/10 text-emerald-300"><i className="ak5-live h-2 w-2 rounded-full bg-emerald-400"/> Laboratorio operativo</span><span className="ak5-chip border-red-400/20 bg-red-400/10 text-red-300"><Sparkles size={13}/> Mission Control V5</span></div>
-          <div className="ak5-kicker mt-7">Bienvenido de nuevo</div>
-          <h1 className="ak5-title mt-3 text-5xl sm:text-6xl xl:text-7xl">Hola, <span className="bg-gradient-to-r from-[#ff6378] to-[#ff9a5a] bg-clip-text text-transparent">{name}</span></h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-white/48">Controla pedidos, versiones, archivos y soporte desde un workspace profesional diseñado para trabajar rápido.</p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row"><Link href="/nuevo-pedido" className="ak5-primary"><CloudUpload size={18}/> Crear nuevo pedido</Link><Link href="/pedidos" className="ak5-secondary">Ver mis pedidos <ArrowRight size={17}/></Link></div>
-        </div>
-        <div className="ak5-card rounded-[24px] border-red-400/15 bg-black/35 p-5">
-          <div className="ak5-kicker">Pedidos disponibles hoy</div><div className="mt-3 text-4xl font-black text-emerald-300">SIN LÍMITE</div><p className="mt-1 text-sm text-white/35">Pide los que necesites</p>
-          <div className="mt-5 grid grid-cols-2 gap-3"><Mini label="Trabajos activos" value={stats.activos}/><Mini label="Archivos listos" value={stats.descargas}/></div>
-          <Link href="/nuevo-pedido" className="ak5-primary mt-4 w-full">Crear nuevo pedido <ArrowRight size={16}/></Link>
-        </div>
+      <div className="relative max-w-2xl">
+        <div className="flex flex-wrap gap-2"><span className="ak5-chip border-emerald-400/20 bg-emerald-400/10 text-emerald-300"><i className="ak5-live h-2 w-2 rounded-full bg-emerald-400"/> Laboratorio operativo</span><span className="ak5-chip border-red-400/20 bg-red-400/10 text-red-300"><Sparkles size={13}/> Mission Control V5</span></div>
+        <div className="ak5-kicker mt-7">Bienvenido de nuevo</div>
+        <h1 className="ak5-title mt-3 text-5xl sm:text-6xl xl:text-7xl">Hola, <span className="bg-gradient-to-r from-[#ff6378] to-[#ff9a5a] bg-clip-text text-transparent">{name}</span></h1>
+        <p className="mt-5 max-w-2xl text-base leading-7 text-white/48">Controla pedidos, versiones, archivos y soporte desde un workspace profesional diseñado para trabajar rápido.</p>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row"><Link href="/nuevo-pedido" className="ak5-primary"><CloudUpload size={18}/> Crear nuevo pedido</Link><Link href="/pedidos" className="ak5-secondary">Ver mis pedidos <ArrowRight size={17}/></Link></div>
       </div>
     </section>
 
@@ -121,7 +112,6 @@ export default function DashboardPage(){
   </div></AppShell>
 }
 
-function Mini({label,value}:{label:string;value:any}){return <div className="rounded-2xl border border-white/[.07] bg-white/[.025] p-4"><div className="text-[10px] font-black uppercase tracking-[.14em] text-white/28">{label}</div><div className="mt-2 text-3xl font-black">{value}</div></div>}
 function Stat({label,value,sub,icon:Icon,tone}:{label:string;value:any;sub:string;icon:any;tone:'amber'|'green'|'cyan'|'red'|'purple'}){const map:any={amber:'text-amber-300 bg-amber-400/10 border-amber-400/20',green:'text-emerald-300 bg-emerald-400/10 border-emerald-400/20',cyan:'text-cyan-300 bg-cyan-400/10 border-cyan-400/20',red:'text-red-300 bg-red-400/10 border-red-400/20',purple:'text-purple-300 bg-purple-400/10 border-purple-400/20'};return <div className="ak5-card ak5-card-hover rounded-[22px] p-5"><div className="flex items-center justify-between"><div className={`grid h-10 w-10 place-items-center rounded-xl border ${map[tone]}`}><Icon size={19}/></div><span className="text-[9px] font-black uppercase tracking-[.14em] text-white/20">En vivo</span></div><div className="mt-5 text-3xl font-black xl:text-4xl">{value}</div><div className="mt-1 text-[11px] font-black uppercase tracking-[.14em] text-white/46">{label}</div><div className="mt-2 text-xs text-white/28">{sub}</div><div className="ak5-statline mt-3"/></div>}
 function Quick({href,icon:Icon,label}:{href:string;icon:any;label:string}){return <Link href={href} className="group rounded-2xl border border-white/[.07] bg-white/[.025] p-4 transition hover:border-red-400/25 hover:bg-red-500/[.055]"><div className="flex items-center justify-between"><span className="grid h-9 w-9 place-items-center rounded-xl bg-black/25 text-red-300"><Icon size={17}/></span><ArrowRight size={15} className="text-white/20 transition group-hover:translate-x-1 group-hover:text-red-300"/></div><div className="mt-4 text-sm font-bold">{label}</div></Link>}
 function Health({label,value}:{label:string;value:string}){return <div className="flex items-center justify-between rounded-xl border border-white/[.06] bg-black/20 px-4 py-3 text-sm"><span className="text-white/45">{label}</span><span className="flex items-center gap-2 font-bold text-emerald-300"><i className="h-2 w-2 rounded-full bg-emerald-400"/>{value}</span></div>}
