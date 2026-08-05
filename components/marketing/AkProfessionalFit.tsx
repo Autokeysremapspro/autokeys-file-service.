@@ -38,8 +38,8 @@ export default function AkProfessionalFit() {
           <div className="mt-8 grid gap-3 sm:grid-cols-3">
             {options.map(({ id, label, icon: Icon }) => {
               const active = profile === id
-              return <button key={id} type="button" onClick={() => setProfile(id)} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#e5a05d]/45 bg-[#e5a05d]/10' : 'border-white/[.07] bg-black/20 hover:border-white/15'}`}>
-                <Icon size={20} className={active ? 'text-[#ffd09a]' : 'text-white/35'} />
+              return <button key={id} type="button" onClick={() => setProfile(id)} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-[#ff425a]/45 bg-[#ff425a]/10' : 'border-white/[.07] bg-black/20 hover:border-white/15'}`}>
+                <Icon size={20} className={active ? 'text-[#ff8095]' : 'text-white/35'} />
                 <span className="mt-3 block text-sm font-bold">{label}</span>
               </button>
             })}
