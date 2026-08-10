@@ -2,10 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Gauge, FileUp } from 'lucide-react'
 
+const title = 'Stage 2 ECU File Service for Professionals'
+const description = 'Professional Stage 2 ECU file service for workshops and tuners. Upload the original ECU read with the vehicle hardware setup and manage your calibration request through AK Cloud.'
+const url = '/en/ecu-file-service/stage-2'
+
 export const metadata: Metadata = {
-  title: 'Stage 2 ECU File Service for Professionals | AK Cloud',
-  description: 'Professional Stage 2 ECU file service for workshops and tuners. Upload the original ECU read with the vehicle hardware setup and manage your calibration request through AK Cloud.',
-  alternates: { canonical: '/en/ecu-file-service/stage-2', languages: { en: '/en/ecu-file-service/stage-2', es: '/ecu-file-service/stage-2', 'x-default': '/ecu-file-service/stage-2' } },
+  title,
+  description,
+  alternates: { canonical: url, languages: { en: url, es: '/ecu-file-service/stage-2', 'x-default': '/ecu-file-service/stage-2' } },
+  openGraph: { type: 'website', title, description, url, images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Stage 2 ECU File Service · AK Cloud' }] },
+  twitter: { card: 'summary_large_image', title, description, images: ['/og-image.png'] },
 }
 
 export default function Page() {
