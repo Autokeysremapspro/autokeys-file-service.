@@ -12,6 +12,8 @@ const PUBLIC_PATHS = [
   '/embed',
   '/restablecer-contrasena',
   '/legal',
+  '/robots.txt',
+  '/sitemap.xml',
   '/file-service-ecu',
   '/stage-1-file-service',
   '/ecu-file-service',
