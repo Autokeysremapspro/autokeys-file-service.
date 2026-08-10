@@ -16,10 +16,15 @@ export async function generateMetadata({ params }: { params: Promise<{ tool: str
   const { tool } = await params
   const item = tools[tool as ToolKey]
   if (!item) return {}
+  const title = `${item.name} File Service for Professional Tuners`
+  const description = `Professional ECU file service for workshops and tuners using ${item.name} by ${item.maker}. Upload your ORI and manage MOD delivery through AK Cloud.`
+  const url = `/en/file-service-tools/${tool}`
   return {
-    title: `${item.name} File Service for Professional Tuners | AK Cloud`,
-    description: `Professional ECU file service for workshops and tuners using ${item.name} by ${item.maker}. Upload your ORI and manage MOD delivery through AK Cloud.`,
-    alternates: { canonical: `/en/file-service-tools/${tool}`, languages: { en: `/en/file-service-tools/${tool}`, es: `/file-service-herramientas/${tool}`, 'x-default': `/file-service-herramientas/${tool}` } },
+    title,
+    description,
+    alternates: { canonical: url, languages: { en: url, es: `/file-service-herramientas/${tool}`, 'x-default': `/file-service-herramientas/${tool}` } },
+    openGraph: { type: 'website', title, description, url, images: [{ url: '/og-image.png', width: 1200, height: 630, alt: `${item.name} File Service · AK Cloud` }] },
+    twitter: { card: 'summary_large_image', title, description, images: ['/og-image.png'] },
   }
 }
 
