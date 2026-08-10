@@ -1,0 +1,13 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { ArrowRight, CheckCircle2, Gauge, FileUp } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Petrol ECU Tuning File Service | AK Cloud',
+  description: 'Professional petrol ECU tuning file service for workshops and tuners. Submit the original ECU read and performance calibration request through AK Cloud.',
+  alternates: { canonical: '/en/ecu-file-service/petrol-tuning', languages: { en: '/en/ecu-file-service/petrol-tuning', es: '/ecu-file-service/petrol-tuning', 'x-default': '/ecu-file-service/petrol-tuning' } },
+}
+
+export default function Page() {
+  return <main className="ak-v5-bg min-h-screen text-white"><header className="ak-v5-topbar"><div className="mx-auto flex max-w-[1180px] items-center justify-between px-5 py-4"><Link href="/" className="text-sm font-black tracking-[.18em]">AK <span className="text-[#ff425a]">CLOUD</span></Link><Link href="/register" className="ak-v5-button !px-4 !py-2.5 text-xs">Create account <ArrowRight size={15}/></Link></div></header><section className="mx-auto max-w-[1180px] px-5 py-24"><div className="ak-v5-pill inline-flex"><Gauge size={14}/> PETROL ECU TUNING · FILE SERVICE</div><h1 className="ak-v5-title mt-7 max-w-5xl text-5xl sm:text-7xl">Petrol ECU tuning files.<br/><span className="text-[#ff425a]">Built for professional tuning requests.</span></h1><p className="mt-7 max-w-3xl text-lg leading-8 text-white/50">For workshops and tuners working with petrol engine management. Upload the original ECU read and provide the exact vehicle, engine, ECU, software, read method, hardware configuration and requested performance target.</p><div className="mt-9 flex gap-3"><Link href="/register" className="ak-v5-button">Request access <ArrowRight size={18}/></Link><Link href="/en/ecu-file-service/performance-tuning" className="ak-v5-button-secondary">Performance tuning</Link></div><div className="mt-12 grid gap-4 md:grid-cols-2"><div className="ak-v5-card p-6"><FileUp className="text-[#67e8d1]"/><h2 className="mt-4 text-xl font-bold">Accurate technical data</h2><p className="mt-3 leading-7 text-white/45">Submit the ORI with ECU identification, software, fuel and hardware information so the calibration request can be evaluated correctly.</p></div><div className="ak-v5-card p-6"><CheckCircle2 className="text-[#67e8d1]"/><h2 className="mt-4 text-xl font-bold">Organised file delivery</h2><p className="mt-3 leading-7 text-white/45">Original file, requirements, support and delivered MOD remain together inside the AK Cloud job.</p></div></div></section></main>
+}
