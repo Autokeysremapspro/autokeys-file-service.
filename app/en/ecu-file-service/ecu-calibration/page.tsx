@@ -1,0 +1,13 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { ArrowRight, CheckCircle2, SlidersHorizontal, FileUp } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'ECU Calibration File Service | AK Cloud',
+  description: 'Professional ECU calibration file service for workshops and tuners. Upload the original ECU read, vehicle data and calibration requirements through AK Cloud.',
+  alternates: { canonical: '/en/ecu-file-service/ecu-calibration', languages: { en: '/en/ecu-file-service/ecu-calibration', 'x-default': '/en/ecu-file-service/ecu-calibration' } },
+}
+
+export default function Page() {
+  return <main className="ak-v5-bg min-h-screen text-white"><header className="ak-v5-topbar"><div className="mx-auto flex max-w-[1180px] items-center justify-between px-5 py-4"><Link href="/" className="text-sm font-black tracking-[.18em]">AK <span className="text-[#ff425a]">CLOUD</span></Link><Link href="/register" className="ak-v5-button !px-4 !py-2.5 text-xs">Create account <ArrowRight size={15}/></Link></div></header><section className="mx-auto max-w-[1180px] px-5 py-24"><div className="ak-v5-pill inline-flex"><SlidersHorizontal size={14}/> ECU CALIBRATION · FILE SERVICE</div><h1 className="ak-v5-title mt-7 max-w-5xl text-5xl sm:text-7xl">ECU calibration files.<br/><span className="text-[#ff425a]">Built from the original read and real job data.</span></h1><p className="mt-7 max-w-3xl text-lg leading-8 text-white/50">AK Cloud gives professional workshops and tuners a structured way to submit ECU calibration requests. Upload the original file, identify the vehicle and ECU, describe the hardware and requested result, and keep the technical workflow organised from ORI to delivered MOD.</p><div className="mt-9 flex gap-3"><Link href="/register" className="ak-v5-button">Request access <ArrowRight size={18}/></Link><Link href="/en/ecu-file-service" className="ak-v5-button-secondary">ECU File Service</Link></div><div className="mt-12 grid gap-4 md:grid-cols-2"><div className="ak-v5-card p-6"><FileUp className="text-[#67e8d1]"/><h2 className="mt-4 text-xl font-bold">Submit complete calibration data</h2><p className="mt-3 leading-7 text-white/45">Original ECU read, ECU identification, read method, hardware changes and requested calibration stay attached to the same job.</p></div><div className="ak-v5-card p-6"><CheckCircle2 className="text-[#67e8d1]"/><h2 className="mt-4 text-xl font-bold">Clear professional workflow</h2><p className="mt-3 leading-7 text-white/45">Requests, technical communication and delivered files remain organised so every calibration can be tracked without scattered messages or attachments.</p></div></div></section></main>
+}
