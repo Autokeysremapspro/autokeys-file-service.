@@ -1,0 +1,13 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { ArrowRight, CheckCircle2, FileUp, Gauge } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Diesel ECU Tuning Files | Professional File Service | AK Cloud',
+  description: 'Diesel ECU tuning files for professional workshops and tuners. Submit the original ECU read, vehicle data and calibration requirements through the AK Cloud file service workflow.',
+  alternates: { canonical: '/en/ecu-file-service/diesel-ecu-tuning-files', languages: { en: '/en/ecu-file-service/diesel-ecu-tuning-files', 'x-default': '/en/ecu-file-service/diesel-ecu-tuning-files' } },
+}
+
+export default function Page() {
+  return <main className="ak-v5-bg min-h-screen text-white"><header className="ak-v5-topbar"><div className="mx-auto flex max-w-[1180px] items-center justify-between px-5 py-4"><Link href="/" className="text-sm font-black tracking-[.18em]">AK <span className="text-[#ff425a]">CLOUD</span></Link><Link href="/register" className="ak-v5-button !px-4 !py-2.5 text-xs">Create account <ArrowRight size={15}/></Link></div></header><section className="mx-auto max-w-[1180px] px-5 py-24"><div className="ak-v5-pill inline-flex"><Gauge size={14}/> DIESEL ECU TUNING FILES</div><h1 className="ak-v5-title mt-7 max-w-5xl text-5xl sm:text-7xl">Diesel ECU tuning files.<br/><span className="text-[#ff425a]">Professional calibration workflow for modern diesel ECUs.</span></h1><p className="mt-7 max-w-3xl text-lg leading-8 text-white/50">AK Cloud gives professional workshops and tuners a structured way to request diesel ECU tuning files. Upload the original ECU read, identify the vehicle, engine and control unit, specify the read method and calibration objective, and keep the technical exchange attached to the job.</p><div className="mt-9 flex gap-3"><Link href="/register" className="ak-v5-button">Request access <ArrowRight size={18}/></Link><Link href="/en/ecu-file-service" className="ak-v5-button-secondary">ECU File Service</Link></div><div className="mt-12 grid gap-4 md:grid-cols-2"><div className="ak-v5-card p-6"><FileUp className="text-[#67e8d1]"/><h2 className="mt-4 text-xl font-bold">Diesel tuning requests from the ORI</h2><p className="mt-3 leading-7 text-white/45">Submit the original ECU file with vehicle, engine, ECU and software identification plus the required calibration objective.</p></div><div className="ak-v5-card p-6"><CheckCircle2 className="text-[#67e8d1]"/><h2 className="mt-4 text-xl font-bold">Designed for professional workshops</h2><p className="mt-3 leading-7 text-white/45">Keep the request, technical notes and delivered tuning file organised around the corresponding vehicle job.</p></div></div></section></main>
+}
