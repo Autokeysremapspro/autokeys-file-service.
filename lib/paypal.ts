@@ -87,7 +87,9 @@ export async function capturarYCrearPedido(pendienteId: string) {
   if (fetchError) throw new Error(fetchError.message)
 
   if (pendiente.estado === 'pagado') {
-    const { data: pedidoExistente } = await supabase.from('file_service_pedidos').select('*').eq('id', pendiente.payload.__pedido_id_creado).maybeSingle()
+    const pedidoId = pendiente.payload?.__pedido_id_creado
+    if (!pedidoId) throw new Error('Pago marcado como completado sin pedido asociado')
+    const { data: pedidoExistente } = await supabase.from('file_service_pedidos').select('*').eq('id', pedidoId).maybeSingle()
     return pedidoExistente
   }
   if (!pendiente.paypal_order_id) throw new Error('Este pago no tiene orden de PayPal asociada')
@@ -112,8 +114,14 @@ export async function capturarYCrearPedido(pendienteId: string) {
     cv: payload.cv || null,
     cambio: payload.cambio || null,
     prioridad: payload.prioridad || 'normal',
-    precio: pendiente.importe,
+    precio: Number(pendiente.importe),
+    precio_inicial: Number(payload.precio_inicial ?? pendiente.importe),
+    precio_final: Number(payload.precio_final ?? pendiente.importe),
     pagado: true,
+    legal_aceptado: payload.legal_aceptado === true,
+    legal_version: payload.legal_version || null,
+    legal_aceptado_at: payload.legal_aceptado_at || null,
+    legal_ip: payload.legal_ip || null,
     estado: 'pendiente',
     ori_nombre: payload.ori?.nombre || null,
     ori_bucket: payload.ori?.bucket,
