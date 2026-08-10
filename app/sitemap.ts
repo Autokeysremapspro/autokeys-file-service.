@@ -21,6 +21,14 @@ const EN_TUNING_TOPICS = [
   'tuning-file-supplier',
   'remap-files-for-tuners',
   'custom-tuning-files',
+  'diesel-ecu-tuning-files',
+  'ecu-remap-files',
+  'performance-tuning-files',
+  'petrol-tuning-files',
+  'stage-1-tuning-files',
+  'stage-2-tuning-files',
+  'stage-3-tuning-files',
+  'tuning-files-online',
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
