@@ -2,10 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, SlidersHorizontal, FileUp } from 'lucide-react'
 
+const title = 'Custom ECU Tuning File Service'
+const description = 'Custom ECU tuning file service for professional workshops and tuners. Send the original ECU read and precise vehicle requirements through the AK Cloud workflow.'
+const url = '/en/ecu-file-service/custom-tuning'
+
 export const metadata: Metadata = {
-  title: 'Custom ECU Tuning File Service | AK Cloud',
-  description: 'Custom ECU tuning file service for professional workshops and tuners. Send the original ECU read and precise vehicle requirements through the AK Cloud workflow.',
-  alternates: { canonical: '/en/ecu-file-service/custom-tuning', languages: { en: '/en/ecu-file-service/custom-tuning', es: '/ecu-file-service/custom-tuning', 'x-default': '/ecu-file-service/custom-tuning' } },
+  title,
+  description,
+  alternates: { canonical: url, languages: { en: url, es: '/ecu-file-service/custom-tuning', 'x-default': '/ecu-file-service/custom-tuning' } },
+  openGraph: { type: 'website', title, description, url, images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Custom ECU Tuning File Service · AK Cloud' }] },
+  twitter: { card: 'summary_large_image', title, description, images: ['/og-image.png'] },
 }
 
 export default function Page() {
