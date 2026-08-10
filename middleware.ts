@@ -1,9 +1,25 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createMiddlewareSupabaseClient } from '@/lib/supabase/middleware'
 
-// Público: landing, login, alta de distribuidor, confirmación de PayPal, y el
-// widget embebible de potencias (pensado para insertarse en webs externas).
-const PUBLIC_PATHS = ['/', '/login', '/register', '/paypal', '/embed', '/restablecer-contrasena', '/legal']
+// Public commercial/SEO pages must stay accessible to search engines and
+// visitors without an AK Cloud account. Authenticated application areas remain
+// protected below.
+const PUBLIC_PATHS = [
+  '/',
+  '/login',
+  '/register',
+  '/paypal',
+  '/embed',
+  '/restablecer-contrasena',
+  '/legal',
+  '/file-service-ecu',
+  '/stage-1-file-service',
+  '/ecu-file-service',
+  '/file-service-herramientas',
+  '/en/ecu-file-service',
+  '/en/stage-1-file-service',
+  '/en/file-service-tools',
+]
 const STAFF_ONLY_PATHS = ['/admin']
 const STAFF_ROLES = ['admin', 'desarrollo', 'laboratorio', 'atencion_cliente']
 
