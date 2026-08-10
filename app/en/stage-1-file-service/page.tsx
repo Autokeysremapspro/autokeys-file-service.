@@ -2,10 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, FileUp, Gauge, ShieldCheck } from 'lucide-react'
 
+const title = 'Stage 1 File Service for Professional Tuners'
+const description = 'Professional Stage 1 file service for workshops and tuners. Upload your ORI and manage the calibration request and MOD delivery through AK Cloud.'
+const url = '/en/stage-1-file-service'
+
 export const metadata: Metadata = {
-  title: 'Stage 1 File Service for Professional Tuners | AK Cloud',
-  description: 'Professional Stage 1 file service for workshops and tuners. Upload your ORI and manage the calibration request and MOD delivery through AK Cloud.',
-  alternates: { canonical: '/en/stage-1-file-service', languages: { en: '/en/stage-1-file-service', es: '/stage-1-file-service', 'x-default': '/stage-1-file-service' } },
+  title,
+  description,
+  alternates: { canonical: url, languages: { en: url, es: '/stage-1-file-service', 'x-default': '/stage-1-file-service' } },
+  openGraph: { type: 'website', title, description, url, images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Stage 1 File Service · AK Cloud' }] },
+  twitter: { card: 'summary_large_image', title, description, images: ['/og-image.png'] },
 }
 
 export default function Page() {
