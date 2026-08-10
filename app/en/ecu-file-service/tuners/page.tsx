@@ -2,10 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, FileUp, Gauge } from 'lucide-react'
 
+const title = 'ECU File Service for Tuners'
+const description = 'Professional ECU file service for tuners and remapping specialists. Upload the ORI, request the calibration and manage each MOD delivery through AK Cloud.'
+const url = '/en/ecu-file-service/tuners'
+
 export const metadata: Metadata = {
-  title: 'ECU File Service for Tuners | AK Cloud',
-  description: 'Professional ECU file service for tuners and remapping specialists. Upload the ORI, request the calibration and manage each MOD delivery through AK Cloud.',
-  alternates: { canonical: '/en/ecu-file-service/tuners' },
+  title,
+  description,
+  alternates: { canonical: url },
+  openGraph: { type: 'website', title, description, url, images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'ECU File Service for Tuners · AK Cloud' }] },
+  twitter: { card: 'summary_large_image', title, description, images: ['/og-image.png'] },
 }
 
 export default function Page() {
