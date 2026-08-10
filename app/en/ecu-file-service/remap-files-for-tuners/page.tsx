@@ -1,0 +1,13 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { ArrowRight, CheckCircle2, FileUp, Gauge } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'ECU Remap Files for Tuners | Professional File Service | AK Cloud',
+  description: 'ECU remap files for professional tuners. Upload original ECU reads and calibration requirements through the AK Cloud online file service workflow.',
+  alternates: { canonical: '/en/ecu-file-service/remap-files-for-tuners', languages: { en: '/en/ecu-file-service/remap-files-for-tuners', 'x-default': '/en/ecu-file-service/remap-files-for-tuners' } },
+}
+
+export default function Page() {
+  return <main className="ak-v5-bg min-h-screen text-white"><header className="ak-v5-topbar"><div className="mx-auto flex max-w-[1180px] items-center justify-between px-5 py-4"><Link href="/" className="text-sm font-black tracking-[.18em]">AK <span className="text-[#ff425a]">CLOUD</span></Link><Link href="/register" className="ak-v5-button !px-4 !py-2.5 text-xs">Create account <ArrowRight size={15}/></Link></div></header><section className="mx-auto max-w-[1180px] px-5 py-24"><div className="ak-v5-pill inline-flex"><Gauge size={14}/> ECU REMAP FILES · TUNERS</div><h1 className="ak-v5-title mt-7 max-w-5xl text-5xl sm:text-7xl">ECU remap files for tuners.<br/><span className="text-[#ff425a]">A professional workflow from ORI to delivery.</span></h1><p className="mt-7 max-w-3xl text-lg leading-8 text-white/50">AK Cloud provides professional tuners with a clear workflow for ECU remap file requests. Submit the original ECU read, identify the vehicle and control unit, include the read method and requested calibration, and keep the complete technical exchange connected to the job.</p><div className="mt-9 flex gap-3"><Link href="/register" className="ak-v5-button">Request access <ArrowRight size={18}/></Link><Link href="/en/ecu-file-service" className="ak-v5-button-secondary">ECU File Service</Link></div><div className="mt-12 grid gap-4 md:grid-cols-2"><div className="ak-v5-card p-6"><FileUp className="text-[#67e8d1]"/><h2 className="mt-4 text-xl font-bold">Structured remap requests</h2><p className="mt-3 leading-7 text-white/45">Provide the ORI, ECU identification, software information and calibration objective in one technical request.</p></div><div className="ak-v5-card p-6"><CheckCircle2 className="text-[#67e8d1]"/><h2 className="mt-4 text-xl font-bold">Files organised by job</h2><p className="mt-3 leading-7 text-white/45">Keep support communication and delivered remap files grouped with the corresponding vehicle request for a cleaner tuner workflow.</p></div></div></section></main>
+}
