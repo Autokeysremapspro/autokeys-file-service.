@@ -1,0 +1,13 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { ArrowRight, CheckCircle2, CloudUpload, MessagesSquare } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Online ECU Tuning File Service | AK Cloud',
+  description: 'Online ECU tuning file service for professional workshops and tuners. Upload the original ECU read, submit the vehicle requirements and manage the job through AK Cloud.',
+  alternates: { canonical: '/en/ecu-file-service/online-tuning' },
+}
+
+export default function Page() {
+  return <main className="ak-v5-bg min-h-screen text-white"><header className="ak-v5-topbar"><div className="mx-auto flex max-w-[1180px] items-center justify-between px-5 py-4"><Link href="/" className="text-sm font-black tracking-[.18em]">AK <span className="text-[#ff425a]">CLOUD</span></Link><Link href="/register" className="ak-v5-button !px-4 !py-2.5 text-xs">Create account <ArrowRight size={15}/></Link></div></header><section className="mx-auto max-w-[1180px] px-5 py-24"><div className="ak-v5-pill inline-flex"><CloudUpload size={14}/> ONLINE ECU TUNING · FILE SERVICE</div><h1 className="ak-v5-title mt-7 max-w-5xl text-5xl sm:text-7xl">Online ECU tuning file service.<br/><span className="text-[#ff425a]">Upload the ORI. Manage the complete job online.</span></h1><p className="mt-7 max-w-3xl text-lg leading-8 text-white/50">A professional online workflow for workshops and tuners. Submit the original ECU file together with vehicle identification, ECU data, read method and requested calibration, then keep the request and delivered file organised in AK Cloud.</p><div className="mt-9 flex gap-3"><Link href="/register" className="ak-v5-button">Request access <ArrowRight size={18}/></Link><Link href="/en/ecu-file-service" className="ak-v5-button-secondary">ECU File Service</Link></div><div className="mt-12 grid gap-4 md:grid-cols-2"><div className="ak-v5-card p-6"><CloudUpload className="text-[#67e8d1]"/><h2 className="mt-4 text-xl font-bold">Upload from your workshop</h2><p className="mt-3 leading-7 text-white/45">Send the ORI and job requirements through the portal without mixing files, messages and vehicle information across different channels.</p></div><div className="ak-v5-card p-6"><MessagesSquare className="text-[#67e8d1]"/><h2 className="mt-4 text-xl font-bold">Job-linked communication</h2><p className="mt-3 leading-7 text-white/45">Technical context, support and the delivered MOD remain associated with the same request for a clearer professional workflow.</p></div></div></section></main>
+}
