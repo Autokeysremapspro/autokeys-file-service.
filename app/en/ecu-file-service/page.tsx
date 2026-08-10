@@ -2,10 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, FileUp, ShieldCheck, Wrench } from 'lucide-react'
 
+const title = 'ECU File Service for Professional Tuners'
+const description = 'Professional ECU file service for workshops and tuners. Upload your original file, submit the job and receive the modified file through AK Cloud. Pay per file.'
+const url = '/en/ecu-file-service'
+
 export const metadata: Metadata = {
-  title: 'ECU File Service for Professional Tuners | AK Cloud',
-  description: 'Professional ECU file service for workshops and tuners. Upload your original file, submit the job and receive the modified file through AK Cloud. Pay per file.',
-  alternates: { canonical: '/en/ecu-file-service', languages: { 'en': '/en/ecu-file-service', 'es': '/file-service-ecu', 'x-default': '/file-service-ecu' } },
+  title,
+  description,
+  alternates: { canonical: url, languages: { en: url, es: '/file-service-ecu', 'x-default': '/file-service-ecu' } },
+  openGraph: { type: 'website', title, description, url, images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Professional ECU File Service · AK Cloud' }] },
+  twitter: { card: 'summary_large_image', title, description, images: ['/og-image.png'] },
 }
 
 export default function EnglishEcuFileServicePage() {
