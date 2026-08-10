@@ -2,10 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, FileUp, Wrench } from 'lucide-react'
 
+const title = 'AutoTuner ECU File Service for Professionals'
+const description = 'Professional ECU file service for workshops and tuners using AutoTuner. Upload the original ECU read and manage your ORI/MOD workflow through AK Cloud.'
+const url = '/en/ecu-file-service/autotuner'
+
 export const metadata: Metadata = {
-  title: 'AutoTuner ECU File Service for Professionals | AK Cloud',
-  description: 'Professional ECU file service for workshops and tuners using AutoTuner. Upload the original ECU read and manage your ORI/MOD workflow through AK Cloud.',
-  alternates: { canonical: '/en/ecu-file-service/autotuner', languages: { en: '/en/ecu-file-service/autotuner', es: '/ecu-file-service/autotuner', 'x-default': '/ecu-file-service/autotuner' } },
+  title,
+  description,
+  alternates: { canonical: url, languages: { en: url, es: '/ecu-file-service/autotuner', 'x-default': '/ecu-file-service/autotuner' } },
+  openGraph: { type: 'website', title, description, url, images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'AutoTuner ECU File Service · AK Cloud' }] },
+  twitter: { card: 'summary_large_image', title, description, images: ['/og-image.png'] },
 }
 
 export default function Page() {
