@@ -4,8 +4,8 @@ import { createMiddlewareSupabaseClient } from '@/lib/supabase/middleware'
 // Público: landing, login, alta de distribuidor, confirmación de PayPal, y el
 // widget embebible de potencias (pensado para insertarse en webs externas).
 const PUBLIC_PATHS = ['/', '/login', '/register', '/paypal', '/embed', '/restablecer-contrasena', '/legal']
-// Solo staff interno de Autokeys puede entrar sin más (comparte usuarios_app con Core).
 const STAFF_ONLY_PATHS = ['/admin']
+const STAFF_ROLES = ['admin', 'desarrollo', 'laboratorio', 'atencion_cliente']
 
 function matches(pathname: string, list: string[]) {
   return list.some((path) => pathname === path || pathname.startsWith(`${path}/`))
@@ -15,43 +15,33 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const { supabase, response } = createMiddlewareSupabaseClient(request)
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  if (matches(pathname, PUBLIC_PATHS)) {
-    return response
-  }
+  if (matches(pathname, PUBLIC_PATHS)) return response
 
   if (!user) {
     const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('next', pathname)
+    loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`)
     return NextResponse.redirect(loginUrl)
   }
 
-  // Un miembro del staff de Autokeys (tabla usuarios_app, compartida con Core)
-  // puede entrar a CUALQUIER parte del portal, sea o no también distribuidor.
+  // Comparte identidad de staff con Core. Mantener esta lista sincronizada
+  // con public.is_staff() evita que un técnico de laboratorio quede bloqueado
+  // en AK Cloud mientras sí tiene permisos internos en Core/Supabase.
   const { data: usuario } = await supabase
     .from('usuarios_app')
     .select('rol, activo')
     .eq('auth_user_id', user.id)
     .maybeSingle()
 
-  const esStaff = !!usuario && usuario.activo !== false && ['admin', 'desarrollo', 'atencion_cliente'].includes(usuario.rol)
+  const esStaff = !!usuario && usuario.activo !== false && STAFF_ROLES.includes(usuario.rol)
+  if (esStaff) return response
 
-  if (esStaff) {
-    return response
-  }
-
-  // No es staff: las rutas /admin quedan cerradas, y el resto exige ser
-  // distribuidor aprobado y activo.
   if (matches(pathname, STAFF_ONLY_PATHS)) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  if (pathname.startsWith('/pendiente-aprobacion')) {
-    return response
-  }
+  if (pathname.startsWith('/pendiente-aprobacion')) return response
 
   const { data: distribuidor } = await supabase
     .from('akcloud_distribuidores')
@@ -67,7 +57,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|webp|gif|ico)$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|webp|gif|ico)$).*)'],
 }
