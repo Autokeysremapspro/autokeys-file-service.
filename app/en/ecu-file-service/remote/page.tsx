@@ -2,10 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Cloud, FileUp, Workflow } from 'lucide-react'
 
+const title = 'Remote ECU File Service for Workshops & Tuners'
+const description = 'Remote ECU tuning file service for professional workshops and tuners. Upload the original ECU file online and manage your calibration request and MOD delivery in AK Cloud.'
+const url = '/en/ecu-file-service/remote'
+
 export const metadata: Metadata = {
-  title: 'Remote ECU File Service for Workshops & Tuners | AK Cloud',
-  description: 'Remote ECU tuning file service for professional workshops and tuners. Upload the original ECU file online and manage your calibration request and MOD delivery in AK Cloud.',
-  alternates: { canonical: '/en/ecu-file-service/remote' },
+  title,
+  description,
+  alternates: { canonical: url },
+  openGraph: { type: 'website', title, description, url, images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Remote ECU File Service · AK Cloud' }] },
+  twitter: { card: 'summary_large_image', title, description, images: ['/og-image.png'] },
 }
 
 export default function Page() {
