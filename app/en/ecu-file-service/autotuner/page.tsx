@@ -9,7 +9,7 @@ const url = '/en/ecu-file-service/autotuner'
 export const metadata: Metadata = {
   title,
   description,
-  alternates: { canonical: url, languages: { en: url, es: '/ecu-file-service/autotuner', 'x-default': '/ecu-file-service/autotuner' } },
+  alternates: { canonical: url, languages: { en: url, es: '/file-service-herramientas/autotuner', 'x-default': '/file-service-herramientas/autotuner' } },
   openGraph: { type: 'website', title, description, url, images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'AutoTuner ECU File Service · AK Cloud' }] },
   twitter: { card: 'summary_large_image', title, description, images: ['/og-image.png'] },
 }
