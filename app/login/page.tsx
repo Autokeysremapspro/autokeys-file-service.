@@ -1,14 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { ArrowRight, Eye, Lock, Mail } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 export default function LoginPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -23,7 +22,11 @@ export default function LoginPage() {
     setLoading(false)
     if (error) { toast.error(error.message); return }
 
-    const requested = searchParams.get('next') || '/dashboard'
+    // Leer el retorno solo en navegador evita el bailout de prerender de
+    // useSearchParams y conserva el comportamiento de volver a la ruta pedida.
+    const requested = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('next') || '/dashboard'
+      : '/dashboard'
     const safeNext = requested.startsWith('/') && !requested.startsWith('//') ? requested : '/dashboard'
     toast.success('Acceso correcto')
     router.replace(safeNext)
