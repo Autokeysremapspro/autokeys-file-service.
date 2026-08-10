@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ family: s
   const { family } = await params
   const item = families[family as Family]
   if (!item) return {}
-  return { title: `${item.title} para profesionales | AK Cloud`, description: item.description, alternates: { canonical: `/ecu-file-service/${family}` } }
+  return { title: `${item.title} para profesionales`, description: item.description, alternates: { canonical: `/ecu-file-service/${family}` } }
 }
 
 export default async function FamilyPage({ params }: { params: Promise<{ family: string }> }) {
