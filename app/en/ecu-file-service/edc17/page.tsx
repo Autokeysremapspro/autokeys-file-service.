@@ -2,10 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Cpu, FileUp } from 'lucide-react'
 
+const title = 'Bosch EDC17 File Service for Professionals'
+const description = 'Professional Bosch EDC17 file service for workshops and tuners. Upload the original ECU file and manage your tuning file request through AK Cloud.'
+const url = '/en/ecu-file-service/edc17'
+
 export const metadata: Metadata = {
-  title: 'Bosch EDC17 File Service for Professionals | AK Cloud',
-  description: 'Professional Bosch EDC17 file service for workshops and tuners. Upload the original ECU file and manage your tuning file request through AK Cloud.',
-  alternates: { canonical: '/en/ecu-file-service/edc17', languages: { en: '/en/ecu-file-service/edc17', es: '/ecu-file-service/edc17', 'x-default': '/ecu-file-service/edc17' } },
+  title,
+  description,
+  alternates: { canonical: url, languages: { en: url, es: '/ecu-file-service/edc17', 'x-default': '/ecu-file-service/edc17' } },
+  openGraph: { type: 'website', title, description, url, images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Bosch EDC17 File Service · AK Cloud' }] },
+  twitter: { card: 'summary_large_image', title, description, images: ['/og-image.png'] },
 }
 
 export default function Page() {
