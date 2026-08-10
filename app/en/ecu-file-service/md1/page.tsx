@@ -2,10 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Cpu, FileUp } from 'lucide-react'
 
+const title = 'Bosch MD1 File Service for Professionals'
+const description = 'Professional Bosch MD1 ECU file service for workshops and tuners. Upload your original read and manage calibration requests and MOD delivery through AK Cloud.'
+const url = '/en/ecu-file-service/md1'
+
 export const metadata: Metadata = {
-  title: 'Bosch MD1 File Service for Professionals | AK Cloud',
-  description: 'Professional Bosch MD1 ECU file service for workshops and tuners. Upload your original read and manage calibration requests and MOD delivery through AK Cloud.',
-  alternates: { canonical: '/en/ecu-file-service/md1', languages: { en: '/en/ecu-file-service/md1', es: '/ecu-file-service/md1', 'x-default': '/ecu-file-service/md1' } },
+  title,
+  description,
+  alternates: { canonical: url, languages: { en: url, es: '/ecu-file-service/md1', 'x-default': '/ecu-file-service/md1' } },
+  openGraph: { type: 'website', title, description, url, images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Bosch MD1 File Service · AK Cloud' }] },
+  twitter: { card: 'summary_large_image', title, description, images: ['/og-image.png'] },
 }
 
 export default function Page() {
