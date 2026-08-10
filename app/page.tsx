@@ -88,7 +88,7 @@ export default function HomePage() {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="ak-v5-stat"><div className="text-[10px] uppercase text-white/30">Activos</div><div className="mt-2 text-3xl font-black">12</div></div>
                   <div className="ak-v5-stat"><div className="text-[10px] uppercase text-white/30">Entregados</div><div className="mt-2 text-3xl font-black text-[#67e8d1]">48</div></div>
-                  <div className="ak-v5-stat"><div className="text-[10px] uppercase text-white/30">Saldo</div><div className="mt-2 text-3xl font-black text-[#ff425a]">0 cr.</div></div>
+                  <div className="ak-v5-stat"><div className="text-[10px] uppercase text-white/30">Modelo</div><div className="mt-2 text-xl font-black text-[#ff425a]">Por archivo</div></div>
                 </div>
                 <div className="ak-v5-card p-4">
                   <div className="flex items-center justify-between gap-3"><div><div className="text-[10px] uppercase tracking-widest text-white/30">Pedido AK-2841</div><div className="mt-1 font-bold">BMW 320d · Bosch MD1CS001</div></div><span className="rounded-full border border-[#67e8d1]/20 bg-[#67e8d1]/10 px-3 py-1 text-[10px] font-bold text-[#67e8d1]">V2 LISTA</span></div>
