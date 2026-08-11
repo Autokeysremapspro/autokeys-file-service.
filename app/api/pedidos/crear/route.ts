@@ -18,6 +18,16 @@ function normalizarDtcs(value: unknown, observaciones: unknown) {
   return Array.from(new Set(matches.map((code) => code.trim())))
 }
 
+function normalizarMetodoLectura(value: unknown) {
+  const normalized = String(value || '').trim().toUpperCase()
+  return ['OBD', 'BENCH', 'BOOT', 'BDM', 'JTAG', 'OTRO'].includes(normalized) ? normalized : null
+}
+
+function normalizarArchivoOrigen(value: unknown) {
+  const normalized = String(value || '').trim().toUpperCase()
+  return ['ORI', 'MODIFICADO', 'DESCONOCIDO'].includes(normalized) ? normalized : null
+}
+
 export async function POST(request: Request) {
   try {
     const userClient = createServerSupabaseClient()
@@ -73,6 +83,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Para DTC OFF indica los códigos DTC separados por comas, por ejemplo P0401, P2002.' }, { status: 400 })
     }
 
+    const herramientaLectura = String(body.herramientaLectura || '').trim() || null
+    const metodoLectura = normalizarMetodoLectura(body.metodoLectura)
+    const archivoOrigen = normalizarArchivoOrigen(body.archivoOrigen)
+    const modificacionesHardware = String(body.modificacionesHardware || '').trim() || null
+
     const conPrecioReal = seleccionados.map((s) => ({ ...s, precio_final: Number(s.precio ?? 0) }))
     const totalPrecio = Number(conPrecioReal.reduce((sum, s) => sum + Number(s.precio_final ?? 0), 0).toFixed(2))
 
@@ -92,6 +107,10 @@ export async function POST(request: Request) {
       sw: body.sw || null,
       cv: body.cv || null,
       cambio: body.cambio || null,
+      herramienta_lectura: herramientaLectura,
+      metodo_lectura: metodoLectura,
+      archivo_origen: archivoOrigen,
+      modificaciones_hardware: modificacionesHardware,
       prioridad: body.prioridad || 'normal',
       legal_aceptado: true,
       legal_version: legalVersion,
@@ -142,6 +161,10 @@ export async function POST(request: Request) {
         sw: commonPayload.sw,
         cv: commonPayload.cv,
         cambio: commonPayload.cambio,
+        herramienta_lectura: commonPayload.herramienta_lectura,
+        metodo_lectura: commonPayload.metodo_lectura,
+        archivo_origen: commonPayload.archivo_origen,
+        modificaciones_hardware: commonPayload.modificaciones_hardware,
         prioridad: commonPayload.prioridad,
         legal_aceptado: commonPayload.legal_aceptado,
         legal_version: commonPayload.legal_version,
