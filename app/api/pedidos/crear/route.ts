@@ -11,6 +11,13 @@ function adminClient() {
   return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } })
 }
 
+function normalizarDtcs(value: unknown, observaciones: unknown) {
+  const explicit = Array.isArray(value) ? value.join(',') : String(value || '')
+  const source = `${explicit},${String(observaciones || '')}`.toUpperCase()
+  const matches = source.match(/\b[PCBU][0-9A-F]{4,5}\b/g) || []
+  return Array.from(new Set(matches.map((code) => code.trim())))
+}
+
 export async function POST(request: Request) {
   try {
     const userClient = createServerSupabaseClient()
@@ -60,6 +67,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Alguno de los servicios seleccionados no existe o no está activo' }, { status: 400 })
     }
 
+    const solicitaDtcOff = seleccionados.some((s) => /dtc/i.test(`${s.slug} ${s.nombre}`))
+    const dtcCodes = normalizarDtcs(body.dtcCodes, body.observaciones)
+    if (solicitaDtcOff && dtcCodes.length === 0) {
+      return NextResponse.json({ error: 'Para DTC OFF indica los códigos DTC separados por comas, por ejemplo P0401, P2002.' }, { status: 400 })
+    }
+
     const conPrecioReal = seleccionados.map((s) => ({ ...s, precio_final: Number(s.precio ?? 0) }))
     const totalPrecio = Number(conPrecioReal.reduce((sum, s) => sum + Number(s.precio_final ?? 0), 0).toFixed(2))
 
@@ -69,6 +82,7 @@ export async function POST(request: Request) {
       cliente_email: user.email || null,
       servicios: seleccionados.map((s) => s.nombre),
       observaciones: body.observaciones || null,
+      dtc_codes: dtcCodes,
       marca: body.marca,
       modelo: body.modelo,
       motor: body.motor || null,
@@ -118,6 +132,7 @@ export async function POST(request: Request) {
         cliente_email: commonPayload.cliente_email,
         servicios_nombres: commonPayload.servicios,
         observaciones: commonPayload.observaciones,
+        dtc_codes: commonPayload.dtc_codes,
         marca: commonPayload.marca,
         modelo: commonPayload.modelo,
         motor: commonPayload.motor,

@@ -33,7 +33,6 @@ export async function getPayPalAccessToken() {
   const clientId = getRequiredEnv('PAYPAL_CLIENT_ID')
   const clientSecret = getRequiredEnv('PAYPAL_CLIENT_SECRET')
   const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
-
   const response = await fetch(`${PAYPAL_BASE_URL}/v1/oauth2/token`, {
     method: 'POST',
     headers: { Authorization: `Basic ${credentials}`, 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -62,7 +61,6 @@ export async function createPayPalOrderForPedido(input: { userId: string; userEm
   const siteUrl = getSiteUrl()
   const { data: pendiente, error: pendienteError } = await supabase.from('ak_pedidos_pendientes_pago').insert({ user_id: input.userId, payload: input.payload, importe: input.importe, estado: 'pendiente' }).select('*').single()
   if (pendienteError) throw new Error(pendienteError.message)
-
   const accessToken = await getPayPalAccessToken()
   const response = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders`, {
     method: 'POST',
@@ -85,7 +83,6 @@ export async function capturarYCrearPedido(pendienteId: string) {
   const supabase = getSupabaseAdmin()
   const { data: pendiente, error: fetchError } = await supabase.from('ak_pedidos_pendientes_pago').select('*').eq('id', pendienteId).single()
   if (fetchError) throw new Error(fetchError.message)
-
   if (pendiente.estado === 'pagado') {
     const pedidoId = pendiente.payload?.__pedido_id_creado
     if (!pedidoId) throw new Error('Pago marcado como completado sin pedido asociado')
@@ -93,10 +90,8 @@ export async function capturarYCrearPedido(pendienteId: string) {
     return pedidoExistente
   }
   if (!pendiente.paypal_order_id) throw new Error('Este pago no tiene orden de PayPal asociada')
-
   const captura = await capturePayPalOrder(pendiente.paypal_order_id)
   if (captura?.status !== 'COMPLETED') throw new Error(`El pago no se completó (estado: ${captura?.status || 'desconocido'})`)
-
   const payload = pendiente.payload as Record<string, any>
   const { data: pedido, error: pedidoError } = await supabase.from('file_service_pedidos').insert({
     user_id: pendiente.user_id,
@@ -104,6 +99,7 @@ export async function capturarYCrearPedido(pendienteId: string) {
     cliente_email: payload.cliente_email || null,
     servicios: payload.servicios_nombres || [],
     observaciones: payload.observaciones || null,
+    dtc_codes: Array.isArray(payload.dtc_codes) ? payload.dtc_codes : [],
     marca: payload.marca,
     modelo: payload.modelo,
     motor: payload.motor || null,
@@ -130,7 +126,6 @@ export async function capturarYCrearPedido(pendienteId: string) {
     ori_sha256: payload.ori?.sha256 || null,
   }).select('*').single()
   if (pedidoError) throw new Error(pedidoError.message)
-
   await supabase.from('ak_pedidos_pendientes_pago').update({ estado: 'pagado', pagado_at: new Date().toISOString(), payload: { ...payload, __pedido_id_creado: pedido.id } }).eq('id', pendienteId)
   await supabase.from('file_service_notificaciones').insert({ user_id: pendiente.user_id, titulo: 'Pago confirmado — pedido creado', mensaje: `Tu pago de ${Number(pendiente.importe).toFixed(2)} € se confirmó y tu pedido ${pedido.numero || ''} ya está en cola.`, tipo: 'success' })
   return pedido
