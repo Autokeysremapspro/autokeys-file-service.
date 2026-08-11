@@ -84,6 +84,7 @@ export async function POST(request: Request) {
       .from('ak_ecu_fingerprints')
       .select('*, ak_ecu_detection_rules(*)')
       .eq('sha256', sha256)
+      .not('confirmado_por', 'is', null)
       .maybeSingle()
     if (fingerprintError) throw fingerprintError
 
