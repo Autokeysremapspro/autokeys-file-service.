@@ -51,6 +51,7 @@ export default function NuevoPedidoPage() {
   const [familia, setFamilia] = useState<string>(FAMILIAS[0].slug)
   const [vehicle, setVehicle] = useState<VehicleForm>(initialVehicle)
   const [observaciones, setObservaciones] = useState('')
+  const [dtcCodes, setDtcCodes] = useState('')
   const [servicios, setServicios] = useState<AkCloudServicio[]>(FALLBACK_SERVICIOS)
   const [loadingConfig, setLoadingConfig] = useState(true)
   const [sending, setSending] = useState(false)
@@ -89,7 +90,6 @@ export default function NuevoPedidoPage() {
     loadConfig()
   }, [])
 
-  // Si viene de AK Intelligence con un análisis ya hecho, lo recuperamos una vez.
   useEffect(() => {
     try {
       const handoff = sessionStorage.getItem('ak-intel-handoff')
@@ -124,7 +124,6 @@ export default function NuevoPedidoPage() {
       if (!res.ok) throw new Error(payload.error)
       setDetection(payload)
     } catch {
-      // La detección es una ayuda, no un requisito — si falla, el cliente sigue rellenando a mano.
       setDetection(null)
     } finally {
       setDetecting(false)
@@ -148,7 +147,6 @@ export default function NuevoPedidoPage() {
     setSelected((current) => current.includes(slug) ? current.filter((x) => x !== slug) : [...current, slug])
   }
 
-  // Precio: siempre el precio real del catálogo — pago por archivo, sin planes.
   const serviciosConPrecioReal: ServicioConPrecioReal[] = useMemo(
     () => servicios.map((s) => ({ ...s, precio_final: Number(s.precio ?? 0), incluido_en_plan: false })),
     [servicios],
@@ -161,8 +159,8 @@ export default function NuevoPedidoPage() {
   )
   const selectedServices = serviciosConPrecioReal.filter((service) => selected.includes(service.slug))
   const total = useMemo(() => selectedServices.reduce((sum, item) => sum + Number(item.precio_final || 0), 0), [selectedServices])
+  const dtcOffSelected = selected.includes('dtc-off')
 
-  // Progreso del pedido — para el indicador de pasos.
   const stepsDone = {
     archivo: Boolean(file),
     vehiculo: Boolean(vehicle.marca.trim() && vehicle.modelo.trim()),
@@ -183,6 +181,10 @@ export default function NuevoPedidoPage() {
     if (!vehicle.marca.trim() || !vehicle.modelo.trim()) return setError('Añade al menos marca y modelo del vehículo.')
     if (!vehicle.ecu.trim()) return setError('Añade la ECU. Si no la sabes, escribe “No sé / revisar”.')
     if (selected.length === 0) return setError('Selecciona al menos un servicio.')
+    if (dtcOffSelected) {
+      const matches = dtcCodes.toUpperCase().match(/\b[PCBU][0-9A-F]{4,5}\b/g) || []
+      if (matches.length === 0) return setError('Para DTC OFF indica los códigos a eliminar separados por comas, por ejemplo P0401, P2002.')
+    }
 
     setSending(true)
     setError(null)
@@ -192,6 +194,7 @@ export default function NuevoPedidoPage() {
         servicios: selectedServices.map((service) => service.nombre),
         serviciosSlugs: selected,
         observaciones,
+        dtcCodes: dtcOffSelected ? dtcCodes : undefined,
         marca: vehicle.marca,
         modelo: vehicle.modelo,
         motor: vehicle.motor,
@@ -206,8 +209,6 @@ export default function NuevoPedidoPage() {
       })
 
       if (result.requierePago && result.approveUrl) {
-        // Hay que pagar antes de crear el pedido — se manda a PayPal, y
-        // vuelve automáticamente a /paypal/pedido-completado cuando termine.
         window.location.href = result.approveUrl
         return
       }
@@ -228,7 +229,6 @@ export default function NuevoPedidoPage() {
       subtitle="Sube el ORI, añade los datos técnicos manualmente y elige los servicios por vehículo. Pagas solo lo que pidas."
       eyebrow="File Service"
     >
-      {/* Indicador de progreso — se colorea solo con lo que ya has completado */}
       <div className="mb-6 grid grid-cols-2 gap-2.5 sm:grid-cols-5">
         {steps.map((step, index) => (
           <div
@@ -358,7 +358,6 @@ export default function NuevoPedidoPage() {
               <div className="rounded-2xl border border-white/10 bg-black/25 p-5 text-sm text-white/45">Cargando catálogo desde Core...</div>
             ) : (
               <div className="space-y-5">
-                {/* Selector de familia — pestañas compactas, sin toda la parrilla abierta a la vez */}
                 <div className="flex flex-wrap gap-2">
                   {FAMILIAS.map((f) => {
                     const Icon = FAMILIA_ICONS[f.slug] || Wrench
@@ -402,7 +401,6 @@ export default function NuevoPedidoPage() {
                   </div>
                 )}
 
-                {/* Panel desplegable de la familia activa — se anima al cambiar de pestaña */}
                 <div key={familia} className="ak-expand-in rounded-[1.6rem] border border-white/10 bg-black/20 p-4 sm:p-5">
                   {serviciosDeFamilia.length === 0 ? (
                     <div className="rounded-2xl border border-dashed border-white/10 p-6 text-center text-sm text-white/40">
@@ -416,6 +414,21 @@ export default function NuevoPedidoPage() {
                     </div>
                   )}
                 </div>
+
+                {dtcOffSelected && (
+                  <div className="rounded-[1.6rem] border border-amber-400/30 bg-amber-500/[.07] p-4 sm:p-5">
+                    <label className="block">
+                      <span className="ak-mono mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-amber-300">DTC a eliminar *</span>
+                      <input
+                        value={dtcCodes}
+                        onChange={(e) => setDtcCodes(e.target.value.toUpperCase())}
+                        placeholder="P0401, P2002, U0100"
+                        className="w-full rounded-2xl border border-amber-400/25 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-amber-300/70"
+                      />
+                    </label>
+                    <p className="mt-2 text-xs leading-5 text-white/45">Introduce únicamente los códigos DTC que deseas solicitar, separados por comas. Ejemplo: P0401, P2002, P2453.</p>
+                  </div>
+                )}
               </div>
             )}
           </AKCard>
@@ -429,6 +442,7 @@ export default function NuevoPedidoPage() {
               <SummaryRow label="Archivo" value={fileName || 'Sin archivo'} />
               <SummaryRow label="Vehículo" value={[vehicle.marca, vehicle.modelo, vehicle.motor].filter(Boolean).join(' ') || 'Pendiente'} />
               <SummaryRow label="ECU" value={vehicle.ecu || 'Pendiente'} />
+              {dtcOffSelected && <SummaryRow label="DTC OFF" value={dtcCodes.trim() || 'Pendiente'} />}
             </div>
             <div className="mt-5 space-y-2">
               {selectedServices.length === 0 ? <p className="text-sm text-white/35">Sin servicios seleccionados.</p> : selectedServices.map((service) => (
