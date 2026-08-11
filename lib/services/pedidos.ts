@@ -19,6 +19,7 @@ export type FileServicePedido = {
   cambio: string | null
   servicios: string[] | null
   observaciones: string | null
+  dtc_codes?: string[] | null
   estado: PedidoEstado | string
   prioridad: string | null
   ori_nombre: string | null
@@ -40,6 +41,7 @@ export type CrearPedidoPayload = {
   servicios: string[]
   serviciosSlugs?: string[]
   observaciones?: string
+  dtcCodes?: string | string[]
   marca?: string
   modelo?: string
   motor?: string
@@ -73,10 +75,6 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
     const folder = user?.id || 'anon'
     const path = `ori/${folder}/${Date.now()}-${safeName}`
 
-    // Se calcula la huella del archivo aquí, en el momento de subirlo —
-    // así el pedido nace ya con su sha256 y el laboratorio no tiene que
-    // volver a descargar el archivo entero solo para poder "enseñarlo"
-    // al detector más adelante.
     const buffer = await payload.ori.arrayBuffer()
     const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
     const sha256 = Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, '0')).join('')
@@ -96,15 +94,13 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
     }
   }
 
-  // El precio y el descuento de créditos se calculan en el servidor
-  // (/api/pedidos/crear) — nunca se manda el precio calculado en el
-  // navegador, así nadie puede manipular lo que paga por un pedido.
   const response = await fetch('/api/pedidos/crear', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       servicios: payload.serviciosSlugs || [],
       observaciones: payload.observaciones,
+      dtcCodes: payload.dtcCodes,
       marca: payload.marca,
       modelo: payload.modelo,
       motor: payload.motor,
@@ -225,7 +221,6 @@ export function formatBytes(bytes?: number | null) {
   }
   return `${value.toFixed(index === 0 ? 0 : 1)} ${units[index]}`
 }
-
 
 export function estadoColor(estado?: string | null) {
   switch (estado) {
