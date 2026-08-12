@@ -20,6 +20,10 @@ export type FileServicePedido = {
   servicios: string[] | null
   observaciones: string | null
   dtc_codes?: string[] | null
+  herramienta_lectura?: string | null
+  metodo_lectura?: string | null
+  archivo_origen?: string | null
+  modificaciones_hardware?: string | null
   estado: PedidoEstado | string
   prioridad: string | null
   ori_nombre: string | null
@@ -51,11 +55,32 @@ export type CrearPedidoPayload = {
   sw?: string
   cv?: string
   cambio?: string
+  herramientaLectura?: string
+  metodoLectura?: string
+  archivoOrigen?: string
+  modificacionesHardware?: string
   prioridad?: string
   precio?: number
   ori?: File | null
   legalAccepted?: boolean
   legalVersion?: string
+}
+
+function getTechnicalMetadata(payload: CrearPedidoPayload) {
+  let stored: Record<string, string> = {}
+  if (typeof window !== 'undefined') {
+    try { stored = JSON.parse(sessionStorage.getItem('ak-order-tech') || '{}') } catch {}
+  }
+  let herramientaVisible = ''
+  if (typeof document !== 'undefined') {
+    herramientaVisible = document.querySelector<HTMLInputElement>('input[placeholder="KESS3, FLEX, Autotuner..."]')?.value?.trim() || ''
+  }
+  return {
+    herramientaLectura: payload.herramientaLectura || herramientaVisible || null,
+    metodoLectura: payload.metodoLectura || stored.metodoLectura || null,
+    archivoOrigen: payload.archivoOrigen || stored.archivoOrigen || 'ORI',
+    modificacionesHardware: payload.modificacionesHardware || stored.modificacionesHardware || null,
+  }
 }
 
 export async function crearPedidoFileService(payload: CrearPedidoPayload) {
@@ -94,6 +119,7 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
     }
   }
 
+  const tech = getTechnicalMetadata(payload)
   const response = await fetch('/api/pedidos/crear', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -110,6 +136,10 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
       sw: payload.sw,
       cv: payload.cv,
       cambio: payload.cambio,
+      herramientaLectura: tech.herramientaLectura,
+      metodoLectura: tech.metodoLectura,
+      archivoOrigen: tech.archivoOrigen,
+      modificacionesHardware: tech.modificacionesHardware,
       legalAccepted: payload.legalAccepted === true,
       legalVersion: payload.legalVersion,
       ori: {
@@ -124,6 +154,9 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
 
   const result = await response.json()
   if (!response.ok) throw new Error(result.error || 'No se pudo crear el pedido')
+  if (!result.requierePago && typeof window !== 'undefined') {
+    try { sessionStorage.removeItem('ak-order-tech') } catch {}
+  }
   return result as { ok: true; requierePago: boolean; pedido?: FileServicePedido; approveUrl?: string; importe?: number }
 }
 
@@ -246,6 +279,5 @@ export async function actualizarPedidoAdmin(id: string, payload: Record<string, 
     .single()
 
   if (error) throw new Error(error.message)
-
   return data as FileServicePedido
 }
