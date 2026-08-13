@@ -127,6 +127,7 @@ export async function POST(request: Request) {
         .eq('sw_normalized', sw)
         .eq('file_size', file.size)
         .eq('activo', true)
+        .not('ultima_confirmacion_por', 'is', null)
         .gte('confirmaciones', MIN_SIGNATURE_CONFIRMATIONS)
         .order('confirmaciones', { ascending: false })
         .limit(2)
