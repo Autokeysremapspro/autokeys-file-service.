@@ -1,13 +1,14 @@
 import AppShell from '@/components/AppShell'
 
 function Block({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse rounded-2xl border border-white/[.06] bg-white/[.035] ${className}`} />
+  return <div className={`animate-pulse motion-reduce:animate-none rounded-2xl border border-white/[.06] bg-white/[.035] ${className}`} />
 }
 
 export default function DashboardLoading() {
   return (
     <AppShell>
-      <div className="space-y-6" aria-busy="true" aria-label="Cargando Mission Control">
+      <div className="space-y-6" aria-busy="true" aria-label="Cargando Mission Control" role="status">
+        <span className="sr-only">Cargando Mission Control</span>
         <section className="ak5-card min-h-[300px] rounded-[28px] p-6 sm:p-8 lg:p-10">
           <div className="max-w-2xl space-y-4">
             <Block className="h-7 w-44" />
