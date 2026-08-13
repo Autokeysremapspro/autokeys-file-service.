@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { Bell, Command, Menu, Plus, Search, ShieldCheck, Sparkles, X } from 'lucide-react'
 import AKSidebar from './AKSidebar'
+import AKThemeSwitcher from './AKThemeSwitcher'
 
 const commands = [
   ['Mission Control', '/dashboard'],
@@ -73,6 +74,7 @@ export default function AKPageShell({
               <span className="flex items-center gap-2"><ShieldCheck size={15}/> Secure Workspace</span>
               <span className="flex items-center gap-2"><Sparkles size={15}/> AI Systems Online</span>
             </div>
+            <AKThemeSwitcher />
             <Link href="/nuevo-pedido" className="ak5-primary !px-4 !py-2.5"><Plus size={16}/> Nueva operación</Link>
             <Link href="/notificaciones" className="relative grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/[.035] text-white/65"><Bell size={18}/><span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[var(--ak5-red)] shadow-[0_0_12px_rgba(255,66,90,.9)]"/></Link>
           </div>
