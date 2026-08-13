@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Bell, BookOpen, BrainCircuit, Car, Download, FolderOpen, Gauge, LayoutDashboard, LifeBuoy, LogOut, Settings, ShieldCheck, UploadCloud, UserCircle, Wrench, X } from 'lucide-react'
+import { Bell, BookOpen, BrainCircuit, Car, Download, FolderOpen, Gauge, LayoutDashboard, LifeBuoy, LogOut, Settings, ShieldCheck, UploadCloud, UserCircle, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 const items = [
@@ -27,8 +27,8 @@ export default function AKSidebar({mobile=false,onClose}:{mobile?:boolean;onClos
   return <aside className={`ak5-sidebar h-screen w-[272px] shrink-0 flex-col ${mobile?'flex':'hidden lg:sticky lg:top-0 lg:flex'}`}>
     <div className="flex h-full flex-col p-4">
       <div className="mb-4 flex items-start gap-2">
-        <Link href="/dashboard" onClick={onClose} className="min-w-0 flex-1 rounded-2xl border border-white/[.07] bg-white/[.025] p-4">
-          <Image src="/images/brand/autokeys-logo-wide-transparent.webp" alt="Autokeys" width={210} height={54} className="h-auto w-[168px]" priority/>
+        <Link href="/dashboard" onClick={onClose} className="ak5-brand-panel min-w-0 flex-1 rounded-2xl border border-white/[.07] bg-white/[.025] p-4">
+          <div className="ak5-brand-logo rounded-xl px-2 py-1"><Image src="/images/brand/autokeys-logo-wide-transparent.webp" alt="Autokeys" width={210} height={54} className="h-auto w-[168px]" priority/></div>
           <div className="mt-3 text-[10px] font-black uppercase tracking-[.22em]">AK LAB <span className="text-orange-400">OS</span></div>
           <div className="mt-1 text-[8px] uppercase tracking-[.2em] text-white/25">File intelligence system</div>
         </Link>
