@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { Car, FileArchive, Search, Sparkles, UploadCloud } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { AlertTriangle, Car, FileArchive, Search, Sparkles, UploadCloud } from 'lucide-react'
 import AKPageShell from '@/components/ak/AKPageShell'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
@@ -12,13 +12,34 @@ export default function GaragePage() {
   const [vehicles, setVehicles] = useState<GarageVehicle[]>([])
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const mountedRef = useRef(true)
+
+  const loadGarage = useCallback(async () => {
+    setLoading(true)
+    setLoadError(false)
+
+    try {
+      const data = await getGarageVehicles()
+      if (!mountedRef.current) return
+      setVehicles(data)
+    } catch (error) {
+      console.error(error)
+      if (!mountedRef.current) return
+      setLoadError(true)
+    } finally {
+      if (mountedRef.current) setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
-    getGarageVehicles()
-      .then(setVehicles)
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [])
+    mountedRef.current = true
+    void loadGarage()
+
+    return () => {
+      mountedRef.current = false
+    }
+  }, [loadGarage])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -95,6 +116,13 @@ export default function GaragePage() {
         <div className="mt-6 grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
           {loading ? (
             <AKCard className="p-8 text-white/35">Cargando garaje...</AKCard>
+          ) : loadError ? (
+            <AKCard className="p-10 text-center md:col-span-2 2xl:col-span-3">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-400/12 text-amber-300"><AlertTriangle size={30} /></div>
+              <h3 className="mt-5 text-2xl font-black">No se pudo cargar tu garaje</h3>
+              <p className="mx-auto mt-2 max-w-lg text-sm text-white/40">Tus datos no se han borrado. No podemos consultar el historial en este momento.</p>
+              <div className="mt-6"><AKButton onClick={() => void loadGarage()}>Reintentar</AKButton></div>
+            </AKCard>
           ) : vehicles.length === 0 ? (
             <AKCard className="p-10 text-center md:col-span-2 2xl:col-span-3">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-red-400/12 text-red-300"><Car size={30} /></div>
