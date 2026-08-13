@@ -63,3 +63,10 @@ html[data-ak-theme='light'] .ak5-shell input,html[data-ak-theme='light'] .ak5-sh
 html[data-ak-theme='light'] .ak5-shell input::placeholder,html[data-ak-theme='light'] .ak5-shell textarea::placeholder{color:rgba(15,23,42,.35)}
 
 @media(max-width:1023px){.ak5-desktop-only{display:none!important}}
+
+/* Phase 2.1 — respect reduced-motion preferences without changing the visual hierarchy. */
+@media (prefers-reduced-motion: reduce){
+  .ak5-live{animation:none!important}
+  .ak5-card-hover,.ak5-primary,.ak5-secondary,.ak5-nav{transition:none!important}
+  .ak5-card-hover:hover,.ak5-primary:hover{transform:none!important}
+}
