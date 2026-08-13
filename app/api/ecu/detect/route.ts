@@ -85,7 +85,6 @@ export async function POST(request: Request) {
       .select('*, ak_ecu_detection_rules(*)')
       .eq('sha256', sha256)
       .not('confirmado_por', 'is', null)
-      .limit(2)
     if (fingerprintError) throw fingerprintError
 
     const fingerprintRows = fingerprints || []
