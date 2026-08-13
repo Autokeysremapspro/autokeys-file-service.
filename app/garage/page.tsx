@@ -46,6 +46,8 @@ export default function GaragePage() {
     }
   }, [vehicles])
 
+  const hasSearch = query.trim().length > 0
+
   return (
     <AKPageShell title="Mis vehículos" subtitle="Un garaje técnico vivo con el historial de cada ECU, servicio, archivo y versión." eyebrow="Vehicle Workspace" actions={<div className="flex flex-wrap gap-3"><AKButton href="/nuevo-pedido"><UploadCloud size={18}/> Nuevo trabajo</AKButton><AKButton href="/biblioteca" variant="ghost"><FileArchive size={18}/> Biblioteca</AKButton></div>}>
         <header className="sr-only">
@@ -93,12 +95,19 @@ export default function GaragePage() {
         <div className="mt-6 grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
           {loading ? (
             <AKCard className="p-8 text-white/35">Cargando garaje...</AKCard>
-          ) : filtered.length === 0 ? (
+          ) : vehicles.length === 0 ? (
             <AKCard className="p-10 text-center md:col-span-2 2xl:col-span-3">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-red-400/12 text-red-300"><Car size={30} /></div>
               <h3 className="mt-5 text-2xl font-black">Todavía no hay vehículos</h3>
               <p className="mx-auto mt-2 max-w-lg text-sm text-white/40">Cuando crees pedidos, AK Cloud agrupará automáticamente tus trabajos por vehículo y ECU.</p>
               <div className="mt-6"><AKButton href="/nuevo-pedido">Crear primer trabajo</AKButton></div>
+            </AKCard>
+          ) : filtered.length === 0 && hasSearch ? (
+            <AKCard className="p-10 text-center md:col-span-2 2xl:col-span-3">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-white/[0.05] text-white/45"><Search size={28} /></div>
+              <h3 className="mt-5 text-2xl font-black">Sin coincidencias</h3>
+              <p className="mx-auto mt-2 max-w-lg text-sm text-white/40">No hay vehículos, ECUs, HW, SW o servicios que coincidan con “{query.trim()}”.</p>
+              <div className="mt-6"><AKButton variant="ghost" onClick={() => setQuery('')}>Limpiar búsqueda</AKButton></div>
             </AKCard>
           ) : (
             filtered.map((vehicle) => <AKGarageVehicleCard key={vehicle.key} vehicle={vehicle} />)
