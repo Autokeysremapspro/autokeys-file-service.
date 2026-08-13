@@ -80,37 +80,47 @@ export async function POST(request: Request) {
     const sha256 = crypto.createHash('sha256').update(buffer).digest('hex')
     const admin = adminClient()
 
-    const { data: fingerprint, error: fingerprintError } = await admin
+    const { data: fingerprints, error: fingerprintError } = await admin
       .from('ak_ecu_fingerprints')
       .select('*, ak_ecu_detection_rules(*)')
       .eq('sha256', sha256)
       .not('confirmado_por', 'is', null)
-      .maybeSingle()
+      .limit(2)
     if (fingerprintError) throw fingerprintError
 
-    if (fingerprint?.ecu) {
-      void admin
-        .from('ak_ecu_fingerprints')
-        .update({ veces_visto: (fingerprint.veces_visto || 1) + 1, updated_at: new Date().toISOString() })
-        .eq('id', fingerprint.id)
+    const fingerprintRows = fingerprints || []
+    const distinctFingerprintEcus = new Set(
+      fingerprintRows.map((item: any) => String(item.ecu || '').trim()).filter(Boolean)
+    )
 
-      return NextResponse.json({
-        identified: true,
-        status: 'identified',
-        method: 'huella_exacta_confirmada',
-        confidence: 100,
-        sha256,
-        file_size: file.size,
-        vehiculo: fingerprint.vehiculo,
-        marca: fingerprint.marca,
-        modelo: fingerprint.modelo,
-        motor: fingerprint.motor,
-        ecu: fingerprint.ecu,
-        hw: fingerprint.hw,
-        sw: fingerprint.sw,
-        rule: fingerprint.ak_ecu_detection_rules || null,
-        evidence: ['Huella SHA-256 idéntica a un archivo validado por el laboratorio'],
-      })
+    // Una huella exacta solo identifica si todas las coincidencias confirmadas apuntan a la misma ECU.
+    // Si existe cualquier conflicto para el mismo SHA, se fuerza revisión humana.
+    if (fingerprintRows.length >= 1 && distinctFingerprintEcus.size === 1) {
+      const fingerprint = fingerprintRows[0] as any
+      if (fingerprint?.ecu) {
+        void admin
+          .from('ak_ecu_fingerprints')
+          .update({ veces_visto: (fingerprint.veces_visto || 1) + 1, updated_at: new Date().toISOString() })
+          .eq('id', fingerprint.id)
+
+        return NextResponse.json({
+          identified: true,
+          status: 'identified',
+          method: 'huella_exacta_confirmada',
+          confidence: 100,
+          sha256,
+          file_size: file.size,
+          vehiculo: fingerprint.vehiculo,
+          marca: fingerprint.marca,
+          modelo: fingerprint.modelo,
+          motor: fingerprint.motor,
+          ecu: fingerprint.ecu,
+          hw: fingerprint.hw,
+          sw: fingerprint.sw,
+          rule: fingerprint.ak_ecu_detection_rules || null,
+          evidence: ['Huella SHA-256 idéntica a un archivo validado por el laboratorio'],
+        })
+      }
     }
 
     const ascii = bufferToSearchableText(buffer)
