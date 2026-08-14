@@ -115,7 +115,7 @@ export default function GaragePage() {
 
         <div className="mt-6 grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
           {loading ? (
-            <AKCard className="p-8 text-white/35">Cargando garaje...</AKCard>
+            <GarageLoadingSkeleton />
           ) : loadError ? (
             <AKCard className="p-10 text-center md:col-span-2 2xl:col-span-3">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-400/12 text-amber-300"><AlertTriangle size={30} /></div>
@@ -142,6 +142,31 @@ export default function GaragePage() {
           )}
         </div>
     </AKPageShell>
+  )
+}
+
+function GarageLoadingSkeleton() {
+  return (
+    <div className="contents" role="status" aria-live="polite" aria-label="Cargando historial de vehículos">
+      {[0, 1, 2].map((item) => (
+        <AKCard key={item} className="overflow-hidden p-5" aria-hidden="true">
+          <div className="animate-pulse">
+            <div className="flex items-center justify-between gap-4">
+              <div className="h-4 w-24 rounded-full bg-white/[0.08]" />
+              <div className="h-8 w-8 rounded-xl bg-white/[0.06]" />
+            </div>
+            <div className="mt-6 h-7 w-2/3 rounded-full bg-white/[0.09]" />
+            <div className="mt-3 h-4 w-1/2 rounded-full bg-white/[0.06]" />
+            <div className="mt-7 grid grid-cols-2 gap-3">
+              <div className="h-16 rounded-2xl bg-white/[0.05]" />
+              <div className="h-16 rounded-2xl bg-white/[0.05]" />
+            </div>
+            <div className="mt-5 h-10 rounded-2xl bg-white/[0.06]" />
+          </div>
+        </AKCard>
+      ))}
+      <span className="sr-only">Cargando garaje…</span>
+    </div>
   )
 }
 
