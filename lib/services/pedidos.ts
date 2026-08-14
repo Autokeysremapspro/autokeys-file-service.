@@ -164,14 +164,14 @@ export async function getMisPedidos() {
   const { data: authData } = await supabase.auth.getUser()
   const user = authData.user
 
-  let query = supabase
+  if (!user?.id) throw new Error('Sesión no válida')
+
+  const { data, error } = await supabase
     .from('file_service_pedidos')
     .select('*')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  if (user?.id) query = query.eq('user_id', user.id)
-
-  const { data, error } = await query
   if (error) throw new Error(error.message)
   return (data || []) as FileServicePedido[]
 }
