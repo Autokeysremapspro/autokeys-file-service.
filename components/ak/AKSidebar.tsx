@@ -2,9 +2,9 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Bell, BookOpen, BrainCircuit, Car, Download, FolderOpen, Gauge, LayoutDashboard, LifeBuoy, LogOut, Settings, ShieldCheck, UploadCloud, UserCircle, Wrench, X } from 'lucide-react'
+import { Bell, BookOpen, BrainCircuit, Car, Download, FolderOpen, Gauge, LayoutDashboard, LifeBuoy, Settings, ShieldCheck, UploadCloud, UserCircle, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 const items = [
@@ -21,14 +21,13 @@ const items = [
 ] as const
 
 export default function AKSidebar({mobile=false,onClose}:{mobile?:boolean;onClose?:()=>void}){
-  const pathname=usePathname(); const router=useRouter(); const [isStaff,setIsStaff]=useState(false)
+  const pathname=usePathname(); const [isStaff,setIsStaff]=useState(false)
   useEffect(()=>{let alive=true;(async()=>{const {data:u}=await supabase.auth.getUser();if(!u.user?.id)return;const {data}=await supabase.from('usuarios_app').select('rol, activo').eq('auth_user_id',u.user.id).maybeSingle();if(alive)setIsStaff(Boolean(data)&&data?.activo!==false&&['admin','desarrollo','atencion_cliente'].includes(data?.rol))})();return()=>{alive=false}},[])
-  async function logout(){await supabase.auth.signOut();router.push('/login')}
   return <aside className={`ak5-sidebar h-screen w-[272px] shrink-0 flex-col ${mobile?'flex':'hidden lg:sticky lg:top-0 lg:flex'}`}>
     <div className="flex h-full flex-col p-4">
       <div className="mb-4 flex items-start gap-2">
-        <Link href="/dashboard" onClick={onClose} className="min-w-0 flex-1 rounded-2xl border border-white/[.07] bg-white/[.025] p-4">
-          <Image src="/images/brand/autokeys-logo-wide-transparent.webp" alt="Autokeys" width={210} height={54} className="h-auto w-[168px]" priority/>
+        <Link href="/dashboard" onClick={onClose} className="ak5-brand-panel min-w-0 flex-1 rounded-2xl border border-white/[.07] bg-white/[.025] p-4">
+          <div className="ak5-brand-logo rounded-xl px-2 py-1"><Image src="/images/brand/autokeys-logo-wide-transparent.webp" alt="Autokeys" width={210} height={54} className="h-auto w-[168px]" priority/></div>
           <div className="mt-3 text-[10px] font-black uppercase tracking-[.22em]">AK LAB <span className="text-orange-400">OS</span></div>
           <div className="mt-1 text-[8px] uppercase tracking-[.2em] text-white/25">File intelligence system</div>
         </Link>
@@ -43,7 +42,6 @@ export default function AKSidebar({mobile=false,onClose}:{mobile?:boolean;onClos
 
       <div className="mt-auto space-y-3">
         <div className="ak5-card rounded-2xl p-4"><div className="flex items-center gap-2 text-xs font-black"><Gauge size={16} className="text-emerald-300"/> System health</div><div className="mt-3 grid grid-cols-3 gap-2 text-center text-[9px]"><div className="rounded-lg border border-white/[.06] bg-black/20 p-2"><b className="block text-white">99.9</b><span className="text-white/30">Uptime</span></div><div className="rounded-lg border border-white/[.06] bg-black/20 p-2"><b className="block text-white">AES</b><span className="text-white/30">Secure</span></div><div className="rounded-lg border border-white/[.06] bg-black/20 p-2"><b className="block text-white">LIVE</b><span className="text-white/30">Sync</span></div></div></div>
-        <button onClick={logout} className="ak5-secondary w-full"><LogOut size={15}/> Cerrar sesión</button>
       </div>
     </div>
   </aside>
