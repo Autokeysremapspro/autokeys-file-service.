@@ -44,7 +44,9 @@ export default function TicketDetallePage({ params }: { params: { id: string } }
     setSending(true)
     try {
       const saved = await enviarMensajeTicket(params.id, message.trim())
+      const now = new Date().toISOString()
       setMensajes(prev => [...prev, saved])
+      setTicket(prev => prev ? { ...prev, estado: 'abierto', updated_at: now } : prev)
       setMessage('')
       toast.success('Mensaje enviado')
     } catch (error: any) {
