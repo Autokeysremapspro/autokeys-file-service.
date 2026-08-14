@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, CheckCircle2, Clock3, Download, FileArchive, Gauge, Sparkles, UploadCloud } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, CheckCircle2, Clock3, Download, FileArchive, Gauge, Sparkles, UploadCloud } from 'lucide-react'
 import AppShell from '@/components/AppShell'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
@@ -26,13 +26,34 @@ async function downloadBlob(filename: string, bucket?: string | null, path?: str
 export default function GarageVehiclePage({ params }: { params: { key: string } }) {
   const [vehicle, setVehicle] = useState<GarageVehicle | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const mountedRef = useRef(true)
+
+  const loadVehicle = useCallback(async () => {
+    setLoading(true)
+    setLoadError(false)
+
+    try {
+      const data = await getGarageVehicle(decodeURIComponent(params.key))
+      if (!mountedRef.current) return
+      setVehicle(data)
+    } catch (error) {
+      console.error(error)
+      if (!mountedRef.current) return
+      setLoadError(true)
+    } finally {
+      if (mountedRef.current) setLoading(false)
+    }
+  }, [params.key])
 
   useEffect(() => {
-    getGarageVehicle(decodeURIComponent(params.key))
-      .then(setVehicle)
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [params.key])
+    mountedRef.current = true
+    void loadVehicle()
+
+    return () => {
+      mountedRef.current = false
+    }
+  }, [loadVehicle])
 
   const name = vehicle ? getVehicleDisplayName(vehicle) : 'Vehículo'
 
@@ -54,7 +75,14 @@ export default function GarageVehiclePage({ params }: { params: { key: string } 
         </Link>
 
         {loading ? (
-          <AKCard className="p-8 text-white/35">Cargando vehículo...</AKCard>
+          <AKCard className="p-8 text-white/35" role="status" aria-live="polite">Cargando vehículo...</AKCard>
+        ) : loadError ? (
+          <AKCard className="p-10 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-400/12 text-amber-300"><AlertTriangle size={30} /></div>
+            <h1 className="mt-5 text-2xl font-black">No se pudo cargar el historial</h1>
+            <p className="mx-auto mt-2 max-w-lg text-sm text-white/40">Tus datos no se han borrado. No podemos consultar este vehículo en este momento.</p>
+            <div className="mt-6"><AKButton onClick={() => void loadVehicle()}>Reintentar</AKButton></div>
+          </AKCard>
         ) : !vehicle ? (
           <AKCard className="p-10 text-center text-white/45">No se encontró este vehículo.</AKCard>
         ) : (
