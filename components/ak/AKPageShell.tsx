@@ -9,7 +9,7 @@ import AKSidebar from './AKSidebar'
 import AKThemeSwitcher from './AKThemeSwitcher'
 
 const commands = [
-  ['Mission Control', '/dashboard'],
+  ['Inicio', '/dashboard'],
   ['Nuevo pedido', '/nuevo-pedido'],
   ['Pedidos', '/pedidos'],
   ['Versiones', '/descargas'],
