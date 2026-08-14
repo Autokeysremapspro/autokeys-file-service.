@@ -4,8 +4,8 @@ import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
 const SESSION_KEY = 'akcloud-phase2-intro-seen'
-const INTRO_MS = 6500
-const FADE_MS = 600
+const INTRO_MS = 8000
+const FADE_MS = 800
 
 export default function AKSessionIntro() {
   const [visible, setVisible] = useState(false)
@@ -45,7 +45,7 @@ export default function AKSessionIntro() {
 
       <button type="button" onClick={closeIntro} className="absolute right-4 top-4 z-30 rounded-full border border-white/10 bg-white/[.035] px-4 py-2 text-[10px] font-black uppercase tracking-[.18em] text-white/45 backdrop-blur-xl transition hover:border-red-400/35 hover:bg-red-500/10 hover:text-white sm:right-7 sm:top-7" aria-label="Saltar introducción">Saltar</button>
 
-      <section className="relative z-10 flex w-full max-w-[920px] flex-col items-center text-center motion-safe:animate-[akIntroEnter_.9s_cubic-bezier(.16,.8,.2,1)_both]">
+      <section className="relative z-10 flex w-full max-w-[920px] flex-col items-center text-center motion-safe:animate-[akIntroEnter_1.2s_cubic-bezier(.16,.8,.2,1)_both]">
         <div className="mb-5 text-[9px] font-black uppercase tracking-[.48em] text-white/34 sm:text-[10px]">Autokeys Remaps Pro</div>
 
         <div className="relative flex h-60 w-60 items-center justify-center sm:h-80 sm:w-80 lg:h-[360px] lg:w-[360px]">
@@ -65,7 +65,7 @@ export default function AKSessionIntro() {
 
         <div className="mt-8 w-full max-w-md sm:mt-10">
           <div className="mb-2 flex items-center justify-between text-[8px] font-black uppercase tracking-[.2em] text-white/24"><span>Secure workspace</span><span>Initializing</span></div>
-          <div className="h-px overflow-hidden bg-white/[.07]"><div className="h-full w-full origin-left bg-gradient-to-r from-red-950 via-red-500 to-white/70 motion-safe:animate-[akIntroLoad_5.9s_cubic-bezier(.2,.7,.2,1)_both]" /></div>
+          <div className="h-px overflow-hidden bg-white/[.07]"><div className="h-full w-full origin-left bg-gradient-to-r from-red-950 via-red-500 to-white/70 motion-safe:animate-[akIntroLoad_7.1s_cubic-bezier(.2,.7,.2,1)_both]" /></div>
         </div>
       </section>
 
