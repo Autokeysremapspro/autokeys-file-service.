@@ -11,6 +11,7 @@ import { getGarageVehicles, type GarageVehicle } from '@/lib/services/garage'
 export default function GaragePage() {
   const [vehicles, setVehicles] = useState<GarageVehicle[]>([])
   const [query, setQuery] = useState('')
+  const [onlyOpen, setOnlyOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
   const mountedRef = useRef(true)
@@ -43,9 +44,10 @@ export default function GaragePage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return vehicles
-    return vehicles.filter((vehicle) =>
-      [
+    return vehicles.filter((vehicle) => {
+      if (onlyOpen && vehicle.pendientes === 0) return false
+      if (!q) return true
+      return [
         vehicle.marca,
         vehicle.modelo,
         vehicle.motor,
@@ -55,8 +57,8 @@ export default function GaragePage() {
         vehicle.cv,
         ...vehicle.servicios,
       ].some((value) => (value || '').toLowerCase().includes(q))
-    )
-  }, [vehicles, query])
+    })
+  }, [vehicles, query, onlyOpen])
 
   const stats = useMemo(() => {
     return {
@@ -68,6 +70,7 @@ export default function GaragePage() {
   }, [vehicles])
 
   const hasSearch = query.trim().length > 0
+  const hasActiveFilters = hasSearch || onlyOpen
 
   return (
     <AKPageShell title="Mis vehículos" subtitle="Un garaje técnico vivo con el historial de cada ECU, servicio, archivo y versión." eyebrow="Vehicle Workspace" actions={<div className="flex flex-wrap gap-3"><AKButton href="/nuevo-pedido"><UploadCloud size={18}/> Nuevo trabajo</AKButton><AKButton href="/biblioteca" variant="ghost"><FileArchive size={18}/> Biblioteca</AKButton></div>}>
@@ -99,16 +102,25 @@ export default function GaragePage() {
                 El distribuidor no solo sube archivos: conserva todo su historial de trabajos con Autokeys Lab, listo para repetir servicios o descargar versiones anteriores.
               </p>
             </div>
-            <div className="rounded-[1.7rem] border border-white/10 bg-black/25 p-4">
+            <div className="space-y-3 rounded-[1.7rem] border border-white/10 bg-black/25 p-4">
               <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3">
                 <Search size={18} className="text-white/35" />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Buscar marca, ECU, HW, SW, servicio..."
+                  aria-label="Buscar en Mis vehículos"
                   className="w-full bg-transparent text-sm outline-none placeholder:text-white/25"
                 />
               </div>
+              <button
+                type="button"
+                onClick={() => setOnlyOpen((current) => !current)}
+                aria-pressed={onlyOpen}
+                className={`w-full rounded-2xl border px-4 py-3 text-left text-sm font-bold transition ${onlyOpen ? 'border-amber-400/35 bg-amber-400/10 text-amber-200' : 'border-white/10 bg-white/[0.025] text-white/50 hover:bg-white/[0.05] hover:text-white/75'}`}
+              >
+                {onlyOpen ? `Mostrando vehículos con trabajos abiertos (${stats.abiertos})` : `Ver solo trabajos abiertos (${stats.abiertos})`}
+              </button>
             </div>
           </div>
         </AKCard>
@@ -130,12 +142,12 @@ export default function GaragePage() {
               <p className="mx-auto mt-2 max-w-lg text-sm text-white/40">Cuando crees pedidos, AK Cloud agrupará automáticamente tus trabajos por vehículo y ECU.</p>
               <div className="mt-6"><AKButton href="/nuevo-pedido">Crear primer trabajo</AKButton></div>
             </AKCard>
-          ) : filtered.length === 0 && hasSearch ? (
+          ) : filtered.length === 0 && hasActiveFilters ? (
             <AKCard className="p-10 text-center md:col-span-2 2xl:col-span-3">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-white/[0.05] text-white/45"><Search size={28} /></div>
               <h3 className="mt-5 text-2xl font-black">Sin coincidencias</h3>
-              <p className="mx-auto mt-2 max-w-lg text-sm text-white/40">No hay vehículos, ECUs, HW, SW o servicios que coincidan con “{query.trim()}”.</p>
-              <div className="mt-6"><AKButton variant="ghost" onClick={() => setQuery('')}>Limpiar búsqueda</AKButton></div>
+              <p className="mx-auto mt-2 max-w-lg text-sm text-white/40">No hay vehículos que coincidan con los filtros activos.</p>
+              <div className="mt-6"><AKButton variant="ghost" onClick={() => { setQuery(''); setOnlyOpen(false) }}>Limpiar filtros</AKButton></div>
             </AKCard>
           ) : (
             filtered.map((vehicle) => <AKGarageVehicleCard key={vehicle.key} vehicle={vehicle} />)
