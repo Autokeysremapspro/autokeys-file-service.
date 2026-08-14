@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import { ArrowRight, Headphones, LifeBuoy, MessageSquarePlus, Search, ShieldCheck, Sparkles, Ticket, X } from 'lucide-react'
 import AppShell from '@/components/AppShell'
 import CustomSelect from '@/components/ak/CustomSelect'
+import { supabase } from '@/lib/supabase'
 import { crearTicketSoporte, estadoTicketColor, estadoTicketLabel, getTicketsSoporte, prioridadTicketColor, type AkCloudTicket, type TicketPrioridad } from '@/lib/services/soporte'
 
 const categorias = [
@@ -37,6 +38,30 @@ export default function SoportePage() {
   }
 
   useEffect(() => { load() }, [])
+
+  useEffect(() => {
+    let active = true
+    let channel: ReturnType<typeof supabase.channel> | null = null
+
+    void supabase.auth.getUser().then(({ data }) => {
+      const userId = data.user?.id
+      if (!active || !userId) return
+
+      channel = supabase
+        .channel(`akcloud-support-list-${userId}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'akcloud_tickets', filter: `user_id=eq.${userId}` },
+          () => { void load() },
+        )
+        .subscribe()
+    })
+
+    return () => {
+      active = false
+      if (channel) void supabase.removeChannel(channel)
+    }
+  }, [])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
