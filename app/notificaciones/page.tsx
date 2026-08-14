@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Bell, CheckCheck, ExternalLink, Loader2, ShieldCheck, Trash2 } from 'lucide-react'
 import AppShell from '@/components/AppShell'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
+import { supabase } from '@/lib/supabase'
 import {
   eliminarNotificacion,
   formatNotificationDate,
@@ -20,18 +21,46 @@ export default function NotificacionesPage() {
   const [items, setItems] = useState<FileServiceNotificacion[]>([])
   const [loading, setLoading] = useState(true)
 
-  async function load() {
-    setLoading(true)
+  const load = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true)
     try {
       setItems(await getMisNotificaciones())
     } finally {
-      setLoading(false)
+      if (showLoading) setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    load()
-  }, [])
+    void load()
+  }, [load])
+
+  useEffect(() => {
+    let active = true
+    let channel: ReturnType<typeof supabase.channel> | null = null
+
+    void supabase.auth.getUser().then(({ data }) => {
+      if (!active || !data.user?.id) return
+      const userId = data.user.id
+
+      channel = supabase
+        .channel(`akcloud-notifications-${userId}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'file_service_notificaciones' },
+          (payload) => {
+            const row = (payload.new && Object.keys(payload.new).length ? payload.new : payload.old) as Partial<FileServiceNotificacion>
+            if (row.user_id !== userId && row.user_id !== null) return
+            void load(false)
+          },
+        )
+        .subscribe()
+    })
+
+    return () => {
+      active = false
+      if (channel) void supabase.removeChannel(channel)
+    }
+  }, [load])
 
   const personalItems = useMemo(() => items.filter((item) => Boolean(item.user_id)), [items])
   const systemItems = useMemo(() => items.filter((item) => !item.user_id), [items])
@@ -39,17 +68,17 @@ export default function NotificacionesPage() {
 
   async function markAll() {
     await marcarTodasNotificacionesLeidas()
-    await load()
+    await load(false)
   }
 
   async function read(id: string) {
     await marcarNotificacionLeida(id)
-    await load()
+    await load(false)
   }
 
   async function remove(id: string) {
     await eliminarNotificacion(id)
-    await load()
+    await load(false)
   }
 
   return (
