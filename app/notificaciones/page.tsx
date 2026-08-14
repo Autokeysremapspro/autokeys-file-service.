@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Bell, CheckCheck, ExternalLink, Loader2, ShieldCheck, Trash2 } from 'lucide-react'
+import { AlertTriangle, Bell, CheckCheck, ExternalLink, Loader2, ShieldCheck, Trash2 } from 'lucide-react'
 import AppShell from '@/components/AppShell'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
@@ -20,11 +20,16 @@ import {
 export default function NotificacionesPage() {
   const [items, setItems] = useState<FileServiceNotificacion[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
 
   const load = useCallback(async (showLoading = true) => {
     if (showLoading) setLoading(true)
+    setLoadError(false)
     try {
       setItems(await getMisNotificaciones())
+    } catch (error) {
+      console.error('No se pudieron cargar las notificaciones', error)
+      setLoadError(true)
     } finally {
       if (showLoading) setLoading(false)
     }
@@ -111,6 +116,13 @@ export default function NotificacionesPage() {
         <AKCard className="p-5">
           {loading ? (
             <div className="flex items-center gap-2 p-8 text-white/45"><Loader2 className="animate-spin" size={18} /> Cargando notificaciones...</div>
+          ) : loadError ? (
+            <div className="rounded-[2rem] border border-amber-400/20 bg-amber-400/[0.06] p-10 text-center">
+              <AlertTriangle className="mx-auto text-amber-300" size={34} />
+              <h2 className="mt-4 text-xl font-black">No se pudieron cargar las notificaciones</h2>
+              <p className="mx-auto mt-2 max-w-lg text-sm text-white/35">Tus avisos no se han borrado. No podemos consultar el centro de actividad en este momento.</p>
+              <div className="mt-6"><AKButton onClick={() => void load()}>Reintentar</AKButton></div>
+            </div>
           ) : items.length === 0 ? (
             <div className="rounded-[2rem] border border-dashed border-white/10 p-10 text-center">
               <Bell className="mx-auto text-white/25" size={34} />
