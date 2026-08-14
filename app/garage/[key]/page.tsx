@@ -75,7 +75,9 @@ export default function GarageVehiclePage({ params }: { params: { key: string } 
         </Link>
 
         {loading ? (
-          <AKCard className="p-8 text-white/35" role="status" aria-live="polite">Cargando vehículo...</AKCard>
+          <AKCard className="p-8 text-white/35">
+            <div role="status" aria-live="polite">Cargando vehículo...</div>
+          </AKCard>
         ) : loadError ? (
           <AKCard className="p-10 text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-400/12 text-amber-300"><AlertTriangle size={30} /></div>
