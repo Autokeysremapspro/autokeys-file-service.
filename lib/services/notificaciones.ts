@@ -14,54 +14,57 @@ export type FileServiceNotificacion = {
   created_at: string
 }
 
-export async function getMisNotificaciones() {
-  const { data: authData } = await supabase.auth.getUser()
-  const user = authData.user
+async function getAuthenticatedUserId() {
+  const { data: authData, error } = await supabase.auth.getUser()
+  const userId = authData.user?.id
 
-  let query = supabase
+  if (error || !userId) throw new Error('Sesión no válida')
+  return userId
+}
+
+export async function getMisNotificaciones() {
+  const userId = await getAuthenticatedUserId()
+
+  const { data, error } = await supabase
     .from('file_service_notificaciones')
     .select('*')
+    .or(`user_id.eq.${userId},user_id.is.null`)
     .order('created_at', { ascending: false })
     .limit(50)
 
-  if (user?.id) {
-    query = query.or(`user_id.eq.${user.id},user_id.is.null`)
-  }
-
-  const { data, error } = await query
   if (error) throw new Error(error.message)
   return (data || []) as FileServiceNotificacion[]
 }
 
 export async function marcarNotificacionLeida(id: string) {
+  const userId = await getAuthenticatedUserId()
   const { error } = await supabase
     .from('file_service_notificaciones')
     .update({ leida: true })
     .eq('id', id)
+    .eq('user_id', userId)
 
   if (error) throw new Error(error.message)
 }
 
 export async function marcarTodasNotificacionesLeidas() {
-  const { data: authData } = await supabase.auth.getUser()
-  const user = authData.user
-
-  let query = supabase
+  const userId = await getAuthenticatedUserId()
+  const { error } = await supabase
     .from('file_service_notificaciones')
     .update({ leida: true })
     .eq('leida', false)
+    .eq('user_id', userId)
 
-  if (user?.id) query = query.eq('user_id', user.id)
-
-  const { error } = await query
   if (error) throw new Error(error.message)
 }
 
 export async function eliminarNotificacion(id: string) {
+  const userId = await getAuthenticatedUserId()
   const { error } = await supabase
     .from('file_service_notificaciones')
     .delete()
     .eq('id', id)
+    .eq('user_id', userId)
 
   if (error) throw new Error(error.message)
 }
