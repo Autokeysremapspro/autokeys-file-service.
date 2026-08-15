@@ -86,6 +86,7 @@ export default function AnaliticaPage() {
     const services = new Map<string, number>()
     for (const p of pedidos) for (const s of p.servicios || []) services.set(s, (services.get(s) || 0) + 1)
     const topServices = Array.from(services.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5)
+    const maxServiceCount = topServices[0]?.[1] || 0
 
     return {
       last7: last7.length,
@@ -95,6 +96,7 @@ export default function AnaliticaPage() {
       recurrent,
       open24,
       topServices,
+      maxServiceCount,
     }
   }, [pedidos])
 
@@ -119,7 +121,7 @@ export default function AnaliticaPage() {
       <section className="grid gap-5 xl:grid-cols-[1fr_.9fr]">
         <div className="ak5-card rounded-[26px] p-5 sm:p-6">
           <div className="flex items-center gap-3"><BarChart3 className="text-cyan-300"/><div><div className="ak5-kicker text-cyan-300">Demanda</div><h2 className="mt-1 text-xl font-black">Servicios más solicitados</h2></div></div>
-          <div className="mt-6 space-y-3">{analytics.topServices.length ? analytics.topServices.map(([name, count], i) => <div key={name} className="rounded-2xl border border-white/[.06] bg-black/20 px-4 py-3"><div className="flex items-center justify-between text-sm"><span className="font-bold text-white/75">{name}</span><span className="font-black text-cyan-300">{count}</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[.05]"><div className="h-full rounded-full bg-cyan-400/70" style={{width: `${Math.max(8, 100 - i * 16)}%`}}/></div></div>) : <div className="py-8 text-center text-sm text-white/30">Aún no hay suficiente actividad para calcular servicios principales.</div>}</div>
+          <div className="mt-6 space-y-3">{analytics.topServices.length ? analytics.topServices.map(([name, count]) => <div key={name} className="rounded-2xl border border-white/[.06] bg-black/20 px-4 py-3"><div className="flex items-center justify-between text-sm"><span className="font-bold text-white/75">{name}</span><span className="font-black text-cyan-300">{count}</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[.05]"><div className="h-full rounded-full bg-cyan-400/70" style={{width: `${analytics.maxServiceCount ? Math.max(8, (count / analytics.maxServiceCount) * 100) : 0}%`}}/></div></div>) : <div className="py-8 text-center text-sm text-white/30">Aún no hay suficiente actividad para calcular servicios principales.</div>}</div>
         </div>
 
         <div className="ak5-card rounded-[26px] p-5 sm:p-6">
