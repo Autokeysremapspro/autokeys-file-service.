@@ -13,9 +13,9 @@ function getSumUpApiKey() {
     return sandboxKey
   }
 
-  const liveKey = process.env.SUMUP_API_KEY
+  const liveKey = process.env.AK_SUMUP_LIVE_API_KEY
   if (!liveKey) {
-    throw new Error('Falta SUMUP_API_KEY en el entorno Production de Vercel')
+    throw new Error('Falta AK_SUMUP_LIVE_API_KEY en el entorno Production de Vercel')
   }
   return liveKey
 }
@@ -57,9 +57,9 @@ export async function getSumUpMerchantCode() {
     return sandboxMerchantCode
   }
 
-  const liveMerchantCode = process.env.SUMUP_MERCHANT_CODE
+  const liveMerchantCode = process.env.AK_SUMUP_LIVE_MERCHANT_CODE
   if (!liveMerchantCode) {
-    throw new Error('Falta SUMUP_MERCHANT_CODE en el entorno Production de Vercel')
+    throw new Error('Falta AK_SUMUP_LIVE_MERCHANT_CODE en el entorno Production de Vercel')
   }
   return liveMerchantCode
 }
