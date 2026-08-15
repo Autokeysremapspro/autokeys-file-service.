@@ -138,6 +138,14 @@ export default function AnaliticaPage() {
       })
     }
 
+    if (analytics.avgHours >= 24) {
+      items.push({
+        title: 'Ciclo medio por encima de 24 h',
+        detail: `Los pedidos finalizados promedian ${analytics.avgHours.toFixed(1)} h desde su creación hasta la última actualización. Conviene revisar si la carga reciente está ampliando los tiempos.`,
+        tone: 'amber',
+      })
+    }
+
     if (analytics.weeklyDelta >= 20) {
       items.push({
         title: 'Aumento de carga esta semana',
