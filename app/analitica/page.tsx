@@ -14,6 +14,14 @@ function hoursBetween(a?: string | null, b?: string | null) {
   return (end - start) / 3600000
 }
 
+function openAge(createdAt?: string | null) {
+  if (!createdAt) return 'Antigüedad no disponible'
+  const hours = Math.max(0, (Date.now() - new Date(createdAt).getTime()) / 3600000)
+  if (!Number.isFinite(hours)) return 'Antigüedad no disponible'
+  if (hours >= 48) return `${Math.floor(hours / 24)} días abierto`
+  return `${Math.floor(hours)} h abierto`
+}
+
 function vehicleKey(p: FileServicePedido) {
   return [p.marca, p.modelo, p.motor, p.ecu].filter(Boolean).map(v => String(v).trim().toLowerCase()).join('|')
 }
@@ -80,7 +88,9 @@ export default function AnaliticaPage() {
     const finished = pedidos.filter(p => p.estado === 'finalizado')
     const cycle = finished.map(p => hoursBetween(p.created_at, p.updated_at)).filter((v): v is number => v !== null)
     const avgHours = cycle.length ? cycle.reduce((a, b) => a + b, 0) / cycle.length : 0
-    const open24 = pedidos.filter(p => p.estado !== 'finalizado' && p.estado !== 'cancelado' && p.created_at && now - new Date(p.created_at).getTime() > 86400000)
+    const open24 = pedidos
+      .filter(p => p.estado !== 'finalizado' && p.estado !== 'cancelado' && p.created_at && now - new Date(p.created_at).getTime() > 86400000)
+      .sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime())
 
     const vehicles = new Map<string, number>()
     for (const p of pedidos) {
@@ -144,8 +154,8 @@ export default function AnaliticaPage() {
         <div className="ak5-card rounded-[26px] p-5 sm:p-6">
           <div className="ak5-kicker text-amber-300">Seguimiento automático</div>
           <h2 className="mt-1 text-xl font-black">Pedidos que requieren atención</h2>
-          <p className="mt-2 text-xs leading-5 text-white/35">Este bloque solo señala pedidos abiertos durante más de 24 horas; no modifica estados ni archivos.</p>
-          <div className="mt-5 space-y-3">{analytics.open24.length ? analytics.open24.slice(0, 6).map(p => <a key={p.id} href={`/pedidos/${p.id}`} className="block rounded-2xl border border-amber-400/15 bg-amber-400/[.05] px-4 py-3 transition hover:bg-amber-400/[.08]"><div className="text-sm font-bold">{[p.marca,p.modelo,p.motor].filter(Boolean).join(' ') || p.ori_nombre || 'Pedido'}</div><div className="mt-1 text-xs text-white/35">#{p.numero || p.id.slice(0,8)} · {p.estado}</div></a>) : <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[.05] p-5 text-sm text-emerald-200">No tienes pedidos abiertos con más de 24 horas.</div>}</div>
+          <p className="mt-2 text-xs leading-5 text-white/35">Se muestran primero los pedidos abiertos durante más tiempo; este bloque no modifica estados ni archivos.</p>
+          <div className="mt-5 space-y-3">{analytics.open24.length ? analytics.open24.slice(0, 6).map(p => <a key={p.id} href={`/pedidos/${p.id}`} className="block rounded-2xl border border-amber-400/15 bg-amber-400/[.05] px-4 py-3 transition hover:bg-amber-400/[.08]"><div className="flex items-start justify-between gap-3"><div className="text-sm font-bold">{[p.marca,p.modelo,p.motor].filter(Boolean).join(' ') || p.ori_nombre || 'Pedido'}</div><span className="shrink-0 rounded-full border border-amber-400/15 bg-amber-400/[.08] px-2.5 py-1 text-[10px] font-black text-amber-200">{openAge(p.created_at)}</span></div><div className="mt-1 text-xs text-white/35">#{p.numero || p.id.slice(0,8)} · {p.estado}</div></a>) : <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[.05] p-5 text-sm text-emerald-200">No tienes pedidos abiertos con más de 24 horas.</div>}</div>
         </div>
       </section>
     </>}
