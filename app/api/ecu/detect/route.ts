@@ -69,20 +69,53 @@ function missingInformation(hw: string | null, sw: string | null) {
 
 function fileQuality(buffer: Buffer, extension: string, hw: string | null, sw: string | null) {
   const sampleSize = Math.min(buffer.length, 1024 * 1024)
+  const counts = new Uint32Array(256)
   let blankBytes = 0
+
   for (let i = 0; i < sampleSize; i++) {
-    if (buffer[i] === 0x00 || buffer[i] === 0xff) blankBytes++
+    const value = buffer[i]
+    counts[value]++
+    if (value === 0x00 || value === 0xff) blankBytes++
   }
+
+  let distinctBytes = 0
+  let dominantByte = 0
+  let dominantCount = 0
+  for (let value = 0; value < counts.length; value++) {
+    const count = counts[value]
+    if (count > 0) distinctBytes++
+    if (count > dominantCount) {
+      dominantCount = count
+      dominantByte = value
+    }
+  }
+
   const blankRatio = sampleSize ? blankBytes / sampleSize : 1
+  const dominantRatio = sampleSize ? dominantCount / sampleSize : 1
+  const suspiciousUniformity = dominantRatio >= 0.985 || distinctBytes <= 2
   const warnings: string[] = []
+
   if (blankRatio >= 0.985) warnings.push('El archivo contiene una proporción anormalmente alta de bytes 00/FF; revisar que la lectura sea válida.')
+  if (suspiciousUniformity && blankRatio < 0.985) warnings.push('La muestra del archivo es prácticamente uniforme; revisar que la lectura no esté vacía, truncada o corrupta.')
   if (!hw) warnings.push('No se ha localizado una referencia HW fiable dentro del archivo.')
   if (!sw) warnings.push('No se ha localizado una referencia SW fiable dentro del archivo.')
   if (extension === 'mod') warnings.push('El archivo tiene extensión .mod; para identificación es preferible analizar el ORI original cuando sea posible.')
 
+  const usable = blankRatio < 0.985 && !suspiciousUniformity
+  const identifierScore = hw && sw ? 20 : hw || sw ? 10 : 0
+  const structureScore = usable ? 70 : 10
+  const extensionScore = extension === 'mod' ? 0 : 10
+  const qualityScore = Math.max(0, Math.min(100, structureScore + identifierScore + extensionScore))
+
   return {
-    usable: blankRatio < 0.985,
+    usable,
+    verdict: usable ? 'lectura_utilizable' : 'lectura_dudosa',
+    quality_score: qualityScore,
+    sampled_bytes: sampleSize,
     blank_ratio: Math.round(blankRatio * 1000) / 10,
+    dominant_byte: `0x${dominantByte.toString(16).padStart(2, '0').toUpperCase()}`,
+    dominant_ratio: Math.round(dominantRatio * 1000) / 10,
+    distinct_byte_values: distinctBytes,
     extracted: { hw, sw },
     completeness: hw && sw ? 'alta' : hw || sw ? 'media' : 'baja',
     warnings,
