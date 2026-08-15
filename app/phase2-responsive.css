@@ -13,6 +13,20 @@
   max-width: 100%;
 }
 
+/* Long ECU/HW/SW identifiers and user-entered labels must never widen the viewport. */
+.ak5-shell .ak5-card,
+.ak5-shell .ak5-card > *,
+.ak5-shell [class*='font-mono'] {
+  min-width: 0;
+}
+
+.ak5-shell [class*='font-mono'],
+.ak5-shell h1,
+.ak5-shell h2,
+.ak5-shell h3 {
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 640px) {
   .ak5-title {
     font-size: clamp(2.25rem, 11vw, 3rem) !important;
@@ -59,11 +73,36 @@
   .ak5-shell select {
     min-width: 0;
     max-width: 100%;
+    font-size: 16px;
   }
 
   .ak5-shell [class*='grid-cols-'] > *,
   .ak5-shell [class*='flex-1'] {
     min-width: 0;
+  }
+
+  /* Dashboard/order rows can contain identifiers much longer than normal prose. */
+  .ak5-shell [class*='justify-between'] > * {
+    min-width: 0;
+  }
+
+  .ak5-shell [class*='justify-between'] > :first-child {
+    overflow-wrap: anywhere;
+  }
+
+  /* Preserve readable touch targets for filters, segmented controls and form actions. */
+  .ak5-shell button,
+  .ak5-shell a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ak5-shell button:not(.ak5-topbar button) {
+    min-height: 44px;
+  }
+
+  /* Avoid iOS safe-area collisions on standalone/home-screen use. */
+  .ak5-shell {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 
@@ -78,8 +117,8 @@
 
   .ak5-topbar {
     gap: 0.25rem !important;
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
+    padding-left: max(0.5rem, env(safe-area-inset-left)) !important;
+    padding-right: max(0.5rem, env(safe-area-inset-right)) !important;
   }
 
   .ak5-topbar .ak5-primary {
