@@ -2,10 +2,9 @@ import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-// Temporary runtime diagnostic v3. Never expose secret values, only presence/length.
 export async function GET() {
-  const apiKey = process.env.SUMUP_API_KEY || ''
-  const merchantCode = process.env.SUMUP_MERCHANT_CODE || ''
+  const apiKey = process.env.AK_SUMUP_LIVE_API_KEY || ''
+  const merchantCode = process.env.AK_SUMUP_LIVE_MERCHANT_CODE || ''
   const sandboxKey = process.env.SUMUP_SANDBOX_API_KEY || ''
   const sandboxMerchant = process.env.SUMUP_SANDBOX_MERCHANT_CODE || ''
 
@@ -20,6 +19,6 @@ export async function GET() {
     sandboxKeyLength: sandboxKey.length,
     hasSandboxMerchant: Boolean(sandboxMerchant),
     sandboxMerchantLength: sandboxMerchant.length,
-    diagnosticVersion: 3,
+    diagnosticVersion: 4,
   })
 }
