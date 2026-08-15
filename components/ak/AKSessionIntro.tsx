@@ -3,10 +3,10 @@
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
-const SESSION_KEY = 'akcloud-intro-video-v3-seen'
-const INTRO_MS = 8500
+const SESSION_KEY = 'akcloud-intro-video-v4-seen'
+const INTRO_MS = 13000
 const FADE_MS = 650
-const VIDEO_SRC = '/api/ak-intro'
+const VIDEO_SRC = '/api/ak-intro?v=4'
 
 export default function AKSessionIntro() {
   const [visible, setVisible] = useState(false)
