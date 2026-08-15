@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, BarChart3, CalendarDays, CheckCircle2, Clock3, Repeat2, TrendingUp } from 'lucide-react'
+import { AlertTriangle, BarChart3, CalendarDays, CheckCircle2, Clock3, Repeat2, Sparkles, TrendingUp } from 'lucide-react'
 import AppShell from '@/components/AppShell'
 import { supabase } from '@/lib/supabase'
 import { getMisPedidos, type FileServicePedido } from '@/lib/services/pedidos'
@@ -127,6 +127,59 @@ export default function AnaliticaPage() {
       ? `${analytics.weeklyDelta}% vs. 7 días anteriores`
       : `${analytics.previous7} en los 7 días anteriores`
 
+  const operationalInsights = useMemo(() => {
+    const items: { title: string; detail: string; tone: 'amber' | 'cyan' | 'green' }[] = []
+
+    if (analytics.open24.length) {
+      items.push({
+        title: `${analytics.open24.length} pedido${analytics.open24.length === 1 ? '' : 's'} necesita${analytics.open24.length === 1 ? '' : 'n'} seguimiento`,
+        detail: `El más antiguo lleva ${openAge(analytics.open24[0]?.created_at).toLowerCase()}. Revisa primero los trabajos con mayor antigüedad.`,
+        tone: 'amber',
+      })
+    }
+
+    if (analytics.avgHours >= 24) {
+      items.push({
+        title: 'Ciclo medio por encima de 24 h',
+        detail: `Los pedidos finalizados promedian ${analytics.avgHours.toFixed(1)} h desde su creación hasta la última actualización. Conviene revisar si la carga reciente está ampliando los tiempos.`,
+        tone: 'amber',
+      })
+    }
+
+    if (analytics.weeklyDelta >= 20) {
+      items.push({
+        title: 'Aumento de carga esta semana',
+        detail: `Los pedidos han subido un ${analytics.weeklyDelta}% frente a los 7 días anteriores. Conviene vigilar tiempos de ciclo y trabajos abiertos.`,
+        tone: 'cyan',
+      })
+    } else if (analytics.weeklyDelta <= -20) {
+      items.push({
+        title: 'Menor volumen semanal',
+        detail: `Los pedidos han bajado un ${Math.abs(analytics.weeklyDelta)}% frente a la semana anterior. El dato es informativo y no modifica ninguna operación.`,
+        tone: 'cyan',
+      })
+    }
+
+    const topService = analytics.topServices[0]
+    if (topService) {
+      items.push({
+        title: `${topService[0]} lidera la demanda`,
+        detail: `${topService[1]} solicitud${topService[1] === 1 ? '' : 'es'} registradas. Puede servir para priorizar documentación, recursos y plantillas internas.`,
+        tone: 'green',
+      })
+    }
+
+    if (!items.length) {
+      items.push({
+        title: 'Actividad sin alertas operativas',
+        detail: 'No hay señales destacadas que requieran seguimiento automático con los datos actuales.',
+        tone: 'green',
+      })
+    }
+
+    return items.slice(0, 3)
+  }, [analytics])
+
   return <AppShell><div className="space-y-6">
     <section className="ak5-card ak5-gridline relative overflow-hidden rounded-[28px] p-6 sm:p-8">
       <div className="ak5-kicker text-cyan-300">Fase 2.5</div>
@@ -144,6 +197,19 @@ export default function AnaliticaPage() {
         <Metric icon={Clock3} label="Ciclo medio" value={analytics.avgHours ? `${analytics.avgHours.toFixed(1)} h` : '—'} sub="Estimado con pedidos finalizados" />
         <Metric icon={Repeat2} label="Vehículos recurrentes" value={analytics.recurrent} sub="Con más de un trabajo" />
         <Metric icon={AlertTriangle} label="Abiertos +24 h" value={analytics.open24.length} sub="Pendientes de seguimiento" />
+      </section>
+
+      <section className="ak5-card rounded-[26px] p-5 sm:p-6">
+        <div className="flex items-center gap-3"><Sparkles className="text-cyan-300"/><div><div className="ak5-kicker text-cyan-300">Automatización útil</div><h2 className="mt-1 text-xl font-black">Resumen operativo automático</h2></div></div>
+        <p className="mt-2 max-w-3xl text-xs leading-5 text-white/35">Prioriza señales con los datos del usuario y se recalcula en tiempo real. Solo recomienda seguimiento; no cambia estados, archivos ni decisiones del laboratorio.</p>
+        <div className="mt-5 grid gap-3 lg:grid-cols-3">{operationalInsights.map((item, index) => {
+          const tone = item.tone === 'amber'
+            ? 'border-amber-400/15 bg-amber-400/[.05] text-amber-200'
+            : item.tone === 'green'
+              ? 'border-emerald-400/15 bg-emerald-400/[.05] text-emerald-200'
+              : 'border-cyan-400/15 bg-cyan-400/[.05] text-cyan-200'
+          return <div key={`${item.title}-${index}`} className={`rounded-2xl border p-4 ${tone}`}><div className="text-sm font-black">{item.title}</div><div className="mt-2 text-xs leading-5 text-white/40">{item.detail}</div></div>
+        })}</div>
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[1fr_.9fr]">
