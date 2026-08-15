@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, BarChart3, CheckCircle2, Clock3, Repeat2, TrendingUp } from 'lucide-react'
 import AppShell from '@/components/AppShell'
+import { supabase } from '@/lib/supabase'
 import { getMisPedidos, type FileServicePedido } from '@/lib/services/pedidos'
 
 function hoursBetween(a?: string | null, b?: string | null) {
@@ -24,17 +25,44 @@ export default function AnaliticaPage() {
 
   useEffect(() => {
     let alive = true
-    ;(async () => {
+    let channel: ReturnType<typeof supabase.channel> | null = null
+
+    async function load(showLoading = false) {
+      if (showLoading && alive) setLoading(true)
       try {
         const data = await getMisPedidos()
-        if (alive) setPedidos(data)
+        if (alive) {
+          setPedidos(data)
+          setError(null)
+        }
       } catch (e: any) {
         if (alive) setError(e?.message || 'No se pudo cargar la analítica')
       } finally {
-        if (alive) setLoading(false)
+        if (showLoading && alive) setLoading(false)
       }
+    }
+
+    ;(async () => {
+      await load(true)
+      const { data } = await supabase.auth.getUser()
+      const userId = data.user?.id
+      if (!alive || !userId) return
+
+      channel = supabase
+        .channel(`analytics-${userId}`)
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'file_service_pedidos',
+          filter: `user_id=eq.${userId}`,
+        }, () => { void load(false) })
+        .subscribe()
     })()
-    return () => { alive = false }
+
+    return () => {
+      alive = false
+      if (channel) void supabase.removeChannel(channel)
+    }
   }, [])
 
   const analytics = useMemo(() => {
