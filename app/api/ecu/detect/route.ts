@@ -5,12 +5,19 @@ import crypto from 'crypto'
 export const runtime = 'nodejs'
 
 const MIN_SIGNATURE_CONFIRMATIONS = 3
+const MAX_FILE_BYTES = 64 * 1024 * 1024
+const SUPPORTED_EXTENSIONS = new Set(['bin', 'ori', 'hex', 'mod'])
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!url || !key) throw new Error('Faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY en Vercel')
   return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } })
+}
+
+function fileExtension(name: string) {
+  const dot = name.lastIndexOf('.')
+  return dot >= 0 ? name.slice(dot + 1).trim().toLowerCase() : ''
 }
 
 function bufferToSearchableText(buffer: Buffer) {
@@ -74,6 +81,14 @@ export async function POST(request: Request) {
     }
     if (file.size <= 0) {
       return NextResponse.json({ error: 'El archivo está vacío' }, { status: 400 })
+    }
+    if (file.size > MAX_FILE_BYTES) {
+      return NextResponse.json({ error: 'El archivo supera el límite de 64 MB para análisis automático' }, { status: 413 })
+    }
+
+    const extension = fileExtension(file.name)
+    if (!SUPPORTED_EXTENSIONS.has(extension)) {
+      return NextResponse.json({ error: 'Formato no compatible con el detector. Usa .bin, .ori, .hex o .mod sin comprimir.' }, { status: 415 })
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())
