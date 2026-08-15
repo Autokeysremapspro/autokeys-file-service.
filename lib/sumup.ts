@@ -3,6 +3,16 @@ import { getSiteUrl, getSupabaseAdmin } from '@/lib/paypal'
 const SUMUP_BASE_URL = 'https://api.sumup.com'
 
 function getSumUpApiKey() {
+  const isPreview = process.env.VERCEL_ENV === 'preview'
+
+  if (isPreview) {
+    const sandboxKey = process.env.SUMUP_SANDBOX_API_KEY
+    if (!sandboxKey) {
+      throw new Error('Falta SUMUP_SANDBOX_API_KEY en el entorno Preview de Vercel')
+    }
+    return sandboxKey
+  }
+
   const key = process.env.SUMUP_API_KEY || process.env.SUMUP_SANDBOX_API_KEY
   if (!key) throw new Error('Falta SUMUP_API_KEY o SUMUP_SANDBOX_API_KEY en Vercel')
   return key
