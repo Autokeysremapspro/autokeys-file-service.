@@ -67,12 +67,37 @@ function missingInformation(hw: string | null, sw: string | null) {
   return missing
 }
 
+function fileQuality(buffer: Buffer, extension: string, hw: string | null, sw: string | null) {
+  const sampleSize = Math.min(buffer.length, 1024 * 1024)
+  let blankBytes = 0
+  for (let i = 0; i < sampleSize; i++) {
+    if (buffer[i] === 0x00 || buffer[i] === 0xff) blankBytes++
+  }
+  const blankRatio = sampleSize ? blankBytes / sampleSize : 1
+  const warnings: string[] = []
+  if (blankRatio >= 0.985) warnings.push('El archivo contiene una proporción anormalmente alta de bytes 00/FF; revisar que la lectura sea válida.')
+  if (!hw) warnings.push('No se ha localizado una referencia HW fiable dentro del archivo.')
+  if (!sw) warnings.push('No se ha localizado una referencia SW fiable dentro del archivo.')
+  if (extension === 'mod') warnings.push('El archivo tiene extensión .mod; para identificación es preferible analizar el ORI original cuando sea posible.')
+
+  return {
+    usable: blankRatio < 0.985,
+    blank_ratio: Math.round(blankRatio * 1000) / 10,
+    extracted: { hw, sw },
+    completeness: hw && sw ? 'alta' : hw || sw ? 'media' : 'baja',
+    warnings,
+  }
+}
+
+function safeRuleServices(rule: any) {
+  return Array.isArray(rule?.servicios) ? rule.servicios.filter((item: unknown) => typeof item === 'string') : []
+}
+
 // Política estricta:
 // 1. Un archivo solo se identifica automáticamente mediante una huella SHA-256 ya confirmada.
 // 2. Como segunda vía, se acepta una firma verificada únicamente si coinciden EXACTAMENTE HW + SW + tamaño
 //    y esa firma ha sido confirmada por el laboratorio al menos 3 veces.
-// 3. Los patrones heurísticos jamás asignan una ECU al cliente. Si faltan pruebas, el resultado es
-//    "NO IDENTIFICADA — añadir información faltante".
+// 3. La inteligencia adicional (calidad, extracción y avisos) jamás asigna una ECU por sí sola.
 export async function POST(request: Request) {
   try {
     const contentLength = Number(request.headers.get('content-length') || 0)
@@ -99,6 +124,10 @@ export async function POST(request: Request) {
 
     const buffer = Buffer.from(await file.arrayBuffer())
     const sha256 = crypto.createHash('sha256').update(buffer).digest('hex')
+    const ascii = bufferToSearchableText(buffer)
+    const hw = findHardware(ascii)
+    const sw = findSoftware(ascii)
+    const quality = fileQuality(buffer, extension, hw, sw)
     const admin = adminClient()
 
     const { data: fingerprints, error: fingerprintError } = await admin
@@ -113,8 +142,6 @@ export async function POST(request: Request) {
       fingerprintRows.map((item: any) => String(item.ecu || '').trim()).filter(Boolean)
     )
 
-    // Una huella exacta solo identifica si todas las coincidencias confirmadas apuntan a la misma ECU.
-    // Si existe cualquier conflicto para el mismo SHA, se fuerza revisión humana.
     if (fingerprintRows.length >= 1 && distinctFingerprintEcus.size === 1) {
       const fingerprint = fingerprintRows[0] as any
       if (fingerprint?.ecu) {
@@ -123,32 +150,49 @@ export async function POST(request: Request) {
           .update({ veces_visto: (fingerprint.veces_visto || 1) + 1, updated_at: new Date().toISOString() })
           .eq('id', fingerprint.id)
 
+        const rule = fingerprint.ak_ecu_detection_rules || null
         return NextResponse.json({
           identified: true,
           status: 'identified',
           method: 'huella_exacta_confirmada',
           confidence: 100,
+          review_required: false,
           sha256,
           file_size: file.size,
+          extension,
           vehiculo: fingerprint.vehiculo,
           marca: fingerprint.marca,
           modelo: fingerprint.modelo,
           motor: fingerprint.motor,
           ecu: fingerprint.ecu,
-          hw: fingerprint.hw,
-          sw: fingerprint.sw,
-          rule: fingerprint.ak_ecu_detection_rules || null,
+          hw: fingerprint.hw || hw,
+          sw: fingerprint.sw || sw,
+          rule,
+          suggested_services: safeRuleServices(rule),
+          quality,
           evidence: ['Huella SHA-256 idéntica a un archivo validado por el laboratorio'],
         })
       }
     }
 
-    const ascii = bufferToSearchableText(buffer)
-    const hw = findHardware(ascii)
-    const sw = findSoftware(ascii)
+    if (fingerprintRows.length > 1 && distinctFingerprintEcus.size > 1) {
+      return NextResponse.json({
+        identified: false,
+        status: 'review_required',
+        method: 'huella_confirmada_ambigua',
+        confidence: 0,
+        review_required: true,
+        sha256,
+        file_size: file.size,
+        extension,
+        hw,
+        sw,
+        quality,
+        message: 'La huella existe en la base, pero tiene identificaciones conflictivas. Revisión manual obligatoria.',
+        missing_information: missingInformation(hw, sw),
+      })
+    }
 
-    // Aprendizaje prudente: una firma solo puede identificar cuando existen ambos identificadores,
-    // coinciden exactamente con el archivo y acumula varias confirmaciones humanas.
     if (hw && sw) {
       const { data: signature, error: signatureError } = await admin
         .from('ak_ecu_verified_signatures')
@@ -160,21 +204,22 @@ export async function POST(request: Request) {
         .not('ultima_confirmacion_por', 'is', null)
         .gte('confirmaciones', MIN_SIGNATURE_CONFIRMATIONS)
         .order('confirmaciones', { ascending: false })
-        .limit(2)
+        .limit(5)
       if (signatureError && signatureError.code !== '42P01') throw signatureError
 
-      // Si hay más de una ECU distinta para la misma firma, se considera ambigua y NO se identifica.
       const signatures = signature || []
       const distinctEcus = new Set(signatures.map((item: any) => String(item.ecu || '').trim()).filter(Boolean))
-      if (signatures.length === 1 && distinctEcus.size === 1) {
+      if (signatures.length >= 1 && distinctEcus.size === 1) {
         const match = signatures[0] as any
         return NextResponse.json({
           identified: true,
           status: 'identified',
           method: 'firma_verificada',
           confidence: 99,
+          review_required: false,
           sha256,
           file_size: file.size,
+          extension,
           vehiculo: match.vehiculo || null,
           marca: match.marca || null,
           modelo: match.modelo || null,
@@ -183,6 +228,7 @@ export async function POST(request: Request) {
           hw,
           sw,
           confirmations: match.confirmaciones,
+          quality,
           evidence: [
             'HW exacto',
             'SW exacto',
@@ -191,18 +237,41 @@ export async function POST(request: Request) {
           ],
         })
       }
+
+      if (signatures.length > 1 && distinctEcus.size > 1) {
+        return NextResponse.json({
+          identified: false,
+          status: 'review_required',
+          method: 'firma_verificada_ambigua',
+          confidence: 0,
+          review_required: true,
+          sha256,
+          file_size: file.size,
+          extension,
+          hw,
+          sw,
+          quality,
+          message: 'HW, SW y tamaño coinciden con más de una ECU confirmada. Revisión manual obligatoria.',
+          missing_information: missingInformation(hw, sw),
+        })
+      }
     }
 
     return NextResponse.json({
       identified: false,
-      status: 'unidentified',
-      method: 'informacion_insuficiente',
+      status: quality.usable ? 'unidentified' : 'invalid_reading_suspected',
+      method: quality.usable ? 'informacion_insuficiente' : 'calidad_archivo_dudosa',
       confidence: 0,
+      review_required: true,
       sha256,
       file_size: file.size,
+      extension,
       hw,
       sw,
-      message: 'ECU NO IDENTIFICADA — añadir información faltante',
+      quality,
+      message: quality.usable
+        ? 'ECU NO IDENTIFICADA — añadir información faltante'
+        : 'LECTURA DUDOSA — revisar el archivo antes de continuar',
       missing_information: missingInformation(hw, sw),
     })
   } catch (error: any) {
