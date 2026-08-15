@@ -6,6 +6,7 @@ export const runtime = 'nodejs'
 
 const MIN_SIGNATURE_CONFIRMATIONS = 3
 const MAX_FILE_BYTES = 64 * 1024 * 1024
+const MAX_REQUEST_BYTES = MAX_FILE_BYTES + 1024 * 1024
 const SUPPORTED_EXTENSIONS = new Set(['bin', 'ori', 'hex', 'mod'])
 
 function adminClient() {
@@ -74,6 +75,11 @@ function missingInformation(hw: string | null, sw: string | null) {
 //    "NO IDENTIFICADA — añadir información faltante".
 export async function POST(request: Request) {
   try {
+    const contentLength = Number(request.headers.get('content-length') || 0)
+    if (Number.isFinite(contentLength) && contentLength > MAX_REQUEST_BYTES) {
+      return NextResponse.json({ error: 'La petición supera el límite permitido para análisis automático' }, { status: 413 })
+    }
+
     const formData = await request.formData()
     const file = formData.get('file')
     if (!file || !(file instanceof File)) {
