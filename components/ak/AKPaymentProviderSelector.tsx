@@ -35,9 +35,9 @@ export default function AKPaymentProviderSelector() {
     setProvider(initial)
     window.localStorage.setItem('ak-payment-provider', initial)
 
-    let attempts = 0
+    // El botón de pago no existe hasta que el usuario selecciona un servicio con precio.
+    // Esperamos sin límite artificial, con un polling ligero, y detenemos en cuanto aparece.
     const timer = window.setInterval(() => {
-      attempts += 1
       const buttons = Array.from(document.querySelectorAll('button'))
       const conditionsButton = buttons.find((button) => /Condiciones aceptadas|Debes aceptar las condiciones/i.test(button.textContent || ''))
       const payButton = buttons.find((button) => /Pagar\s+.+€\s+con/i.test(button.textContent || ''))
@@ -53,10 +53,8 @@ export default function AKPaymentProviderSelector() {
         setMountNode(holder)
         syncPaymentCopy(initial)
         window.clearInterval(timer)
-      } else if (attempts >= 40) {
-        window.clearInterval(timer)
       }
-    }, 75)
+    }, 250)
 
     return () => window.clearInterval(timer)
   }, [])
