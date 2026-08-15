@@ -8,7 +8,8 @@ function PedidoCompletadoInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [estado, setEstado] = useState<'procesando' | 'ok' | 'error'>('procesando')
-  const [mensaje, setMensaje] = useState('Confirmando tu pago con SumUp...')
+  const [mensaje, setMensaje] = useState('Confirmando tu pago con tarjeta...')
+  const [pedidoId, setPedidoId] = useState<string | null>(null)
 
   useEffect(() => {
     const pendienteId = searchParams.get('pendiente')
@@ -26,15 +27,15 @@ function PedidoCompletadoInner() {
       .then(async (res) => {
         const data = await res.json()
         if (!res.ok) throw new Error(data.error)
+        setPedidoId(data.pedido?.id || null)
         setEstado('ok')
         setMensaje('Pago confirmado — tu pedido ya está en cola.')
-        setTimeout(() => router.push(`/pedidos/${data.pedido.id}`), 1600)
       })
       .catch((err) => {
         setEstado('error')
         setMensaje(err.message || 'No se pudo confirmar el pago.')
       })
-  }, [searchParams, router])
+  }, [searchParams])
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-black p-6 text-white">
@@ -42,11 +43,16 @@ function PedidoCompletadoInner() {
         {estado === 'procesando' && <Loader2 className="mx-auto animate-spin text-emerald-400" size={40} />}
         {estado === 'ok' && <CheckCircle2 className="mx-auto text-emerald-400" size={40} />}
         {estado === 'error' && <XCircle className="mx-auto text-red-400" size={40} />}
-        <h1 className="mt-5 text-2xl font-black">SumUp · AK Cloud</h1>
+        <h1 className="mt-5 text-2xl font-black">Pago con tarjeta · AK Cloud</h1>
         <p className="mt-3 text-sm text-white/60">{mensaje}</p>
+        {estado === 'ok' && pedidoId && (
+          <button onClick={() => router.push(`/pedidos/${pedidoId}`)} className="mt-6 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-black uppercase">
+            Ver pedido
+          </button>
+        )}
         {estado === 'error' && (
           <button onClick={() => router.push('/nuevo-pedido')} className="mt-6 rounded-xl bg-red-600 px-5 py-3 text-sm font-black uppercase">
-            Volver a intentarlo
+            Volver al portal
           </button>
         )}
       </div>
