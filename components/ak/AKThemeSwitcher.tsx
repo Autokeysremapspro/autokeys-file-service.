@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { Monitor, Moon, Sun } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Check, ChevronDown, Monitor, Moon, Sun } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 type ThemePreference = 'dark' | 'light' | 'system'
@@ -26,6 +26,8 @@ export default function AKThemeSwitcher() {
   const [preference, setPreference] = useState<ThemePreference>('dark')
   const [userKey, setUserKey] = useState('akcloud:theme:guest')
   const [mounted, setMounted] = useState(false)
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let active = true
@@ -67,24 +69,45 @@ export default function AKThemeSwitcher() {
     return () => media.removeEventListener('change', apply)
   }, [preference, mounted])
 
+  useEffect(() => {
+    if (!open) return
+
+    const closeOutside = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
+    }
+    const closeEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+
+    document.addEventListener('mousedown', closeOutside)
+    document.addEventListener('keydown', closeEscape)
+    return () => {
+      document.removeEventListener('mousedown', closeOutside)
+      document.removeEventListener('keydown', closeEscape)
+    }
+  }, [open])
+
   const activeOption = useMemo(() => OPTIONS.find(option => option.value === preference) || OPTIONS[0], [preference])
   const ActiveIcon = activeOption.icon
 
-  const cycle = async () => {
-    const current = OPTIONS.findIndex(option => option.value === preference)
-    const next = OPTIONS[(current + 1) % OPTIONS.length].value
-
+  const selectTheme = async (next: ThemePreference) => {
     setPreference(next)
+    setOpen(false)
     window.localStorage.setItem(userKey, next)
+
+    const resolved = resolveTheme(next)
+    document.documentElement.dataset.akTheme = resolved
+    document.documentElement.style.colorScheme = resolved
 
     try {
       const { data } = await supabase.auth.getUser()
       if (!data.user) return
 
       const currentMetadata = data.user.user_metadata || {}
-      await supabase.auth.updateUser({
+      const { error } = await supabase.auth.updateUser({
         data: { ...currentMetadata, akcloud_theme: next },
       })
+      if (error) throw error
     } catch (error) {
       // El cambio local sigue funcionando aunque la sincronización de cuenta falle.
       console.error('No se pudo sincronizar la preferencia de tema', error)
@@ -96,17 +119,47 @@ export default function AKThemeSwitcher() {
   }
 
   return (
-    <button
-      type="button"
-      onClick={cycle}
-      className="ak5-theme-toggle group relative grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/[.035] text-white/65 transition hover:border-white/20 hover:text-white"
-      aria-label={`Tema: ${activeOption.label}. Pulsa para cambiar.`}
-      title={`Tema: ${activeOption.label}`}
-    >
-      <ActiveIcon size={18} />
-      <span className="pointer-events-none absolute right-0 top-full z-50 mt-2 hidden whitespace-nowrap rounded-lg border border-white/10 bg-[#080c13]/95 px-2.5 py-1.5 text-[10px] font-bold text-white/70 shadow-xl group-hover:block">
-        {activeOption.label}
-      </span>
-    </button>
+    <div ref={rootRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(value => !value)}
+        className="ak5-theme-toggle group flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/[.035] px-3 text-white/65 transition hover:border-white/20 hover:text-white"
+        aria-label={`Tema: ${activeOption.label}. Abrir selector de tema.`}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        title={`Tema: ${activeOption.label}`}
+      >
+        <ActiveIcon size={18} />
+        <span className="hidden text-xs font-bold sm:inline">{activeOption.label}</span>
+        <ChevronDown size={14} className={`hidden transition-transform sm:block ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          aria-label="Seleccionar tema"
+          className="absolute right-0 top-full z-[80] mt-2 w-44 overflow-hidden rounded-xl border border-white/10 bg-[#080c13]/95 p-1.5 shadow-2xl backdrop-blur-xl"
+        >
+          {OPTIONS.map(option => {
+            const Icon = option.icon
+            const selected = option.value === preference
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="menuitemradio"
+                aria-checked={selected}
+                onClick={() => selectTheme(option.value)}
+                className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-xs font-bold transition ${selected ? 'bg-white/[.08] text-white' : 'text-white/60 hover:bg-white/[.05] hover:text-white'}`}
+              >
+                <Icon size={16} />
+                <span>{option.label}</span>
+                {selected && <Check size={14} className="ml-auto text-cyan-300" />}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
   )
 }

@@ -1,0 +1,37 @@
+/* Phase 2.1 — responsive hardening for AK Cloud UI.
+   Visual-only rules: no application, order, ECU or payment logic is changed. */
+
+@media (max-width: 640px) {
+  .ak5-title {
+    font-size: clamp(2.25rem, 11vw, 3rem) !important;
+    line-height: 0.98 !important;
+    overflow-wrap: anywhere;
+  }
+
+  .ak5-card {
+    border-radius: 20px !important;
+  }
+
+  .ak5-chip {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .ak5-primary,
+  .ak5-secondary {
+    width: 100%;
+    min-height: 48px;
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .ak5-title {
+    font-size: clamp(2rem, 10.5vw, 2.55rem) !important;
+  }
+
+  .ak5-card {
+    border-radius: 18px !important;
+  }
+}
