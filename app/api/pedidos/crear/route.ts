@@ -36,13 +36,23 @@ export async function POST(request: Request) {
     if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
     const admin = adminClient()
-    const { data: distribuidor } = await admin
-      .from('akcloud_distribuidores')
-      .select('estado')
-      .eq('auth_user_id', user.id)
-      .maybeSingle()
+    const [{ data: distribuidor }, { data: staff }] = await Promise.all([
+      admin
+        .from('akcloud_distribuidores')
+        .select('estado')
+        .eq('auth_user_id', user.id)
+        .maybeSingle(),
+      admin
+        .from('usuarios_app')
+        .select('activo, rol')
+        .eq('auth_user_id', user.id)
+        .maybeSingle(),
+    ])
 
-    if (!distribuidor || distribuidor.estado !== 'activo') {
+    const distribuidorActivo = distribuidor?.estado === 'activo'
+    const staffActivo = staff?.activo === true && ['admin', 'desarrollo', 'laboratorio', 'atencion_cliente'].includes(String(staff?.rol || ''))
+
+    if (!distribuidorActivo && !staffActivo) {
       return NextResponse.json({ error: 'Cuenta no autorizada para crear pedidos' }, { status: 403 })
     }
 
