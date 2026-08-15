@@ -35,7 +35,9 @@ export default function AKPaymentProviderSelector() {
     setProvider(initial)
     window.localStorage.setItem('ak-payment-provider', initial)
 
-    const id = window.requestAnimationFrame(() => {
+    let attempts = 0
+    const timer = window.setInterval(() => {
+      attempts += 1
       const buttons = Array.from(document.querySelectorAll('button'))
       const conditionsButton = buttons.find((button) => /Condiciones aceptadas|Debes aceptar las condiciones/i.test(button.textContent || ''))
       const payButton = buttons.find((button) => /Pagar\s+.+€\s+con/i.test(button.textContent || ''))
@@ -50,10 +52,13 @@ export default function AKPaymentProviderSelector() {
         }
         setMountNode(holder)
         syncPaymentCopy(initial)
+        window.clearInterval(timer)
+      } else if (attempts >= 40) {
+        window.clearInterval(timer)
       }
-    })
+    }, 75)
 
-    return () => window.cancelAnimationFrame(id)
+    return () => window.clearInterval(timer)
   }, [])
 
   function choose(next: Provider) {
