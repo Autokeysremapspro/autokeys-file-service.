@@ -10,6 +10,10 @@ function getRequiredEnv(name: string) {
 }
 
 export function getSiteUrl() {
+  if (process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+
   const fromEnv = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL
   if (fromEnv) return fromEnv.startsWith('http') ? fromEnv : `https://${fromEnv}`
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`

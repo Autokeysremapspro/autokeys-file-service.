@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 
 export type PedidoEstado = 'pendiente' | 'en_proceso' | 'finalizado' | 'cancelado'
+export type PaymentMethod = 'paypal' | 'sumup'
 
 export type FileServicePedido = {
   id: string
@@ -64,6 +65,7 @@ export type CrearPedidoPayload = {
   ori?: File | null
   legalAccepted?: boolean
   legalVersion?: string
+  paymentMethod?: PaymentMethod
 }
 
 function getTechnicalMetadata(payload: CrearPedidoPayload) {
@@ -81,6 +83,15 @@ function getTechnicalMetadata(payload: CrearPedidoPayload) {
     archivoOrigen: payload.archivoOrigen || stored.archivoOrigen || 'ORI',
     modificacionesHardware: payload.modificacionesHardware || stored.modificacionesHardware || null,
   }
+}
+
+function getPaymentMethod(payload: CrearPedidoPayload): PaymentMethod {
+  if (payload.paymentMethod === 'sumup' || payload.paymentMethod === 'paypal') return payload.paymentMethod
+  if (typeof window !== 'undefined') {
+    const stored = window.localStorage.getItem('ak-payment-provider')
+    if (stored === 'sumup') return 'sumup'
+  }
+  return 'paypal'
 }
 
 export async function crearPedidoFileService(payload: CrearPedidoPayload) {
@@ -120,6 +131,7 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
   }
 
   const tech = getTechnicalMetadata(payload)
+  const paymentMethod = getPaymentMethod(payload)
   const response = await fetch('/api/pedidos/crear', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -140,6 +152,7 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
       metodoLectura: tech.metodoLectura,
       archivoOrigen: tech.archivoOrigen,
       modificacionesHardware: tech.modificacionesHardware,
+      paymentMethod,
       legalAccepted: payload.legalAccepted === true,
       legalVersion: payload.legalVersion,
       ori: {
@@ -157,7 +170,7 @@ export async function crearPedidoFileService(payload: CrearPedidoPayload) {
   if (!result.requierePago && typeof window !== 'undefined') {
     try { sessionStorage.removeItem('ak-order-tech') } catch {}
   }
-  return result as { ok: true; requierePago: boolean; pedido?: FileServicePedido; approveUrl?: string; importe?: number }
+  return result as { ok: true; requierePago: boolean; pedido?: FileServicePedido; approveUrl?: string; importe?: number; paymentMethod?: PaymentMethod }
 }
 
 export async function getMisPedidos() {

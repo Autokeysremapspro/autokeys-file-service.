@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createPayPalOrderForPedido } from '@/lib/paypal'
+import { createSumUpOrderForPedido } from '@/lib/sumup'
 import { FALLBACK_SERVICIOS, type AkCloudServicio } from '@/lib/services/akCloudConfig'
 
 function adminClient() {
@@ -35,13 +36,23 @@ export async function POST(request: Request) {
     if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
     const admin = adminClient()
-    const { data: distribuidor } = await admin
-      .from('akcloud_distribuidores')
-      .select('estado')
-      .eq('auth_user_id', user.id)
-      .maybeSingle()
+    const [{ data: distribuidor }, { data: staff }] = await Promise.all([
+      admin
+        .from('akcloud_distribuidores')
+        .select('estado')
+        .eq('auth_user_id', user.id)
+        .maybeSingle(),
+      admin
+        .from('usuarios_app')
+        .select('activo, rol')
+        .eq('auth_user_id', user.id)
+        .maybeSingle(),
+    ])
 
-    if (!distribuidor || distribuidor.estado !== 'activo') {
+    const distribuidorActivo = distribuidor?.estado === 'activo'
+    const staffActivo = staff?.activo === true && ['admin', 'desarrollo', 'laboratorio', 'atencion_cliente'].includes(String(staff?.rol || ''))
+
+    if (!distribuidorActivo && !staffActivo) {
       return NextResponse.json({ error: 'Cuenta no autorizada para crear pedidos' }, { status: 403 })
     }
 
@@ -50,6 +61,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Debes aceptar las condiciones del servicio' }, { status: 400 })
     }
 
+    const paymentMethod = body.paymentMethod === 'sumup' ? 'sumup' : 'paypal'
     const legalVersion = String(body.legalVersion || 'AKCLOUD-LEGAL-2026-07-17')
     const forwardedFor = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null
     const serviciosSlugs: string[] = Array.isArray(body.servicios) ? body.servicios : []
@@ -141,48 +153,65 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, requierePago: false, pedido })
     }
 
-    const { approveUrl, pendienteId } = await createPayPalOrderForPedido({
-      userId: user.id,
-      userEmail: user.email,
-      importe: totalPrecio,
-      descripcion: `AK Cloud — ${seleccionados.map((s) => s.nombre).join(', ')}`,
-      payload: {
-        cliente_nombre: commonPayload.cliente_nombre,
-        cliente_email: commonPayload.cliente_email,
-        servicios_nombres: commonPayload.servicios,
-        observaciones: commonPayload.observaciones,
-        dtc_codes: commonPayload.dtc_codes,
-        marca: commonPayload.marca,
-        modelo: commonPayload.modelo,
-        motor: commonPayload.motor,
-        anio: commonPayload.anio,
-        ecu: commonPayload.ecu,
-        hw: commonPayload.hw,
-        sw: commonPayload.sw,
-        cv: commonPayload.cv,
-        cambio: commonPayload.cambio,
-        herramienta_lectura: commonPayload.herramienta_lectura,
-        metodo_lectura: commonPayload.metodo_lectura,
-        archivo_origen: commonPayload.archivo_origen,
-        modificaciones_hardware: commonPayload.modificaciones_hardware,
-        prioridad: commonPayload.prioridad,
-        legal_aceptado: commonPayload.legal_aceptado,
-        legal_version: commonPayload.legal_version,
-        legal_aceptado_at: commonPayload.legal_aceptado_at,
-        legal_ip: commonPayload.legal_ip,
-        precio_inicial: totalPrecio,
-        precio_final: totalPrecio,
-        ori: {
-          nombre: commonPayload.ori_nombre,
-          bucket: commonPayload.ori_bucket,
-          path: commonPayload.ori_path,
-          size: commonPayload.ori_size,
-          sha256: commonPayload.ori_sha256,
-        },
+    const paymentPayload = {
+      cliente_nombre: commonPayload.cliente_nombre,
+      cliente_email: commonPayload.cliente_email,
+      servicios_nombres: commonPayload.servicios,
+      observaciones: commonPayload.observaciones,
+      dtc_codes: commonPayload.dtc_codes,
+      marca: commonPayload.marca,
+      modelo: commonPayload.modelo,
+      motor: commonPayload.motor,
+      anio: commonPayload.anio,
+      ecu: commonPayload.ecu,
+      hw: commonPayload.hw,
+      sw: commonPayload.sw,
+      cv: commonPayload.cv,
+      cambio: commonPayload.cambio,
+      herramienta_lectura: commonPayload.herramienta_lectura,
+      metodo_lectura: commonPayload.metodo_lectura,
+      archivo_origen: commonPayload.archivo_origen,
+      modificaciones_hardware: commonPayload.modificaciones_hardware,
+      prioridad: commonPayload.prioridad,
+      legal_aceptado: commonPayload.legal_aceptado,
+      legal_version: commonPayload.legal_version,
+      legal_aceptado_at: commonPayload.legal_aceptado_at,
+      legal_ip: commonPayload.legal_ip,
+      precio_inicial: totalPrecio,
+      precio_final: totalPrecio,
+      ori: {
+        nombre: commonPayload.ori_nombre,
+        bucket: commonPayload.ori_bucket,
+        path: commonPayload.ori_path,
+        size: commonPayload.ori_size,
+        sha256: commonPayload.ori_sha256,
       },
-    })
+    }
 
-    return NextResponse.json({ ok: true, requierePago: true, importe: totalPrecio, approveUrl, pendienteId })
+    const descripcion = `AK Cloud — ${seleccionados.map((s) => s.nombre).join(', ')}`
+    const payment = paymentMethod === 'sumup'
+      ? await createSumUpOrderForPedido({
+          userId: user.id,
+          importe: totalPrecio,
+          descripcion,
+          payload: paymentPayload,
+        })
+      : await createPayPalOrderForPedido({
+          userId: user.id,
+          userEmail: user.email,
+          importe: totalPrecio,
+          descripcion,
+          payload: paymentPayload,
+        })
+
+    return NextResponse.json({
+      ok: true,
+      requierePago: true,
+      importe: totalPrecio,
+      approveUrl: payment.approveUrl,
+      pendienteId: payment.pendienteId,
+      paymentMethod,
+    })
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Error creando el pedido' }, { status: 500 })
   }
