@@ -93,11 +93,21 @@ function safeRuleServices(rule: any) {
   return Array.isArray(rule?.servicios) ? rule.servicios.filter((item: unknown) => typeof item === 'string') : []
 }
 
+function labPolicy(identificationReviewRequired: boolean) {
+  return {
+    identification_review_required: identificationReviewRequired,
+    lab_decision_required: true,
+    ecu_file_modification_automated: false,
+    final_decision_owner: 'laboratorio',
+  }
+}
+
 // Política estricta:
 // 1. Un archivo solo se identifica automáticamente mediante una huella SHA-256 ya confirmada.
 // 2. Como segunda vía, se acepta una firma verificada únicamente si coinciden EXACTAMENTE HW + SW + tamaño
 //    y esa firma ha sido confirmada por el laboratorio al menos 3 veces.
 // 3. La inteligencia adicional (calidad, extracción y avisos) jamás asigna una ECU por sí sola.
+// 4. Incluso con identificación verificada, la decisión técnica final sigue perteneciendo al laboratorio.
 export async function POST(request: Request) {
   try {
     const contentLength = Number(request.headers.get('content-length') || 0)
@@ -157,6 +167,7 @@ export async function POST(request: Request) {
           method: 'huella_exacta_confirmada',
           confidence: 100,
           review_required: false,
+          ...labPolicy(false),
           sha256,
           file_size: file.size,
           extension,
@@ -182,6 +193,7 @@ export async function POST(request: Request) {
         method: 'huella_confirmada_ambigua',
         confidence: 0,
         review_required: true,
+        ...labPolicy(true),
         sha256,
         file_size: file.size,
         extension,
@@ -217,6 +229,7 @@ export async function POST(request: Request) {
           method: 'firma_verificada',
           confidence: 99,
           review_required: false,
+          ...labPolicy(false),
           sha256,
           file_size: file.size,
           extension,
@@ -245,6 +258,7 @@ export async function POST(request: Request) {
           method: 'firma_verificada_ambigua',
           confidence: 0,
           review_required: true,
+          ...labPolicy(true),
           sha256,
           file_size: file.size,
           extension,
@@ -263,6 +277,7 @@ export async function POST(request: Request) {
       method: quality.usable ? 'informacion_insuficiente' : 'calidad_archivo_dudosa',
       confidence: 0,
       review_required: true,
+      ...labPolicy(true),
       sha256,
       file_size: file.size,
       extension,
