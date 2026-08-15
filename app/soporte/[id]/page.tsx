@@ -5,6 +5,7 @@ import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { ArrowLeft, Clock, Headphones, Send, Ticket } from 'lucide-react'
 import AppShell from '@/components/AppShell'
+import { supabase } from '@/lib/supabase'
 import { enviarMensajeTicket, estadoTicketColor, estadoTicketLabel, getMensajesTicket, getTicketSoporte, prioridadTicketColor, type AkCloudTicket, type AkCloudTicketMensaje } from '@/lib/services/soporte'
 
 function formatDate(value?: string | null) {
@@ -39,12 +40,40 @@ export default function TicketDetallePage({ params }: { params: { id: string } }
 
   useEffect(() => { load() }, [params.id])
 
+  useEffect(() => {
+    const channel = supabase
+      .channel(`akcloud-support-${params.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'akcloud_ticket_mensajes', filter: `ticket_id=eq.${params.id}` },
+        (payload) => {
+          const incoming = payload.new as AkCloudTicketMensaje
+          setMensajes((current) => current.some((item) => item.id === incoming.id) ? current : [...current, incoming])
+        },
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'akcloud_tickets', filter: `id=eq.${params.id}` },
+        (payload) => {
+          const incoming = payload.new as AkCloudTicket
+          setTicket((current) => current ? { ...current, ...incoming } : incoming)
+        },
+      )
+      .subscribe()
+
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [params.id])
+
   async function send() {
     if (!message.trim()) return
     setSending(true)
     try {
       const saved = await enviarMensajeTicket(params.id, message.trim())
-      setMensajes(prev => [...prev, saved])
+      const now = new Date().toISOString()
+      setMensajes(prev => prev.some(item => item.id === saved.id) ? prev : [...prev, saved])
+      setTicket(prev => prev ? { ...prev, estado: 'abierto', updated_at: now } : prev)
       setMessage('')
       toast.success('Mensaje enviado')
     } catch (error: any) {

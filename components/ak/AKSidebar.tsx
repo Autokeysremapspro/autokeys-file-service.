@@ -8,7 +8,7 @@ import { Bell, BookOpen, BrainCircuit, Car, Download, FolderOpen, Gauge, LayoutD
 import { supabase } from '@/lib/supabase'
 
 const items = [
-  ['/dashboard','Mission Control',LayoutDashboard],
+  ['/dashboard','Inicio',LayoutDashboard],
   ['/nuevo-pedido','Nuevo pedido',UploadCloud],
   ['/pedidos','Pedidos',FolderOpen],
   ['/descargas','Versiones',Download],
@@ -28,8 +28,6 @@ export default function AKSidebar({mobile=false,onClose}:{mobile?:boolean;onClos
       <div className="mb-4 flex items-start gap-2">
         <Link href="/dashboard" onClick={onClose} className="ak5-brand-panel min-w-0 flex-1 rounded-2xl border border-white/[.07] bg-white/[.025] p-4">
           <div className="ak5-brand-logo rounded-xl px-2 py-1"><Image src="/images/brand/autokeys-logo-wide-transparent.webp" alt="Autokeys" width={210} height={54} className="h-auto w-[168px]" priority/></div>
-          <div className="mt-3 text-[10px] font-black uppercase tracking-[.22em]">AK LAB <span className="text-orange-400">OS</span></div>
-          <div className="mt-1 text-[8px] uppercase tracking-[.2em] text-white/25">File intelligence system</div>
         </Link>
         {mobile&&<button onClick={onClose} className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/[.04]"><X size={18}/></button>}
       </div>

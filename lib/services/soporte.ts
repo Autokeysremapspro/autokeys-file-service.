@@ -34,6 +34,25 @@ function createTicketNumber() {
   return `SUP-${year}-${rand}`
 }
 
+async function requireUserId() {
+  const { data, error } = await supabase.auth.getUser()
+  if (error || !data.user?.id) throw new Error('No hay sesión activa')
+  return data.user.id
+}
+
+async function requireOwnedTicket(ticketId: string, userId: string) {
+  const { data, error } = await supabase
+    .from('akcloud_tickets')
+    .select('id')
+    .eq('id', ticketId)
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (error) throw new Error(error.message)
+  if (!data?.id) throw new Error('Ticket no disponible')
+  return data.id
+}
+
 export function estadoTicketLabel(estado?: string | null) {
   switch (estado) {
     case 'abierto': return 'Abierto'
@@ -65,9 +84,11 @@ export function prioridadTicketColor(prioridad?: string | null) {
 }
 
 export async function getTicketsSoporte() {
+  const userId = await requireUserId()
   const { data, error } = await supabase
     .from('akcloud_tickets')
     .select('*')
+    .eq('user_id', userId)
     .order('updated_at', { ascending: false })
 
   if (error) throw new Error(error.message)
@@ -75,10 +96,12 @@ export async function getTicketsSoporte() {
 }
 
 export async function getTicketSoporte(id: string) {
+  const userId = await requireUserId()
   const { data, error } = await supabase
     .from('akcloud_tickets')
     .select('*')
     .eq('id', id)
+    .eq('user_id', userId)
     .single()
 
   if (error) throw new Error(error.message)
@@ -86,6 +109,9 @@ export async function getTicketSoporte(id: string) {
 }
 
 export async function getMensajesTicket(ticketId: string) {
+  const userId = await requireUserId()
+  await requireOwnedTicket(ticketId, userId)
+
   const { data, error } = await supabase
     .from('akcloud_ticket_mensajes')
     .select('*')
@@ -104,14 +130,12 @@ export async function crearTicketSoporte(payload: {
   descripcion: string
   pedido_id?: string | null
 }) {
-  const { data: userRes } = await supabase.auth.getUser()
-  const user = userRes?.user
-  if (!user) throw new Error('No hay sesión activa')
+  const userId = await requireUserId()
 
   const { data, error } = await supabase
     .from('akcloud_tickets')
     .insert({
-      user_id: user.id,
+      user_id: userId,
       numero: createTicketNumber(),
       asunto: payload.asunto,
       categoria: payload.categoria,
@@ -127,7 +151,7 @@ export async function crearTicketSoporte(payload: {
 
   await supabase.from('akcloud_ticket_mensajes').insert({
     ticket_id: data.id,
-    user_id: user.id,
+    user_id: userId,
     remitente: 'cliente',
     mensaje: payload.descripcion,
     interno: false,
@@ -137,15 +161,14 @@ export async function crearTicketSoporte(payload: {
 }
 
 export async function enviarMensajeTicket(ticketId: string, mensaje: string) {
-  const { data: userRes } = await supabase.auth.getUser()
-  const user = userRes?.user
-  if (!user) throw new Error('No hay sesión activa')
+  const userId = await requireUserId()
+  await requireOwnedTicket(ticketId, userId)
 
   const { data, error } = await supabase
     .from('akcloud_ticket_mensajes')
     .insert({
       ticket_id: ticketId,
-      user_id: user.id,
+      user_id: userId,
       remitente: 'cliente',
       mensaje,
       interno: false,
@@ -155,10 +178,12 @@ export async function enviarMensajeTicket(ticketId: string, mensaje: string) {
 
   if (error) throw new Error(error.message)
 
-  await supabase
+  const { error: updateError } = await supabase
     .from('akcloud_tickets')
     .update({ estado: 'abierto', updated_at: new Date().toISOString() })
     .eq('id', ticketId)
+    .eq('user_id', userId)
 
+  if (updateError) throw new Error(updateError.message)
   return data as AkCloudTicketMensaje
 }

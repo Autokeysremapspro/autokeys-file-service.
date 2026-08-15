@@ -13,6 +13,10 @@ const OPTIONS: Array<{ value: ThemePreference; label: string; icon: typeof Moon 
   { value: 'system', label: 'Sistema', icon: Monitor },
 ]
 
+function isThemePreference(value: unknown): value is ThemePreference {
+  return typeof value === 'string' && ['dark', 'light', 'system'].includes(value)
+}
+
 function resolveTheme(preference: ThemePreference): ResolvedTheme {
   if (preference !== 'system') return preference
   return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
@@ -25,13 +29,24 @@ export default function AKThemeSwitcher() {
 
   useEffect(() => {
     let active = true
+
     supabase.auth.getUser().then(({ data }) => {
       if (!active) return
-      const key = `akcloud:theme:${data.user?.id || 'guest'}`
+
+      const user = data.user
+      const key = `akcloud:theme:${user?.id || 'guest'}`
       setUserKey(key)
-      const saved = window.localStorage.getItem(key) as ThemePreference | null
-      const next: ThemePreference = saved && ['dark', 'light', 'system'].includes(saved) ? saved : 'system'
+
+      const accountPreference = user?.user_metadata?.akcloud_theme
+      const localPreference = window.localStorage.getItem(key)
+      const next: ThemePreference = isThemePreference(accountPreference)
+        ? accountPreference
+        : isThemePreference(localPreference)
+          ? localPreference
+          : 'system'
+
       setPreference(next)
+      window.localStorage.setItem(key, next)
       document.documentElement.dataset.akTheme = resolveTheme(next)
       setMounted(true)
     })
@@ -55,11 +70,25 @@ export default function AKThemeSwitcher() {
   const activeOption = useMemo(() => OPTIONS.find(option => option.value === preference) || OPTIONS[0], [preference])
   const ActiveIcon = activeOption.icon
 
-  const cycle = () => {
+  const cycle = async () => {
     const current = OPTIONS.findIndex(option => option.value === preference)
     const next = OPTIONS[(current + 1) % OPTIONS.length].value
+
     setPreference(next)
     window.localStorage.setItem(userKey, next)
+
+    try {
+      const { data } = await supabase.auth.getUser()
+      if (!data.user) return
+
+      const currentMetadata = data.user.user_metadata || {}
+      await supabase.auth.updateUser({
+        data: { ...currentMetadata, akcloud_theme: next },
+      })
+    } catch (error) {
+      // El cambio local sigue funcionando aunque la sincronización de cuenta falle.
+      console.error('No se pudo sincronizar la preferencia de tema', error)
+    }
   }
 
   if (!mounted) {

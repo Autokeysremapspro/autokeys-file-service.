@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
-import { ArrowRight, Headphones, LifeBuoy, MessageSquarePlus, Search, ShieldCheck, Sparkles, Ticket, X } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Headphones, LifeBuoy, MessageSquarePlus, Search, ShieldCheck, Sparkles, Ticket, X } from 'lucide-react'
 import AppShell from '@/components/AppShell'
 import CustomSelect from '@/components/ak/CustomSelect'
+import { supabase } from '@/lib/supabase'
 import { crearTicketSoporte, estadoTicketColor, estadoTicketLabel, getTicketsSoporte, prioridadTicketColor, type AkCloudTicket, type TicketPrioridad } from '@/lib/services/soporte'
 
 const categorias = [
@@ -20,6 +21,7 @@ const categorias = [
 export default function SoportePage() {
   const [tickets, setTickets] = useState<AkCloudTicket[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [query, setQuery] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -27,9 +29,11 @@ export default function SoportePage() {
 
   async function load() {
     setLoading(true)
+    setLoadError(false)
     try {
       setTickets(await getTicketsSoporte())
     } catch (error: any) {
+      setLoadError(true)
       toast.error(error?.message || 'No se pudo cargar soporte')
     } finally {
       setLoading(false)
@@ -37,6 +41,30 @@ export default function SoportePage() {
   }
 
   useEffect(() => { load() }, [])
+
+  useEffect(() => {
+    let active = true
+    let channel: ReturnType<typeof supabase.channel> | null = null
+
+    void supabase.auth.getUser().then(({ data }) => {
+      const userId = data.user?.id
+      if (!active || !userId) return
+
+      channel = supabase
+        .channel(`akcloud-support-list-${userId}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'akcloud_tickets', filter: `user_id=eq.${userId}` },
+          () => { void load() },
+        )
+        .subscribe()
+    })
+
+    return () => {
+      active = false
+      if (channel) void supabase.removeChannel(channel)
+    }
+  }, [])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -85,6 +113,7 @@ export default function SoportePage() {
   const abiertos = tickets.filter(t => t.estado !== 'cerrado').length
   const respondidos = tickets.filter(t => t.estado === 'respondido').length
   const urgentes = tickets.filter(t => t.prioridad === 'urgente' || t.prioridad === 'alta').length
+  const hasSearch = query.trim().length > 0
 
   return (
     <AppShell>
@@ -117,17 +146,31 @@ export default function SoportePage() {
             </div>
             <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/25 px-4 py-3 lg:w-[380px]">
               <Search size={18} className="text-white/35" />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar ticket, estado, categoría..." className="w-full border-0 bg-transparent p-0 text-sm outline-none placeholder:text-white/25" />
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar ticket, estado, categoría..." aria-label="Buscar en Mis tickets" className="w-full border-0 bg-transparent p-0 text-sm outline-none placeholder:text-white/25" />
             </div>
           </div>
 
           {loading ? (
             <div className="rounded-3xl border border-white/10 bg-black/20 p-8 text-white/35">Cargando soporte...</div>
-          ) : filtered.length === 0 ? (
+          ) : loadError ? (
+            <div className="rounded-3xl border border-amber-400/15 bg-amber-400/[.04] p-10 text-center">
+              <AlertTriangle className="mx-auto mb-3 text-amber-300" size={34} />
+              <div className="font-black">No se pudo cargar soporte</div>
+              <p className="mt-1 text-sm text-white/35">Tus tickets y mensajes no se han borrado. No podemos consultar el historial en este momento.</p>
+              <button type="button" onClick={() => void load()} className="ak5-secondary mt-5">Reintentar</button>
+            </div>
+          ) : tickets.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-white/10 bg-black/20 p-10 text-center">
               <LifeBuoy className="mx-auto mb-3 text-white/35" size={34} />
               <div className="font-black">No hay tickets todavía</div>
               <p className="mt-1 text-sm text-white/35">Crea el primer ticket para hablar con Autokeys.</p>
+            </div>
+          ) : filtered.length === 0 && hasSearch ? (
+            <div className="rounded-3xl border border-dashed border-white/10 bg-black/20 p-10 text-center">
+              <Search className="mx-auto mb-3 text-white/35" size={32} />
+              <div className="font-black">Sin coincidencias</div>
+              <p className="mt-1 text-sm text-white/35">No hay tickets que coincidan con tu búsqueda.</p>
+              <button type="button" onClick={() => setQuery('')} className="ak5-secondary mt-5">Limpiar búsqueda</button>
             </div>
           ) : (
             <div className="grid gap-3">
@@ -172,24 +215,11 @@ export default function SoportePage() {
               </label>
               <label>
                 <span className="mb-2 block text-sm font-bold text-white/70">Categoría</span>
-                <CustomSelect
-                  value={form.categoria}
-                  onChange={(v) => setForm(prev => ({ ...prev, categoria: v }))}
-                  options={categorias.map(c => ({ value: c, label: c }))}
-                />
+                <CustomSelect value={form.categoria} onChange={(v) => setForm(prev => ({ ...prev, categoria: v }))} options={categorias.map(c => ({ value: c, label: c }))} />
               </label>
               <label>
                 <span className="mb-2 block text-sm font-bold text-white/70">Prioridad</span>
-                <CustomSelect
-                  value={form.prioridad}
-                  onChange={(v) => setForm(prev => ({ ...prev, prioridad: v as TicketPrioridad }))}
-                  options={[
-                    { value: 'baja', label: 'Baja' },
-                    { value: 'normal', label: 'Normal' },
-                    { value: 'alta', label: 'Alta' },
-                    { value: 'urgente', label: 'Urgente' },
-                  ]}
-                />
+                <CustomSelect value={form.prioridad} onChange={(v) => setForm(prev => ({ ...prev, prioridad: v as TicketPrioridad }))} options={[{ value: 'baja', label: 'Baja' },{ value: 'normal', label: 'Normal' },{ value: 'alta', label: 'Alta' },{ value: 'urgente', label: 'Urgente' }]} />
               </label>
               <label className="md:col-span-2">
                 <span className="mb-2 block text-sm font-bold text-white/70">ID pedido opcional</span>
