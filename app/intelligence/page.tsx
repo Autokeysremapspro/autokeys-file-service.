@@ -64,7 +64,7 @@ export default function IntelligencePage() {
               <span className="ak5-chip border-cyan-400/20 bg-cyan-400/10 text-cyan-300"><Brain size={13} /> AK Intelligence</span>
               <h1 className="ak5-title mt-4 text-4xl sm:text-5xl">Analiza un archivo antes de pedir</h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-white/48">
-                Sube el .bin/.ori/.hex y AK Intelligence lo identifica por huella y patrones reales del archivo — la misma detección que usa Nuevo pedido, aquí como herramienta independiente.
+                Sube el .bin/.ori/.hex/.mod y AK Intelligence lo identifica por huella y patrones reales del archivo — la misma detección que usa Nuevo pedido, aquí como herramienta independiente.
               </p>
             </div>
           </div>
@@ -75,12 +75,12 @@ export default function IntelligencePage() {
             <div className="ak5-kicker text-cyan-300">Paso 1</div>
             <h2 className="mt-1 text-xl font-black">Sube el archivo</h2>
             <label className="group mt-5 flex min-h-[260px] cursor-pointer flex-col items-center justify-center rounded-[22px] border border-dashed border-white/15 bg-white/[0.02] p-8 text-center transition hover:border-cyan-400/30 hover:bg-cyan-400/[0.03]">
-              <input type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
+              <input type="file" accept=".bin,.ori,.hex,.mod" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
               <div className="flex h-20 w-20 items-center justify-center rounded-[20px] border border-cyan-400/20 bg-cyan-400/10 text-cyan-300 transition group-hover:scale-105">
                 {fileName ? <FileArchive size={34} /> : <UploadCloud size={36} />}
               </div>
               <h3 className="mt-6 text-xl font-black">{fileName ? fileName : 'Arrastra tu archivo aquí'}</h3>
-              <p className="mt-2 max-w-xs text-sm text-white/35">{fileName ? 'Toca para analizar otro archivo' : '.bin · .ori · .hex · .mod · .zip'}</p>
+              <p className="mt-2 max-w-xs text-sm text-white/35">{fileName ? 'Toca para analizar otro archivo' : '.bin · .ori · .hex · .mod'}</p>
             </label>
 
             {analyzing && (
