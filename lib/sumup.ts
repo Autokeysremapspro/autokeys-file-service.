@@ -13,9 +13,11 @@ function getSumUpApiKey() {
     return sandboxKey
   }
 
-  const key = process.env.SUMUP_API_KEY || process.env.SUMUP_SANDBOX_API_KEY
-  if (!key) throw new Error('Falta SUMUP_API_KEY o SUMUP_SANDBOX_API_KEY en Vercel')
-  return key
+  const liveKey = process.env.SUMUP_API_KEY
+  if (!liveKey) {
+    throw new Error('Falta SUMUP_API_KEY en el entorno Production de Vercel')
+  }
+  return liveKey
 }
 
 async function sumupFetch(path: string, init: RequestInit = {}) {
@@ -55,13 +57,11 @@ export async function getSumUpMerchantCode() {
     return sandboxMerchantCode
   }
 
-  const explicit = process.env.SUMUP_MERCHANT_CODE
-  if (explicit) return explicit
-
-  const profile = await getSumUpProfile()
-  const merchantCode = profile?.merchant_profile?.merchant_code || profile?.merchant_code
-  if (!merchantCode) throw new Error('SumUp no devolvió merchant_code para esta API key')
-  return merchantCode as string
+  const liveMerchantCode = process.env.SUMUP_MERCHANT_CODE
+  if (!liveMerchantCode) {
+    throw new Error('Falta SUMUP_MERCHANT_CODE en el entorno Production de Vercel')
+  }
+  return liveMerchantCode
 }
 
 export async function createSumUpHostedCheckout(input: {
