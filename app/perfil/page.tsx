@@ -82,10 +82,10 @@ export default function PerfilPage() {
   return (
     <AKPageShell title="Mi cuenta" subtitle="Datos fiscales, contacto y herramientas del taller. Se sincronizan con tu ficha de cliente en AK Core." eyebrow="Account">
       <div className="grid gap-6 xl:grid-cols-[1fr_390px]">
-        <AKCard className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-3xl border border-red-500/25 bg-red-500/10 text-red-300"><UserCircle size={32} /></div>
-            <div><h2 className="text-2xl font-black">Perfil del taller</h2><p className="text-sm text-white/40">Solo puedes modificar datos de empresa, contacto y herramientas.</p></div>
+        <AKCard className="p-4 sm:p-6">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-red-500/25 bg-red-500/10 text-red-300 sm:h-16 sm:w-16 sm:rounded-3xl"><UserCircle size={32} /></div>
+            <div className="min-w-0"><h2 className="break-words text-2xl font-black">Perfil del taller</h2><p className="mt-1 text-sm leading-6 text-white/40">Solo puedes modificar datos de empresa, contacto y herramientas.</p></div>
           </div>
 
           {loading ? <div className="mt-8 text-sm text-white/35">Cargando perfil...</div> : <>
@@ -101,19 +101,19 @@ export default function PerfilPage() {
               <Field icon={<Globe2 size={18}/>} label="Web" value={profile.web} onChange={v=>field('web',v)} placeholder="https://..." />
               <Field icon={<Wrench size={18}/>} label="Herramientas" value={tools} onChange={setTools} placeholder="Kess3, Flex, Autotuner..." className="md:col-span-2" />
             </div>
-            <div className="mt-6 flex justify-end"><button disabled={saving} onClick={save} className="ak5-primary disabled:cursor-not-allowed disabled:opacity-50"><Save size={17}/>{saving?'Guardando...':'Guardar cambios'}</button></div>
+            <div className="mt-6 flex justify-stretch sm:justify-end"><button disabled={saving} onClick={save} className="ak5-primary w-full disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"><Save size={17}/>{saving?'Guardando...':'Guardar cambios'}</button></div>
           </>}
         </AKCard>
 
         <div className="space-y-6">
-          <AKCard className="p-6">
+          <AKCard className="p-4 sm:p-6">
             <p className="text-xs font-black uppercase tracking-[0.22em] text-red-400">Seguridad</p>
-            <h3 className="mt-2 text-2xl font-black">Acceso protegido</h3>
+            <h3 className="mt-2 break-words text-2xl font-black">Acceso protegido</h3>
             <p className="mt-3 text-sm leading-6 text-white/45">La actualización usa una operación segura ligada a tu usuario. No expone precios, descuentos, límites de crédito, notas internas ni ajustes administrativos.</p>
           </AKCard>
-          <AKCard className="p-6">
+          <AKCard className="p-4 sm:p-6">
             <p className="text-xs font-black uppercase tracking-[0.22em] text-cyan-300">Cuenta de acceso</p>
-            <div className="mt-4 flex items-center gap-3 text-sm text-white/65"><ShieldCheck size={18} className="text-cyan-300"/><span className="break-all">{loginEmail || '—'}</span></div>
+            <div className="mt-4 flex min-w-0 items-start gap-3 text-sm text-white/65"><ShieldCheck size={18} className="mt-0.5 shrink-0 text-cyan-300"/><span className="min-w-0 break-all">{loginEmail || '—'}</span></div>
             <p className="mt-3 text-xs leading-5 text-white/30">El email de acceso puede ser distinto del email de contacto o facturación.</p>
           </AKCard>
         </div>
@@ -123,5 +123,5 @@ export default function PerfilPage() {
 }
 
 function Field({label,value,onChange,icon,type='text',placeholder,className=''}:{label:string;value:string;onChange:(value:string)=>void;icon?:React.ReactNode;type?:string;placeholder?:string;className?:string}){
-  return <label className={`block ${className}`}><span className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-[.16em] text-white/40">{icon}{label}</span><input type={type} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} className="w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-white/20 focus:border-cyan-400/40" /></label>
+  return <label className={`block min-w-0 ${className}`}><span className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-[.16em] text-white/40">{icon}{label}</span><input type={type} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} className="w-full min-w-0 rounded-2xl border border-white/10 bg-black/25 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-white/20 focus:border-cyan-400/40" /></label>
 }
