@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, BarChart3, CheckCircle2, Clock3, Repeat2, TrendingUp } from 'lucide-react'
+import { AlertTriangle, BarChart3, CalendarDays, CheckCircle2, Clock3, Repeat2, TrendingUp } from 'lucide-react'
 import AppShell from '@/components/AppShell'
 import { supabase } from '@/lib/supabase'
 import { getMisPedidos, type FileServicePedido } from '@/lib/services/pedidos'
@@ -137,8 +137,9 @@ export default function AnaliticaPage() {
     {error && <div className="rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-200">{error}</div>}
 
     {loading ? <div className="ak5-card rounded-[24px] p-10 text-center text-white/35">Calculando indicadores...</div> : <>
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         <Metric icon={TrendingUp} label="Pedidos 7 días" value={analytics.last7} sub={weeklyTrend} />
+        <Metric icon={CalendarDays} label="Pedidos 30 días" value={analytics.last30} sub="Volumen reciente" />
         <Metric icon={CheckCircle2} label="Finalización" value={`${analytics.completion}%`} sub="Sobre todos tus pedidos" />
         <Metric icon={Clock3} label="Ciclo medio" value={analytics.avgHours ? `${analytics.avgHours.toFixed(1)} h` : '—'} sub="Estimado con pedidos finalizados" />
         <Metric icon={Repeat2} label="Vehículos recurrentes" value={analytics.recurrent} sub="Con más de un trabajo" />
