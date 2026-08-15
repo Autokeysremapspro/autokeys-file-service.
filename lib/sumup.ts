@@ -45,6 +45,16 @@ export async function getSumUpProfile() {
 }
 
 export async function getSumUpMerchantCode() {
+  const isPreview = process.env.VERCEL_ENV === 'preview'
+
+  if (isPreview) {
+    const sandboxMerchantCode = process.env.SUMUP_SANDBOX_MERCHANT_CODE
+    if (!sandboxMerchantCode) {
+      throw new Error('Falta SUMUP_SANDBOX_MERCHANT_CODE en el entorno Preview de Vercel')
+    }
+    return sandboxMerchantCode
+  }
+
   const explicit = process.env.SUMUP_MERCHANT_CODE
   if (explicit) return explicit
 
