@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Bell, BookOpen, BrainCircuit, Car, Download, FolderOpen, Gauge, LayoutDashboard, LifeBuoy, Settings, ShieldCheck, UploadCloud, UserCircle, X } from 'lucide-react'
+import { BarChart3, Bell, BookOpen, BrainCircuit, Car, Download, FolderOpen, Gauge, LayoutDashboard, LifeBuoy, Settings, ShieldCheck, UploadCloud, UserCircle, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 const items = [
@@ -15,6 +15,7 @@ const items = [
   ['/garage','Garage',Car],
   ['/biblioteca','Knowledge Base',BookOpen],
   ['/intelligence','AK Intelligence',BrainCircuit],
+  ['/analitica','Analítica',BarChart3],
   ['/soporte','Soporte técnico',LifeBuoy],
   ['/notificaciones','Actividad',Bell],
   ['/perfil','Mi workspace',UserCircle],
