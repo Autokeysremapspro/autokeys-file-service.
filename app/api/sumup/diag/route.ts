@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-// Diagnostic v6: validates only presence/length; never exposes secret values.
+// Diagnostic v7: validates only presence/length; never exposes secret values.
 export async function GET() {
   const apiKey = process.env.AK_SUMUP_LIVE_API_KEY || ''
   const merchantCode = process.env.AK_SUMUP_LIVE_MERCHANT_CODE || ''
@@ -20,6 +20,6 @@ export async function GET() {
     sandboxKeyLength: sandboxKey.length,
     hasSandboxMerchant: Boolean(sandboxMerchant),
     sandboxMerchantLength: sandboxMerchant.length,
-    diagnosticVersion: 6,
+    diagnosticVersion: 7,
   })
 }
