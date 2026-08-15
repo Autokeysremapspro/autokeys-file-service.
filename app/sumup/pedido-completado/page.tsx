@@ -45,11 +45,29 @@ function PedidoCompletadoInner() {
         {estado === 'error' && <XCircle className="mx-auto text-red-400" size={40} />}
         <h1 className="mt-5 text-2xl font-black">Pago con tarjeta · AK Cloud</h1>
         <p className="mt-3 text-sm text-white/60">{mensaje}</p>
-        {estado === 'ok' && pedidoId && (
-          <button onClick={() => router.push(`/pedidos/${pedidoId}`)} className="mt-6 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-black uppercase">
-            Ver pedido
-          </button>
+
+        {estado === 'ok' && (
+          <div className="mt-6 flex flex-col gap-3">
+            {pedidoId && (
+              <button
+                onClick={() => router.push(`/pedidos/${pedidoId}`)}
+                className="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-black uppercase"
+              >
+                Ver pedido
+              </button>
+            )}
+            <button
+              onClick={() => router.push('/pedidos')}
+              className="rounded-xl border border-white/15 bg-white/[.05] px-5 py-3 text-sm font-black uppercase text-white"
+            >
+              Ir al portal
+            </button>
+            <p className="text-xs text-white/40">
+              Si la sesión ha caducado, AK Cloud te pedirá iniciar sesión antes de mostrar tus pedidos.
+            </p>
+          </div>
         )}
+
         {estado === 'error' && (
           <button onClick={() => router.push('/nuevo-pedido')} className="mt-6 rounded-xl bg-red-600 px-5 py-3 text-sm font-black uppercase">
             Volver al portal
