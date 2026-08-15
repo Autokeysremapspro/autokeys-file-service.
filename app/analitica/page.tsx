@@ -68,8 +68,14 @@ export default function AnaliticaPage() {
   const analytics = useMemo(() => {
     const now = Date.now()
     const d7 = now - 7 * 86400000
+    const d14 = now - 14 * 86400000
     const d30 = now - 30 * 86400000
     const last7 = pedidos.filter(p => p.created_at && new Date(p.created_at).getTime() >= d7)
+    const previous7 = pedidos.filter(p => {
+      if (!p.created_at) return false
+      const t = new Date(p.created_at).getTime()
+      return t >= d14 && t < d7
+    })
     const last30 = pedidos.filter(p => p.created_at && new Date(p.created_at).getTime() >= d30)
     const finished = pedidos.filter(p => p.estado === 'finalizado')
     const cycle = finished.map(p => hoursBetween(p.created_at, p.updated_at)).filter((v): v is number => v !== null)
@@ -87,9 +93,14 @@ export default function AnaliticaPage() {
     for (const p of pedidos) for (const s of p.servicios || []) services.set(s, (services.get(s) || 0) + 1)
     const topServices = Array.from(services.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5)
     const maxServiceCount = topServices[0]?.[1] || 0
+    const weeklyDelta = previous7.length
+      ? Math.round(((last7.length - previous7.length) / previous7.length) * 1000) / 10
+      : last7.length > 0 ? 100 : 0
 
     return {
       last7: last7.length,
+      previous7: previous7.length,
+      weeklyDelta,
       last30: last30.length,
       completion: pedidos.length ? Math.round((finished.length / pedidos.length) * 1000) / 10 : 0,
       avgHours,
@@ -99,6 +110,12 @@ export default function AnaliticaPage() {
       maxServiceCount,
     }
   }, [pedidos])
+
+  const weeklyTrend = analytics.weeklyDelta > 0
+    ? `+${analytics.weeklyDelta}% vs. 7 días anteriores`
+    : analytics.weeklyDelta < 0
+      ? `${analytics.weeklyDelta}% vs. 7 días anteriores`
+      : `${analytics.previous7} en los 7 días anteriores`
 
   return <AppShell><div className="space-y-6">
     <section className="ak5-card ak5-gridline relative overflow-hidden rounded-[28px] p-6 sm:p-8">
@@ -111,7 +128,7 @@ export default function AnaliticaPage() {
 
     {loading ? <div className="ak5-card rounded-[24px] p-10 text-center text-white/35">Calculando indicadores...</div> : <>
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <Metric icon={TrendingUp} label="Pedidos 7 días" value={analytics.last7} sub={`${analytics.last30} en 30 días`} />
+        <Metric icon={TrendingUp} label="Pedidos 7 días" value={analytics.last7} sub={weeklyTrend} />
         <Metric icon={CheckCircle2} label="Finalización" value={`${analytics.completion}%`} sub="Sobre todos tus pedidos" />
         <Metric icon={Clock3} label="Ciclo medio" value={analytics.avgHours ? `${analytics.avgHours.toFixed(1)} h` : '—'} sub="Estimado con pedidos finalizados" />
         <Metric icon={Repeat2} label="Vehículos recurrentes" value={analytics.recurrent} sub="Con más de un trabajo" />
