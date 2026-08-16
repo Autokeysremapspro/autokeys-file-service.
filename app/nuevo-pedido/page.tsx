@@ -10,6 +10,7 @@ import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import AKServiceCard, { type AKService } from '@/components/ak/AKServiceCard'
 import AKEcuDetectionSummary, { type AKEcuDetection } from '@/components/ak/AKEcuDetectionSummary'
+import { mergeVerifiedEcuPrefill } from '@/lib/ecu/safePrefill'
 import { crearPedidoFileService } from '@/lib/services/pedidos'
 import {
   FALLBACK_SERVICIOS,
@@ -117,15 +118,23 @@ export default function NuevoPedidoPage() {
 
   function aplicarDeteccion() {
     if (!detection) return
-    setVehicle((current) => ({
-      ...current,
-      marca: detection.marca || current.marca,
-      modelo: detection.modelo || current.modelo,
-      motor: detection.motor || current.motor,
-      ecu: detection.ecu || current.ecu,
-      hw: detection.hw || current.hw,
-      sw: detection.sw || current.sw,
-    }))
+    setVehicle((current) => {
+      const merged = mergeVerifiedEcuPrefill({
+        marca: current.marca,
+        modelo: current.modelo,
+        motor: current.motor,
+        ecu: current.ecu,
+        hw: current.hw,
+        sw: current.sw,
+      }, detection)
+
+      if (!merged.allowed) return current
+
+      return {
+        ...current,
+        ...merged.values,
+      }
+    })
   }
 
   function toggle(slug: string) {
