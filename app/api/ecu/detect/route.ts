@@ -135,6 +135,47 @@ function labPolicy(identificationReviewRequired: boolean) {
   }
 }
 
+function clientGuidance(options: {
+  identified: boolean
+  method: string
+  qualityUsable: boolean
+  ambiguous?: boolean
+}) {
+  if (!options.qualityUsable) {
+    return {
+      level: 'warning',
+      label: 'Lectura dudosa',
+      safe_to_prefill: false,
+      client_action: 'Revisar o repetir la lectura antes de enviar el pedido.',
+    }
+  }
+
+  if (options.ambiguous) {
+    return {
+      level: 'warning',
+      label: 'Revisión manual obligatoria',
+      safe_to_prefill: false,
+      client_action: 'Completar los datos técnicos y dejar la identificación final al laboratorio.',
+    }
+  }
+
+  if (options.identified) {
+    return {
+      level: 'verified',
+      label: options.method === 'huella_exacta_confirmada' ? 'Identificación verificada 100%' : 'Firma verificada',
+      safe_to_prefill: true,
+      client_action: 'Puedes usar los datos verificados; el laboratorio mantiene la decisión técnica final.',
+    }
+  }
+
+  return {
+    level: 'info',
+    label: 'Información insuficiente',
+    safe_to_prefill: false,
+    client_action: 'Completar ECU, vehículo, HW/SW y método de lectura para revisión del laboratorio.',
+  }
+}
+
 // Política estricta:
 // 1. Un archivo solo se identifica automáticamente mediante una huella SHA-256 ya confirmada.
 // 2. Como segunda vía, se acepta una firma verificada únicamente si coinciden EXACTAMENTE HW + SW + tamaño
@@ -201,6 +242,7 @@ export async function POST(request: Request) {
           confidence: 100,
           review_required: false,
           ...labPolicy(false),
+          guidance: clientGuidance({ identified: true, method: 'huella_exacta_confirmada', qualityUsable: quality.usable }),
           sha256,
           file_size: file.size,
           extension,
@@ -227,6 +269,7 @@ export async function POST(request: Request) {
         confidence: 0,
         review_required: true,
         ...labPolicy(true),
+        guidance: clientGuidance({ identified: false, method: 'huella_confirmada_ambigua', qualityUsable: quality.usable, ambiguous: true }),
         sha256,
         file_size: file.size,
         extension,
@@ -263,6 +306,7 @@ export async function POST(request: Request) {
           confidence: 99,
           review_required: false,
           ...labPolicy(false),
+          guidance: clientGuidance({ identified: true, method: 'firma_verificada', qualityUsable: quality.usable }),
           sha256,
           file_size: file.size,
           extension,
@@ -292,6 +336,7 @@ export async function POST(request: Request) {
           confidence: 0,
           review_required: true,
           ...labPolicy(true),
+          guidance: clientGuidance({ identified: false, method: 'firma_verificada_ambigua', qualityUsable: quality.usable, ambiguous: true }),
           sha256,
           file_size: file.size,
           extension,
@@ -311,6 +356,7 @@ export async function POST(request: Request) {
       confidence: 0,
       review_required: true,
       ...labPolicy(true),
+      guidance: clientGuidance({ identified: false, method: quality.usable ? 'informacion_insuficiente' : 'calidad_archivo_dudosa', qualityUsable: quality.usable }),
       sha256,
       file_size: file.size,
       extension,
