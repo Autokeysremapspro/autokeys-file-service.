@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { AlertTriangle, CheckCircle2, Info, ScanLine, ShieldCheck } from 'lucide-react'
 import { canUseVerifiedEcuPrefill } from '@/lib/ecu/safePrefill'
 
@@ -67,21 +66,7 @@ function methodLabel(method: string) {
   return 'Sin identificación confirmada'
 }
 
-const PREFILL_LABELS = new Set(['Marca *', 'Modelo *', 'Motor', 'ECU *', 'Hardware', 'Software'])
-
-function formHasManualEcuData() {
-  if (typeof document === 'undefined') return true
-  const labels = Array.from(document.querySelectorAll('label'))
-  return labels.some((label) => {
-    const title = label.querySelector('span')?.textContent?.trim() || ''
-    if (!PREFILL_LABELS.has(title)) return false
-    const input = label.querySelector('input')
-    return Boolean(input?.value.trim())
-  })
-}
-
 export default function AKEcuDetectionSummary({ detection, onApply }: { detection: AKEcuDetection; onApply?: () => void }) {
-  const [prefillNotice, setPrefillNotice] = useState<string | null>(null)
   const guidance = detection.guidance || {}
   const visual = tone(guidance.level)
   const Icon = visual.Icon
@@ -90,16 +75,6 @@ export default function AKEcuDetectionSummary({ detection, onApply }: { detectio
   const vehicle = [detection.marca, detection.modelo, detection.motor].filter(Boolean).join(' ')
   const confidence = Number.isFinite(detection.confidence) ? Math.max(0, Math.min(100, detection.confidence)) : 0
   const suggestedServices = verifiedDetection ? Array.from(new Set((detection.suggested_services || []).filter(Boolean))) : []
-
-  function handleApply() {
-    if (!onApply || !safeToPrefill) return
-    if (formHasManualEcuData()) {
-      setPrefillNotice('Autorrelleno bloqueado para proteger los datos que ya has escrito. Mantén esos datos o vacía los campos antes de usar la identificación verificada.')
-      return
-    }
-    setPrefillNotice(null)
-    onApply()
-  }
 
   return (
     <div className={`mt-4 rounded-2xl border p-4 ${visual.shell}`}>
@@ -165,12 +140,11 @@ export default function AKEcuDetectionSummary({ detection, onApply }: { detectio
       <div className="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1 text-xs text-white/45">
           <div className="flex items-center gap-2"><ShieldCheck size={15} className="text-cyan-300" />La decisión técnica final pertenece siempre al laboratorio.</div>
-          {verifiedDetection && <div className="pl-[23px] text-white/35">Datos verificados disponibles. El autorrelleno solo se ejecuta si los campos objetivo siguen vacíos.</div>}
+          {verifiedDetection && <div className="pl-[23px] text-white/35">Datos verificados disponibles. Solo se completan los campos vacíos; cualquier dato escrito por el cliente se conserva.</div>}
           {!verifiedDetection && <div className="pl-[23px] text-white/35">Autorrelleno bloqueado: completa o confirma los datos manualmente.</div>}
-          {prefillNotice && <div className="pl-[23px] text-amber-300/80">{prefillNotice}</div>}
         </div>
         {safeToPrefill && onApply ? (
-          <button type="button" onClick={handleApply} className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-emerald-300 transition hover:bg-emerald-500/20">Usar datos verificados</button>
+          <button type="button" onClick={onApply} className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-emerald-300 transition hover:bg-emerald-500/20">Usar datos verificados</button>
         ) : null}
       </div>
     </div>
