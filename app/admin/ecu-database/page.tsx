@@ -51,6 +51,7 @@ const ISSUE_LABELS: Record<string, string> = {
 export default function EcuDatabasePage() {
   const [rules, setRules] = useState<EcuDbRule[]>([])
   const [query, setQuery] = useState('')
+  const [onlyReview, setOnlyReview] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -74,11 +75,16 @@ export default function EcuDatabasePage() {
 
   useEffect(() => { load(); loadAudit() }, [])
 
+  const reviewRuleIds = useMemo(() => new Set((audit?.issues.rules || []).map((issue) => issue.id).filter(Boolean) as string[]), [audit])
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return rules
-    return rules.filter((rule) => [rule.fabricante, rule.ecu, rule.familia, rule.vehiculo, rule.motor, rule.marcas?.join(' '), rule.herramientas?.join(' '), rule.servicios?.join(' '), rule.patrones?.join(' ')].some((value) => (value || '').toLowerCase().includes(q)))
-  }, [rules, query])
+    return rules.filter((rule) => {
+      if (onlyReview && (!rule.id || !reviewRuleIds.has(rule.id))) return false
+      if (!q) return true
+      return [rule.fabricante, rule.ecu, rule.familia, rule.vehiculo, rule.motor, rule.marcas?.join(' '), rule.herramientas?.join(' '), rule.servicios?.join(' '), rule.patrones?.join(' ')].some((value) => (value || '').toLowerCase().includes(q))
+    })
+  }, [rules, query, onlyReview, reviewRuleIds])
 
   const auditIssueCount = audit ? audit.totals.rule_issues + audit.totals.fingerprint_issues + audit.totals.signature_issues : 0
   const auditGroups = useMemo(() => {
@@ -200,8 +206,13 @@ export default function EcuDatabasePage() {
           </AKCard>
 
           <div className="space-y-5">
-            <AKCard className="p-4"><div className="flex items-center gap-3"><Search size={20} className="text-white/35" /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar ECU, HW, SW, marca, herramienta o servicio..." className="w-full border-0 bg-transparent text-sm text-white outline-none placeholder:text-white/25" /></div></AKCard>
-            {loading ? <AKCard className="p-8 text-white/35">Cargando reglas...</AKCard> : filtered.length === 0 ? <AKCard className="p-8 text-white/35">No hay reglas que coincidan.</AKCard> : <div className="grid gap-4 xl:grid-cols-2">{filtered.map((rule) => <AKCard key={rule.id || rule.ecu} className="p-5"><div className="flex items-start justify-between gap-4"><div><div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-[var(--ak-glow)]"><Cpu size={15} /> {rule.fabricante || 'ECU'}</div><h3 className="mt-2 text-2xl font-black">{rule.ecu}</h3><p className="mt-1 text-sm text-white/40">{rule.vehiculo || 'Vehículo no definido'} · {rule.motor || 'Motor —'} · {rule.potencia || 'CV —'}</p></div><button onClick={() => remove(rule)} className="rounded-2xl border border-red-500/25 bg-red-500/10 p-3 text-red-200 transition hover:bg-red-500/20"><Trash2 size={18} /></button></div><div className="mt-5 grid gap-3 text-xs md:grid-cols-2"><Info label="Familia" value={rule.familia} /><Info label="Años" value={rule.anios || '—'} /><Info label="Marcas" value={rule.marcas?.join(', ') || '—'} /><Info label="Tamaños" value={(rule.tamanos || []).map((size) => `${(size / 1024 / 1024).toFixed(1)} MB`).join(', ') || '—'} /><Info label="Par motor origen" value={rule.par_nm || '—'} /><Info label="Potencia Stage 1" value={rule.potencia_stage1 || '—'} /></div><div className="mt-4 flex flex-wrap gap-2">{(rule.servicios || []).map((service) => <span key={service} className="rounded-full border border-[var(--ak-red)]/20 bg-[var(--ak-red)]/10 px-3 py-1 text-xs font-bold text-[var(--ak-glow)]">{SERVICE_LABELS[service] || service}</span>)}</div><div className="mt-4 flex flex-wrap gap-2">{(rule.herramientas || []).map((tool) => <span key={tool} className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-bold text-white/50">{tool}</span>)}</div></AKCard>)}</div>}
+            <AKCard className="p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="flex min-w-0 flex-1 items-center gap-3"><Search size={20} className="shrink-0 text-white/35" /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar ECU, HW, SW, marca, herramienta o servicio..." className="w-full border-0 bg-transparent text-sm text-white outline-none placeholder:text-white/25" /></div>
+                <button type="button" onClick={() => setOnlyReview((current) => !current)} disabled={!audit || audit.totals.rule_issues === 0} className={`rounded-2xl border px-4 py-2 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-35 ${onlyReview ? 'border-amber-500/30 bg-amber-500/10 text-amber-200' : 'border-white/10 bg-white/[0.03] text-white/55 hover:bg-white/[0.06]'}`}>{onlyReview ? `Mostrando revisión (${reviewRuleIds.size})` : `Solo revisión (${reviewRuleIds.size})`}</button>
+              </div>
+            </AKCard>
+            {loading ? <AKCard className="p-8 text-white/35">Cargando reglas...</AKCard> : filtered.length === 0 ? <AKCard className="p-8 text-white/35">{onlyReview ? 'No hay reglas pendientes de revisión que coincidan con la búsqueda.' : 'No hay reglas que coincidan.'}</AKCard> : <div className="grid gap-4 xl:grid-cols-2">{filtered.map((rule) => <AKCard key={rule.id || rule.ecu} className="p-5"><div className="flex items-start justify-between gap-4"><div><div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-[var(--ak-glow)]"><Cpu size={15} /> {rule.fabricante || 'ECU'}</div><h3 className="mt-2 text-2xl font-black">{rule.ecu}</h3><p className="mt-1 text-sm text-white/40">{rule.vehiculo || 'Vehículo no definido'} · {rule.motor || 'Motor —'} · {rule.potencia || 'CV —'}</p></div><button onClick={() => remove(rule)} className="rounded-2xl border border-red-500/25 bg-red-500/10 p-3 text-red-200 transition hover:bg-red-500/20"><Trash2 size={18} /></button></div><div className="mt-5 grid gap-3 text-xs md:grid-cols-2"><Info label="Familia" value={rule.familia} /><Info label="Años" value={rule.anios || '—'} /><Info label="Marcas" value={rule.marcas?.join(', ') || '—'} /><Info label="Tamaños" value={(rule.tamanos || []).map((size) => `${(size / 1024 / 1024).toFixed(1)} MB`).join(', ') || '—'} /><Info label="Par motor origen" value={rule.par_nm || '—'} /><Info label="Potencia Stage 1" value={rule.potencia_stage1 || '—'} /></div><div className="mt-4 flex flex-wrap gap-2">{(rule.servicios || []).map((service) => <span key={service} className="rounded-full border border-[var(--ak-red)]/20 bg-[var(--ak-red)]/10 px-3 py-1 text-xs font-bold text-[var(--ak-glow)]">{SERVICE_LABELS[service] || service}</span>)}</div><div className="mt-4 flex flex-wrap gap-2">{(rule.herramientas || []).map((tool) => <span key={tool} className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-bold text-white/50">{tool}</span>)}</div></AKCard>)}</div>}
           </div>
         </div>
       </section>
