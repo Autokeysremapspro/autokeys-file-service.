@@ -9,6 +9,8 @@ import AKUploader from '@/components/ak/AKUploader'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import AKServiceCard, { type AKService } from '@/components/ak/AKServiceCard'
+import AKEcuDetectionSummary, { type AKEcuDetection } from '@/components/ak/AKEcuDetectionSummary'
+import { mergeVerifiedEcuPrefill } from '@/lib/ecu/safePrefill'
 import { crearPedidoFileService } from '@/lib/services/pedidos'
 import {
   FALLBACK_SERVICIOS,
@@ -59,23 +61,7 @@ export default function NuevoPedidoPage() {
   const [legalAccepted, setLegalAccepted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [detecting, setDetecting] = useState(false)
-  const [detection, setDetection] = useState<null | {
-    identified: boolean
-    method: string
-    confidence: number
-    sha256: string
-    vehiculo?: string | null
-    marca?: string | null
-    modelo?: string | null
-    motor?: string | null
-    ecu?: string | null
-    hw?: string | null
-    sw?: string | null
-    message?: string | null
-    missing_information?: string[]
-    evidence?: string[]
-    confirmations?: number
-  }>(null)
+  const [detection, setDetection] = useState<AKEcuDetection | null>(null)
 
   useEffect(() => {
     async function loadConfig() {
@@ -132,15 +118,23 @@ export default function NuevoPedidoPage() {
 
   function aplicarDeteccion() {
     if (!detection) return
-    setVehicle((current) => ({
-      ...current,
-      marca: detection.marca || current.marca,
-      modelo: detection.modelo || current.modelo,
-      motor: detection.motor || current.motor,
-      ecu: detection.ecu || current.ecu,
-      hw: detection.hw || current.hw,
-      sw: detection.sw || current.sw,
-    }))
+    setVehicle((current) => {
+      const merged = mergeVerifiedEcuPrefill({
+        marca: current.marca,
+        modelo: current.modelo,
+        motor: current.motor,
+        ecu: current.ecu,
+        hw: current.hw,
+        sw: current.sw,
+      }, detection)
+
+      if (!merged.allowed) return current
+
+      return {
+        ...current,
+        ...merged.values,
+      }
+    })
   }
 
   function toggle(slug: string) {
@@ -266,49 +260,11 @@ export default function NuevoPedidoPage() {
 
             {detecting && (
               <div className="mt-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-white/60">
-                <ScanLine size={18} className="animate-pulse text-[#5eead4]" /> Analizando archivo (huella + patrones)...
+                <ScanLine size={18} className="animate-pulse text-[#5eead4]" /> Analizando archivo (huella + firmas verificadas + calidad)...
               </div>
             )}
 
-            {!detecting && detection && (
-              <div className={`mt-4 rounded-2xl border p-4 ${detection.identified ? 'border-emerald-500/25 bg-emerald-500/[.06]' : 'border-amber-500/25 bg-amber-500/[.06]'}`}>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 text-sm font-bold">
-                    {detection.identified ? <Sparkles size={16} className="text-emerald-300" /> : <AlertCircle size={16} className="text-amber-300" />}
-                    {detection.identified ? 'ECU identificada con evidencia verificada' : 'ECU NO IDENTIFICADA — añadir información faltante'}
-                  </div>
-                  <span className="ak-mono rounded-full border border-white/10 bg-white/[.04] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white/50">
-                    {detection.method === 'huella_exacta_confirmada' ? 'Huella exacta confirmada' : detection.method === 'firma_verificada' ? 'Firma verificada' : 'Sin identificación'}
-                  </span>
-                </div>
-                {detection.identified ? (
-                  <>
-                    <p className="mt-3 text-sm text-white/60">
-                      {[detection.marca, detection.modelo, detection.motor].filter(Boolean).join(' ') || 'Vehículo pendiente'}
-                      {detection.ecu ? ` · ECU: ${detection.ecu}` : ''}
-                    </p>
-                    {detection.evidence?.length ? (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {detection.evidence.map((item) => <span key={item} className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-bold text-emerald-200">{item}</span>)}
-                      </div>
-                    ) : null}
-                    <button type="button" onClick={aplicarDeteccion} className="mt-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-emerald-300 hover:bg-emerald-500/20">
-                      Usar datos verificados
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <p className="mt-3 text-sm text-white/55">El sistema no asignará otra ECU por aproximación. Completa los datos técnicos para que el laboratorio pueda validarla correctamente.</p>
-                    {(detection.hw || detection.sw) && <p className="mt-2 text-xs text-white/40">Extraído del archivo: {detection.hw ? `HW ${detection.hw}` : ''}{detection.hw && detection.sw ? ' · ' : ''}{detection.sw ? `SW ${detection.sw}` : ''}</p>}
-                    {detection.missing_information?.length ? (
-                      <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                        {detection.missing_information.map((item) => <div key={item} className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-white/55"><AlertCircle size={14} className="text-amber-300" />{item}</div>)}
-                      </div>
-                    ) : null}
-                  </>
-                )}
-              </div>
-            )}
+            {!detecting && detection && <AKEcuDetectionSummary detection={detection} onApply={aplicarDeteccion} />}
           </AKCard>
 
           <AKCard className="p-5 md:p-6">

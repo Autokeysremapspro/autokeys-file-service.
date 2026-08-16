@@ -25,6 +25,7 @@ const PUBLIC_PATHS = [
 ]
 const STAFF_ONLY_PATHS = ['/admin']
 const STAFF_ROLES = ['admin', 'desarrollo', 'laboratorio', 'atencion_cliente']
+const PROTECTED_API_PATHS = ['/api/ecu/detect']
 
 function matches(pathname: string, list: string[]) {
   return list.some((path) => pathname === path || pathname.startsWith(`${path}/`))
@@ -32,13 +33,18 @@ function matches(pathname: string, list: string[]) {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const protectedApi = matches(pathname, PROTECTED_API_PATHS)
   const { supabase, response } = createMiddlewareSupabaseClient(request)
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (matches(pathname, PUBLIC_PATHS)) return response
+  if (!protectedApi && matches(pathname, PUBLIC_PATHS)) return response
 
   if (!user) {
+    if (protectedApi) {
+      return NextResponse.json({ error: 'Sesión requerida para analizar archivos ECU' }, { status: 401 })
+    }
+
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`)
     return NextResponse.redirect(loginUrl)
@@ -69,6 +75,9 @@ export async function middleware(request: NextRequest) {
     .maybeSingle()
 
   if (!distribuidor || distribuidor.estado !== 'activo') {
+    if (protectedApi) {
+      return NextResponse.json({ error: 'Cuenta no habilitada para analizar archivos ECU' }, { status: 403 })
+    }
     return NextResponse.redirect(new URL('/pendiente-aprobacion', request.url))
   }
 
@@ -76,5 +85,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|webp|gif|ico)$).*)'],
+  matcher: [
+    '/api/ecu/detect',
+    '/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|webp|gif|ico)$).*)',
+  ],
 }
