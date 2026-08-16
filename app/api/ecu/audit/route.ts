@@ -21,6 +21,34 @@ function pushIssue(target: any[], issue: Record<string, unknown>) {
   target.push(issue)
 }
 
+const KNOWN_SINGLE_TOKEN_BRANDS = new Set([
+  'AUDI',
+  'SEAT',
+  'VOLKSWAGEN',
+  'VW',
+  'SKODA',
+  'BMW',
+  'MINI',
+  'OPEL',
+  'PEUGEOT',
+  'CITROEN',
+  'FIAT',
+  'FORD',
+  'RENAULT',
+  'NISSAN',
+  'TOYOTA',
+  'MERCEDES',
+])
+
+function compoundBrandTokens(value: unknown) {
+  if (typeof value !== 'string') return []
+  return value
+    .trim()
+    .toUpperCase()
+    .split(/\s+/)
+    .filter((token) => KNOWN_SINGLE_TOKEN_BRANDS.has(token))
+}
+
 export async function GET() {
   try {
     await requireStaff()
@@ -39,7 +67,7 @@ export async function GET() {
         .select('id, signature_key, hw_normalized, sw_normalized, file_size, ecu, vehiculo, marca, modelo, motor, confirmaciones, activo, ultima_confirmacion_por'),
       admin
         .from('ak_ecu_detection_rules')
-        .select('id, ecu, familia, activo')
+        .select('id, ecu, familia, marcas, activo')
         .eq('activo', true),
     ])
 
@@ -49,6 +77,7 @@ export async function GET() {
 
     const fingerprintIssues: any[] = []
     const signatureIssues: any[] = []
+    const ruleIssues: any[] = []
     const exactRuleCandidates: any[] = []
     const ambiguousRuleCandidates: any[] = []
 
@@ -64,6 +93,21 @@ export async function GET() {
         current.push({ id: rule.id, ecu: rule.ecu, familia: rule.familia })
         ruleKeyMap.set(key, current)
       })
+
+      for (const brandEntry of rule.marcas || []) {
+        const knownTokens = compoundBrandTokens(brandEntry)
+        if (knownTokens.length >= 2) {
+          pushIssue(ruleIssues, {
+            type: 'rule_compound_brand_entry_requires_review',
+            id: rule.id,
+            ecu: rule.ecu,
+            familia: rule.familia,
+            stored: brandEntry,
+            detected_brand_tokens: knownTokens,
+            auto_fix: false,
+          })
+        }
+      }
     }
 
     for (const row of fingerprints || []) {
@@ -148,12 +192,14 @@ export async function GET() {
         fingerprints: (fingerprints || []).length,
         signatures: (signatures || []).length,
         active_rules: (rules || []).length,
+        rule_issues: ruleIssues.length,
         fingerprint_issues: fingerprintIssues.length,
         signature_issues: signatureIssues.length,
         exact_rule_candidates: exactRuleCandidates.length,
         ambiguous_rule_candidates: ambiguousRuleCandidates.length,
       },
       issues: {
+        rules: ruleIssues,
         fingerprints: fingerprintIssues,
         signatures: signatureIssues,
       },
