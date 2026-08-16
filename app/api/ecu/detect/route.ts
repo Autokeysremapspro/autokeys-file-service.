@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
+import { distinctDetectorEcuKeys, normalizeDetectorIdentity } from '@/lib/ecu/detectorKeys'
 
 export const runtime = 'nodejs'
 
@@ -209,8 +210,9 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await file.arrayBuffer())
     const sha256 = crypto.createHash('sha256').update(buffer).digest('hex')
     const ascii = bufferToSearchableText(buffer)
-    const hw = findHardware(ascii)
-    const sw = findSoftware(ascii)
+    const extractedIdentity = normalizeDetectorIdentity({ hw: findHardware(ascii), sw: findSoftware(ascii) })
+    const hw = extractedIdentity.hw
+    const sw = extractedIdentity.sw
     const quality = fileQuality(buffer, extension, hw, sw)
     const admin = adminClient()
 
@@ -222,13 +224,12 @@ export async function POST(request: Request) {
     if (fingerprintError) throw fingerprintError
 
     const fingerprintRows = fingerprints || []
-    const distinctFingerprintEcus = new Set(
-      fingerprintRows.map((item: any) => String(item.ecu || '').trim()).filter(Boolean)
-    )
+    const distinctFingerprintEcus = distinctDetectorEcuKeys(fingerprintRows)
 
     if (fingerprintRows.length >= 1 && distinctFingerprintEcus.size === 1) {
       const fingerprint = fingerprintRows[0] as any
-      if (fingerprint?.ecu) {
+      const normalizedFingerprint = normalizeDetectorIdentity(fingerprint)
+      if (normalizedFingerprint.ecu) {
         void admin
           .from('ak_ecu_fingerprints')
           .update({ veces_visto: (fingerprint.veces_visto || 1) + 1, updated_at: new Date().toISOString() })
@@ -250,9 +251,9 @@ export async function POST(request: Request) {
           marca: fingerprint.marca,
           modelo: fingerprint.modelo,
           motor: fingerprint.motor,
-          ecu: fingerprint.ecu,
-          hw: fingerprint.hw || hw,
-          sw: fingerprint.sw || sw,
+          ecu: normalizedFingerprint.ecu,
+          hw: normalizedFingerprint.hw || hw,
+          sw: normalizedFingerprint.sw || sw,
           rule,
           suggested_services: safeRuleServices(rule),
           quality,
@@ -296,9 +297,30 @@ export async function POST(request: Request) {
       if (signatureError && signatureError.code !== '42P01') throw signatureError
 
       const signatures = signature || []
-      const distinctEcus = new Set(signatures.map((item: any) => String(item.ecu || '').trim()).filter(Boolean))
+      const distinctEcus = distinctDetectorEcuKeys(signatures)
       if (signatures.length >= 1 && distinctEcus.size === 1) {
         const match = signatures[0] as any
+        const normalizedMatch = normalizeDetectorIdentity(match)
+        if (!normalizedMatch.ecu) {
+          return NextResponse.json({
+            identified: false,
+            status: 'review_required',
+            method: 'firma_verificada_incompleta',
+            confidence: 0,
+            review_required: true,
+            ...labPolicy(true),
+            guidance: clientGuidance({ identified: false, method: 'firma_verificada_incompleta', qualityUsable: quality.usable, ambiguous: true }),
+            sha256,
+            file_size: file.size,
+            extension,
+            hw,
+            sw,
+            quality,
+            message: 'La firma existe, pero la ECU confirmada no es válida tras normalización. Revisión manual obligatoria.',
+            missing_information: missingInformation(hw, sw),
+          })
+        }
+
         return NextResponse.json({
           identified: true,
           status: 'identified',
@@ -314,7 +336,7 @@ export async function POST(request: Request) {
           marca: match.marca || null,
           modelo: match.modelo || null,
           motor: match.motor || null,
-          ecu: match.ecu,
+          ecu: normalizedMatch.ecu,
           hw,
           sw,
           confirmations: match.confirmaciones,
