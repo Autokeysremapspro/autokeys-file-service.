@@ -69,8 +69,9 @@ export default function AKEcuDetectionSummary({ detection, onApply }: { detectio
   const guidance = detection.guidance || {}
   const visual = tone(guidance.level)
   const Icon = visual.Icon
-  const safeToPrefill = guidance.safe_to_prefill === true && detection.identified === true
+  const safeToPrefill = guidance.safe_to_prefill === true && detection.identified === true && detection.quality?.usable !== false
   const vehicle = [detection.marca, detection.modelo, detection.motor].filter(Boolean).join(' ')
+  const confidence = Number.isFinite(detection.confidence) ? Math.max(0, Math.min(100, detection.confidence)) : 0
 
   return (
     <div className={`mt-4 rounded-2xl border p-4 ${visual.shell}`}>
@@ -82,7 +83,10 @@ export default function AKEcuDetectionSummary({ detection, onApply }: { detectio
             <p className="mt-1 text-sm leading-6 text-white/55">{guidance.client_action || 'Completa los datos técnicos y deja la decisión final al laboratorio.'}</p>
           </div>
         </div>
-        <span className={`ak-mono rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${visual.badge}`}>{methodLabel(detection.method)}</span>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <span className={`ak-mono rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${visual.badge}`}>{methodLabel(detection.method)}</span>
+          <span className="ak-mono rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white/55">Confianza {confidence}%</span>
+        </div>
       </div>
 
       {(vehicle || detection.ecu || detection.hw || detection.sw) && (
@@ -121,7 +125,10 @@ export default function AKEcuDetectionSummary({ detection, onApply }: { detectio
       ) : null}
 
       <div className="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2 text-xs text-white/45"><ShieldCheck size={15} className="text-cyan-300" />La decisión técnica final pertenece siempre al laboratorio.</div>
+        <div className="space-y-1 text-xs text-white/45">
+          <div className="flex items-center gap-2"><ShieldCheck size={15} className="text-cyan-300" />La decisión técnica final pertenece siempre al laboratorio.</div>
+          {!safeToPrefill && <div className="pl-[23px] text-white/35">Autorrelleno bloqueado: completa o confirma los datos manualmente.</div>}
+        </div>
         {safeToPrefill && onApply ? (
           <button type="button" onClick={onApply} className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-emerald-300 transition hover:bg-emerald-500/20">Usar datos verificados</button>
         ) : null}
