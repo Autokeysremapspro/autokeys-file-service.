@@ -69,10 +69,13 @@ export default function AKEcuDetectionSummary({ detection, onApply }: { detectio
   const guidance = detection.guidance || {}
   const visual = tone(guidance.level)
   const Icon = visual.Icon
-  const safeToPrefill = guidance.safe_to_prefill === true && detection.identified === true && detection.quality?.usable !== false
+  const verifiedDetection = guidance.safe_to_prefill === true && detection.identified === true && detection.quality?.usable !== false
+  // 2.2A safety gate: verified data stays visible, but prefill is disabled until the form
+  // can guarantee that manually-entered customer values are never overwritten.
+  const safeToPrefill = false
   const vehicle = [detection.marca, detection.modelo, detection.motor].filter(Boolean).join(' ')
   const confidence = Number.isFinite(detection.confidence) ? Math.max(0, Math.min(100, detection.confidence)) : 0
-  const suggestedServices = safeToPrefill ? Array.from(new Set((detection.suggested_services || []).filter(Boolean))) : []
+  const suggestedServices = verifiedDetection ? Array.from(new Set((detection.suggested_services || []).filter(Boolean))) : []
 
   return (
     <div className={`mt-4 rounded-2xl border p-4 ${visual.shell}`}>
@@ -138,7 +141,8 @@ export default function AKEcuDetectionSummary({ detection, onApply }: { detectio
       <div className="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1 text-xs text-white/45">
           <div className="flex items-center gap-2"><ShieldCheck size={15} className="text-cyan-300" />La decisión técnica final pertenece siempre al laboratorio.</div>
-          {!safeToPrefill && <div className="pl-[23px] text-white/35">Autorrelleno bloqueado: completa o confirma los datos manualmente.</div>}
+          {verifiedDetection && <div className="pl-[23px] text-white/35">Datos verificados disponibles. Autorrelleno protegido mientras se evita sobrescribir cualquier dato manual.</div>}
+          {!verifiedDetection && <div className="pl-[23px] text-white/35">Autorrelleno bloqueado: completa o confirma los datos manualmente.</div>}
         </div>
         {safeToPrefill && onApply ? (
           <button type="button" onClick={onApply} className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-emerald-300 transition hover:bg-emerald-500/20">Usar datos verificados</button>
