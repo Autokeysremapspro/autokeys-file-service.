@@ -26,6 +26,19 @@ function clean(value: unknown) {
 }
 
 /**
+ * Single source of truth for whether verified ECU metadata may be used for prefill.
+ * Identification heuristics alone are never enough: the detector must explicitly
+ * confirm the ECU, explicitly allow prefill and not mark the reading as unusable.
+ */
+export function canUseVerifiedEcuPrefill(detection: VerifiedEcuDetection | null | undefined) {
+  return Boolean(
+    detection?.identified === true &&
+    detection?.guidance?.safe_to_prefill === true &&
+    detection?.quality?.usable !== false,
+  )
+}
+
+/**
  * Applies verified ECU metadata without ever replacing customer-entered values.
  *
  * Safety gates:
@@ -45,11 +58,7 @@ export function mergeVerifiedEcuPrefill(
   const applied: EcuPrefillField[] = []
   const preserved: EcuPrefillField[] = []
 
-  const allowed = Boolean(
-    detection?.identified === true &&
-    detection?.guidance?.safe_to_prefill === true &&
-    detection?.quality?.usable !== false,
-  )
+  const allowed = canUseVerifiedEcuPrefill(detection)
 
   if (!allowed || !detection) {
     return { values, applied, preserved, allowed: false }
