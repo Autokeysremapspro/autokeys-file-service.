@@ -1,4 +1,8 @@
 import { supabase } from '@/lib/supabase'
+import {
+  normalizeEcu,
+  normalizeKnowledgeLabel,
+} from '@/lib/ecu/normalize'
 
 export type EcuDbRule = {
   id?: string
@@ -38,6 +42,38 @@ export const FALLBACK_ECU_RULES: EcuDbRule[] = [
   { fabricante:'Bosch', ecu:'Bosch ME7.5', familia:'ME7.5', marcas:['Audi','Volkswagen','SEAT','Skoda'], vehiculo:'VAG 1.8T', motor:'1.8 Turbo', potencia:'150-225 CV', anios:'1999-2005', herramientas:['KESS3','MPPS','Galletto','Bench'], servicios:['stage1','stage2','pops','hardcut'], patrones:['me7\\.5|me75','1\\.8t|1\\.8\\s*turbo|bam|apy|aum|agu'], tamanos:[524288,1048576], activo:true },
 ]
 
+function normalizeList(values: string[] | null | undefined) {
+  if (!Array.isArray(values)) return []
+  return Array.from(new Set(values.map((item) => normalizeKnowledgeLabel(item)).filter((item): item is string => Boolean(item))))
+}
+
+function normalizeRuleForWrite(payload: EcuDbRule): EcuDbRule {
+  const ecu = normalizeEcu(payload.ecu)
+  const familia = normalizeEcu(payload.familia)
+  if (!ecu || !familia) throw new Error('ECU y familia deben contener valores técnicos válidos')
+
+  return {
+    ...payload,
+    fabricante: normalizeKnowledgeLabel(payload.fabricante),
+    ecu,
+    familia,
+    marcas: normalizeList(payload.marcas),
+    vehiculo: normalizeKnowledgeLabel(payload.vehiculo),
+    modelo: normalizeKnowledgeLabel(payload.modelo),
+    motor: normalizeKnowledgeLabel(payload.motor),
+    potencia: normalizeKnowledgeLabel(payload.potencia),
+    par_nm: normalizeKnowledgeLabel(payload.par_nm),
+    potencia_stage1: normalizeKnowledgeLabel(payload.potencia_stage1),
+    anios: normalizeKnowledgeLabel(payload.anios),
+    herramientas: normalizeList(payload.herramientas),
+    servicios: normalizeList(payload.servicios).map((item) => item.toLowerCase()),
+    patrones: normalizeList(payload.patrones),
+    tamanos: Array.from(new Set((payload.tamanos || []).filter((item) => Number.isSafeInteger(item) && item > 0))),
+    notas: normalizeKnowledgeLabel(payload.notas),
+    activo: payload.activo ?? true,
+  }
+}
+
 export async function getEcuRules(): Promise<EcuDbRule[]> {
   const { data, error } = await supabase.from('ak_ecu_detection_rules').select('*').eq('activo', true).order('created_at', { ascending: false })
   if (error) { console.warn('AK ECU DB fallback:', error.message); return FALLBACK_ECU_RULES }
@@ -49,7 +85,8 @@ export async function getAllEcuRules(): Promise<EcuDbRule[]> {
   return (data || []) as EcuDbRule[]
 }
 export async function createEcuRule(payload: EcuDbRule) {
-  const { data, error } = await supabase.from('ak_ecu_detection_rules').insert({ ...payload, activo: payload.activo ?? true }).select('*').single()
+  const normalized = normalizeRuleForWrite(payload)
+  const { data, error } = await supabase.from('ak_ecu_detection_rules').insert(normalized).select('*').single()
   if (error) throw new Error(error.message)
   return data as EcuDbRule
 }
