@@ -59,11 +59,11 @@ export async function GET() {
         normalizeEcuComparisonKey(rule.familia),
       ].filter(Boolean) as string[])
 
-      for (const key of keys) {
+      Array.from(keys).forEach((key) => {
         const current = ruleKeyMap.get(key) || []
         current.push({ id: rule.id, ecu: rule.ecu, familia: rule.familia })
         ruleKeyMap.set(key, current)
-      }
+      })
     }
 
     for (const row of fingerprints || []) {
