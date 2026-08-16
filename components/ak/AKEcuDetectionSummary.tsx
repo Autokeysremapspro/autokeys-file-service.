@@ -1,6 +1,7 @@
 'use client'
 
 import { AlertTriangle, CheckCircle2, Info, ScanLine, ShieldCheck } from 'lucide-react'
+import { canUseVerifiedEcuPrefill } from '@/lib/ecu/safePrefill'
 
 export type AKEcuDetection = {
   identified: boolean
@@ -69,7 +70,7 @@ export default function AKEcuDetectionSummary({ detection, onApply }: { detectio
   const guidance = detection.guidance || {}
   const visual = tone(guidance.level)
   const Icon = visual.Icon
-  const verifiedDetection = guidance.safe_to_prefill === true && detection.identified === true && detection.quality?.usable !== false
+  const verifiedDetection = canUseVerifiedEcuPrefill(detection)
   // 2.2A safety gate: verified data stays visible, but prefill is disabled until the form
   // can guarantee that manually-entered customer values are never overwritten.
   const safeToPrefill = false
