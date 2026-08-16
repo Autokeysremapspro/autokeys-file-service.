@@ -72,6 +72,7 @@ export default function AKEcuDetectionSummary({ detection, onApply }: { detectio
   const safeToPrefill = guidance.safe_to_prefill === true && detection.identified === true && detection.quality?.usable !== false
   const vehicle = [detection.marca, detection.modelo, detection.motor].filter(Boolean).join(' ')
   const confidence = Number.isFinite(detection.confidence) ? Math.max(0, Math.min(100, detection.confidence)) : 0
+  const suggestedServices = safeToPrefill ? Array.from(new Set((detection.suggested_services || []).filter(Boolean))) : []
 
   return (
     <div className={`mt-4 rounded-2xl border p-4 ${visual.shell}`}>
@@ -115,6 +116,16 @@ export default function AKEcuDetectionSummary({ detection, onApply }: { detectio
       {detection.evidence?.length ? (
         <div className="mt-4 flex flex-wrap gap-2">
           {detection.evidence.map((item) => <span key={item} className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-bold text-emerald-200">{item}</span>)}
+        </div>
+      ) : null}
+
+      {suggestedServices.length ? (
+        <div className="mt-4 rounded-xl border border-cyan-400/15 bg-black/15 p-3">
+          <div className="text-[10px] font-black uppercase tracking-[.18em] text-cyan-300/80">Servicios compatibles de referencia</div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {suggestedServices.map((service) => <span key={service} className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-bold text-cyan-200">{service}</span>)}
+          </div>
+          <p className="mt-2 text-[11px] leading-5 text-white/35">No se selecciona ningún servicio automáticamente. El cliente elige qué solicita y el laboratorio valida la compatibilidad final.</p>
         </div>
       ) : null}
 
