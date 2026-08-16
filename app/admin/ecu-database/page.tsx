@@ -8,17 +8,30 @@ import AKButton from '@/components/ak/AKButton'
 import { DEFAULT_SERVICES, DEFAULT_TOOLS, SERVICE_LABELS, createEcuRule, csvToArray, csvToNumberArray, deleteEcuRule, getAllEcuRules, type EcuDbRule } from '@/lib/services/ecuDatabase'
 
 type FormState = { fabricante: string; ecu: string; familia: string; marcas: string; vehiculo: string; modelo: string; motor: string; potencia: string; par_nm: string; potencia_stage1: string; anios: string; herramientas: string; servicios: string; patrones: string; tamanos: string; notas: string }
+type RuleAuditIssue = { type: string; id?: string; ecu?: string; familia?: string; stored?: string; detected_brand_tokens?: string[]; auto_fix?: boolean }
+type AuditIssue = { type: string; id?: string }
 type AuditData = {
   ok: boolean
   read_only: boolean
   generated_at: string
-  totals: { fingerprints: number; signatures: number; fingerprint_issues: number; signature_issues: number }
-  issues: { fingerprints: Array<{ type: string; id?: string }>; signatures: Array<{ type: string; id?: string }> }
+  totals: {
+    fingerprints: number
+    signatures: number
+    active_rules: number
+    rule_issues: number
+    fingerprint_issues: number
+    signature_issues: number
+    exact_rule_candidates: number
+    ambiguous_rule_candidates: number
+  }
+  issues: { rules: RuleAuditIssue[]; fingerprints: AuditIssue[]; signatures: AuditIssue[] }
+  rule_linkage: { exact_candidates: unknown[]; ambiguous_candidates: unknown[]; auto_apply: false }
 }
 
 const emptyForm: FormState = { fabricante: 'Bosch', ecu: '', familia: '', marcas: '', vehiculo: '', modelo: '', motor: '', potencia: '', par_nm: '', potencia_stage1: '', anios: '', herramientas: DEFAULT_TOOLS.join(', '), servicios: DEFAULT_SERVICES.join(', '), patrones: '', tamanos: '', notas: '' }
 
 const ISSUE_LABELS: Record<string, string> = {
+  rule_compound_brand_entry_requires_review: 'Regla con marcas mezcladas: revisión manual',
   fingerprint_without_rule: 'Huella sin regla enlazada',
   fingerprint_not_human_confirmed: 'Huella sin confirmación humana',
   fingerprint_invalid_ecu: 'Huella con ECU inválida',
@@ -67,11 +80,11 @@ export default function EcuDatabasePage() {
     return rules.filter((rule) => [rule.fabricante, rule.ecu, rule.familia, rule.vehiculo, rule.motor, rule.marcas?.join(' '), rule.herramientas?.join(' '), rule.servicios?.join(' '), rule.patrones?.join(' ')].some((value) => (value || '').toLowerCase().includes(q)))
   }, [rules, query])
 
-  const auditIssueCount = audit ? audit.totals.fingerprint_issues + audit.totals.signature_issues : 0
+  const auditIssueCount = audit ? audit.totals.rule_issues + audit.totals.fingerprint_issues + audit.totals.signature_issues : 0
   const auditGroups = useMemo(() => {
     if (!audit) return [] as Array<[string, number]>
     const counts = new Map<string, number>()
-    for (const issue of [...audit.issues.fingerprints, ...audit.issues.signatures]) counts.set(issue.type, (counts.get(issue.type) || 0) + 1)
+    for (const issue of [...audit.issues.rules, ...audit.issues.fingerprints, ...audit.issues.signatures]) counts.set(issue.type, (counts.get(issue.type) || 0) + 1)
     return Array.from(counts.entries()).sort((a, b) => b[1] - a[1])
   }, [audit])
 
@@ -115,7 +128,7 @@ export default function EcuDatabasePage() {
                 </div>
                 <div>
                   <h2 className="text-xl font-black">Auditoría de conocimiento ECU</h2>
-                  <p className="text-sm text-white/35">Diagnóstico seguro y solo lectura de huellas y firmas verificadas.</p>
+                  <p className="text-sm text-white/35">Diagnóstico seguro de reglas, huellas y firmas. Los avisos requieren decisión manual del laboratorio.</p>
                 </div>
               </div>
               {audit?.generated_at && <p className="mt-3 text-xs text-white/25">Última revisión: {new Date(audit.generated_at).toLocaleString('es-ES')}</p>}
@@ -126,17 +139,42 @@ export default function EcuDatabasePage() {
           {auditError ? <div className="mt-4 rounded-2xl border border-red-500/25 bg-red-500/10 p-4 text-sm text-red-200">{auditError}</div> : null}
           {audit ? (
             <div className="mt-5 space-y-4">
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                <AuditMetric label="Reglas activas" value={audit.totals.active_rules} />
                 <AuditMetric label="Huellas" value={audit.totals.fingerprints} />
                 <AuditMetric label="Firmas" value={audit.totals.signatures} />
-                <AuditMetric label="Avisos en huellas" value={audit.totals.fingerprint_issues} warning={audit.totals.fingerprint_issues > 0} />
-                <AuditMetric label="Avisos en firmas" value={audit.totals.signature_issues} warning={audit.totals.signature_issues > 0} />
+                <AuditMetric label="Reglas a revisar" value={audit.totals.rule_issues} warning={audit.totals.rule_issues > 0} />
+                <AuditMetric label="Otros avisos" value={audit.totals.fingerprint_issues + audit.totals.signature_issues} warning={audit.totals.fingerprint_issues + audit.totals.signature_issues > 0} />
               </div>
+
+              {audit.issues.rules.length > 0 && (
+                <div className="rounded-3xl border border-amber-500/20 bg-amber-500/[0.04] p-4 md:p-5">
+                  <div className="mb-3 flex items-center gap-2 text-amber-300"><AlertTriangle size={18} /><h3 className="font-black">Reglas ECU que requieren revisión manual</h3></div>
+                  <div className="grid gap-3 xl:grid-cols-2">
+                    {audit.issues.rules.map((issue, index) => (
+                      <div key={`${issue.id || 'rule'}-${index}`} className="rounded-2xl border border-amber-500/15 bg-black/20 p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2"><p className="font-black text-white/80">{issue.ecu || 'ECU sin nombre'}</p><span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-amber-300">Solo revisión</span></div>
+                        <p className="mt-1 text-xs text-white/35">Familia: {issue.familia || '—'}</p>
+                        <p className="mt-3 text-sm text-white/55">Valor almacenado: <span className="font-bold text-white/75">{issue.stored || '—'}</span></p>
+                        {issue.detected_brand_tokens?.length ? <p className="mt-1 text-xs text-white/35">Marcas detectadas: {issue.detected_brand_tokens.join(', ')}</p> : null}
+                        <p className="mt-3 text-xs font-bold text-amber-200/70">No se corrige ni se divide automáticamente.</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                <AuditMetric label="Candidatos exactos sin aplicar" value={audit.totals.exact_rule_candidates} warning={audit.totals.exact_rule_candidates > 0} />
+                <AuditMetric label="Candidatos ambiguos" value={audit.totals.ambiguous_rule_candidates} warning={audit.totals.ambiguous_rule_candidates > 0} />
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/25">Aplicación automática</p><p className="mt-1 text-sm font-black text-emerald-300">Desactivada</p></div>
+              </div>
+
               {auditGroups.length ? (
                 <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
                   {auditGroups.map(([type, count]) => <div key={type} className="flex items-center justify-between gap-3 rounded-2xl border border-amber-500/15 bg-amber-500/[0.04] px-4 py-3 text-sm"><span className="text-white/55">{ISSUE_LABELS[type] || type}</span><span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-black text-amber-300">{count}</span></div>)}
                 </div>
-              ) : <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.04] p-4 text-sm text-emerald-200">No se han detectado inconsistencias en huellas o firmas.</div>}
+              ) : <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.04] p-4 text-sm text-emerald-200">No se han detectado inconsistencias en reglas, huellas o firmas.</div>}
             </div>
           ) : !auditLoading && !auditError ? <p className="mt-4 text-sm text-white/30">Auditoría pendiente.</p> : null}
         </AKCard>
