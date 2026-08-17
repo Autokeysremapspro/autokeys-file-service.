@@ -1,0 +1,49 @@
+/* Phase 2.1 — profile light-theme and responsive hardening.
+   Visual-only: profile RPCs, permissions and persisted data stay unchanged. */
+
+html[data-ak-theme='light'] .ak-profile-theme-scope [class~='bg-black/25'] {
+  background-color: rgba(15, 23, 42, .035) !important;
+}
+
+html[data-ak-theme='light'] .ak-profile-theme-scope [class~='border-white/10'] {
+  border-color: rgba(15, 23, 42, .12) !important;
+}
+
+html[data-ak-theme='light'] .ak-profile-theme-scope [class~='text-white/20'] {
+  color: rgba(15, 23, 42, .34) !important;
+}
+
+html[data-ak-theme='light'] .ak-profile-theme-scope [class~='text-white/30'],
+html[data-ak-theme='light'] .ak-profile-theme-scope [class~='text-white/35'],
+html[data-ak-theme='light'] .ak-profile-theme-scope [class~='text-white/40'],
+html[data-ak-theme='light'] .ak-profile-theme-scope [class~='text-white/45'],
+html[data-ak-theme='light'] .ak-profile-theme-scope [class~='text-white/65'] {
+  color: rgba(15, 23, 42, .68) !important;
+}
+
+html[data-ak-theme='light'] .ak-profile-theme-scope input {
+  color: #152033 !important;
+  background-color: rgba(255,255,255,.94) !important;
+  border-color: rgba(15, 23, 42, .12) !important;
+}
+
+html[data-ak-theme='light'] .ak-profile-theme-scope input::placeholder {
+  color: rgba(15, 23, 42, .38) !important;
+}
+
+@media (max-width: 640px) {
+  .ak-profile-theme-scope {
+    min-width: 0;
+    overflow-x: clip;
+  }
+
+  .ak-profile-theme-scope input {
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  .ak-profile-theme-scope button {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+}

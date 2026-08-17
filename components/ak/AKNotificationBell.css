@@ -1,0 +1,52 @@
+/* Phase 2.1 — visual-only notification popover theme hardening. */
+
+html[data-ak-theme='light'] .ak-notification-bell > button {
+  color: rgba(15, 23, 42, .68) !important;
+  border-color: rgba(15, 23, 42, .12) !important;
+  background: rgba(15, 23, 42, .04) !important;
+}
+
+html[data-ak-theme='light'] .ak-notification-bell > button:hover {
+  color: #152033 !important;
+  border-color: rgba(255, 66, 90, .28) !important;
+}
+
+html[data-ak-theme='light'] .ak-notification-popover {
+  color: #152033 !important;
+  border-color: rgba(15, 23, 42, .12) !important;
+  background: rgba(255, 255, 255, .98) !important;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, .18) !important;
+}
+
+html[data-ak-theme='light'] .ak-notification-popover [class~='border-white/10'] {
+  border-color: rgba(15, 23, 42, .12) !important;
+}
+
+html[data-ak-theme='light'] .ak-notification-popover [class~='bg-white/[0.025]'],
+html[data-ak-theme='light'] .ak-notification-popover [class~='bg-white/[0.04]'],
+html[data-ak-theme='light'] .ak-notification-popover [class~='bg-white/[0.07]'],
+html[data-ak-theme='light'] .ak-notification-popover [class~='hover:bg-white/10']:hover {
+  background-color: rgba(15, 23, 42, .045) !important;
+}
+
+html[data-ak-theme='light'] .ak-notification-popover [class~='text-white/25'],
+html[data-ak-theme='light'] .ak-notification-popover [class~='text-white/35'],
+html[data-ak-theme='light'] .ak-notification-popover [class~='text-white/45'],
+html[data-ak-theme='light'] .ak-notification-popover [class~='text-white/60'] {
+  color: rgba(15, 23, 42, .62) !important;
+}
+
+html[data-ak-theme='light'] .ak-notification-popover [class~='hover:text-white']:hover {
+  color: #152033 !important;
+}
+
+@media (max-width: 640px) {
+  .ak-notification-popover {
+    max-width: calc(100vw - 1rem);
+    max-height: min(78dvh, 620px);
+  }
+
+  .ak-notification-popover > div:nth-child(2) {
+    max-height: min(62dvh, 500px);
+  }
+}

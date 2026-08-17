@@ -1,0 +1,162 @@
+/* Phase 2.1 — checkout/legal light-theme hardening.
+   Visual-only: no order, payment, consent or ECU logic is changed. */
+
+html[data-ak-theme='light'] .ak-new-order-theme-scope .fixed.inset-0 {
+  background: rgba(15, 23, 42, .38) !important;
+}
+
+html[data-ak-theme='light'] .ak-new-order-theme-scope .fixed.inset-0 > div {
+  color: #152033 !important;
+  border-color: rgba(15, 23, 42, .12) !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.99), rgba(247,249,252,.99)) !important;
+  box-shadow: 0 28px 90px rgba(15, 23, 42, .18) !important;
+}
+
+html[data-ak-theme='light'] .ak-new-order-theme-scope .fixed.inset-0 label {
+  color: #152033 !important;
+  border-color: rgba(15, 23, 42, .12) !important;
+  background: rgba(15, 23, 42, .035) !important;
+}
+
+html[data-ak-theme='light'] .ak-new-order-theme-scope .fixed.inset-0 button:not(:disabled):first-child {
+  border-color: rgba(15, 23, 42, .14) !important;
+  background: rgba(255,255,255,.78);
+}
+
+/* New-order flow: neutral dark utility classes must follow the selected light theme. */
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='bg-black/15'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='bg-black/20'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='bg-black/25'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='bg-black/30'] {
+  background-color: rgba(15, 23, 42, .035) !important;
+}
+
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='bg-white/5'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='bg-white/10'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='bg-white/[0.02]'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='bg-white/[0.035]'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='bg-white/[0.055]'] {
+  background-color: rgba(15, 23, 42, .05) !important;
+}
+
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='border-white/5'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='border-white/8'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='border-white/10'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='border-white/15'] {
+  border-color: rgba(15, 23, 42, .12) !important;
+}
+
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='border-white/25'] {
+  border-color: rgba(15, 23, 42, .22) !important;
+}
+
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='text-white/25'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='text-white/30'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='text-white/35'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='text-white/38'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='text-white/40'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='text-white/45'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='text-white/50'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='text-white/55'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='text-white/60'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='text-white/70'] {
+  color: rgba(15, 23, 42, .68) !important;
+}
+
+html[data-ak-theme='light'] .ak-new-order-theme-scope [class~='text-white'] {
+  color: #152033 !important;
+}
+
+/* Shared uploader used by checkout: replace the dark bench gradient in light mode. */
+html[data-ak-theme='light'] .ak-new-order-theme-scope label.ak-card-hover {
+  color: #152033 !important;
+  border-color: rgba(15, 23, 42, .16) !important;
+  background:
+    radial-gradient(circle at center, rgba(255, 66, 90, .10), transparent 46%),
+    linear-gradient(180deg, rgba(255,255,255,.98), rgba(245,247,251,.96)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 18px 55px rgba(15,23,42,.07) !important;
+}
+
+html[data-ak-theme='light'] .ak-new-order-theme-scope label.ak-card-hover:hover {
+  border-color: rgba(255, 66, 90, .36) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 22px 65px rgba(255,66,90,.10) !important;
+}
+
+html[data-ak-theme='light'] .ak-new-order-theme-scope input,
+html[data-ak-theme='light'] .ak-new-order-theme-scope textarea {
+  color: #152033 !important;
+}
+
+html[data-ak-theme='light'] .ak-new-order-theme-scope input::placeholder,
+html[data-ak-theme='light'] .ak-new-order-theme-scope textarea::placeholder {
+  color: rgba(15, 23, 42, .42) !important;
+}
+
+html[data-ak-theme='light'] .ak-new-order-theme-scope aside [class~='text-white'],
+html[data-ak-theme='light'] .ak-new-order-theme-scope aside strong[class~='text-white'] {
+  color: #152033 !important;
+}
+
+/* Mobile hardening for checkout and legal consent. */
+@media (max-width: 640px) {
+  .ak-new-order-theme-scope {
+    min-width: 0;
+    overflow-x: clip;
+  }
+
+  .ak-new-order-theme-scope .fixed.inset-0 {
+    align-items: flex-end;
+    padding: .75rem;
+  }
+
+  .ak-new-order-theme-scope .fixed.inset-0 > div {
+    width: 100%;
+    max-height: calc(100dvh - 1.5rem);
+    border-radius: 1.5rem;
+    padding: 1.1rem !important;
+    overscroll-behavior: contain;
+  }
+
+  .ak-new-order-theme-scope aside,
+  .ak-new-order-theme-scope aside > *,
+  .ak-new-order-theme-scope [class*='grid-cols-'],
+  .ak-new-order-theme-scope [class*='flex'] {
+    min-width: 0;
+  }
+
+  .ak-new-order-theme-scope aside [class*='justify-between'] {
+    gap: .75rem;
+  }
+
+  .ak-new-order-theme-scope aside .ak-mono.text-4xl {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .ak-new-order-theme-scope textarea,
+  .ak-new-order-theme-scope input,
+  .ak-new-order-theme-scope select {
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  .ak-new-order-theme-scope button,
+  .ak-new-order-theme-scope a {
+    max-width: 100%;
+  }
+
+  .ak-new-order-theme-scope button {
+    touch-action: manipulation;
+  }
+
+  .ak-new-order-theme-scope p,
+  .ak-new-order-theme-scope span,
+  .ak-new-order-theme-scope strong {
+    overflow-wrap: anywhere;
+  }
+
+  .ak-new-order-theme-scope aside button,
+  .ak-new-order-theme-scope .fixed.inset-0 button {
+    min-height: 44px;
+  }
+}
