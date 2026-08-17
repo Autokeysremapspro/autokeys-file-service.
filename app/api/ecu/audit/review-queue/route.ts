@@ -34,6 +34,11 @@ type MissingEcuIdentifierReview = ReviewItemBase & {
   stored_ecu: unknown
 }
 
+type MissingFamilyReview = ReviewItemBase & {
+  review_type: 'missing_family'
+  stored_family: unknown
+}
+
 type InvalidBrandContainerReview = ReviewItemBase & {
   review_type: 'invalid_brand_container'
   stored_brand_container: unknown
@@ -74,6 +79,7 @@ type DuplicateCanonicalBrandReview = ReviewItemBase & {
 type ReviewItem =
   | MissingManufacturerReview
   | MissingEcuIdentifierReview
+  | MissingFamilyReview
   | InvalidBrandContainerReview
   | MissingBrandCoverageReview
   | InvalidBrandEntryReview
@@ -167,6 +173,23 @@ export async function GET() {
           ecu: rule.ecu,
           familia: rule.familia,
           stored_ecu: rule.ecu,
+          context: commonContext(rule),
+          requires_human_decision: true,
+          auto_fix: false,
+        })
+      }
+
+      const normalizedFamily = typeof rule.familia === 'string' ? normalizeBrandText(rule.familia) : ''
+      if (!normalizedFamily) {
+        integrityReviews.push({
+          review_type: 'missing_family',
+          review_reason: 'La regla está activa pero no contiene una familia ECU utilizable. Requiere revisión humana antes de usarla como fuente fiable de clasificación o aprendizaje.',
+          review_priority: 'medium',
+          rule_id: rule.id,
+          fabricante: rule.fabricante,
+          ecu: rule.ecu,
+          familia: rule.familia,
+          stored_family: rule.familia,
           context: commonContext(rule),
           requires_human_decision: true,
           auto_fix: false,
