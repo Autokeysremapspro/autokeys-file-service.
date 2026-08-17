@@ -4,6 +4,42 @@ import { requireStaff } from '@/lib/supabase/server'
 
 type BrandPattern = { canonical: string; aliases: string[] }
 
+type ReviewContext = {
+  vehiculo: unknown
+  modelo: unknown
+  motor: unknown
+  anios: unknown
+  notas: unknown
+}
+
+type ReviewItemBase = {
+  review_reason: string
+  review_priority: 'high' | 'medium' | 'low'
+  rule_id: unknown
+  fabricante: unknown
+  ecu: unknown
+  familia: unknown
+  context: ReviewContext
+  requires_human_decision: true
+  auto_fix: false
+}
+
+type InvalidBrandContainerReview = ReviewItemBase & {
+  review_type: 'invalid_brand_container'
+  stored_brand_container: unknown
+  stored_brand_container_type: string
+}
+
+type CompoundBrandEntryReview = ReviewItemBase & {
+  review_type: 'compound_brand_entry'
+  stored_brand_entry: unknown
+  normalized_brand_entry: string
+  detected_brand_tokens: string[]
+  detected_brand_count: number
+}
+
+type ReviewItem = InvalidBrandContainerReview | CompoundBrandEntryReview
+
 // Review-only lexicon. Aliases collapse to a canonical brand so values such as
 // "VW VOLKSWAGEN" do not become a false multi-brand warning, while entries
 // such as "Land Rover BMW" are still surfaced for human review.
@@ -76,7 +112,7 @@ function detectedBrandTokens(value: unknown) {
   return Array.from(detected).sort((a, b) => a.localeCompare(b))
 }
 
-function commonContext(rule: any) {
+function commonContext(rule: any): ReviewContext {
   return {
     vehiculo: rule.vehiculo,
     modelo: rule.modelo,
@@ -99,7 +135,7 @@ export async function GET() {
 
     if (error) throw error
 
-    const queue = (rules || []).flatMap((rule) => {
+    const queue = (rules || []).flatMap<ReviewItem>((rule) => {
       if (rule.marcas != null && !Array.isArray(rule.marcas)) {
         return [{
           review_type: 'invalid_brand_container',
@@ -118,7 +154,7 @@ export async function GET() {
       }
 
       const brandEntries = Array.isArray(rule.marcas) ? rule.marcas : []
-      return brandEntries.flatMap((brandEntry: unknown) => {
+      return brandEntries.flatMap<ReviewItem>((brandEntry: unknown) => {
         const tokens = detectedBrandTokens(brandEntry)
         if (tokens.length < 2) return []
 
@@ -142,7 +178,7 @@ export async function GET() {
           auto_fix: false,
         }]
       })
-    }).sort((a: any, b: any) => {
+    }).sort((a, b) => {
       const priorityRank: Record<string, number> = { high: 0, medium: 1, low: 2 }
       const priorityCompare = (priorityRank[a.review_priority] ?? 9) - (priorityRank[b.review_priority] ?? 9)
       if (priorityCompare !== 0) return priorityCompare
@@ -150,10 +186,12 @@ export async function GET() {
       if (ecuCompare !== 0) return ecuCompare
       const ruleCompare = String(a.rule_id || '').localeCompare(String(b.rule_id || ''))
       if (ruleCompare !== 0) return ruleCompare
-      return String(a.normalized_brand_entry || '').localeCompare(String(b.normalized_brand_entry || ''))
+      const aNormalized = a.review_type === 'compound_brand_entry' ? a.normalized_brand_entry : ''
+      const bNormalized = b.review_type === 'compound_brand_entry' ? b.normalized_brand_entry : ''
+      return aNormalized.localeCompare(bNormalized)
     })
 
-    const summary = queue.reduce((acc: Record<string, number>, item: any) => {
+    const summary = queue.reduce((acc: Record<string, number>, item) => {
       acc[item.review_type] = (acc[item.review_type] || 0) + 1
       return acc
     }, {})
