@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-const SESSION_KEY = 'akcloud-intro-static-v11-seen'
+const SESSION_KEY = 'akcloud-intro-static-v12-seen'
 const INTRO_MS = 7000
 const FADE_MS = 650
-const INTRO_SRC = '/api/ak-intro-v11'
+const INTRO_SRC = '/akcloud-intro-final.jpg?v=12'
 
 export default function AKSessionIntro() {
   const [visible, setVisible] = useState(false)
