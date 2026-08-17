@@ -49,7 +49,19 @@ type CompoundBrandEntryReview = ReviewItemBase & {
   detected_brand_count: number
 }
 
-type ReviewItem = InvalidBrandContainerReview | InvalidBrandEntryReview | EmptyBrandEntryReview | CompoundBrandEntryReview
+type DuplicateCanonicalBrandReview = ReviewItemBase & {
+  review_type: 'duplicate_canonical_brand'
+  canonical_brand: string
+  stored_brand_entries: string[]
+  duplicate_count: number
+}
+
+type ReviewItem =
+  | InvalidBrandContainerReview
+  | InvalidBrandEntryReview
+  | EmptyBrandEntryReview
+  | CompoundBrandEntryReview
+  | DuplicateCanonicalBrandReview
 
 // Review-only lexicon. Aliases collapse to a canonical brand so values such as
 // "VW VOLKSWAGEN" do not become a false multi-brand warning, while entries
@@ -165,7 +177,7 @@ export async function GET() {
       }
 
       const brandEntries = Array.isArray(rule.marcas) ? rule.marcas : []
-      return brandEntries.flatMap<ReviewItem>((brandEntry: unknown) => {
+      const entryReviews = brandEntries.flatMap<ReviewItem>((brandEntry: unknown) => {
         if (typeof brandEntry !== 'string') {
           return [{
             review_type: 'invalid_brand_entry',
@@ -220,6 +232,37 @@ export async function GET() {
           auto_fix: false,
         }]
       })
+
+      const canonicalEntries = new Map<string, string[]>()
+      for (const brandEntry of brandEntries) {
+        if (typeof brandEntry !== 'string' || !normalizeBrandText(brandEntry)) continue
+        const tokens = detectedBrandTokens(brandEntry)
+        if (tokens.length !== 1) continue
+        const canonical = tokens[0]
+        canonicalEntries.set(canonical, [...(canonicalEntries.get(canonical) || []), brandEntry])
+      }
+
+      const duplicateReviews: ReviewItem[] = []
+      for (const [canonicalBrand, storedEntries] of canonicalEntries.entries()) {
+        if (storedEntries.length < 2) continue
+        duplicateReviews.push({
+          review_type: 'duplicate_canonical_brand',
+          review_reason: 'Dos o más entradas de marcas representan la misma marca canónica. Requiere revisión humana antes de consolidar alias o eliminar duplicados.',
+          review_priority: 'low',
+          rule_id: rule.id,
+          fabricante: rule.fabricante,
+          ecu: rule.ecu,
+          familia: rule.familia,
+          canonical_brand: canonicalBrand,
+          stored_brand_entries: storedEntries,
+          duplicate_count: storedEntries.length,
+          context: commonContext(rule),
+          requires_human_decision: true,
+          auto_fix: false,
+        })
+      }
+
+      return [...entryReviews, ...duplicateReviews]
     }).sort((a, b) => {
       const priorityRank: Record<string, number> = { high: 0, medium: 1, low: 2 }
       const priorityCompare = (priorityRank[a.review_priority] ?? 9) - (priorityRank[b.review_priority] ?? 9)
