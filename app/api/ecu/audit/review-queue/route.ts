@@ -30,6 +30,11 @@ type InvalidBrandContainerReview = ReviewItemBase & {
   stored_brand_container_type: string
 }
 
+type MissingBrandCoverageReview = ReviewItemBase & {
+  review_type: 'missing_brand_coverage'
+  stored_brand_container: null | unknown[]
+}
+
 type InvalidBrandEntryReview = ReviewItemBase & {
   review_type: 'invalid_brand_entry'
   stored_brand_entry: unknown
@@ -58,6 +63,7 @@ type DuplicateCanonicalBrandReview = ReviewItemBase & {
 
 type ReviewItem =
   | InvalidBrandContainerReview
+  | MissingBrandCoverageReview
   | InvalidBrandEntryReview
   | EmptyBrandEntryReview
   | CompoundBrandEntryReview
@@ -122,6 +128,8 @@ export async function GET() {
       if (rule.marcas != null && !Array.isArray(rule.marcas)) return [{ review_type: 'invalid_brand_container', review_reason: 'El campo marcas no está almacenado como una lista. Requiere revisión humana antes de cualquier normalización o corrección.', review_priority: 'high', rule_id: rule.id, fabricante: rule.fabricante, ecu: rule.ecu, familia: rule.familia, stored_brand_container: rule.marcas, stored_brand_container_type: typeof rule.marcas, context: commonContext(rule), requires_human_decision: true, auto_fix: false }]
 
       const brandEntries = Array.isArray(rule.marcas) ? rule.marcas : []
+      const coverageReviews: ReviewItem[] = brandEntries.length === 0 ? [{ review_type: 'missing_brand_coverage', review_reason: 'La regla ECU está activa pero no tiene ninguna marca asociada. Requiere revisión humana para confirmar si la ausencia de cobertura de marca es intencionada.', review_priority: 'medium', rule_id: rule.id, fabricante: rule.fabricante, ecu: rule.ecu, familia: rule.familia, stored_brand_container: rule.marcas == null ? null : brandEntries, context: commonContext(rule), requires_human_decision: true, auto_fix: false }] : []
+
       const entryReviews = brandEntries.flatMap<ReviewItem>((brandEntry: unknown) => {
         if (typeof brandEntry !== 'string') return [{ review_type: 'invalid_brand_entry', review_reason: 'Una entrada individual del campo marcas no es texto. Requiere revisión humana antes de interpretarla, normalizarla o descartarla.', review_priority: 'high', rule_id: rule.id, fabricante: rule.fabricante, ecu: rule.ecu, familia: rule.familia, stored_brand_entry: brandEntry, stored_brand_entry_type: brandEntry === null ? 'null' : typeof brandEntry, context: commonContext(rule), requires_human_decision: true, auto_fix: false }]
         const normalizedBrandEntry = normalizeBrandText(brandEntry)
@@ -145,7 +153,7 @@ export async function GET() {
         if (storedEntries.length < 2) return
         duplicateReviews.push({ review_type: 'duplicate_canonical_brand', review_reason: 'Dos o más entradas de marcas representan la misma marca canónica. Requiere revisión humana antes de consolidar alias o eliminar duplicados.', review_priority: 'low', rule_id: rule.id, fabricante: rule.fabricante, ecu: rule.ecu, familia: rule.familia, canonical_brand: canonicalBrand, stored_brand_entries: storedEntries, duplicate_count: storedEntries.length, context: commonContext(rule), requires_human_decision: true, auto_fix: false })
       })
-      return [...entryReviews, ...duplicateReviews]
+      return [...coverageReviews, ...entryReviews, ...duplicateReviews]
     }).sort((a, b) => {
       const priorityRank: Record<string, number> = { high: 0, medium: 1, low: 2 }
       const priorityCompare = (priorityRank[a.review_priority] ?? 9) - (priorityRank[b.review_priority] ?? 9)
