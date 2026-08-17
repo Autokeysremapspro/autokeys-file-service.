@@ -36,6 +36,11 @@ type InvalidBrandEntryReview = ReviewItemBase & {
   stored_brand_entry_type: string
 }
 
+type EmptyBrandEntryReview = ReviewItemBase & {
+  review_type: 'empty_brand_entry'
+  stored_brand_entry: string
+}
+
 type CompoundBrandEntryReview = ReviewItemBase & {
   review_type: 'compound_brand_entry'
   stored_brand_entry: unknown
@@ -44,7 +49,7 @@ type CompoundBrandEntryReview = ReviewItemBase & {
   detected_brand_count: number
 }
 
-type ReviewItem = InvalidBrandContainerReview | InvalidBrandEntryReview | CompoundBrandEntryReview
+type ReviewItem = InvalidBrandContainerReview | InvalidBrandEntryReview | EmptyBrandEntryReview | CompoundBrandEntryReview
 
 // Review-only lexicon. Aliases collapse to a canonical brand so values such as
 // "VW VOLKSWAGEN" do not become a false multi-brand warning, while entries
@@ -178,10 +183,25 @@ export async function GET() {
           }]
         }
 
+        const normalizedBrandEntry = normalizeBrandText(brandEntry)
+        if (!normalizedBrandEntry) {
+          return [{
+            review_type: 'empty_brand_entry',
+            review_reason: 'Una entrada del campo marcas está vacía o solo contiene separadores/espacios. Requiere revisión humana antes de conservarla o eliminarla.',
+            review_priority: 'medium',
+            rule_id: rule.id,
+            fabricante: rule.fabricante,
+            ecu: rule.ecu,
+            familia: rule.familia,
+            stored_brand_entry: brandEntry,
+            context: commonContext(rule),
+            requires_human_decision: true,
+            auto_fix: false,
+          }]
+        }
+
         const tokens = detectedBrandTokens(brandEntry)
         if (tokens.length < 2) return []
-
-        const normalizedBrandEntry = normalizeBrandText(brandEntry)
 
         return [{
           review_type: 'compound_brand_entry',
