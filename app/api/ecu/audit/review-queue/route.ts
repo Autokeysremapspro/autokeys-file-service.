@@ -76,6 +76,16 @@ function detectedBrandTokens(value: unknown) {
   return Array.from(detected).sort((a, b) => a.localeCompare(b))
 }
 
+function commonContext(rule: any) {
+  return {
+    vehiculo: rule.vehiculo,
+    modelo: rule.modelo,
+    motor: rule.motor,
+    anios: rule.anios,
+    notas: rule.notas,
+  }
+}
+
 export async function GET() {
   try {
     await requireStaff()
@@ -90,7 +100,25 @@ export async function GET() {
     if (error) throw error
 
     const queue = (rules || []).flatMap((rule) => {
-      return (rule.marcas || []).flatMap((brandEntry: unknown) => {
+      if (rule.marcas != null && !Array.isArray(rule.marcas)) {
+        return [{
+          review_type: 'invalid_brand_container',
+          review_reason: 'El campo marcas no está almacenado como una lista. Requiere revisión humana antes de cualquier normalización o corrección.',
+          review_priority: 'high',
+          rule_id: rule.id,
+          fabricante: rule.fabricante,
+          ecu: rule.ecu,
+          familia: rule.familia,
+          stored_brand_container: rule.marcas,
+          stored_brand_container_type: typeof rule.marcas,
+          context: commonContext(rule),
+          requires_human_decision: true,
+          auto_fix: false,
+        }]
+      }
+
+      const brandEntries = Array.isArray(rule.marcas) ? rule.marcas : []
+      return brandEntries.flatMap((brandEntry: unknown) => {
         const tokens = detectedBrandTokens(brandEntry)
         if (tokens.length < 2) return []
 
@@ -100,6 +128,7 @@ export async function GET() {
         return [{
           review_type: 'compound_brand_entry',
           review_reason: 'La misma entrada contiene dos o más marcas canónicas distintas y requiere decisión humana antes de corregirla o dividirla.',
+          review_priority: tokens.length >= 3 ? 'high' : 'medium',
           rule_id: rule.id,
           fabricante: rule.fabricante,
           ecu: rule.ecu,
@@ -108,18 +137,15 @@ export async function GET() {
           normalized_brand_entry: normalizedBrandEntry,
           detected_brand_tokens: tokens,
           detected_brand_count: tokens.length,
-          context: {
-            vehiculo: rule.vehiculo,
-            modelo: rule.modelo,
-            motor: rule.motor,
-            anios: rule.anios,
-            notas: rule.notas,
-          },
+          context: commonContext(rule),
           requires_human_decision: true,
           auto_fix: false,
         }]
       })
-    }).sort((a, b) => {
+    }).sort((a: any, b: any) => {
+      const priorityRank: Record<string, number> = { high: 0, medium: 1, low: 2 }
+      const priorityCompare = (priorityRank[a.review_priority] ?? 9) - (priorityRank[b.review_priority] ?? 9)
+      if (priorityCompare !== 0) return priorityCompare
       const ecuCompare = String(a.ecu || '').localeCompare(String(b.ecu || ''))
       if (ecuCompare !== 0) return ecuCompare
       const ruleCompare = String(a.rule_id || '').localeCompare(String(b.rule_id || ''))
@@ -127,12 +153,18 @@ export async function GET() {
       return String(a.normalized_brand_entry || '').localeCompare(String(b.normalized_brand_entry || ''))
     })
 
+    const summary = queue.reduce((acc: Record<string, number>, item: any) => {
+      acc[item.review_type] = (acc[item.review_type] || 0) + 1
+      return acc
+    }, {})
+
     return NextResponse.json({
       ok: true,
       read_only: true,
       source_scope: 'active_ecu_detection_rules',
       generated_at: new Date().toISOString(),
       total: queue.length,
+      summary,
       policy: {
         requires_human_decision: true,
         auto_fix: false,
