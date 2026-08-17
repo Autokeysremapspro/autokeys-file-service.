@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Bell, CheckCheck, ExternalLink, Loader2, Trash2, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import './AKNotificationBell.css'
 import {
   eliminarNotificacion,
   formatNotificationDate,
@@ -76,7 +77,7 @@ export default function AKNotificationBell() {
   }
 
   return (
-    <div className="relative">
+    <div className="ak-notification-bell relative">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
@@ -93,7 +94,7 @@ export default function AKNotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-3 w-[min(420px,calc(100vw-2rem))] overflow-hidden rounded-[1.8rem] border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/60 backdrop-blur-xl">
+        <div className="ak-notification-popover absolute right-0 z-50 mt-3 w-[min(420px,calc(100vw-2rem))] overflow-hidden rounded-[1.8rem] border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/60 backdrop-blur-xl">
           <div className="flex items-center justify-between border-b border-white/10 p-4">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--ak-glow)]">AK Cloud</p>
