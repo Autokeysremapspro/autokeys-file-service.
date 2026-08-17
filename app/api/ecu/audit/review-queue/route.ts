@@ -73,7 +73,7 @@ function detectedBrandTokens(value: unknown) {
   for (const brand of KNOWN_BRAND_PATTERNS) {
     if (brand.aliases.some((alias) => containsAlias(normalized, alias))) detected.add(brand.canonical)
   }
-  return Array.from(detected)
+  return Array.from(detected).sort((a, b) => a.localeCompare(b))
 }
 
 export async function GET() {
@@ -94,14 +94,20 @@ export async function GET() {
         const tokens = detectedBrandTokens(brandEntry)
         if (tokens.length < 2) return []
 
+        const storedBrandEntry = typeof brandEntry === 'string' ? brandEntry : String(brandEntry ?? '')
+        const normalizedBrandEntry = normalizeBrandText(storedBrandEntry)
+
         return [{
           review_type: 'compound_brand_entry',
+          review_reason: 'La misma entrada contiene dos o más marcas canónicas distintas y requiere decisión humana antes de corregirla o dividirla.',
           rule_id: rule.id,
           fabricante: rule.fabricante,
           ecu: rule.ecu,
           familia: rule.familia,
           stored_brand_entry: brandEntry,
+          normalized_brand_entry: normalizedBrandEntry,
           detected_brand_tokens: tokens,
+          detected_brand_count: tokens.length,
           context: {
             vehiculo: rule.vehiculo,
             modelo: rule.modelo,
@@ -113,11 +119,18 @@ export async function GET() {
           auto_fix: false,
         }]
       })
+    }).sort((a, b) => {
+      const ecuCompare = String(a.ecu || '').localeCompare(String(b.ecu || ''))
+      if (ecuCompare !== 0) return ecuCompare
+      const ruleCompare = String(a.rule_id || '').localeCompare(String(b.rule_id || ''))
+      if (ruleCompare !== 0) return ruleCompare
+      return String(a.normalized_brand_entry || '').localeCompare(String(b.normalized_brand_entry || ''))
     })
 
     return NextResponse.json({
       ok: true,
       read_only: true,
+      source_scope: 'active_ecu_detection_rules',
       generated_at: new Date().toISOString(),
       total: queue.length,
       policy: {
