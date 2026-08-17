@@ -2,10 +2,15 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-const SESSION_KEY = 'akcloud-intro-static-v12-seen'
+const SESSION_KEY = 'akcloud-intro-static-v13-seen'
 const INTRO_MS = 7000
 const FADE_MS = 650
-const INTRO_SRC = '/akcloud-intro-final.jpg?v=12'
+const INTRO_SLICES = [
+  '/akcloud-intro-v13-0.jpg',
+  '/akcloud-intro-v13-1.jpg',
+  '/akcloud-intro-v13-2.jpg',
+  '/akcloud-intro-v13-3.jpg',
+]
 
 export default function AKSessionIntro() {
   const [visible, setVisible] = useState(false)
@@ -42,12 +47,26 @@ export default function AKSessionIntro() {
       aria-modal="true"
       aria-label="Bienvenido a AK Cloud"
     >
-      <img
-        src={INTRO_SRC}
-        alt="Autokeys Remaps Pro — Bienvenidos a AK Cloud"
-        className="absolute inset-0 h-[100dvh] w-full object-contain object-center"
-        draggable={false}
-      />
+      <div className="absolute inset-0 flex items-center justify-center bg-black">
+        <div
+          className="flex flex-col overflow-hidden"
+          style={{
+            width: 'min(100vw, calc(100dvh * 9 / 16))',
+            height: 'min(100dvh, calc(100vw * 16 / 9))',
+          }}
+          aria-label="Autokeys Remaps Pro — Bienvenidos a AK Cloud"
+        >
+          {INTRO_SLICES.map((src, index) => (
+            <img
+              key={src}
+              src={src}
+              alt={index === 0 ? 'Autokeys Remaps Pro — Bienvenidos a AK Cloud' : ''}
+              className="block h-1/4 w-full shrink-0 object-fill"
+              draggable={false}
+            />
+          ))}
+        </div>
+      </div>
 
       <button
         type="button"
