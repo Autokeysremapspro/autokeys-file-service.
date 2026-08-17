@@ -30,6 +30,12 @@ type InvalidBrandContainerReview = ReviewItemBase & {
   stored_brand_container_type: string
 }
 
+type InvalidBrandEntryReview = ReviewItemBase & {
+  review_type: 'invalid_brand_entry'
+  stored_brand_entry: unknown
+  stored_brand_entry_type: string
+}
+
 type CompoundBrandEntryReview = ReviewItemBase & {
   review_type: 'compound_brand_entry'
   stored_brand_entry: unknown
@@ -38,7 +44,7 @@ type CompoundBrandEntryReview = ReviewItemBase & {
   detected_brand_count: number
 }
 
-type ReviewItem = InvalidBrandContainerReview | CompoundBrandEntryReview
+type ReviewItem = InvalidBrandContainerReview | InvalidBrandEntryReview | CompoundBrandEntryReview
 
 // Review-only lexicon. Aliases collapse to a canonical brand so values such as
 // "VW VOLKSWAGEN" do not become a false multi-brand warning, while entries
@@ -155,11 +161,27 @@ export async function GET() {
 
       const brandEntries = Array.isArray(rule.marcas) ? rule.marcas : []
       return brandEntries.flatMap<ReviewItem>((brandEntry: unknown) => {
+        if (typeof brandEntry !== 'string') {
+          return [{
+            review_type: 'invalid_brand_entry',
+            review_reason: 'Una entrada individual del campo marcas no es texto. Requiere revisión humana antes de interpretarla, normalizarla o descartarla.',
+            review_priority: 'high',
+            rule_id: rule.id,
+            fabricante: rule.fabricante,
+            ecu: rule.ecu,
+            familia: rule.familia,
+            stored_brand_entry: brandEntry,
+            stored_brand_entry_type: brandEntry === null ? 'null' : typeof brandEntry,
+            context: commonContext(rule),
+            requires_human_decision: true,
+            auto_fix: false,
+          }]
+        }
+
         const tokens = detectedBrandTokens(brandEntry)
         if (tokens.length < 2) return []
 
-        const storedBrandEntry = typeof brandEntry === 'string' ? brandEntry : String(brandEntry ?? '')
-        const normalizedBrandEntry = normalizeBrandText(storedBrandEntry)
+        const normalizedBrandEntry = normalizeBrandText(brandEntry)
 
         return [{
           review_type: 'compound_brand_entry',
