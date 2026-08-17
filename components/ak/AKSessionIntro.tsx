@@ -1,15 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import part00 from './intro-image-data/part00'
-import part01 from './intro-image-data/part01'
-import part02 from './intro-image-data/part02'
-import part03 from './intro-image-data/part03'
+import INTRO_IMAGE from './intro-image-v5'
 
-const SESSION_KEY = 'akcloud-intro-image-v5-seen'
-const INTRO_MS = 8000
+const SESSION_KEY = 'akcloud-intro-image-v5-final-seen'
+const INTRO_MS = 7000
 const FADE_MS = 650
-const INTRO_IMAGE = `data:image/webp;base64,${part00}${part01}${part02}${part03}`
 
 export default function AKSessionIntro() {
   const [visible, setVisible] = useState(false)
@@ -48,16 +44,17 @@ export default function AKSessionIntro() {
     >
       <img
         src={INTRO_IMAGE}
-        alt="Bienvenidos a AK Cloud · Autokeys Remaps Pro"
-        className="absolute inset-0 h-full w-full object-cover object-center"
+        alt="Autokeys Remaps Pro — Bienvenidos a AK Cloud"
+        className="absolute inset-0 h-[100dvh] w-full object-contain object-center md:object-cover"
+        draggable={false}
       />
 
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.05),transparent_25%,transparent_75%,rgba(0,0,0,.22))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.04),transparent_18%,transparent_80%,rgba(0,0,0,.18))]" />
 
       <button
         type="button"
         onClick={closeIntro}
-        className="absolute right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-full border border-white/20 bg-black/45 px-4 py-2 text-[10px] font-black uppercase tracking-[.18em] text-white/90 backdrop-blur-xl transition hover:border-red-400/50 hover:bg-red-500/15 hover:text-white md:right-7 md:top-7"
+        className="absolute right-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-full border border-white/20 bg-black/55 px-4 py-2 text-[10px] font-black uppercase tracking-[.18em] text-white/90 backdrop-blur-xl transition hover:border-red-400/50 hover:bg-red-500/20 hover:text-white md:right-7 md:top-7"
         aria-label="Saltar introducción"
       >
         Saltar
