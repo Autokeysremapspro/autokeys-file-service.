@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-const SESSION_KEY = 'akcloud-intro-static-v7-seen'
+const SESSION_KEY = 'akcloud-intro-static-v9-seen'
 const INTRO_MS = 7000
 const FADE_MS = 650
-const INTRO_SRC = '/api/ak-intro-image?v=7'
+const INTRO_SRC = '/akcloud-intro-v9.jpg?v=9'
 
 export default function AKSessionIntro() {
   const [visible, setVisible] = useState(false)
@@ -45,7 +45,7 @@ export default function AKSessionIntro() {
       <img
         src={INTRO_SRC}
         alt="Autokeys Remaps Pro — Bienvenidos a AK Cloud"
-        className="absolute inset-0 h-[100dvh] w-full object-contain object-center md:object-contain"
+        className="absolute inset-0 h-[100dvh] w-full object-contain object-center"
         draggable={false}
       />
 
