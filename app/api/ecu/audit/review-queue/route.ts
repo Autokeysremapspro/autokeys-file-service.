@@ -2,24 +2,44 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { requireStaff } from '@/lib/supabase/server'
 
-const KNOWN_SINGLE_TOKEN_BRANDS = new Set([
-  'AUDI',
-  'SEAT',
-  'VOLKSWAGEN',
-  'VW',
-  'SKODA',
-  'BMW',
-  'MINI',
-  'OPEL',
-  'PEUGEOT',
-  'CITROEN',
-  'FIAT',
-  'FORD',
-  'RENAULT',
-  'NISSAN',
-  'TOYOTA',
-  'MERCEDES',
-])
+type BrandPattern = { canonical: string; aliases: string[] }
+
+// Review-only lexicon. Aliases collapse to a canonical brand so values such as
+// "VW VOLKSWAGEN" do not become a false multi-brand warning, while entries
+// such as "Land Rover BMW" are still surfaced for human review.
+const KNOWN_BRAND_PATTERNS: BrandPattern[] = [
+  { canonical: 'AUDI', aliases: ['AUDI'] },
+  { canonical: 'SEAT', aliases: ['SEAT'] },
+  { canonical: 'VOLKSWAGEN', aliases: ['VOLKSWAGEN', 'VW'] },
+  { canonical: 'SKODA', aliases: ['SKODA'] },
+  { canonical: 'BMW', aliases: ['BMW'] },
+  { canonical: 'MINI', aliases: ['MINI'] },
+  { canonical: 'MERCEDES-BENZ', aliases: ['MERCEDES BENZ', 'MERCEDES-BENZ', 'MERCEDES'] },
+  { canonical: 'LAND ROVER', aliases: ['LAND ROVER'] },
+  { canonical: 'RANGE ROVER', aliases: ['RANGE ROVER'] },
+  { canonical: 'ALFA ROMEO', aliases: ['ALFA ROMEO'] },
+  { canonical: 'OPEL', aliases: ['OPEL'] },
+  { canonical: 'VAUXHALL', aliases: ['VAUXHALL'] },
+  { canonical: 'PEUGEOT', aliases: ['PEUGEOT'] },
+  { canonical: 'CITROEN', aliases: ['CITROEN', 'CITROËN'] },
+  { canonical: 'DS', aliases: ['DS AUTOMOBILES', 'DS'] },
+  { canonical: 'FIAT', aliases: ['FIAT'] },
+  { canonical: 'ABARTH', aliases: ['ABARTH'] },
+  { canonical: 'FORD', aliases: ['FORD'] },
+  { canonical: 'RENAULT', aliases: ['RENAULT'] },
+  { canonical: 'DACIA', aliases: ['DACIA'] },
+  { canonical: 'NISSAN', aliases: ['NISSAN'] },
+  { canonical: 'TOYOTA', aliases: ['TOYOTA'] },
+  { canonical: 'LEXUS', aliases: ['LEXUS'] },
+  { canonical: 'HONDA', aliases: ['HONDA'] },
+  { canonical: 'MAZDA', aliases: ['MAZDA'] },
+  { canonical: 'MITSUBISHI', aliases: ['MITSUBISHI'] },
+  { canonical: 'HYUNDAI', aliases: ['HYUNDAI'] },
+  { canonical: 'KIA', aliases: ['KIA'] },
+  { canonical: 'VOLVO', aliases: ['VOLVO'] },
+  { canonical: 'PORSCHE', aliases: ['PORSCHE'] },
+  { canonical: 'JEEP', aliases: ['JEEP'] },
+]
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -28,13 +48,32 @@ function adminClient() {
   return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } })
 }
 
+function normalizeBrandText(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function containsAlias(normalizedValue: string, alias: string) {
+  const normalizedAlias = normalizeBrandText(alias)
+  if (!normalizedAlias) return false
+  return ` ${normalizedValue} `.includes(` ${normalizedAlias} `)
+}
+
 function detectedBrandTokens(value: unknown) {
   if (typeof value !== 'string') return []
-  return value
-    .trim()
-    .toUpperCase()
-    .split(/\s+/)
-    .filter((token) => KNOWN_SINGLE_TOKEN_BRANDS.has(token))
+  const normalized = normalizeBrandText(value)
+  if (!normalized) return []
+
+  const detected = new Set<string>()
+  for (const brand of KNOWN_BRAND_PATTERNS) {
+    if (brand.aliases.some((alias) => containsAlias(normalized, alias))) detected.add(brand.canonical)
+  }
+  return Array.from(detected)
 }
 
 export async function GET() {
