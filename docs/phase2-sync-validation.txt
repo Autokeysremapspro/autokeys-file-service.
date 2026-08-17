@@ -1,0 +1,1 @@
+Phase 2.2 branch synchronized with current main 8e14e169. Runtime remains main plus the validated read-only ECU review queue; no ECU file modification is automated.
