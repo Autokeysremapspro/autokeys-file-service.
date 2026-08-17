@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-const SESSION_KEY = 'akcloud-intro-static-v10-seen'
+const SESSION_KEY = 'akcloud-intro-static-v11-seen'
 const INTRO_MS = 7000
 const FADE_MS = 650
-const INTRO_SRC = '/akcloud-intro-v9.jpg?v=10'
+const INTRO_SRC = '/api/ak-intro-v11'
 
 export default function AKSessionIntro() {
   const [visible, setVisible] = useState(false)
@@ -48,8 +48,6 @@ export default function AKSessionIntro() {
         className="absolute inset-0 h-[100dvh] w-full object-contain object-center"
         draggable={false}
       />
-
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.03),transparent_18%,transparent_82%,rgba(0,0,0,.16))]" />
 
       <button
         type="button"
