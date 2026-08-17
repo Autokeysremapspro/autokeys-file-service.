@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, ChevronDown, Monitor, Moon, Sun } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import './AKThemeSwitcher.css'
 
 type ThemePreference = 'dark' | 'light' | 'system'
 type ResolvedTheme = 'dark' | 'light'
@@ -119,7 +120,7 @@ export default function AKThemeSwitcher() {
   }
 
   return (
-    <div ref={rootRef} className="relative">
+    <div ref={rootRef} className="ak5-theme-switcher-scope relative">
       <button
         type="button"
         onClick={() => setOpen(value => !value)}
