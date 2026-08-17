@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-const SESSION_KEY = 'akcloud-intro-static-v13-seen'
+const SESSION_KEY = 'akcloud-intro-static-v14-seen'
 const INTRO_MS = 7000
 const FADE_MS = 650
 const INTRO_SLICES = [
