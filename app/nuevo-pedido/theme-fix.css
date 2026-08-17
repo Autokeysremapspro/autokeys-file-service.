@@ -101,6 +101,7 @@ html[data-ak-theme='light'] .ak-new-order-theme-scope aside strong[class~='text-
 @media (max-width: 640px) {
   .ak-new-order-theme-scope {
     min-width: 0;
+    overflow-x: clip;
   }
 
   .ak-new-order-theme-scope .fixed.inset-0 {
@@ -133,12 +134,29 @@ html[data-ak-theme='light'] .ak-new-order-theme-scope aside strong[class~='text-
   }
 
   .ak-new-order-theme-scope textarea,
-  .ak-new-order-theme-scope input {
+  .ak-new-order-theme-scope input,
+  .ak-new-order-theme-scope select {
     max-width: 100%;
+    font-size: 16px;
   }
 
   .ak-new-order-theme-scope button,
   .ak-new-order-theme-scope a {
     max-width: 100%;
+  }
+
+  .ak-new-order-theme-scope button {
+    touch-action: manipulation;
+  }
+
+  .ak-new-order-theme-scope p,
+  .ak-new-order-theme-scope span,
+  .ak-new-order-theme-scope strong {
+    overflow-wrap: anywhere;
+  }
+
+  .ak-new-order-theme-scope aside button,
+  .ak-new-order-theme-scope .fixed.inset-0 button {
+    min-height: 44px;
   }
 }
