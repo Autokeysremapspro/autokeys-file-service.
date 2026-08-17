@@ -1,0 +1,59 @@
+/* Phase 2.1 — pedidos light-theme hardening.
+   Visual-only: no order, payment, status or ECU logic is changed. */
+
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='bg-black/20'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='bg-black/25'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='bg-black/30'] {
+  background-color: rgba(15, 23, 42, .035) !important;
+}
+
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='bg-white/[.025]'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='bg-white/[.055]'] {
+  background-color: rgba(15, 23, 42, .05) !important;
+}
+
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='border-white/6'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='border-white/7'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='border-white/8'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='border-white/[.08]'] {
+  border-color: rgba(15, 23, 42, .12) !important;
+}
+
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/22'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/28'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/30'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/32'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/35'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/38'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/42'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/45'] {
+  color: rgba(15, 23, 42, .68) !important;
+}
+
+html[data-ak-theme='light'] .ak-orders-theme-scope input {
+  color: #152033 !important;
+}
+
+html[data-ak-theme='light'] .ak-orders-theme-scope input::placeholder {
+  color: rgba(15, 23, 42, .42) !important;
+}
+
+@media (max-width: 640px) {
+  .ak-orders-theme-scope {
+    min-width: 0;
+    overflow-x: clip;
+  }
+
+  .ak-orders-theme-scope input,
+  .ak-orders-theme-scope textarea,
+  .ak-orders-theme-scope select {
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  .ak-orders-theme-scope button,
+  .ak-orders-theme-scope a {
+    max-width: 100%;
+    touch-action: manipulation;
+  }
+}
