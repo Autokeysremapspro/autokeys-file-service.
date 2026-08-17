@@ -238,13 +238,24 @@ export async function GET() {
       return acc
     }, {})
 
+    const prioritySummary = queue.reduce((acc: Record<'high' | 'medium' | 'low', number>, item) => {
+      acc[item.review_priority] += 1
+      return acc
+    }, { high: 0, medium: 0, low: 0 })
+
+    const affectedRuleIds = new Set(queue.map((item) => String(item.rule_id ?? '')))
+    affectedRuleIds.delete('')
+
     return NextResponse.json({
       ok: true,
       read_only: true,
       source_scope: 'active_ecu_detection_rules',
       generated_at: new Date().toISOString(),
+      rules_scanned: (rules || []).length,
+      rules_with_review_items: affectedRuleIds.size,
       total: queue.length,
       summary,
+      priority_summary: prioritySummary,
       policy: {
         requires_human_decision: true,
         auto_fix: false,
