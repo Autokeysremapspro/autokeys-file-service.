@@ -24,6 +24,11 @@ type ReviewItemBase = {
   auto_fix: false
 }
 
+type MissingManufacturerReview = ReviewItemBase & {
+  review_type: 'missing_manufacturer'
+  stored_manufacturer: unknown
+}
+
 type MissingEcuIdentifierReview = ReviewItemBase & {
   review_type: 'missing_ecu_identifier'
   stored_ecu: unknown
@@ -67,6 +72,7 @@ type DuplicateCanonicalBrandReview = ReviewItemBase & {
 }
 
 type ReviewItem =
+  | MissingManufacturerReview
   | MissingEcuIdentifierReview
   | InvalidBrandContainerReview
   | MissingBrandCoverageReview
@@ -132,6 +138,24 @@ export async function GET() {
 
     const queue = (rules || []).flatMap<ReviewItem>((rule) => {
       const integrityReviews: ReviewItem[] = []
+
+      const normalizedManufacturer = typeof rule.fabricante === 'string' ? normalizeBrandText(rule.fabricante) : ''
+      if (!normalizedManufacturer) {
+        integrityReviews.push({
+          review_type: 'missing_manufacturer',
+          review_reason: 'La regla está activa pero no contiene un fabricante utilizable. Requiere revisión humana antes de usarla como fuente de detección o aprendizaje.',
+          review_priority: 'high',
+          rule_id: rule.id,
+          fabricante: rule.fabricante,
+          ecu: rule.ecu,
+          familia: rule.familia,
+          stored_manufacturer: rule.fabricante,
+          context: commonContext(rule),
+          requires_human_decision: true,
+          auto_fix: false,
+        })
+      }
+
       const normalizedEcu = typeof rule.ecu === 'string' ? normalizeBrandText(rule.ecu) : ''
       if (!normalizedEcu) {
         integrityReviews.push({
