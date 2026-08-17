@@ -1,0 +1,52 @@
+/* Phase 2.1 — global shell light-theme QA. Visual only. */
+html[data-ak-theme='light'] .ak-page-shell-theme-scope .ak-command-overlay {
+  background: rgba(15, 23, 42, .34) !important;
+}
+
+html[data-ak-theme='light'] .ak-page-shell-theme-scope .ak-command-panel {
+  color: #152033 !important;
+  border-color: rgba(15, 23, 42, .12) !important;
+  background: rgba(255,255,255,.98) !important;
+  box-shadow: 0 28px 90px rgba(15,23,42,.18) !important;
+}
+
+html[data-ak-theme='light'] .ak-page-shell-theme-scope .ak-command-panel [class*='border-white'] {
+  border-color: rgba(15,23,42,.12) !important;
+}
+
+html[data-ak-theme='light'] .ak-page-shell-theme-scope .ak-command-panel input {
+  color: #152033 !important;
+}
+
+html[data-ak-theme='light'] .ak-page-shell-theme-scope .ak-command-panel input::placeholder {
+  color: rgba(15,23,42,.42) !important;
+}
+
+html[data-ak-theme='light'] .ak-page-shell-theme-scope .ak-command-panel a {
+  color: rgba(15,23,42,.72) !important;
+}
+
+html[data-ak-theme='light'] .ak-page-shell-theme-scope .ak-command-panel a:hover {
+  color: #152033 !important;
+  background: rgba(15,23,42,.055) !important;
+}
+
+html[data-ak-theme='light'] .ak-page-shell-theme-scope .ak-command-panel [class*='text-white/20'] {
+  color: rgba(15,23,42,.36) !important;
+}
+
+@media (max-width: 640px) {
+  .ak-page-shell-theme-scope .ak-command-overlay {
+    padding-left: .75rem;
+    padding-right: .75rem;
+  }
+
+  .ak-page-shell-theme-scope .ak-command-panel {
+    max-height: calc(100dvh - 5rem);
+  }
+
+  .ak-page-shell-theme-scope .ak-command-panel input {
+    min-width: 0;
+    font-size: 16px;
+  }
+}
