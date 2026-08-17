@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import INTRO_IMAGE from './intro-image-v5'
 
-const SESSION_KEY = 'akcloud-intro-image-v5-final-seen'
+const SESSION_KEY = 'akcloud-intro-image-v6-final-seen'
 const INTRO_MS = 7000
 const FADE_MS = 650
 
@@ -45,7 +45,7 @@ export default function AKSessionIntro() {
       <img
         src={INTRO_IMAGE}
         alt="Autokeys Remaps Pro — Bienvenidos a AK Cloud"
-        className="absolute inset-0 h-[100dvh] w-full object-contain object-center md:object-cover"
+        className="absolute inset-0 h-[100dvh] w-full scale-[1.15] object-contain object-center md:scale-100 md:object-cover"
         draggable={false}
       />
 
