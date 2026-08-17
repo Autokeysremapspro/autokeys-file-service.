@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import INTRO_IMAGE from './intro-image-v5'
 
-const SESSION_KEY = 'akcloud-intro-image-v6-final-seen'
+const SESSION_KEY = 'akcloud-intro-static-v7-seen'
 const INTRO_MS = 7000
 const FADE_MS = 650
+const INTRO_SRC = '/api/ak-intro-image?v=7'
 
 export default function AKSessionIntro() {
   const [visible, setVisible] = useState(false)
@@ -43,13 +43,13 @@ export default function AKSessionIntro() {
       aria-label="Bienvenido a AK Cloud"
     >
       <img
-        src={INTRO_IMAGE}
+        src={INTRO_SRC}
         alt="Autokeys Remaps Pro — Bienvenidos a AK Cloud"
-        className="absolute inset-0 h-[100dvh] w-full scale-[1.15] object-contain object-center md:scale-100 md:object-cover"
+        className="absolute inset-0 h-[100dvh] w-full object-contain object-center md:object-contain"
         draggable={false}
       />
 
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.04),transparent_18%,transparent_80%,rgba(0,0,0,.18))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.03),transparent_18%,transparent_82%,rgba(0,0,0,.16))]" />
 
       <button
         type="button"
