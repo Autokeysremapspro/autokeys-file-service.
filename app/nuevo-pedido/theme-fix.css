@@ -96,3 +96,49 @@ html[data-ak-theme='light'] .ak-new-order-theme-scope aside [class~='text-white'
 html[data-ak-theme='light'] .ak-new-order-theme-scope aside strong[class~='text-white'] {
   color: #152033 !important;
 }
+
+/* Mobile hardening for checkout and legal consent. */
+@media (max-width: 640px) {
+  .ak-new-order-theme-scope {
+    min-width: 0;
+  }
+
+  .ak-new-order-theme-scope .fixed.inset-0 {
+    align-items: flex-end;
+    padding: .75rem;
+  }
+
+  .ak-new-order-theme-scope .fixed.inset-0 > div {
+    width: 100%;
+    max-height: calc(100dvh - 1.5rem);
+    border-radius: 1.5rem;
+    padding: 1.1rem !important;
+    overscroll-behavior: contain;
+  }
+
+  .ak-new-order-theme-scope aside,
+  .ak-new-order-theme-scope aside > *,
+  .ak-new-order-theme-scope [class*='grid-cols-'],
+  .ak-new-order-theme-scope [class*='flex'] {
+    min-width: 0;
+  }
+
+  .ak-new-order-theme-scope aside [class*='justify-between'] {
+    gap: .75rem;
+  }
+
+  .ak-new-order-theme-scope aside .ak-mono.text-4xl {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .ak-new-order-theme-scope textarea,
+  .ak-new-order-theme-scope input {
+    max-width: 100%;
+  }
+
+  .ak-new-order-theme-scope button,
+  .ak-new-order-theme-scope a {
+    max-width: 100%;
+  }
+}
