@@ -24,6 +24,11 @@ type ReviewItemBase = {
   auto_fix: false
 }
 
+type MissingEcuIdentifierReview = ReviewItemBase & {
+  review_type: 'missing_ecu_identifier'
+  stored_ecu: unknown
+}
+
 type InvalidBrandContainerReview = ReviewItemBase & {
   review_type: 'invalid_brand_container'
   stored_brand_container: unknown
@@ -62,6 +67,7 @@ type DuplicateCanonicalBrandReview = ReviewItemBase & {
 }
 
 type ReviewItem =
+  | MissingEcuIdentifierReview
   | InvalidBrandContainerReview
   | MissingBrandCoverageReview
   | InvalidBrandEntryReview
@@ -125,7 +131,25 @@ export async function GET() {
     if (error) throw error
 
     const queue = (rules || []).flatMap<ReviewItem>((rule) => {
-      if (rule.marcas != null && !Array.isArray(rule.marcas)) return [{ review_type: 'invalid_brand_container', review_reason: 'El campo marcas no está almacenado como una lista. Requiere revisión humana antes de cualquier normalización o corrección.', review_priority: 'high', rule_id: rule.id, fabricante: rule.fabricante, ecu: rule.ecu, familia: rule.familia, stored_brand_container: rule.marcas, stored_brand_container_type: typeof rule.marcas, context: commonContext(rule), requires_human_decision: true, auto_fix: false }]
+      const integrityReviews: ReviewItem[] = []
+      const normalizedEcu = typeof rule.ecu === 'string' ? normalizeBrandText(rule.ecu) : ''
+      if (!normalizedEcu) {
+        integrityReviews.push({
+          review_type: 'missing_ecu_identifier',
+          review_reason: 'La regla está activa pero no contiene un identificador ECU utilizable. Requiere revisión humana antes de usarla como fuente de detección o aprendizaje.',
+          review_priority: 'high',
+          rule_id: rule.id,
+          fabricante: rule.fabricante,
+          ecu: rule.ecu,
+          familia: rule.familia,
+          stored_ecu: rule.ecu,
+          context: commonContext(rule),
+          requires_human_decision: true,
+          auto_fix: false,
+        })
+      }
+
+      if (rule.marcas != null && !Array.isArray(rule.marcas)) return [...integrityReviews, { review_type: 'invalid_brand_container', review_reason: 'El campo marcas no está almacenado como una lista. Requiere revisión humana antes de cualquier normalización o corrección.', review_priority: 'high', rule_id: rule.id, fabricante: rule.fabricante, ecu: rule.ecu, familia: rule.familia, stored_brand_container: rule.marcas, stored_brand_container_type: typeof rule.marcas, context: commonContext(rule), requires_human_decision: true, auto_fix: false }]
 
       const brandEntries = Array.isArray(rule.marcas) ? rule.marcas : []
       const coverageReviews: ReviewItem[] = brandEntries.length === 0 ? [{ review_type: 'missing_brand_coverage', review_reason: 'La regla ECU está activa pero no tiene ninguna marca asociada. Requiere revisión humana para confirmar si la ausencia de cobertura de marca es intencionada.', review_priority: 'medium', rule_id: rule.id, fabricante: rule.fabricante, ecu: rule.ecu, familia: rule.familia, stored_brand_container: rule.marcas == null ? null : brandEntries, context: commonContext(rule), requires_human_decision: true, auto_fix: false }] : []
@@ -153,7 +177,7 @@ export async function GET() {
         if (storedEntries.length < 2) return
         duplicateReviews.push({ review_type: 'duplicate_canonical_brand', review_reason: 'Dos o más entradas de marcas representan la misma marca canónica. Requiere revisión humana antes de consolidar alias o eliminar duplicados.', review_priority: 'low', rule_id: rule.id, fabricante: rule.fabricante, ecu: rule.ecu, familia: rule.familia, canonical_brand: canonicalBrand, stored_brand_entries: storedEntries, duplicate_count: storedEntries.length, context: commonContext(rule), requires_human_decision: true, auto_fix: false })
       })
-      return [...coverageReviews, ...entryReviews, ...duplicateReviews]
+      return [...integrityReviews, ...coverageReviews, ...entryReviews, ...duplicateReviews]
     }).sort((a, b) => {
       const priorityRank: Record<string, number> = { high: 0, medium: 1, low: 2 }
       const priorityCompare = (priorityRank[a.review_priority] ?? 9) - (priorityRank[b.review_priority] ?? 9)
