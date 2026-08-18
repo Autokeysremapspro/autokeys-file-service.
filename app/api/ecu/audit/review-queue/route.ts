@@ -241,8 +241,33 @@ export async function GET() {
     const summary = queue.reduce((acc: Record<string, number>, item) => { acc[item.review_type] = (acc[item.review_type] || 0) + 1; return acc }, {})
     const prioritySummary = queue.reduce((acc: Record<'high' | 'medium' | 'low', number>, item) => { acc[item.review_priority] += 1; return acc }, { high: 0, medium: 0, low: 0 })
     const affectedRuleIds = new Set(queue.map((item) => String(item.rule_id ?? ''))); affectedRuleIds.delete('')
+    const rulesScanned = (rules || []).length
+    const rulesBlockedFromLearning = affectedRuleIds.size
+    const rulesClearForLearning = Math.max(0, rulesScanned - rulesBlockedFromLearning)
 
-    return NextResponse.json({ ok: true, read_only: true, source_scope: 'active_ecu_detection_rules', generated_at: new Date().toISOString(), rules_scanned: (rules || []).length, rules_with_review_items: affectedRuleIds.size, total: queue.length, summary, priority_summary: prioritySummary, policy: { requires_human_decision: true, auto_fix: false, modifies_ecu_files: false }, queue })
+    return NextResponse.json({
+      ok: true,
+      read_only: true,
+      source_scope: 'active_ecu_detection_rules',
+      generated_at: new Date().toISOString(),
+      rules_scanned: rulesScanned,
+      rules_with_review_items: rulesBlockedFromLearning,
+      total: queue.length,
+      summary,
+      priority_summary: prioritySummary,
+      learning_gate: {
+        rules_clear_for_learning: rulesClearForLearning,
+        rules_blocked_from_learning: rulesBlockedFromLearning,
+        requires_zero_review_items: true,
+        auto_promote: false,
+      },
+      policy: {
+        requires_human_decision: true,
+        auto_fix: false,
+        modifies_ecu_files: false,
+      },
+      queue,
+    })
   } catch (error: any) {
     const status = error.message === 'No autorizado' ? 401 : 500
     return NextResponse.json({ error: error.message || 'Error generando cola de revisión ECU' }, { status })
