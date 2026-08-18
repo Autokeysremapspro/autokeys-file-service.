@@ -61,6 +61,12 @@ type EmptyBrandEntryReview = ReviewItemBase & {
   stored_brand_entry: string
 }
 
+type UnknownBrandEntryReview = ReviewItemBase & {
+  review_type: 'unknown_brand_entry'
+  stored_brand_entry: string
+  normalized_brand_entry: string
+}
+
 type CompoundBrandEntryReview = ReviewItemBase & {
   review_type: 'compound_brand_entry'
   stored_brand_entry: unknown
@@ -84,6 +90,7 @@ type ReviewItem =
   | MissingBrandCoverageReview
   | InvalidBrandEntryReview
   | EmptyBrandEntryReview
+  | UnknownBrandEntryReview
   | CompoundBrandEntryReview
   | DuplicateCanonicalBrandReview
 
@@ -206,6 +213,7 @@ export async function GET() {
         const normalizedBrandEntry = normalizeBrandText(brandEntry)
         if (!normalizedBrandEntry) return [{ review_type: 'empty_brand_entry', review_reason: 'Una entrada del campo marcas está vacía o solo contiene separadores/espacios. Requiere revisión humana antes de conservarla o eliminarla.', review_priority: 'medium', rule_id: rule.id, fabricante: rule.fabricante, ecu: rule.ecu, familia: rule.familia, stored_brand_entry: brandEntry, context: commonContext(rule), requires_human_decision: true, auto_fix: false }]
         const tokens = detectedBrandTokens(brandEntry)
+        if (tokens.length === 0) return [{ review_type: 'unknown_brand_entry', review_reason: 'La entrada de marca no coincide con ninguna marca canónica conocida. Requiere revisión humana antes de permitir que esta regla alimente el aprendizaje.', review_priority: 'medium', rule_id: rule.id, fabricante: rule.fabricante, ecu: rule.ecu, familia: rule.familia, stored_brand_entry: brandEntry, normalized_brand_entry: normalizedBrandEntry, context: commonContext(rule), requires_human_decision: true, auto_fix: false }]
         if (tokens.length < 2) return []
         return [{ review_type: 'compound_brand_entry', review_reason: 'La misma entrada contiene dos o más marcas canónicas distintas y requiere decisión humana antes de corregirla o dividirla.', review_priority: tokens.length >= 3 ? 'high' : 'medium', rule_id: rule.id, fabricante: rule.fabricante, ecu: rule.ecu, familia: rule.familia, stored_brand_entry: brandEntry, normalized_brand_entry: normalizedBrandEntry, detected_brand_tokens: tokens, detected_brand_count: tokens.length, context: commonContext(rule), requires_human_decision: true, auto_fix: false }]
       })
@@ -233,8 +241,8 @@ export async function GET() {
       if (ecuCompare !== 0) return ecuCompare
       const ruleCompare = String(a.rule_id || '').localeCompare(String(b.rule_id || ''))
       if (ruleCompare !== 0) return ruleCompare
-      const aNormalized = a.review_type === 'compound_brand_entry' ? a.normalized_brand_entry : ''
-      const bNormalized = b.review_type === 'compound_brand_entry' ? b.normalized_brand_entry : ''
+      const aNormalized = a.review_type === 'compound_brand_entry' || a.review_type === 'unknown_brand_entry' ? a.normalized_brand_entry : ''
+      const bNormalized = b.review_type === 'compound_brand_entry' || b.review_type === 'unknown_brand_entry' ? b.normalized_brand_entry : ''
       return aNormalized.localeCompare(bNormalized)
     })
 
