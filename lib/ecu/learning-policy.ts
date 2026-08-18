@@ -8,11 +8,16 @@ export const ECU_LEARNING_POLICY = Object.freeze({
   allowsFuzzyIdentityMatching: false,
   requiresZeroReviewItems: true,
   requiresExplicitHumanConfirmation: true,
+  invalidInputsFailClosed: true,
 } as const)
 
 export type EcuLearningEligibility = {
   eligible: boolean
-  reason: 'clear_for_learning' | 'blocked_by_review_items' | 'awaiting_human_confirmation'
+  reason:
+    | 'clear_for_learning'
+    | 'blocked_by_review_items'
+    | 'awaiting_human_confirmation'
+    | 'invalid_review_item_count'
   reviewItemCount: number
   humanConfirmed: boolean
   policyVersion: typeof ECU_LEARNING_POLICY.policyVersion
@@ -30,15 +35,18 @@ export function evaluateEcuLearningEligibility(
   reviewItemCount: number,
   humanConfirmed = false,
 ): EcuLearningEligibility {
-  const safeReviewItemCount = Number.isFinite(reviewItemCount)
-    ? Math.max(0, Math.trunc(reviewItemCount))
-    : 1
+  const hasValidReviewItemCount =
+    Number.isFinite(reviewItemCount) &&
+    Number.isInteger(reviewItemCount) &&
+    reviewItemCount >= 0
 
-  const hasNoReviewItems = safeReviewItemCount === 0
+  const safeReviewItemCount = hasValidReviewItemCount ? reviewItemCount : 1
+  const hasNoReviewItems = hasValidReviewItemCount && safeReviewItemCount === 0
   const eligible = hasNoReviewItems && humanConfirmed === true
 
   let reason: EcuLearningEligibility['reason'] = 'clear_for_learning'
-  if (!hasNoReviewItems) reason = 'blocked_by_review_items'
+  if (!hasValidReviewItemCount) reason = 'invalid_review_item_count'
+  else if (!hasNoReviewItems) reason = 'blocked_by_review_items'
   else if (!humanConfirmed) reason = 'awaiting_human_confirmation'
 
   return {
