@@ -10,6 +10,7 @@ export const ECU_LEARNING_POLICY = Object.freeze({
   requiresExplicitHumanConfirmation: true,
   requiresHumanDecisionTrace: true,
   requiresHumanReviewerTrace: true,
+  requiresHumanDecisionTimestamp: true,
   invalidInputsFailClosed: true,
 } as const)
 
@@ -21,11 +22,14 @@ export type EcuLearningEligibility = {
     | 'awaiting_human_confirmation'
     | 'missing_human_decision_trace'
     | 'missing_human_reviewer_trace'
+    | 'missing_human_decision_timestamp'
+    | 'invalid_human_decision_timestamp'
     | 'invalid_review_item_count'
   reviewItemCount: number
   humanConfirmed: boolean
   humanDecisionId: string | null
   humanReviewerId: string | null
+  humanDecisionAt: string | null
   policyVersion: typeof ECU_LEARNING_POLICY.policyVersion
   decisionAuthority: typeof ECU_LEARNING_POLICY.decisionAuthority
 }
@@ -42,6 +46,7 @@ export function evaluateEcuLearningEligibility(
   humanConfirmed = false,
   humanDecisionId?: string | null,
   humanReviewerId?: string | null,
+  humanDecisionAt?: string | null,
 ): EcuLearningEligibility {
   const hasValidReviewItemCount =
     Number.isFinite(reviewItemCount) &&
@@ -54,14 +59,23 @@ export function evaluateEcuLearningEligibility(
     typeof humanDecisionId === 'string' ? humanDecisionId.trim() : ''
   const normalizedReviewerId =
     typeof humanReviewerId === 'string' ? humanReviewerId.trim() : ''
+  const normalizedDecisionAt =
+    typeof humanDecisionAt === 'string' ? humanDecisionAt.trim() : ''
   const hasHumanDecisionTrace = normalizedDecisionId.length > 0
   const hasHumanReviewerTrace = normalizedReviewerId.length > 0
+  const hasHumanDecisionTimestamp = normalizedDecisionAt.length > 0
+  const parsedHumanDecisionTimestamp = hasHumanDecisionTimestamp
+    ? Date.parse(normalizedDecisionAt)
+    : Number.NaN
+  const hasValidHumanDecisionTimestamp =
+    hasHumanDecisionTimestamp && Number.isFinite(parsedHumanDecisionTimestamp)
   const isHumanConfirmed = humanConfirmed === true
   const eligible =
     hasNoReviewItems &&
     isHumanConfirmed &&
     hasHumanDecisionTrace &&
-    hasHumanReviewerTrace
+    hasHumanReviewerTrace &&
+    hasValidHumanDecisionTimestamp
 
   let reason: EcuLearningEligibility['reason'] = 'clear_for_learning'
   if (!hasValidReviewItemCount) reason = 'invalid_review_item_count'
@@ -69,6 +83,8 @@ export function evaluateEcuLearningEligibility(
   else if (!isHumanConfirmed) reason = 'awaiting_human_confirmation'
   else if (!hasHumanDecisionTrace) reason = 'missing_human_decision_trace'
   else if (!hasHumanReviewerTrace) reason = 'missing_human_reviewer_trace'
+  else if (!hasHumanDecisionTimestamp) reason = 'missing_human_decision_timestamp'
+  else if (!hasValidHumanDecisionTimestamp) reason = 'invalid_human_decision_timestamp'
 
   return {
     eligible,
@@ -77,6 +93,7 @@ export function evaluateEcuLearningEligibility(
     humanConfirmed: isHumanConfirmed,
     humanDecisionId: hasHumanDecisionTrace ? normalizedDecisionId : null,
     humanReviewerId: hasHumanReviewerTrace ? normalizedReviewerId : null,
+    humanDecisionAt: hasValidHumanDecisionTimestamp ? normalizedDecisionAt : null,
     policyVersion: ECU_LEARNING_POLICY.policyVersion,
     decisionAuthority: ECU_LEARNING_POLICY.decisionAuthority,
   }
