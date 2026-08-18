@@ -1,5 +1,5 @@
 export const ECU_LEARNING_POLICY = Object.freeze({
-  policyVersion: 1,
+  policyVersion: 2,
   decisionAuthority: 'laboratory_human',
   requiresHumanDecision: true,
   autoPromote: false,
@@ -11,8 +11,12 @@ export const ECU_LEARNING_POLICY = Object.freeze({
   requiresHumanDecisionTrace: true,
   requiresHumanReviewerTrace: true,
   requiresHumanDecisionTimestamp: true,
+  requiresIso8601DecisionTimestamp: true,
   invalidInputsFailClosed: true,
 } as const)
+
+const ISO_8601_TIMESTAMP_WITH_ZONE =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/
 
 export type EcuLearningEligibility = {
   eligible: boolean
@@ -64,11 +68,13 @@ export function evaluateEcuLearningEligibility(
   const hasHumanDecisionTrace = normalizedDecisionId.length > 0
   const hasHumanReviewerTrace = normalizedReviewerId.length > 0
   const hasHumanDecisionTimestamp = normalizedDecisionAt.length > 0
-  const parsedHumanDecisionTimestamp = hasHumanDecisionTimestamp
+  const hasStrictIso8601Timestamp =
+    hasHumanDecisionTimestamp && ISO_8601_TIMESTAMP_WITH_ZONE.test(normalizedDecisionAt)
+  const parsedHumanDecisionTimestamp = hasStrictIso8601Timestamp
     ? Date.parse(normalizedDecisionAt)
     : Number.NaN
   const hasValidHumanDecisionTimestamp =
-    hasHumanDecisionTimestamp && Number.isFinite(parsedHumanDecisionTimestamp)
+    hasStrictIso8601Timestamp && Number.isFinite(parsedHumanDecisionTimestamp)
   const isHumanConfirmed = humanConfirmed === true
   const eligible =
     hasNoReviewItems &&
