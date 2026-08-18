@@ -8,6 +8,7 @@ export const ECU_LEARNING_POLICY = Object.freeze({
   allowsFuzzyIdentityMatching: false,
   requiresZeroReviewItems: true,
   requiresExplicitHumanConfirmation: true,
+  requiresHumanDecisionTrace: true,
   invalidInputsFailClosed: true,
 } as const)
 
@@ -17,9 +18,11 @@ export type EcuLearningEligibility = {
     | 'clear_for_learning'
     | 'blocked_by_review_items'
     | 'awaiting_human_confirmation'
+    | 'missing_human_decision_trace'
     | 'invalid_review_item_count'
   reviewItemCount: number
   humanConfirmed: boolean
+  humanDecisionId: string | null
   policyVersion: typeof ECU_LEARNING_POLICY.policyVersion
   decisionAuthority: typeof ECU_LEARNING_POLICY.decisionAuthority
 }
@@ -34,6 +37,7 @@ export type EcuLearningEligibility = {
 export function evaluateEcuLearningEligibility(
   reviewItemCount: number,
   humanConfirmed = false,
+  humanDecisionId?: string | null,
 ): EcuLearningEligibility {
   const hasValidReviewItemCount =
     Number.isFinite(reviewItemCount) &&
@@ -42,18 +46,24 @@ export function evaluateEcuLearningEligibility(
 
   const safeReviewItemCount = hasValidReviewItemCount ? reviewItemCount : 1
   const hasNoReviewItems = hasValidReviewItemCount && safeReviewItemCount === 0
-  const eligible = hasNoReviewItems && humanConfirmed === true
+  const normalizedDecisionId =
+    typeof humanDecisionId === 'string' ? humanDecisionId.trim() : ''
+  const hasHumanDecisionTrace = normalizedDecisionId.length > 0
+  const isHumanConfirmed = humanConfirmed === true
+  const eligible = hasNoReviewItems && isHumanConfirmed && hasHumanDecisionTrace
 
   let reason: EcuLearningEligibility['reason'] = 'clear_for_learning'
   if (!hasValidReviewItemCount) reason = 'invalid_review_item_count'
   else if (!hasNoReviewItems) reason = 'blocked_by_review_items'
-  else if (!humanConfirmed) reason = 'awaiting_human_confirmation'
+  else if (!isHumanConfirmed) reason = 'awaiting_human_confirmation'
+  else if (!hasHumanDecisionTrace) reason = 'missing_human_decision_trace'
 
   return {
     eligible,
     reason,
     reviewItemCount: safeReviewItemCount,
-    humanConfirmed: humanConfirmed === true,
+    humanConfirmed: isHumanConfirmed,
+    humanDecisionId: hasHumanDecisionTrace ? normalizedDecisionId : null,
     policyVersion: ECU_LEARNING_POLICY.policyVersion,
     decisionAuthority: ECU_LEARNING_POLICY.decisionAuthority,
   }
