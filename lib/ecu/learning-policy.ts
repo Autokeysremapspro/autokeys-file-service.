@@ -1,4 +1,6 @@
 export const ECU_LEARNING_POLICY = Object.freeze({
+  policyVersion: 1,
+  decisionAuthority: 'laboratory_human',
   requiresHumanDecision: true,
   autoPromote: false,
   autoFix: false,
@@ -13,6 +15,8 @@ export type EcuLearningEligibility = {
   reason: 'clear_for_learning' | 'blocked_by_review_items' | 'awaiting_human_confirmation'
   reviewItemCount: number
   humanConfirmed: boolean
+  policyVersion: typeof ECU_LEARNING_POLICY.policyVersion
+  decisionAuthority: typeof ECU_LEARNING_POLICY.decisionAuthority
 }
 
 /**
@@ -42,5 +46,7 @@ export function evaluateEcuLearningEligibility(
     reason,
     reviewItemCount: safeReviewItemCount,
     humanConfirmed: humanConfirmed === true,
+    policyVersion: ECU_LEARNING_POLICY.policyVersion,
+    decisionAuthority: ECU_LEARNING_POLICY.decisionAuthority,
   }
 }
