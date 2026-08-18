@@ -249,9 +249,12 @@ export async function GET() {
     const summary = queue.reduce((acc: Record<string, number>, item) => { acc[item.review_type] = (acc[item.review_type] || 0) + 1; return acc }, {})
     const prioritySummary = queue.reduce((acc: Record<'high' | 'medium' | 'low', number>, item) => { acc[item.review_priority] += 1; return acc }, { high: 0, medium: 0, low: 0 })
     const affectedRuleIds = new Set(queue.map((item) => String(item.rule_id ?? ''))); affectedRuleIds.delete('')
-    const rulesScanned = (rules || []).length
-    const rulesBlockedFromLearning = affectedRuleIds.size
-    const rulesClearForLearning = Math.max(0, rulesScanned - rulesBlockedFromLearning)
+    const allRuleIds = (rules || []).map((rule) => String(rule.id ?? '')).filter(Boolean).sort((a, b) => a.localeCompare(b))
+    const blockedRuleIds = Array.from(affectedRuleIds).sort((a, b) => a.localeCompare(b))
+    const clearRuleIds = allRuleIds.filter((ruleId) => !affectedRuleIds.has(ruleId))
+    const rulesScanned = allRuleIds.length
+    const rulesBlockedFromLearning = blockedRuleIds.length
+    const rulesClearForLearning = clearRuleIds.length
 
     return NextResponse.json({
       ok: true,
@@ -266,6 +269,8 @@ export async function GET() {
       learning_gate: {
         rules_clear_for_learning: rulesClearForLearning,
         rules_blocked_from_learning: rulesBlockedFromLearning,
+        clear_rule_ids: clearRuleIds,
+        blocked_rule_ids: blockedRuleIds,
         requires_zero_review_items: true,
         auto_promote: false,
       },
