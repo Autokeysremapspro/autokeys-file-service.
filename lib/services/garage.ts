@@ -5,6 +5,8 @@ export type GarageHistorySummary = {
   ultimaFecha: string | null
   versionesHw: string[]
   versionesSw: string[]
+  cambioHwDetectado: boolean
+  cambioSwDetectado: boolean
   serviciosRecurrentes: string[]
   trabajosConMod: number
 }
@@ -81,6 +83,8 @@ function buildHistorySummary(sortedPedidos: FileServicePedido[]): GarageHistoryS
     ultimaFecha: last?.created_at || null,
     versionesHw,
     versionesSw,
+    cambioHwDetectado: versionesHw.length > 1,
+    cambioSwDetectado: versionesSw.length > 1,
     serviciosRecurrentes,
     trabajosConMod: sortedPedidos.filter((pedido) => Boolean(pedido.mod_path || pedido.mod_nombre)).length,
   }
