@@ -154,6 +154,44 @@ export default function GarageVehiclePage({ params }: { params: { key: string } 
                   <div className="mt-1 text-xs text-white/30">de {vehicle.trabajos} trabajos registrados</div>
                 </div>
               </div>
+
+              <div className="mt-4 grid gap-3 lg:grid-cols-[180px_180px_1fr]">
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-white/30">Cambios HW</div>
+                  <div className="mt-2 text-3xl font-black">{vehicle.historial.cambiosHw}</div>
+                  <div className="mt-1 text-xs text-white/30">confirmados</div>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-white/30">Cambios SW</div>
+                  <div className="mt-2 text-3xl font-black">{vehicle.historial.cambiosSw}</div>
+                  <div className="mt-1 text-xs text-white/30">confirmados</div>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-white/30">Último cambio técnico</div>
+                  {vehicle.historial.ultimoCambioTecnico ? (
+                    <Link href={`/pedidos/${vehicle.historial.ultimoCambioTecnico.pedidoId}`} className="mt-2 block rounded-xl border border-white/10 bg-white/[0.035] p-3 transition hover:border-red-400/35 hover:bg-white/[0.055]">
+                      <div className="text-sm font-black text-white/65">{vehicle.historial.ultimoCambioTecnico.campo}: {vehicle.historial.ultimoCambioTecnico.anterior} → {vehicle.historial.ultimoCambioTecnico.actual}</div>
+                      <div className="mt-1 text-xs text-white/30">{formatGarageDate(vehicle.historial.ultimoCambioTecnico.fecha)} · Ver pedido</div>
+                    </Link>
+                  ) : (
+                    <div className="mt-2 text-sm text-white/30">Sin cambios técnicos confirmados</div>
+                  )}
+                </div>
+              </div>
+
+              {vehicle.historial.cambiosTecnicos.length > 0 && (
+                <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-white/30">Trazabilidad técnica</div>
+                  <div className="mt-3 space-y-2">
+                    {[...vehicle.historial.cambiosTecnicos].reverse().map((change) => (
+                      <Link key={`${change.pedidoId}-${change.campo}-${change.anterior}-${change.actual}`} href={`/pedidos/${change.pedidoId}`} className="flex flex-col gap-1 rounded-xl border border-white/10 bg-white/[0.025] p-3 transition hover:border-red-400/35 hover:bg-white/[0.045] sm:flex-row sm:items-center sm:justify-between">
+                        <div className="text-sm font-black text-white/60">{change.campo}: {change.anterior} → {change.actual}</div>
+                        <div className="text-xs text-white/30">{formatGarageDate(change.fecha)} · Ver pedido</div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </AKCard>
 
             <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
