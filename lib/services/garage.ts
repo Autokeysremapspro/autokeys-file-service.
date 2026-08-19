@@ -1,5 +1,14 @@
 import { getMisPedidos, type FileServicePedido } from '@/lib/services/pedidos'
 
+export type GarageHistorySummary = {
+  primeraFecha: string | null
+  ultimaFecha: string | null
+  versionesHw: string[]
+  versionesSw: string[]
+  serviciosRecurrentes: string[]
+  trabajosConMod: number
+}
+
 export type GarageVehicle = {
   key: string
   marca: string
@@ -18,11 +27,18 @@ export type GarageVehicle = {
   ultimoNumero: string
   ultimaFecha: string | null
   servicios: string[]
+  historial: GarageHistorySummary
   pedidos: FileServicePedido[]
 }
 
 function clean(value?: string | null, fallback = 'Sin definir') {
   return value?.trim() || fallback
+}
+
+function cleanTechnicalValue(value?: string | null) {
+  const normalized = value?.trim()
+  if (!normalized) return null
+  return normalized
 }
 
 function makeVehicleKey(pedido: FileServicePedido) {
@@ -35,6 +51,39 @@ function makeVehicleKey(pedido: FileServicePedido) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
+}
+
+function buildHistorySummary(sortedPedidos: FileServicePedido[]): GarageHistorySummary {
+  const orderedOldestFirst = [...sortedPedidos].reverse()
+  const first = orderedOldestFirst[0]
+  const last = sortedPedidos[0]
+  const serviceFrequency = new Map<string, number>()
+
+  sortedPedidos.forEach((pedido) => {
+    ;(pedido.servicios || []).filter(Boolean).forEach((service) => {
+      serviceFrequency.set(service, (serviceFrequency.get(service) || 0) + 1)
+    })
+  })
+
+  const versionesHw = Array.from(
+    new Set(sortedPedidos.map((pedido) => cleanTechnicalValue(pedido.hw)).filter((value): value is string => Boolean(value))),
+  )
+  const versionesSw = Array.from(
+    new Set(sortedPedidos.map((pedido) => cleanTechnicalValue(pedido.sw)).filter((value): value is string => Boolean(value))),
+  )
+  const serviciosRecurrentes = Array.from(serviceFrequency.entries())
+    .filter(([, count]) => count > 1)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([service]) => service)
+
+  return {
+    primeraFecha: first?.created_at || null,
+    ultimaFecha: last?.created_at || null,
+    versionesHw,
+    versionesSw,
+    serviciosRecurrentes,
+    trabajosConMod: sortedPedidos.filter((pedido) => Boolean(pedido.mod_path || pedido.mod_nombre)).length,
+  }
 }
 
 export function formatGarageDate(date?: string | null) {
@@ -90,6 +139,7 @@ export async function getGarageVehicles() {
       ultimoNumero: last.numero || 'FS',
       ultimaFecha: last.created_at,
       servicios: services,
+      historial: buildHistorySummary(sorted),
       pedidos: sorted,
     }
   })
