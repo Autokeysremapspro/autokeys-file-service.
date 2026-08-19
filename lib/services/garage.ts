@@ -20,6 +20,9 @@ export type GarageHistorySummary = {
   cambiosSw: number
   ultimoCambioTecnico: GarageTechnicalChange | null
   serviciosRecurrentes: string[]
+  trabajosConOri: number
+  trabajosConHw: number
+  trabajosConSw: number
   trabajosConMod: number
 }
 
@@ -142,6 +145,9 @@ function buildHistorySummary(sortedPedidos: FileServicePedido[]): GarageHistoryS
     cambiosSw,
     ultimoCambioTecnico,
     serviciosRecurrentes,
+    trabajosConOri: sortedPedidos.filter((pedido) => Boolean(pedido.ori_path || pedido.ori_nombre)).length,
+    trabajosConHw: sortedPedidos.filter((pedido) => Boolean(cleanTechnicalValue(pedido.hw))).length,
+    trabajosConSw: sortedPedidos.filter((pedido) => Boolean(cleanTechnicalValue(pedido.sw))).length,
     trabajosConMod: sortedPedidos.filter((pedido) => Boolean(pedido.mod_path || pedido.mod_nombre)).length,
   }
 }
