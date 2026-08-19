@@ -1,5 +1,5 @@
 export const ECU_LEARNING_POLICY = Object.freeze({
-  policyVersion: 3,
+  policyVersion: 4,
   decisionAuthority: 'laboratory_human',
   requiresHumanDecision: true,
   autoPromote: false,
@@ -13,6 +13,7 @@ export const ECU_LEARNING_POLICY = Object.freeze({
   requiresHumanDecisionTimestamp: true,
   requiresIso8601DecisionTimestamp: true,
   requiresCalendarValidDecisionTimestamp: true,
+  rejectsFutureDecisionTimestamp: true,
   invalidInputsFailClosed: true,
 } as const)
 
@@ -49,6 +50,7 @@ export type EcuLearningEligibility = {
     | 'missing_human_reviewer_trace'
     | 'missing_human_decision_timestamp'
     | 'invalid_human_decision_timestamp'
+    | 'future_human_decision_timestamp'
     | 'invalid_review_item_count'
   reviewItemCount: number
   humanConfirmed: boolean
@@ -60,7 +62,7 @@ export type EcuLearningEligibility = {
 }
 
 /**
- * Pure safety gate for ECU learning.
+ * Safety gate for ECU learning.
  *
  * This helper never identifies an ECU, fixes a rule, promotes knowledge or
  * modifies an ECU file. It only answers whether already-reviewed knowledge is
@@ -98,13 +100,16 @@ export function evaluateEcuLearningEligibility(
     : Number.NaN
   const hasValidHumanDecisionTimestamp =
     hasCalendarValidTimestamp && Number.isFinite(parsedHumanDecisionTimestamp)
+  const isFutureHumanDecisionTimestamp =
+    hasValidHumanDecisionTimestamp && parsedHumanDecisionTimestamp > Date.now()
   const isHumanConfirmed = humanConfirmed === true
   const eligible =
     hasNoReviewItems &&
     isHumanConfirmed &&
     hasHumanDecisionTrace &&
     hasHumanReviewerTrace &&
-    hasValidHumanDecisionTimestamp
+    hasValidHumanDecisionTimestamp &&
+    !isFutureHumanDecisionTimestamp
 
   let reason: EcuLearningEligibility['reason'] = 'clear_for_learning'
   if (!hasValidReviewItemCount) reason = 'invalid_review_item_count'
@@ -114,6 +119,7 @@ export function evaluateEcuLearningEligibility(
   else if (!hasHumanReviewerTrace) reason = 'missing_human_reviewer_trace'
   else if (!hasHumanDecisionTimestamp) reason = 'missing_human_decision_timestamp'
   else if (!hasValidHumanDecisionTimestamp) reason = 'invalid_human_decision_timestamp'
+  else if (isFutureHumanDecisionTimestamp) reason = 'future_human_decision_timestamp'
 
   return {
     eligible,
@@ -122,7 +128,10 @@ export function evaluateEcuLearningEligibility(
     humanConfirmed: isHumanConfirmed,
     humanDecisionId: hasHumanDecisionTrace ? normalizedDecisionId : null,
     humanReviewerId: hasHumanReviewerTrace ? normalizedReviewerId : null,
-    humanDecisionAt: hasValidHumanDecisionTimestamp ? normalizedDecisionAt : null,
+    humanDecisionAt:
+      hasValidHumanDecisionTimestamp && !isFutureHumanDecisionTimestamp
+        ? normalizedDecisionAt
+        : null,
     policyVersion: ECU_LEARNING_POLICY.policyVersion,
     decisionAuthority: ECU_LEARNING_POLICY.decisionAuthority,
   }
