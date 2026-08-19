@@ -83,10 +83,11 @@ export async function createPayPalOrderForPedido(input: { userId: string; userEm
   return { approveUrl: approveUrl as string, pendienteId: pendiente.id as string }
 }
 
-export async function capturarYCrearPedido(pendienteId: string) {
+export async function capturarYCrearPedido(pendienteId: string, expectedUserId: string) {
   const supabase = getSupabaseAdmin()
   const { data: pendiente, error: fetchError } = await supabase.from('ak_pedidos_pendientes_pago').select('*').eq('id', pendienteId).single()
   if (fetchError) throw new Error(fetchError.message)
+  if (pendiente.user_id !== expectedUserId) throw new Error('No autorizado')
   if (pendiente.estado === 'pagado') {
     const pedidoId = pendiente.payload?.__pedido_id_creado
     if (!pedidoId) throw new Error('Pago marcado como completado sin pedido asociado')

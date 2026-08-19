@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { requireStaff } from '@/lib/supabase/server'
 
-// GET /api/diagnostico — ábrelo directamente en el navegador.
-// No expone ningún secreto (solo longitud/prefijo), pero prueba la clave
-// de verdad contra Supabase y te dice exactamente qué falla.
+// GET /api/diagnostico — solo staff autenticado.
+// Prueba la clave service_role de verdad contra Supabase y dice qué falla;
+// como eso confirma si esa clave sigue siendo válida, no puede ser público.
 export async function GET() {
+  try {
+    await requireStaff()
+  } catch {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY

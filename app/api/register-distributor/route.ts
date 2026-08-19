@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
 import { sendNotificationEmail } from '@/lib/email'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -19,9 +20,19 @@ function clean(value: unknown) {
 
 export async function POST(request: Request) {
   try {
+    // La cuenta se acaba de crear con supabase.auth.signUp() en el navegador,
+    // que sincroniza la sesión en cookies (ver lib/supabase.ts). No confiamos
+    // en el auth_user_id que manda el body: se verifica contra la sesión real,
+    // así nadie puede crear/sobrescribir la solicitud de otra cuenta.
+    const sessionClient = createServerSupabaseClient()
+    const { data: { user: sessionUser } } = await sessionClient.auth.getUser()
+    if (!sessionUser) {
+      return NextResponse.json({ error: 'Sesión requerida para enviar la solicitud' }, { status: 401 })
+    }
+
     const body = await request.json()
-    const authUserId = String(body.auth_user_id || '').trim()
-    const email = String(body.email || '').trim().toLowerCase()
+    const authUserId = sessionUser.id
+    const email = (sessionUser.email || '').trim().toLowerCase()
     const empresa = String(body.empresa || '').trim()
     const nombre = String(body.nombre || '').trim()
 
@@ -30,14 +41,6 @@ export async function POST(request: Request) {
     }
 
     const admin = adminClient()
-    const { data: authData, error: authError } = await admin.auth.admin.getUserById(authUserId)
-    if (authError || !authData.user) {
-      console.error('register-distributor: getUserById falló', authError?.message || 'sin usuario', { authUserId })
-      return NextResponse.json({ error: 'No se ha podido verificar la cuenta creada' }, { status: 400 })
-    }
-    if ((authData.user.email || '').toLowerCase() !== email) {
-      return NextResponse.json({ error: 'El email de la solicitud no coincide con la cuenta creada' }, { status: 400 })
-    }
 
     const payload = {
       auth_user_id: authUserId,
