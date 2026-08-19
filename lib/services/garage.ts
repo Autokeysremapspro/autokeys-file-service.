@@ -16,6 +16,9 @@ export type GarageHistorySummary = {
   cambioHwDetectado: boolean
   cambioSwDetectado: boolean
   cambiosTecnicos: GarageTechnicalChange[]
+  cambiosHw: number
+  cambiosSw: number
+  ultimoCambioTecnico: GarageTechnicalChange | null
   serviciosRecurrentes: string[]
   trabajosConMod: number
 }
@@ -119,6 +122,9 @@ function buildHistorySummary(sortedPedidos: FileServicePedido[]): GarageHistoryS
     new Set(sortedPedidos.map((pedido) => cleanTechnicalValue(pedido.sw)).filter((value): value is string => Boolean(value))),
   )
   const cambiosTecnicos = buildTechnicalChanges(orderedOldestFirst)
+  const cambiosHw = cambiosTecnicos.filter((change) => change.campo === 'HW').length
+  const cambiosSw = cambiosTecnicos.filter((change) => change.campo === 'SW').length
+  const ultimoCambioTecnico = cambiosTecnicos.at(-1) || null
   const serviciosRecurrentes = Array.from(serviceFrequency.entries())
     .filter(([, count]) => count > 1)
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
@@ -132,6 +138,9 @@ function buildHistorySummary(sortedPedidos: FileServicePedido[]): GarageHistoryS
     cambioHwDetectado: versionesHw.length > 1,
     cambioSwDetectado: versionesSw.length > 1,
     cambiosTecnicos,
+    cambiosHw,
+    cambiosSw,
+    ultimoCambioTecnico,
     serviciosRecurrentes,
     trabajosConMod: sortedPedidos.filter((pedido) => Boolean(pedido.mod_path || pedido.mod_nombre)).length,
   }
