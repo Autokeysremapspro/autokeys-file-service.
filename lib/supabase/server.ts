@@ -34,7 +34,7 @@ export async function requireStaff() {
     .eq('auth_user_id', user.id)
     .maybeSingle()
 
-  const esStaff = !!usuario && usuario.activo !== false && ['admin', 'desarrollo', 'atencion_cliente'].includes(usuario.rol)
+  const esStaff = !!usuario && usuario.activo !== false && ['admin', 'desarrollo', 'laboratorio', 'atencion_cliente'].includes(usuario.rol)
   if (!esStaff) throw new Error('No autorizado')
 
   return { user }
