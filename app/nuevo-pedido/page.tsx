@@ -12,6 +12,7 @@ import AKServiceCard, { type AKService } from '@/components/ak/AKServiceCard'
 import AKEcuDetectionSummary, { type AKEcuDetection } from '@/components/ak/AKEcuDetectionSummary'
 import { mergeVerifiedEcuPrefill } from '@/lib/ecu/safePrefill'
 import { crearPedidoFileService } from '@/lib/services/pedidos'
+import { extractDtcCodes } from '@/lib/dtc'
 import {
   FALLBACK_SERVICIOS,
   FAMILIAS,
@@ -176,8 +177,7 @@ export default function NuevoPedidoPage() {
     if (!vehicle.ecu.trim()) return setError('Añade la ECU. Si no la sabes, escribe “No sé / revisar”.')
     if (selected.length === 0) return setError('Selecciona al menos un servicio.')
     if (dtcOffSelected) {
-      const matches = dtcCodes.toUpperCase().match(/\b[PCBU][0-9A-F]{4,5}\b/g) || []
-      if (matches.length === 0) return setError('Para DTC OFF indica los códigos a eliminar separados por comas, por ejemplo P0401, P2002.')
+      if (extractDtcCodes(dtcCodes).length === 0) return setError('Para DTC OFF indica los códigos a eliminar separados por comas, por ejemplo P0401, P2002.')
     }
 
     setSending(true)

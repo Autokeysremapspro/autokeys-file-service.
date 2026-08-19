@@ -4,6 +4,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createPayPalOrderForPedido } from '@/lib/paypal'
 import { createSumUpOrderForPedido } from '@/lib/sumup'
 import { FALLBACK_SERVICIOS, type AkCloudServicio } from '@/lib/services/akCloudConfig'
+import { extractDtcCodes } from '@/lib/dtc'
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -14,9 +15,7 @@ function adminClient() {
 
 function normalizarDtcs(value: unknown, observaciones: unknown) {
   const explicit = Array.isArray(value) ? value.join(',') : String(value || '')
-  const source = `${explicit},${String(observaciones || '')}`.toUpperCase()
-  const matches = source.match(/\b[PCBU][0-9A-F]{4,5}\b/g) || []
-  return Array.from(new Set(matches.map((code) => code.trim())))
+  return extractDtcCodes(`${explicit},${String(observaciones || '')}`)
 }
 
 function normalizarMetodoLectura(value: unknown) {
