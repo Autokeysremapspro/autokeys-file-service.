@@ -8,6 +8,7 @@ export default function AKGarageVehicleCard({ vehicle }: { vehicle: GarageVehicl
   const open = vehicle.pendientes > 0
   const recurrent = vehicle.trabajos > 1
   const reusable = !open && vehicle.finalizados > 0
+  const hasConfirmedTechnicalChanges = vehicle.historial.cambiosHw + vehicle.historial.cambiosSw > 0
 
   return (
     <AKCard className="group relative overflow-hidden p-6 transition duration-300 hover:-translate-y-1 hover:border-red-400/45">
@@ -29,9 +30,19 @@ export default function AKGarageVehicleCard({ vehicle }: { vehicle: GarageVehicl
                 <Sparkles size={12} /> Historial listo
               </div>
             )}
+            {hasConfirmedTechnicalChanges && (
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-amber-200">
+                <Gauge size={12} /> Cambio técnico confirmado
+              </div>
+            )}
           </div>
           <h2 className="mt-4 text-2xl font-black tracking-tight">{name}</h2>
           <p className="mt-2 text-sm text-white/38">Último: {vehicle.ultimoTrabajo}</p>
+          {hasConfirmedTechnicalChanges && (
+            <p className="mt-2 text-xs font-bold text-amber-200/65">
+              Cambios registrados · HW {vehicle.historial.cambiosHw} · SW {vehicle.historial.cambiosSw}
+            </p>
+          )}
         </div>
         <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-red-400/20 bg-red-400/12 text-red-300 shadow-[0_0_32px_rgba(255,66,90,.22)]">
           <Car size={26} />
