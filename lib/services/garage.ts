@@ -120,6 +120,7 @@ export async function getGarageVehicles() {
     })
     const last = sorted[0]
     const services = Array.from(new Set(sorted.flatMap((pedido) => pedido.servicios || []))).filter(Boolean)
+    const latestServices = (last.servicios || []).filter(Boolean)
 
     return {
       key,
@@ -133,7 +134,7 @@ export async function getGarageVehicles() {
       trabajos: sorted.length,
       finalizados: sorted.filter((pedido) => pedido.estado === 'finalizado').length,
       pendientes: sorted.filter((pedido) => pedido.estado !== 'finalizado' && pedido.estado !== 'cancelado').length,
-      ultimoTrabajo: services.slice(0, 3).join(' + ') || 'Sin servicios',
+      ultimoTrabajo: latestServices.slice(0, 3).join(' + ') || 'Sin servicios',
       ultimoEstado: last.estado || 'pendiente',
       ultimoPedidoId: last.id,
       ultimoNumero: last.numero || 'FS',
