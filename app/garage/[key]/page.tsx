@@ -155,6 +155,30 @@ export default function GarageVehiclePage({ params }: { params: { key: string } 
                 </div>
               </div>
 
+              <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <div className="text-xs font-black uppercase tracking-[0.18em] text-white/30">Cobertura del historial</div>
+                    <div className="mt-1 text-sm text-white/38">Presencia confirmada en trabajos reales, sin completar datos ausentes por inferencia.</div>
+                  </div>
+                  <div className="text-xs text-white/25">Total: {vehicle.trabajos} trabajos</div>
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {[
+                    ['ORI', vehicle.historial.trabajosConOri],
+                    ['HW', vehicle.historial.trabajosConHw],
+                    ['SW', vehicle.historial.trabajosConSw],
+                    ['MOD', vehicle.historial.trabajosConMod],
+                  ].map(([label, count]) => (
+                    <div key={label} className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
+                      <div className="text-xs font-black uppercase tracking-[0.16em] text-white/30">{label}</div>
+                      <div className="mt-2 text-2xl font-black">{count}</div>
+                      <div className="mt-1 text-xs text-white/28">de {vehicle.trabajos}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="mt-4 grid gap-3 lg:grid-cols-[180px_180px_1fr]">
                 <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
                   <div className="text-xs font-black uppercase tracking-[0.18em] text-white/30">Cambios HW</div>
