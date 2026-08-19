@@ -1,5 +1,5 @@
 export const ECU_LEARNING_POLICY = Object.freeze({
-  policyVersion: 2,
+  policyVersion: 3,
   decisionAuthority: 'laboratory_human',
   requiresHumanDecision: true,
   autoPromote: false,
@@ -12,11 +12,32 @@ export const ECU_LEARNING_POLICY = Object.freeze({
   requiresHumanReviewerTrace: true,
   requiresHumanDecisionTimestamp: true,
   requiresIso8601DecisionTimestamp: true,
+  requiresCalendarValidDecisionTimestamp: true,
   invalidInputsFailClosed: true,
 } as const)
 
 const ISO_8601_TIMESTAMP_WITH_ZONE =
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/
+  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/
+
+function hasValidCalendarDate(timestamp: string): boolean {
+  const match = ISO_8601_TIMESTAMP_WITH_ZONE.exec(timestamp)
+  if (!match) return false
+
+  const year = Number(match[1])
+  const month = Number(match[2])
+  const day = Number(match[3])
+  const hour = Number(match[4])
+  const minute = Number(match[5])
+  const second = Number(match[6])
+
+  if (month < 1 || month > 12) return false
+  if (hour < 0 || hour > 23) return false
+  if (minute < 0 || minute > 59) return false
+  if (second < 0 || second > 59) return false
+
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate()
+  return day >= 1 && day <= daysInMonth
+}
 
 export type EcuLearningEligibility = {
   eligible: boolean
@@ -70,11 +91,13 @@ export function evaluateEcuLearningEligibility(
   const hasHumanDecisionTimestamp = normalizedDecisionAt.length > 0
   const hasStrictIso8601Timestamp =
     hasHumanDecisionTimestamp && ISO_8601_TIMESTAMP_WITH_ZONE.test(normalizedDecisionAt)
-  const parsedHumanDecisionTimestamp = hasStrictIso8601Timestamp
+  const hasCalendarValidTimestamp =
+    hasStrictIso8601Timestamp && hasValidCalendarDate(normalizedDecisionAt)
+  const parsedHumanDecisionTimestamp = hasCalendarValidTimestamp
     ? Date.parse(normalizedDecisionAt)
     : Number.NaN
   const hasValidHumanDecisionTimestamp =
-    hasStrictIso8601Timestamp && Number.isFinite(parsedHumanDecisionTimestamp)
+    hasCalendarValidTimestamp && Number.isFinite(parsedHumanDecisionTimestamp)
   const isHumanConfirmed = humanConfirmed === true
   const eligible =
     hasNoReviewItems &&
