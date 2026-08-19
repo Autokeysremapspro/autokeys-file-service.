@@ -116,6 +116,46 @@ export default function GarageVehiclePage({ params }: { params: { key: string } 
               </AKCard>
             </header>
 
+            <AKCard className="mb-6 p-6 md:p-7">
+              <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-red-300">Historial inteligente</p>
+                  <h2 className="mt-1 text-2xl font-black">Resumen técnico confirmado</h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-white/38">Derivado únicamente de los trabajos reales asociados a este vehículo. No se generan ni infieren identificadores ECU.</p>
+                </div>
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-white/28">Actividad {formatGarageDate(vehicle.historial.primeraFecha)} → {formatGarageDate(vehicle.historial.ultimaFecha)}</div>
+              </div>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-white/30">HW conocidos</div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {vehicle.historial.versionesHw.length ? vehicle.historial.versionesHw.map((value) => <span key={value} className="rounded-full bg-white/[0.05] px-3 py-1 text-xs font-black text-white/55">{value}</span>) : <span className="text-sm text-white/30">Sin datos confirmados</span>}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-white/30">SW conocidos</div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {vehicle.historial.versionesSw.length ? vehicle.historial.versionesSw.map((value) => <span key={value} className="rounded-full bg-white/[0.05] px-3 py-1 text-xs font-black text-white/55">{value}</span>) : <span className="text-sm text-white/30">Sin datos confirmados</span>}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-white/30">Servicios recurrentes</div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {vehicle.historial.serviciosRecurrentes.length ? vehicle.historial.serviciosRecurrentes.map((value) => <span key={value} className="rounded-full border border-red-400/20 bg-red-400/10 px-3 py-1 text-xs font-black text-red-300">{value}</span>) : <span className="text-sm text-white/30">Sin servicios repetidos</span>}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-white/30">Trabajos con MOD</div>
+                  <div className="mt-2 text-3xl font-black">{vehicle.historial.trabajosConMod}</div>
+                  <div className="mt-1 text-xs text-white/30">de {vehicle.trabajos} trabajos registrados</div>
+                </div>
+              </div>
+            </AKCard>
+
             <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
               <section className="space-y-6">
                 <AKCard className="p-6">
