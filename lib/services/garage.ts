@@ -1,5 +1,13 @@
 import { getMisPedidos, type FileServicePedido } from '@/lib/services/pedidos'
 
+export type GarageTechnicalChange = {
+  pedidoId: string
+  fecha: string | null
+  campo: 'HW' | 'SW'
+  anterior: string
+  actual: string
+}
+
 export type GarageHistorySummary = {
   primeraFecha: string | null
   ultimaFecha: string | null
@@ -7,6 +15,7 @@ export type GarageHistorySummary = {
   versionesSw: string[]
   cambioHwDetectado: boolean
   cambioSwDetectado: boolean
+  cambiosTecnicos: GarageTechnicalChange[]
   serviciosRecurrentes: string[]
   trabajosConMod: number
 }
@@ -55,6 +64,42 @@ function makeVehicleKey(pedido: FileServicePedido) {
     .replace(/^-+|-+$/g, '')
 }
 
+function buildTechnicalChanges(orderedOldestFirst: FileServicePedido[]) {
+  const changes: GarageTechnicalChange[] = []
+  let previousHw: string | null = null
+  let previousSw: string | null = null
+
+  orderedOldestFirst.forEach((pedido) => {
+    const currentHw = cleanTechnicalValue(pedido.hw)
+    const currentSw = cleanTechnicalValue(pedido.sw)
+
+    if (previousHw && currentHw && previousHw !== currentHw) {
+      changes.push({
+        pedidoId: pedido.id,
+        fecha: pedido.created_at || null,
+        campo: 'HW',
+        anterior: previousHw,
+        actual: currentHw,
+      })
+    }
+
+    if (previousSw && currentSw && previousSw !== currentSw) {
+      changes.push({
+        pedidoId: pedido.id,
+        fecha: pedido.created_at || null,
+        campo: 'SW',
+        anterior: previousSw,
+        actual: currentSw,
+      })
+    }
+
+    if (currentHw) previousHw = currentHw
+    if (currentSw) previousSw = currentSw
+  })
+
+  return changes
+}
+
 function buildHistorySummary(sortedPedidos: FileServicePedido[]): GarageHistorySummary {
   const orderedOldestFirst = [...sortedPedidos].reverse()
   const first = orderedOldestFirst[0]
@@ -73,6 +118,7 @@ function buildHistorySummary(sortedPedidos: FileServicePedido[]): GarageHistoryS
   const versionesSw = Array.from(
     new Set(sortedPedidos.map((pedido) => cleanTechnicalValue(pedido.sw)).filter((value): value is string => Boolean(value))),
   )
+  const cambiosTecnicos = buildTechnicalChanges(orderedOldestFirst)
   const serviciosRecurrentes = Array.from(serviceFrequency.entries())
     .filter(([, count]) => count > 1)
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
@@ -85,6 +131,7 @@ function buildHistorySummary(sortedPedidos: FileServicePedido[]): GarageHistoryS
     versionesSw,
     cambioHwDetectado: versionesHw.length > 1,
     cambioSwDetectado: versionesSw.length > 1,
+    cambiosTecnicos,
     serviciosRecurrentes,
     trabajosConMod: sortedPedidos.filter((pedido) => Boolean(pedido.mod_path || pedido.mod_nombre)).length,
   }
