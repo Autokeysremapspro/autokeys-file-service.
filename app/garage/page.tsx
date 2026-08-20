@@ -122,6 +122,9 @@ export default function GaragePage() {
               >
                 {onlyOpen ? `Mostrando vehículos con trabajos abiertos (${stats.vehiculosAbiertos})` : `Ver solo vehículos con trabajos abiertos (${stats.vehiculosAbiertos})`}
               </button>
+              <p className="px-1 text-xs font-semibold text-white/35" role="status" aria-live="polite">
+                {loading ? 'Actualizando garaje…' : hasActiveFilters ? `${filtered.length} de ${vehicles.length} vehículos visibles` : `${vehicles.length} vehículos en tu garaje`}
+              </p>
             </div>
           </div>
         </AKCard>
@@ -140,7 +143,7 @@ export default function GaragePage() {
             <AKCard className="p-6 text-center sm:p-10 md:col-span-2 2xl:col-span-3">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-red-400/12 text-red-300"><Car size={30} /></div>
               <h3 className="mt-5 break-words text-2xl font-black">Todavía no hay vehículos</h3>
-              <p className="mx-auto mt-2 max-w-lg text-sm text-white/40">Cuando crees pedidos, AK Cloud agrupará automáticamente tus trabajos por vehículo y ECU.</p>
+              <p className="mx-auto mt-2 max-w-lg text-sm text-white/40">Cuando crees pedidos con vehículo y ECU identificados, AK Cloud conservará y agrupará su historial técnico sin inferir datos faltantes.</p>
               <div className="mt-6"><AKButton href="/nuevo-pedido">Crear primer trabajo</AKButton></div>
             </AKCard>
           ) : filtered.length === 0 && hasActiveFilters ? (
