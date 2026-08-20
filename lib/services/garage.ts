@@ -48,6 +48,16 @@ export type GarageVehicle = {
   pedidos: FileServicePedido[]
 }
 
+const TECHNICAL_PLACEHOLDERS = new Set([
+  'ecu pendiente',
+  'ecu sin confirmar',
+  'hw pendiente',
+  'hw sin confirmar',
+  'sw pendiente',
+  'sw sin confirmar',
+  'sin definir',
+])
+
 function clean(value?: string | null, fallback = 'Sin definir') {
   return value?.trim() || fallback
 }
@@ -55,6 +65,7 @@ function clean(value?: string | null, fallback = 'Sin definir') {
 function cleanTechnicalValue(value?: string | null) {
   const normalized = value?.trim()
   if (!normalized) return null
+  if (TECHNICAL_PLACEHOLDERS.has(normalized.toLowerCase())) return null
   return normalized
 }
 
@@ -162,11 +173,13 @@ function buildHistorySummary(sortedPedidos: FileServicePedido[]): GarageHistoryS
 
 export function formatGarageDate(date?: string | null) {
   if (!date) return '—'
+  const parsed = new Date(date)
+  if (Number.isNaN(parsed.getTime())) return '—'
   return new Intl.DateTimeFormat('es-ES', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-  }).format(new Date(date))
+  }).format(parsed)
 }
 
 export function getVehicleDisplayName(vehicle: Pick<GarageVehicle, 'marca' | 'modelo' | 'motor'>) {
