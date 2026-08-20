@@ -45,7 +45,7 @@ export default function GarageVehicleLoading() {
               <Skeleton className="mt-3 h-8 w-full max-w-xs" />
               <Skeleton className="mt-3 h-4 w-full max-w-2xl" />
             </div>
-            <Skeleton className="h-3 w-48" />
+            <Skeleton className="h-3 w-48 max-w-full" />
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -60,6 +60,15 @@ export default function GarageVehicleLoading() {
             <Skeleton className="h-24" />
             <Skeleton className="h-24" />
             <Skeleton className="h-24" />
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+            <Skeleton className="h-3 w-36" />
+            <div className="mt-3 space-y-2">
+              {Array.from({ length: 2 }).map((_, index) => (
+                <Skeleton key={index} className="h-14 w-full" />
+              ))}
+            </div>
           </div>
         </AKCard>
 
