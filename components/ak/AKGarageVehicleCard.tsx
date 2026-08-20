@@ -3,18 +3,24 @@ import { ArrowRight, Car, CheckCircle2, Clock3, FileArchive, Gauge, Repeat2, Spa
 import AKCard from '@/components/ak/AKCard'
 import { formatGarageDate, getVehicleDisplayName, type GarageVehicle } from '@/lib/services/garage'
 
+function confirmedTechnicalValue(value: string | null | undefined, placeholder: string) {
+  const normalized = value?.trim()
+  if (!normalized || normalized === placeholder) return null
+  return normalized
+}
+
 export default function AKGarageVehicleCard({ vehicle }: { vehicle: GarageVehicle }) {
   const name = getVehicleDisplayName(vehicle)
   const open = vehicle.pendientes > 0
   const recurrent = vehicle.trabajos > 1
   const reusable = !open && vehicle.finalizados > 0
   const hasConfirmedTechnicalChanges = vehicle.historial.cambiosHw + vehicle.historial.cambiosSw > 0
-  const ecuLabel = vehicle.ecu?.trim() || 'ECU sin confirmar'
+  const ecuLabel = confirmedTechnicalValue(vehicle.ecu, 'ECU pendiente') || 'ECU sin confirmar'
   const lastJobLabel = vehicle.ultimoTrabajo?.trim() || 'Sin servicio registrado'
   const lastActivityLabel = vehicle.ultimaFecha ? formatGarageDate(vehicle.ultimaFecha) : 'Sin fecha registrada'
   const confirmedIdentifiers = [
-    { label: 'HW', value: vehicle.hw?.trim() },
-    { label: 'SW', value: vehicle.sw?.trim() },
+    { label: 'HW', value: confirmedTechnicalValue(vehicle.hw, 'HW pendiente') },
+    { label: 'SW', value: confirmedTechnicalValue(vehicle.sw, 'SW pendiente') },
   ].filter((item): item is { label: string; value: string } => Boolean(item.value))
 
   return (
