@@ -58,16 +58,24 @@ function cleanTechnicalValue(value?: string | null) {
   return normalized
 }
 
+function normalizeKeyPart(value?: string | null) {
+  const normalized = value?.trim().toLowerCase()
+  if (!normalized) return null
+  return normalized.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || null
+}
+
 function makeVehicleKey(pedido: FileServicePedido) {
-  return [
-    clean(pedido.marca, 'marca'),
-    clean(pedido.modelo, 'modelo'),
-    clean(pedido.ecu, 'ecu'),
-  ]
-    .join('__')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+  const marca = normalizeKeyPart(pedido.marca)
+  const modelo = normalizeKeyPart(pedido.modelo)
+  const ecu = normalizeKeyPart(pedido.ecu)
+
+  // No inferimos que dos pedidos pertenecen al mismo vehículo si faltan
+  // identificadores mínimos. En ese caso mantenemos el pedido aislado.
+  if (!marca || !modelo || !ecu) {
+    return `pedido-${normalizeKeyPart(pedido.id) || pedido.id}`
+  }
+
+  return `${marca}__${modelo}__${ecu}`
 }
 
 function buildTechnicalChanges(orderedOldestFirst: FileServicePedido[]) {
