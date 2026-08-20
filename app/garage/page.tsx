@@ -66,6 +66,7 @@ export default function GaragePage() {
       trabajos: vehicles.reduce((total, vehicle) => total + vehicle.trabajos, 0),
       finalizados: vehicles.reduce((total, vehicle) => total + vehicle.finalizados, 0),
       abiertos: vehicles.reduce((total, vehicle) => total + vehicle.pendientes, 0),
+      vehiculosAbiertos: vehicles.filter((vehicle) => vehicle.pendientes > 0).length,
     }
   }, [vehicles])
 
@@ -88,7 +89,7 @@ export default function GaragePage() {
           <GarageStat label="Vehículos" value={stats.vehicles} helper="Garage privado" glow="rgba(255,66,90,.14)" valueClass="" />
           <GarageStat label="Trabajos" value={stats.trabajos} helper="Historial acumulado" glow="rgba(34,211,238,.14)" valueClass="" />
           <GarageStat label="Finalizados" value={stats.finalizados} helper="MOD disponibles" glow="rgba(52,211,153,.14)" valueClass="text-emerald-300" />
-          <GarageStat label="Abiertos" value={stats.abiertos} helper="En cola o proceso" glow="rgba(245,158,11,.14)" valueClass="text-amber-300" />
+          <GarageStat label="Abiertos" value={stats.abiertos} helper="Trabajos en cola o proceso" glow="rgba(245,158,11,.14)" valueClass="text-amber-300" />
         </div>
 
         <AKCard className="ak5-gridline mt-6 overflow-hidden p-4 sm:p-5 md:p-6">
@@ -119,7 +120,7 @@ export default function GaragePage() {
                 aria-pressed={onlyOpen}
                 className={`w-full break-words rounded-2xl border px-4 py-3 text-left text-sm font-bold transition ${onlyOpen ? 'border-amber-400/35 bg-amber-400/10 text-amber-200' : 'border-white/10 bg-white/[0.025] text-white/50 hover:bg-white/[0.05] hover:text-white/75'}`}
               >
-                {onlyOpen ? `Mostrando vehículos con trabajos abiertos (${stats.abiertos})` : `Ver solo trabajos abiertos (${stats.abiertos})`}
+                {onlyOpen ? `Mostrando vehículos con trabajos abiertos (${stats.vehiculosAbiertos})` : `Ver solo vehículos con trabajos abiertos (${stats.vehiculosAbiertos})`}
               </button>
             </div>
           </div>
