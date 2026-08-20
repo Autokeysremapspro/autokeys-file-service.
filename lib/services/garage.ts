@@ -69,6 +69,12 @@ function cleanTechnicalValue(value?: string | null) {
   return normalized
 }
 
+function safeTimestamp(value?: string | null) {
+  if (!value) return 0
+  const timestamp = new Date(value).getTime()
+  return Number.isNaN(timestamp) ? 0 : timestamp
+}
+
 function normalizeKeyPart(value?: string | null) {
   const normalized = value?.trim().toLowerCase()
   if (!normalized) return null
@@ -200,11 +206,7 @@ export async function getGarageVehicles() {
   })
 
   const vehicles: GarageVehicle[] = Array.from(map.entries()).map(([key, vehiclePedidos]) => {
-    const sorted = [...vehiclePedidos].sort((a, b) => {
-      const aTime = a.created_at ? new Date(a.created_at).getTime() : 0
-      const bTime = b.created_at ? new Date(b.created_at).getTime() : 0
-      return bTime - aTime
-    })
+    const sorted = [...vehiclePedidos].sort((a, b) => safeTimestamp(b.created_at) - safeTimestamp(a.created_at))
     const last = sorted[0]
     const services = Array.from(new Set(sorted.flatMap((pedido) => pedido.servicios || []))).filter(Boolean)
     const latestServices = (last.servicios || []).filter(Boolean)
@@ -232,11 +234,7 @@ export async function getGarageVehicles() {
     }
   })
 
-  return vehicles.sort((a, b) => {
-    const aTime = a.ultimaFecha ? new Date(a.ultimaFecha).getTime() : 0
-    const bTime = b.ultimaFecha ? new Date(b.ultimaFecha).getTime() : 0
-    return bTime - aTime
-  })
+  return vehicles.sort((a, b) => safeTimestamp(b.ultimaFecha) - safeTimestamp(a.ultimaFecha))
 }
 
 export async function getGarageVehicle(key: string) {
