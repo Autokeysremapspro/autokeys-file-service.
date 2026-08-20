@@ -12,6 +12,10 @@ export default function AKGarageVehicleCard({ vehicle }: { vehicle: GarageVehicl
   const ecuLabel = vehicle.ecu?.trim() || 'ECU sin confirmar'
   const lastJobLabel = vehicle.ultimoTrabajo?.trim() || 'Sin servicio registrado'
   const lastActivityLabel = vehicle.ultimaFecha ? formatGarageDate(vehicle.ultimaFecha) : 'Sin fecha registrada'
+  const confirmedIdentifiers = [
+    { label: 'HW', value: vehicle.hw?.trim() },
+    { label: 'SW', value: vehicle.sw?.trim() },
+  ].filter((item): item is { label: string; value: string } => Boolean(item.value))
 
   return (
     <AKCard className="group relative overflow-hidden p-4 transition duration-300 hover:-translate-y-1 hover:border-red-400/45 sm:p-6">
@@ -41,6 +45,15 @@ export default function AKGarageVehicleCard({ vehicle }: { vehicle: GarageVehicl
           </div>
           <h2 className="mt-4 break-words text-xl font-black tracking-tight sm:text-2xl">{name}</h2>
           <p className="mt-2 break-words text-sm text-white/38">Último: {lastJobLabel}</p>
+          {confirmedIdentifiers.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2" aria-label="Identificadores técnicos confirmados">
+              {confirmedIdentifiers.map(({ label, value }) => (
+                <span key={label} className="max-w-full break-all rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-[11px] font-black text-white/45">
+                  {label} · {value}
+                </span>
+              ))}
+            </div>
+          )}
           {hasConfirmedTechnicalChanges && (
             <p className="mt-2 break-words text-xs font-bold text-amber-200/65">
               Cambios registrados · HW {vehicle.historial.cambiosHw} · SW {vehicle.historial.cambiosSw}
