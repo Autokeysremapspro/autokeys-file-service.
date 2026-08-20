@@ -10,6 +10,22 @@ import AKTimeline from '@/components/ak/AKTimeline'
 import { descargarArchivo, formatBytes, formatEstado, type FileServicePedido } from '@/lib/services/pedidos'
 import { formatGarageDate, getGarageVehicle, getVehicleDisplayName, type GarageVehicle } from '@/lib/services/garage'
 
+const VEHICLE_DETAIL_PLACEHOLDERS = new Set([
+  'sin definir',
+  'ecu pendiente',
+  'ecu sin confirmar',
+  'hw pendiente',
+  'hw sin confirmar',
+  'sw pendiente',
+  'sw sin confirmar',
+  'cv pendiente',
+])
+
+function isConfirmedVehicleDetail(value?: string | null): value is string {
+  const normalized = value?.trim()
+  return Boolean(normalized && !VEHICLE_DETAIL_PLACEHOLDERS.has(normalized.toLowerCase()))
+}
+
 async function downloadBlob(filename: string, bucket?: string | null, path?: string | null) {
   if (!bucket || !path) return
   const blob = await descargarArchivo(bucket, path)
@@ -99,7 +115,7 @@ export default function GarageVehiclePage({ params }: { params: { key: string } 
                   Historial completo de trabajos, servicios, archivos ORI/MOD y estados del vehículo.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-2">
-                  {[vehicle.ecu, vehicle.hw, vehicle.sw, vehicle.cv].map((item) => (
+                  {[vehicle.ecu, vehicle.hw, vehicle.sw, vehicle.cv].filter(isConfirmedVehicleDetail).map((item) => (
                     <span key={item} className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-black text-white/50">{item}</span>
                   ))}
                 </div>
