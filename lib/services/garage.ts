@@ -82,12 +82,13 @@ function normalizeKeyPart(value?: string | null) {
 }
 
 function makeVehicleKey(pedido: FileServicePedido) {
-  const marca = normalizeKeyPart(pedido.marca)
-  const modelo = normalizeKeyPart(pedido.modelo)
-  const ecu = normalizeKeyPart(pedido.ecu)
+  const marca = normalizeKeyPart(cleanTechnicalValue(pedido.marca))
+  const modelo = normalizeKeyPart(cleanTechnicalValue(pedido.modelo))
+  const ecu = normalizeKeyPart(cleanTechnicalValue(pedido.ecu))
 
   // No inferimos que dos pedidos pertenecen al mismo vehículo si faltan
-  // identificadores mínimos. En ese caso mantenemos el pedido aislado.
+  // identificadores mínimos o contienen placeholders. En ese caso
+  // mantenemos el pedido aislado para evitar agrupaciones falsas.
   if (!marca || !modelo || !ecu) {
     return `pedido-${normalizeKeyPart(pedido.id) || pedido.id}`
   }
