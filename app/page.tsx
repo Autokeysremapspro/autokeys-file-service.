@@ -97,9 +97,9 @@ export default function HomePage() {
 
       <section className="relative z-10 overflow-hidden">
         <div className="absolute inset-0 -z-10">
-          <img src="/images/marketing/hero-car.webp" alt="" className="h-full w-full object-cover object-[75%_50%] opacity-55" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#05070b] via-[#05070b]/75 to-[#05070b]/20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#05070b] via-transparent to-[#05070b]/60" />
+          <img src="/images/marketing/hero-car.webp" alt="" className="h-full w-full object-cover object-[65%_45%] opacity-90" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#05070b]/85 via-[#05070b]/35 to-[#05070b]/15" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#05070b] via-transparent to-[#05070b]/45" />
         </div>
         <div className="relative mx-auto grid min-h-[780px] max-w-[1480px] items-center gap-12 px-5 py-20 lg:grid-cols-[.92fr_1.08fr] lg:px-8">
         <div className="ak-v5-reveal">
