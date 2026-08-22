@@ -21,7 +21,7 @@ const highlights = [
 ]
 
 const services = [
-  { icon: Gauge, title: 'Stage 1 / Stage 2 / Stage 3', text: 'Potencia, par y eficiencia adaptados a cada motor.' },
+  { icon: Gauge, title: 'Stage 1 / Stage 2 / Stage 3', text: 'Potencia, par y eficiencia adaptados a cada motor.', image: '/images/marketing/service-stage.webp' },
   { icon: Filter, title: 'DPF / EGR / AdBlue / Lambda', text: 'Soluciones profesionales para sistemas de emisiones.' },
   { icon: Cpu, title: 'Immo Off y soluciones ECU', text: 'Eliminación de inmovilizador y soluciones electrónicas avanzadas.' },
   { icon: Download, title: 'Archivos listos para descargar', text: 'Archivos verificados y listos para instalar en tu cliente.' },
@@ -188,11 +188,19 @@ export default function HomePage() {
       <section id="servicios" className="relative z-10 mx-auto max-w-[1480px] px-5 py-24 lg:px-8">
         <div className="mb-10 text-center"><div className="ak-v5-kicker">Nuestros servicios</div></div>
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          {services.map(({ icon: Icon, title, text }) => (
-            <article key={title} className="ak-v5-card p-7">
-              <div className="grid h-12 w-12 place-items-center rounded-2xl border border-[#ff425a]/20 bg-[#ff425a]/10 text-[#ff8095]"><Icon /></div>
-              <h3 className="mt-7 text-xl font-bold tracking-tight">{title}</h3>
-              <p className="mt-3 leading-6 text-white/40">{text}</p>
+          {services.map(({ icon: Icon, title, text, image }) => (
+            <article key={title} className="ak-v5-card relative overflow-hidden p-7">
+              {image && (
+                <>
+                  <img src={image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#070a10] via-[#070a10]/75 to-[#070a10]/30" />
+                </>
+              )}
+              <div className="relative">
+                <div className="grid h-12 w-12 place-items-center rounded-2xl border border-[#ff425a]/20 bg-[#ff425a]/10 text-[#ff8095]"><Icon /></div>
+                <h3 className="mt-7 text-xl font-bold tracking-tight">{title}</h3>
+                <p className="mt-3 leading-6 text-white/40">{text}</p>
+              </div>
             </article>
           ))}
         </div>
