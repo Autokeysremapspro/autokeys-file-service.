@@ -22,7 +22,7 @@ const highlights = [
 
 const services = [
   { icon: Gauge, title: 'Stage 1 / Stage 2 / Stage 3', text: 'Potencia, par y eficiencia adaptados a cada motor.', image: '/images/marketing/service-stage.webp' },
-  { icon: Filter, title: 'DPF / EGR / AdBlue / Lambda', text: 'Soluciones profesionales para sistemas de emisiones.' },
+  { icon: Filter, title: 'DPF / EGR / AdBlue / Lambda', text: 'Soluciones profesionales para sistemas de emisiones.', image: '/images/marketing/service-dpf.webp' },
   { icon: Cpu, title: 'Immo Off y soluciones ECU', text: 'Eliminación de inmovilizador y soluciones electrónicas avanzadas.' },
   { icon: Download, title: 'Archivos listos para descargar', text: 'Archivos verificados y listos para instalar en tu cliente.' },
 ]
