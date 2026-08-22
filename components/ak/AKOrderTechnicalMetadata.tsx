@@ -87,7 +87,7 @@ export default function AKOrderTechnicalMetadata() {
               <div className="mt-4 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">Indica qué cambios contiene el archivo o qué hardware monta el vehículo para que el laboratorio pueda valorarlo correctamente.</div>
             )}
 
-            <button type="button" onClick={() => setOpen(false)} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-[#c9102b] to-[#ff425a] px-4 py-3 font-bold text-white">Guardar datos</button>
+            <button type="button" onClick={() => setOpen(false)} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-[#b8090f] to-[#ef1018] px-4 py-3 font-bold text-white">Guardar datos</button>
           </div>
         </div>
       )}

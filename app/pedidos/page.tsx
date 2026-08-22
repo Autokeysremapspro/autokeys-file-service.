@@ -44,7 +44,7 @@ export default function PedidosPage() {
     <AppShell>
       <div className="space-y-6">
         <section className="ak5-card ak5-gridline relative overflow-hidden rounded-[28px] p-6 sm:p-8">
-          <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full" style={{background:'radial-gradient(circle,rgba(255,66,90,.12),transparent 70%)'}}/>
+          <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full" style={{background:'radial-gradient(circle,rgba(239,16,24,.12),transparent 70%)'}}/>
           <div className="relative flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
             <div>
               <span className="ak5-chip border-red-400/20 bg-red-400/10 text-red-300"><Sparkles size={13}/> Workspace · Pedidos</span>
@@ -57,7 +57,7 @@ export default function PedidosPage() {
 
         <div className="grid gap-4 md:grid-cols-3">
           {[['En curso', abiertos, 'Trabajos activos', 'red'], ['Esperando', esperando, 'Pendientes de análisis', 'amber'], ['Finalizados', finalizados, 'Listos y archivados', 'green']].map(([label, value, helper, t]) => {
-            const glow: any = { red: 'rgba(255,66,90,.14)', amber: 'rgba(245,158,11,.14)', green: 'rgba(52,211,153,.14)' }
+            const glow: any = { red: 'rgba(239,16,24,.14)', amber: 'rgba(245,158,11,.14)', green: 'rgba(52,211,153,.14)' }
             return (
               <div key={String(label)} className="ak5-card relative overflow-hidden rounded-[22px] p-5">
                 <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full" style={{ background: `radial-gradient(circle,${glow[t as string]},transparent 70%)` }} />
@@ -102,7 +102,7 @@ export default function PedidosPage() {
               </div>
 
               <div className="mt-5 h-[7px] overflow-hidden rounded-full bg-white/[.055]">
-                <div className="h-full rounded-full bg-gradient-to-r from-[#ff425a] to-[#ff9a5a] shadow-[0_0_14px_rgba(255,66,90,.4)] transition-[width]" style={{ width: `${progress(pedido.estado)}%` }} />
+                <div className="h-full rounded-full bg-gradient-to-r from-[#ef1018] to-[#ff9a5a] shadow-[0_0_14px_rgba(239,16,24,.4)] transition-[width]" style={{ width: `${progress(pedido.estado)}%` }} />
               </div>
 
               <div className="mt-5 flex flex-wrap gap-2">

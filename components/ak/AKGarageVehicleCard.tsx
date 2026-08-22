@@ -66,7 +66,7 @@ export default function AKGarageVehicleCard({ vehicle }: { vehicle: GarageVehicl
             </p>
           )}
         </div>
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-red-400/20 bg-red-400/12 text-red-300 shadow-[0_0_32px_rgba(255,66,90,.22)] sm:h-14 sm:w-14">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-red-400/20 bg-red-400/12 text-red-300 shadow-[0_0_32px_rgba(239,16,24,.22)] sm:h-14 sm:w-14">
           <Car size={24} />
         </div>
       </div>

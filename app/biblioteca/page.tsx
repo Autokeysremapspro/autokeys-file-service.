@@ -69,7 +69,7 @@ export default function BibliotecaPage() {
     <AppShell>
       <div className="space-y-6">
         <section className="ak5-card ak5-gridline relative overflow-hidden rounded-[28px] p-6 sm:p-8">
-          <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full" style={{background:'radial-gradient(circle,rgba(255,66,90,.12),transparent 70%)'}}/>
+          <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full" style={{background:'radial-gradient(circle,rgba(239,16,24,.12),transparent 70%)'}}/>
           <div className="relative flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
             <div>
               <span className="ak5-chip border-red-400/20 bg-red-400/10 text-red-300"><Sparkles size={13}/> Private Technical Library</span>
@@ -84,7 +84,7 @@ export default function BibliotecaPage() {
         </section>
 
         <section className="grid gap-5 md:grid-cols-2 2xl:grid-cols-4">
-          <LibStat label="ORI" value={stats.ori} helper="Archivos originales" icon={Database} glow="rgba(255,66,90,.14)" valueClass="" />
+          <LibStat label="ORI" value={stats.ori} helper="Archivos originales" icon={Database} glow="rgba(239,16,24,.14)" valueClass="" />
           <LibStat label="MOD" value={stats.mod} helper="Archivos modificados" icon={DownloadCloud} glow="rgba(52,211,153,.14)" valueClass="text-emerald-300" />
           <LibStat label="ECU" value={stats.ecus} helper="Familias identificadas" icon={ShieldCheck} glow="rgba(34,211,238,.14)" valueClass="" />
           <LibStat label="Vehículos" value={stats.vehiculos} helper="Historial agrupado" icon={Archive} glow="rgba(168,85,247,.14)" valueClass="" />

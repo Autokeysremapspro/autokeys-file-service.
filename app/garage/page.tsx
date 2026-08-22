@@ -86,7 +86,7 @@ export default function GaragePage() {
         </header>
 
         <div className="grid gap-4 sm:gap-5 md:grid-cols-2 2xl:grid-cols-4">
-          <GarageStat label="Vehículos" value={stats.vehicles} helper="Garage privado" glow="rgba(255,66,90,.14)" valueClass="" />
+          <GarageStat label="Vehículos" value={stats.vehicles} helper="Garage privado" glow="rgba(239,16,24,.14)" valueClass="" />
           <GarageStat label="Trabajos" value={stats.trabajos} helper="Historial acumulado" glow="rgba(34,211,238,.14)" valueClass="" />
           <GarageStat label="Finalizados" value={stats.finalizados} helper="MOD disponibles" glow="rgba(52,211,153,.14)" valueClass="text-emerald-300" />
           <GarageStat label="Abiertos" value={stats.abiertos} helper="Trabajos en cola o proceso" glow="rgba(245,158,11,.14)" valueClass="text-amber-300" />

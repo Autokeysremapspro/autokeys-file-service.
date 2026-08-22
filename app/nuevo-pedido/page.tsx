@@ -326,7 +326,7 @@ export default function NuevoPedidoPage() {
                         onClick={() => setFamilia(f.slug)}
                         className={`flex items-center gap-2.5 rounded-2xl border px-4 py-3 text-sm font-bold transition ${
                           activa
-                            ? 'border-red-400/45 bg-red-400/[.12] text-white shadow-[0_0_28px_rgba(255,66,90,.18)]'
+                            ? 'border-red-400/45 bg-red-400/[.12] text-white shadow-[0_0_28px_rgba(239,16,24,.18)]'
                             : 'border-white/10 bg-black/20 text-white/55 hover:border-white/25 hover:text-white'
                         }`}
                       >
@@ -445,7 +445,7 @@ export default function NuevoPedidoPage() {
             <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-black/25 p-4"><input type="checkbox" checked={legalAccepted} onChange={(e)=>setLegalAccepted(e.target.checked)} className="mt-1 h-5 w-5"/><span className="font-semibold">He leído, comprendo y acepto estas condiciones y asumo la responsabilidad del uso solicitado.</span></label>
             <div className="mt-6 flex gap-3">
               <button onClick={()=>setLegalOpen(false)} className="flex-1 rounded-2xl border border-white/10 px-4 py-3 font-bold">Cancelar</button>
-              <button disabled={!legalAccepted} onClick={()=>setLegalOpen(false)} className="flex-1 rounded-2xl bg-gradient-to-r from-[#c9102b] to-[#ff425a] px-4 py-3 font-bold text-white disabled:opacity-40">Aceptar y continuar</button>
+              <button disabled={!legalAccepted} onClick={()=>setLegalOpen(false)} className="flex-1 rounded-2xl bg-gradient-to-r from-[#b8090f] to-[#ef1018] px-4 py-3 font-bold text-white disabled:opacity-40">Aceptar y continuar</button>
             </div>
           </div>
         </div>

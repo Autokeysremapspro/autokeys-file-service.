@@ -119,7 +119,7 @@ export default function SoportePage() {
     <AppShell>
       <div className="space-y-7">
         <section className="ak5-card ak5-gridline relative overflow-hidden rounded-[28px] p-6 lg:p-8">
-          <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full" style={{background:'radial-gradient(circle,rgba(255,66,90,.14),transparent 70%)'}}/>
+          <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full" style={{background:'radial-gradient(circle,rgba(239,16,24,.14),transparent 70%)'}}/>
           <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <span className="ak5-chip border-red-400/20 bg-red-400/10 text-red-300"><Headphones size={15} /> AK Cloud Support</span>
@@ -133,7 +133,7 @@ export default function SoportePage() {
         </section>
 
         <section className="grid gap-4 md:grid-cols-3">
-          <StatCard icon={<Ticket size={20} />} label="Tickets abiertos" value={abiertos} glow="rgba(255,66,90,.14)" />
+          <StatCard icon={<Ticket size={20} />} label="Tickets abiertos" value={abiertos} glow="rgba(239,16,24,.14)" />
           <StatCard icon={<Sparkles size={20} />} label="Respondidos" value={respondidos} glow="rgba(52,211,153,.14)" />
           <StatCard icon={<ShieldCheck size={20} />} label="Prioridad alta" value={urgentes} glow="rgba(245,158,11,.14)" />
         </section>
