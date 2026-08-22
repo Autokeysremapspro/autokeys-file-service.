@@ -35,6 +35,7 @@ export async function POST(request: Request) {
     const email = (sessionUser.email || '').trim().toLowerCase()
     const empresa = String(body.empresa || '').trim()
     const nombre = String(body.nombre || '').trim()
+    const mensaje = clean(body.mensaje)
 
     if (!authUserId || !email || !empresa || !nombre) {
       return NextResponse.json({ error: 'Faltan datos obligatorios de la solicitud' }, { status: 400 })
@@ -92,7 +93,7 @@ export async function POST(request: Request) {
     await admin.from('notificaciones').insert({
       usuario_id: null,
       titulo: 'Nueva solicitud de distribuidor AK Cloud',
-      mensaje: `${empresa} (${nombre}) ha solicitado acceso como distribuidor.`,
+      mensaje: `${empresa} (${nombre}) ha solicitado acceso como distribuidor.${mensaje ? `\n\nMensaje: ${mensaje}` : ''}`,
       modulo: 'ak_cloud',
       tipo: 'info',
       prioridad: 'normal',
@@ -101,7 +102,7 @@ export async function POST(request: Request) {
     })
 
     await sendWhatsAppNotification(
-      `🆕 Nueva solicitud AK Cloud\n${empresa} (${nombre})\n${email}${clean(body.ciudad) ? `\nCiudad: ${body.ciudad}` : ''}${clean(body.especialidad) ? `\nEspecialidad: ${body.especialidad}` : ''}\n\nRevisar: ${process.env.NEXT_PUBLIC_CORE_URL ? `${process.env.NEXT_PUBLIC_CORE_URL}/ak-cloud/solicitudes` : '/ak-cloud/solicitudes'}`
+      `🆕 Nueva solicitud AK Cloud\n${empresa} (${nombre})\n${email}${clean(body.ciudad) ? `\nCiudad: ${body.ciudad}` : ''}${clean(body.especialidad) ? `\nEspecialidad: ${body.especialidad}` : ''}${mensaje ? `\nMensaje: ${mensaje}` : ''}\n\nRevisar: ${process.env.NEXT_PUBLIC_CORE_URL ? `${process.env.NEXT_PUBLIC_CORE_URL}/ak-cloud/solicitudes` : '/ak-cloud/solicitudes'}`
     )
 
     if (process.env.STAFF_NOTIFICATION_EMAIL) {
@@ -109,7 +110,7 @@ export async function POST(request: Request) {
         to: process.env.STAFF_NOTIFICATION_EMAIL,
         subject: `Nueva solicitud de distribuidor: ${empresa}`,
         title: 'Nueva solicitud de distribuidor',
-        bodyHtml: `<b>${empresa}</b> (${nombre}, ${email}) ha solicitado acceso como distribuidor en AK Cloud.${clean(body.ciudad) ? `<br>Ciudad: ${body.ciudad}` : ''}${clean(body.especialidad) ? `<br>Especialidad: ${body.especialidad}` : ''}`,
+        bodyHtml: `<b>${empresa}</b> (${nombre}, ${email}) ha solicitado acceso como distribuidor en AK Cloud.${clean(body.ciudad) ? `<br>Ciudad: ${body.ciudad}` : ''}${clean(body.especialidad) ? `<br>Especialidad: ${body.especialidad}` : ''}${mensaje ? `<br>Mensaje: ${mensaje}` : ''}`,
         ctaHref: process.env.NEXT_PUBLIC_CORE_URL ? `${process.env.NEXT_PUBLIC_CORE_URL}/ak-cloud/solicitudes` : undefined,
         ctaLabel: 'Revisar solicitud',
       })
