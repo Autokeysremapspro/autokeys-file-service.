@@ -10,6 +10,22 @@ const config: Config = {
       },
       colors: {
         ink: '#0A0D12',
+        // AK Cloud brand red — replaces Tailwind's default pink-leaning red scale so every
+        // red-300/400/500/etc. utility across the authenticated portal (buttons, active nav,
+        // badges, borders) renders the true brand red from the new mockups, not the stock hue.
+        red: {
+          50: '#fff2f2',
+          100: '#ffe1e2',
+          200: '#ffc5c6',
+          300: '#ff8f92',
+          400: '#ff1924',
+          500: '#ef1018',
+          600: '#c20d13',
+          700: '#97090e',
+          800: '#6e070a',
+          900: '#4a0507',
+          950: '#2b0304',
+        },
         copper: {
           DEFAULT: '#E2954D',
           bright: '#FFB870',
