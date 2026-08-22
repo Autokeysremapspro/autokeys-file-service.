@@ -4,9 +4,9 @@ import { notFound } from 'next/navigation'
 import { ArrowRight, CheckCircle2, FileUp, Wrench } from 'lucide-react'
 
 const tools = {
-  kess3: { name: 'KESS3', maker: 'Alientech', title: 'KESS3 File Service' },
-  flex: { name: 'FLEX', maker: 'Magicmotorsport', title: 'FLEX File Service' },
-  autotuner: { name: 'AutoTuner', maker: 'AutoTuner', title: 'AutoTuner File Service' },
+  kess3: { name: 'KESS3', maker: 'Alientech', title: 'KESS3 File Service', enUrl: '/en/file-service-tools/kess3' },
+  flex: { name: 'FLEX', maker: 'Magicmotorsport', title: 'FLEX File Service', enUrl: '/en/file-service-tools/flex' },
+  autotuner: { name: 'AutoTuner', maker: 'AutoTuner', title: 'AutoTuner File Service', enUrl: '/en/ecu-file-service/autotuner' },
 } as const
 
 type ToolKey = keyof typeof tools
@@ -20,7 +20,10 @@ export async function generateMetadata({ params }: { params: Promise<{ tool: str
   return {
     title: `${item.title} para profesionales | AK Cloud`,
     description: `File service para profesionales que trabajan con ${item.name}. Sube el ORI obtenido con tu herramienta compatible y gestiona la solicitud y entrega del MOD en AK Cloud.`,
-    alternates: { canonical: `/file-service-herramientas/${tool}` },
+    alternates: {
+      canonical: `/file-service-herramientas/${tool}`,
+      languages: { es: `/file-service-herramientas/${tool}`, en: item.enUrl, 'x-default': `/file-service-herramientas/${tool}` },
+    },
   }
 }
 

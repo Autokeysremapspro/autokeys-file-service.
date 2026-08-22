@@ -65,9 +65,30 @@ const footerColumns = [
   { title: 'Soporte', links: [['Contacto', '#contacto'], ['Soporte técnico', '/soporte'], ['Preguntas frecuentes', '#faq']] },
 ]
 
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'AK Cloud',
+    alternateName: 'Autokeys Remaps Pro',
+    url: 'https://akcloud.es',
+    logo: 'https://akcloud.es/images/brand/ak-cloud-logo.webp',
+    description: 'Portal profesional de File Service para reprogramación ECU: Stage 1, Stage 2, EGR/DPF/AdBlue OFF e Immo Off para talleres y distribuidores.',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'AK Cloud',
+    url: 'https://akcloud.es',
+    inLanguage: 'es-ES',
+    publisher: { '@type': 'Organization', name: 'Autokeys Remaps Pro' },
+  },
+]
+
 export default function HomePage() {
   return (
     <main className="akhome ak-v5-bg min-h-screen overflow-hidden text-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <header className="ak-v5-topbar sticky top-0 z-50">
         <div className="mx-auto flex max-w-[1480px] items-center justify-between px-5 py-4 lg:px-8">
           <Link href="/" className="flex items-center">
@@ -97,7 +118,7 @@ export default function HomePage() {
 
       <section className="relative z-10 overflow-hidden">
         <div className="absolute inset-0 -z-10">
-          <img src="/images/marketing/hero-car.webp" alt="" className="h-full w-full object-cover object-[65%_45%] opacity-90" />
+          <img src="/images/marketing/hero-car.webp" alt="" fetchPriority="high" className="h-full w-full object-cover object-[65%_45%] opacity-90" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#05070b]/85 via-[#05070b]/35 to-[#05070b]/15" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#05070b] via-transparent to-[#05070b]/45" />
         </div>
@@ -206,7 +227,7 @@ export default function HomePage() {
             <article key={title} className="ak-v5-card relative overflow-hidden p-7">
               {image && (
                 <>
-                  <img src={image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35" />
+                  <img src={image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-35" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#070a10] via-[#070a10]/75 to-[#070a10]/30" />
                 </>
               )}
@@ -289,7 +310,7 @@ export default function HomePage() {
             </div>
             <div className="relative mt-8">
               <div className="absolute -inset-10 -z-10 rounded-full bg-[#ff2b2b]/10 blur-[90px]" />
-              <img src="/images/marketing/dashboard-devices.webp" alt="AK Cloud en laptop y tablet" className="w-full rounded-[24px]" />
+              <img src="/images/marketing/dashboard-devices.webp" alt="AK Cloud en laptop y tablet" loading="lazy" className="w-full rounded-[24px]" />
             </div>
           </div>
         </div>
@@ -315,7 +336,7 @@ export default function HomePage() {
       <footer id="contacto" className="relative z-10 border-t border-white/[.07]">
         <div className="mx-auto grid max-w-[1480px] gap-10 px-5 py-14 lg:grid-cols-[1.3fr_.8fr_.8fr_.8fr_1fr] lg:px-8">
           <div>
-            <img src="/images/brand/ak-cloud-logo.webp" alt="AK Cloud by Autokeys Remaps Pro" className="h-9 w-auto" />
+            <img src="/images/brand/ak-cloud-logo.webp" alt="AK Cloud by Autokeys Remaps Pro" loading="lazy" className="h-9 w-auto" />
             <p className="mt-4 max-w-xs text-sm leading-6 text-white/35">Plataforma profesional de File Service para talleres y expertos en electrónica.</p>
           </div>
           {footerColumns.map(col => (

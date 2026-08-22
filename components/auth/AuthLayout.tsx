@@ -13,6 +13,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <img
           src="/images/marketing/auth-car-black.webp"
           alt=""
+          fetchPriority="high"
           className="h-full w-full object-cover object-[12%_50%]"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-black/25 to-black/85" />

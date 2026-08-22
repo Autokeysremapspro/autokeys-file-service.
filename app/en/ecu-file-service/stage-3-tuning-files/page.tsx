@@ -5,7 +5,7 @@ import { ArrowRight, CheckCircle2, Gauge, Settings2 } from 'lucide-react'
 export const metadata: Metadata = {
   title: 'Stage 3 ECU Tuning Files | Professional File Service | AK Cloud',
   description: 'Stage 3 ECU tuning files for professional workshops and tuners with modified vehicles. Submit the ORI and full hardware specification through AK Cloud.',
-  alternates: { canonical: '/en/ecu-file-service/stage-3-tuning-files', languages: { en: '/en/ecu-file-service/stage-3-tuning-files', es: '/ecu-file-service/stage-3-tuning-files', 'x-default': '/ecu-file-service/stage-3-tuning-files' } },
+  alternates: { canonical: '/en/ecu-file-service/stage-3-tuning-files', languages: { en: '/en/ecu-file-service/stage-3-tuning-files', 'x-default': '/en/ecu-file-service/stage-3-tuning-files' } },
 }
 
 export default function Page() {

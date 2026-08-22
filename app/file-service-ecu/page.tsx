@@ -5,7 +5,7 @@ import { ArrowRight, CheckCircle2, Clock3, Euro, FileUp, ShieldCheck, Wrench } f
 export const metadata: Metadata = {
   title: 'ECU File Service para talleres | Sin créditos ni suscripción',
   description: 'File service ECU profesional para talleres y preparadores. Sube tu archivo ORI, selecciona el servicio, conoce el precio y recibe tu MOD. Sin créditos ni suscripciones.',
-  alternates: { canonical: '/file-service-ecu' },
+  alternates: { canonical: '/file-service-ecu', languages: { es: '/file-service-ecu', en: '/en/ecu-file-service', 'x-default': '/file-service-ecu' } },
   openGraph: { title: 'ECU File Service profesional | AK Cloud', description: 'Archivos ECU para profesionales con precio por trabajo, soporte técnico e historial de versiones.', url: '/file-service-ecu' },
 }
 

@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ family: s
   return {
     title,
     description: item.description,
-    alternates: { canonical: url },
+    alternates: { canonical: url, languages: { es: url, en: `/en/ecu-file-service/${family}`, 'x-default': url } },
     openGraph: {
       type: 'website',
       title,

@@ -5,7 +5,7 @@ import { ArrowRight, CheckCircle2, Gauge, FileUp } from 'lucide-react'
 export const metadata: Metadata = {
   title: 'Petrol ECU Tuning Files | Professional File Service | AK Cloud',
   description: 'Petrol ECU tuning files for professional workshops and tuners. Upload the original ECU read and manage performance calibration requests through AK Cloud.',
-  alternates: { canonical: '/en/ecu-file-service/petrol-tuning-files', languages: { en: '/en/ecu-file-service/petrol-tuning-files', es: '/ecu-file-service/petrol-tuning-files', 'x-default': '/ecu-file-service/petrol-tuning-files' } },
+  alternates: { canonical: '/en/ecu-file-service/petrol-tuning-files', languages: { en: '/en/ecu-file-service/petrol-tuning-files', 'x-default': '/en/ecu-file-service/petrol-tuning-files' } },
 }
 
 export default function Page() {
