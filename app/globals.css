@@ -435,6 +435,15 @@ table tbody tr{transition:background .2s} table tbody tr:hover{background:rgba(2
 @media(max-width:768px){.ak-v5-card{border-radius:18px}.ak-v5-title{line-height:1}.ak-v5-button,.ak-v5-button-secondary{width:100%}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
 
+/* AK Cloud homepage (app/page.tsx) — mockup-accurate palette overrides.
+   Scoped to .akhome so the ~30 other pages sharing .ak-v5-* keep their current look. */
+.akhome.ak-v5-bg{background:
+  radial-gradient(900px 520px at 7% -5%,rgba(255,43,43,.18),transparent 62%),
+  radial-gradient(760px 480px at 96% 16%,rgba(255,43,43,.08),transparent 64%),
+  linear-gradient(180deg,#050505 0%,#0a0808 48%,#050505 100%)}
+.akhome .ak-v5-card{background:linear-gradient(150deg,rgba(20,17,17,.86),rgba(8,7,7,.86))}
+.akhome .ak-v5-glass{background:linear-gradient(145deg,rgba(24,19,19,.8),rgba(10,8,8,.76))}
+
 /* =========================================================
    AK CLOUD WORKSPACE V6 — LIVING PREMIUM INTERFACE
    ========================================================= */

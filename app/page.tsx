@@ -67,7 +67,7 @@ const footerColumns = [
 
 export default function HomePage() {
   return (
-    <main className="ak-v5-bg min-h-screen overflow-hidden text-white">
+    <main className="akhome ak-v5-bg min-h-screen overflow-hidden text-white">
       <header className="ak-v5-topbar sticky top-0 z-50">
         <div className="mx-auto flex max-w-[1480px] items-center justify-between px-5 py-4 lg:px-8">
           <Link href="/" className="flex items-center">
@@ -199,8 +199,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="servicios" className="relative z-10 mx-auto max-w-[1480px] px-5 py-24 lg:px-8">
-        <div className="mb-10 text-center"><div className="ak-v5-kicker !text-[#ff2b2b]">Nuestros servicios</div></div>
+      <section id="servicios" className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
+        <div className="mb-8 text-center"><div className="ak-v5-kicker !text-[#ff2b2b]">Nuestros servicios</div></div>
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {services.map(({ icon: Icon, title, text, image }) => (
             <article key={title} className="ak-v5-card relative overflow-hidden p-7">
@@ -220,8 +220,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="como-funciona" className="relative z-10 mx-auto max-w-[1480px] px-5 py-20 lg:px-8">
-        <div className="mb-14 text-center"><div className="ak-v5-kicker !text-[#ff2b2b]">Cómo funciona</div></div>
+      <section id="como-funciona" className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
+        <div className="mb-9 text-center"><div className="ak-v5-kicker !text-[#ff2b2b]">Cómo funciona</div></div>
         <div className="relative grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           <div className="pointer-events-none absolute inset-x-[12%] top-[70px] hidden border-t border-dashed border-white/15 xl:block" />
           {steps.map(({ n, icon: Icon, title, text }) => (
@@ -237,7 +237,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="relative z-10 mx-auto max-w-[1480px] px-5 py-20 lg:px-8">
+      <section className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-[1.05fr_.95fr]">
           <div className="ak-v5-card p-7 sm:p-8">
             <div className="flex items-center justify-between">
@@ -295,7 +295,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="precios" className="relative z-10 mx-auto max-w-[1480px] px-5 pb-24 pt-6 lg:px-8">
+      <section id="precios" className="relative z-10 mx-auto max-w-[1480px] px-5 pb-16 pt-2 lg:px-8">
         <div className="ak-v5-card relative overflow-hidden p-8 sm:p-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_100%,rgba(255,43,43,.18),transparent_55%)]" />
           <div className="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
