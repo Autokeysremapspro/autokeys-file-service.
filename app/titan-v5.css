@@ -102,3 +102,9 @@ html[data-ak-theme='light'] .ak5-shell [class*='text-emerald-300']{color:#047857
 .ak5-shell .ak5-primary:hover{box-shadow:0 18px 42px rgba(239,16,24,.4)}
 .ak5-shell .ak5-nav-active{background:linear-gradient(90deg,rgba(239,16,24,.17),rgba(239,16,24,.035));box-shadow:inset 3px 0 0 var(--ak5-red)}
 html[data-ak-theme='light'] .ak5-shell{--ak5-red:#ef1018;--ak5-red2:#b8090f;--ak-red:#ef1018;--ak-glow:#d10d15;--ak-copper:#ef1018;--ak-copper-bright:#ff1924}
+.ak5-shell{background:
+  radial-gradient(circle at 70% -15%,rgba(239,16,24,.10),transparent 32%),
+  radial-gradient(circle at 18% 0%,rgba(239,16,24,.08),transparent 28%),
+  linear-gradient(180deg,#050607,#030405 70%)}
+.ak5-shell .ak5-topbar{background:rgba(5,6,7,.84)}
+.ak5-shell .ak5-sidebar{background:linear-gradient(180deg,#06070a 0%,#050607 100%)}
