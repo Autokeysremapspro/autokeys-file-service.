@@ -1,10 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
-import { ArrowRight, Eye, Lock, Mail } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import AuthLayout from '@/components/auth/AuthLayout'
+import AuthCard, { AuthButton } from '@/components/auth/AuthCard'
+import { AuthInput } from '@/components/auth/AuthInput'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -41,33 +45,97 @@ export default function LoginPage() {
     toast.success(`Te hemos enviado un email a ${email} para restablecer tu contraseña.`)
   }
 
+  function oauthProximamente(provider: string) {
+    toast(`El acceso con ${provider} todavía no está disponible. Usa tu email y contraseña.`)
+  }
+
   return (
-    <main className="ak-v5-bg min-h-screen text-white">
-      <section className="relative z-10 grid min-h-screen lg:grid-cols-[1.2fr_.8fr]">
-        <div className="relative hidden overflow-hidden bg-[#05070a] lg:block">
-          <img src="/images/login/ak-login-hero.webp" alt="Autokeys Remaps Pro" className="absolute inset-0 h-full w-full object-contain" />
-          <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-r from-transparent to-[#05070a]" />
+    <AuthLayout>
+      <AuthCard>
+        <h2 className="text-[28px] font-bold text-white">Iniciar sesión</h2>
+        <p className="mt-2 text-[15px] text-[#92939a]">Accede a tu cuenta de AK Cloud</p>
+
+        <form onSubmit={login} className="mt-8 space-y-5">
+          <AuthInput
+            icon={Mail}
+            label="Correo electrónico"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="tu@email.com"
+            required
+            autoComplete="email"
+          />
+          <AuthInput
+            icon={Lock}
+            label="Contraseña"
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••••••"
+            required
+            autoComplete="current-password"
+            rightSlot={
+              <button type="button" onClick={() => setShowPassword((v) => !v)} className="text-[#85868c] transition hover:text-white" aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            }
+          />
+
+          <div className="flex items-center justify-between text-sm">
+            <label className="flex items-center gap-2 text-[#92939a]">
+              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="h-4 w-4 accent-[#ef1018]" />
+              Recordarme
+            </label>
+            <button type="button" disabled={sendingReset} onClick={recuperarContrasena} className="font-medium text-[#ef1018] transition hover:text-[#ff1c25] disabled:opacity-60">
+              {sendingReset ? 'Enviando...' : '¿Olvidaste tu contraseña?'}
+            </button>
+          </div>
+
+          <AuthButton type="submit" loading={loading}>
+            {loading ? 'Verificando...' : 'Iniciar sesión'} <ArrowRight size={19} />
+          </AuthButton>
+        </form>
+
+        <div className="my-7 flex items-center gap-4 text-xs text-[#85868c]">
+          <span className="h-px flex-1 bg-white/[.1]" /> o continúa con <span className="h-px flex-1 bg-white/[.1]" />
         </div>
-        <div className="relative flex items-center justify-center px-5 py-10 lg:px-10">
-          <form onSubmit={login} className="w-full max-w-[460px]">
-            <div className="mb-8 flex items-center gap-3 lg:hidden"><img src="/images/brand/autokeys-logo-small-transparent.webp" className="h-10 w-auto" alt="Autokeys" /><div className="font-black tracking-[.18em]">AK <span className="text-[#ff425a]">CLOUD</span></div></div>
-            <div className="ak-v5-kicker">Acceso distribuidores</div>
-            <h1 className="ak-v5-title mt-4 text-5xl">Bienvenido de<br />vuelta.</h1>
-            <p className="mt-4 text-sm leading-6 text-white/38">Introduce tus credenciales para entrar a tu workspace.</p>
-            <div className="mt-8 space-y-5">
-              <label className="block"><span className="mb-2 block text-xs font-bold text-white/45">Email</span><div className="relative"><Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/28" /><input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="usuario@taller.com" className="ak-v5-input !pl-12" /></div></label>
-              <label className="block"><span className="mb-2 block text-xs font-bold text-white/45">Contraseña</span><div className="relative"><Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/28" /><input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••••••" className="ak-v5-input !pl-12 !pr-12" /><button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/35"><Eye size={18} /></button></div></label>
-            </div>
-            <div className="mt-5 flex items-center justify-between text-xs">
-              <label className="flex items-center gap-2 text-white/38"><input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} /> Recordarme</label>
-              <button type="button" disabled={sendingReset} onClick={recuperarContrasena} className="font-bold text-[#ff425a]">{sendingReset ? 'Enviando...' : 'Recuperar acceso'}</button>
-            </div>
-            <button disabled={loading} type="submit" className="ak-v5-button mt-7 w-full !py-4">{loading ? 'Verificando...' : 'Acceder a AK Cloud'} <ArrowRight size={19} /></button>
-            <div className="ak-v5-glass mt-7 rounded-2xl p-4"><div className="mb-2 flex items-center justify-between"><span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.18em] text-white/35"><i className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" /> Estado del sistema</span><span className="text-[10px] font-bold uppercase text-emerald-300">Operativo</span></div><div className="relative h-9 overflow-hidden rounded-lg border border-[#67e8d1]/15 bg-black/40"><svg viewBox="0 0 300 36" preserveAspectRatio="none" className="h-full w-full opacity-80"><path d="M0,18 L10,18 L15,7 L20,29 L27,18 L60,18 L65,10 L70,26 L75,18 L130,18 L135,6 L140,30 L146,18 L200,18 L205,8 L210,28 L216,18 L260,18 L265,7 L270,29 L276,18 L300,18" fill="none" stroke="#67e8d1" strokeWidth="1.4" /></svg></div></div>
-            <div className="mt-7 border-t border-white/[.07] pt-6 text-center text-sm text-white/35">¿No tienes acceso? <button type="button" onClick={() => router.push('/register')} className="font-bold text-[#ff8095]">Solicitar cuenta profesional</button></div>
-          </form>
+
+        <div className="grid grid-cols-2 gap-3">
+          <button type="button" onClick={() => oauthProximamente('Google')} className="flex h-[50px] items-center justify-center gap-2 rounded-lg border border-white/[.13] bg-[#0e1013] text-sm font-medium text-white/85 transition hover:border-white/25">
+            <GoogleIcon /> Google
+          </button>
+          <button type="button" onClick={() => oauthProximamente('Microsoft')} className="flex h-[50px] items-center justify-center gap-2 rounded-lg border border-white/[.13] bg-[#0e1013] text-sm font-medium text-white/85 transition hover:border-white/25">
+            <MicrosoftIcon /> Microsoft
+          </button>
         </div>
-      </section>
-    </main>
+
+        <p className="mt-8 text-center text-sm text-[#92939a]">
+          ¿No tienes cuenta? <Link href="/register" className="font-medium text-[#ef1018] transition hover:text-[#ff1c25]">Solicitar cuenta</Link>
+        </p>
+      </AuthCard>
+    </AuthLayout>
+  )
+}
+
+function GoogleIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.66-.22-2.44H12v4.62h6.47c-.28 1.5-1.13 2.77-2.41 3.62v3.01h3.9c2.28-2.1 3.56-5.2 3.56-8.81z" />
+      <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.92l-3.9-3.01c-1.08.73-2.46 1.16-4.05 1.16-3.11 0-5.75-2.1-6.69-4.92H1.28v3.1C3.26 21.3 7.31 24 12 24z" />
+      <path fill="#FBBC05" d="M5.31 14.31A7.2 7.2 0 0 1 4.91 12c0-.8.14-1.58.4-2.31v-3.1H1.28A11.98 11.98 0 0 0 0 12c0 1.93.46 3.76 1.28 5.41l4.03-3.1z" />
+      <path fill="#EA4335" d="M12 4.77c1.76 0 3.34.6 4.58 1.79l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.28 6.59l4.03 3.1C6.25 6.87 8.89 4.77 12 4.77z" />
+    </svg>
+  )
+}
+
+function MicrosoftIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 23 23" aria-hidden="true">
+      <path fill="#f35325" d="M1 1h10v10H1z" />
+      <path fill="#81bc06" d="M12 1h10v10H12z" />
+      <path fill="#05a6f0" d="M1 12h10v10H1z" />
+      <path fill="#ffba08" d="M12 12h10v10H12z" />
+    </svg>
   )
 }
