@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { AlertTriangle, ArrowLeft, Download, FileArchive, Loader2, ShieldCheck, MessageSquare, History, Layers3, Activity } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, Download, FileArchive, Loader2, Printer, ShieldCheck, MessageSquare, History, Layers3, User, Car, Hash } from 'lucide-react'
 import AKPageShell from '@/components/ak/AKPageShell'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
-import AKTimeline from '@/components/ak/AKTimeline'
+import AKTimeline, { getTimelineState, timelineFlow } from '@/components/ak/AKTimeline'
 import AKChat from '@/components/ak/AKChat'
 import { descargarArchivo, formatBytes, getPedidoById, type FileServicePedido } from '@/lib/services/pedidos'
 import { supabase } from '@/lib/supabase'
@@ -107,20 +107,6 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
         </div>
       )}
 
-      <div className="ak5-card mb-6 p-4 md:p-5">
-        <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <Info label="ECU" value={pedido.ecu || 'No identificada'} />
-            <Info label="HW" value={pedido.hw || '—'} />
-            <Info label="SW" value={pedido.sw || '—'} />
-            <Info label="Precio" value={`${pedido.precio || 0} €`} />
-          </div>
-          <div className="flex items-center gap-3 rounded-2xl border border-emerald-400/15 bg-emerald-400/[.055] px-4 py-3 text-emerald-300">
-            <Activity size={18}/><div><div className="text-[10px] font-black uppercase tracking-wider">Estado vivo</div><div className="text-xs text-emerald-200/65">Sincronizado con AK Core</div></div>
-          </div>
-        </div>
-      </div>
-
       <div className="flex gap-1.5 overflow-auto rounded-2xl border border-white/[.075] bg-black/20 p-1.5">
         {[
           ['resumen', 'Resumen', ShieldCheck],
@@ -133,25 +119,64 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
       </div>
 
       {activeTab === 'resumen' && (
-        <div className="grid gap-6 xl:grid-cols-[1fr_390px]">
+        <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
           <section className="space-y-6">
             <div className="ak5-card p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div><div className="ak5-kicker text-red-300">Ficha técnica</div><h2 className="mt-3 text-3xl font-black">{pedido.ecu || 'ECU pendiente'}</h2><p className="mt-2 text-sm text-white/38">{[pedido.marca, pedido.modelo, pedido.motor, pedido.cv].filter(Boolean).join(' · ') || 'Datos del vehículo pendientes'}</p></div>
-                <div className="grid h-14 w-14 place-items-center rounded-2xl border border-red-400/20 bg-red-400/10 text-red-300"><ShieldCheck size={26}/></div>
+              <div className="ak5-kicker text-red-300">Información del pedido</div>
+              <div className="mt-4 grid gap-6 sm:grid-cols-3">
+                <InfoGroup icon={User} title="Cliente">
+                  <InfoLine label="Nombre" value={pedido.cliente_nombre || 'Sin identificar'} />
+                  <InfoLine label="Email" value={pedido.cliente_email || '—'} />
+                </InfoGroup>
+                <InfoGroup icon={Car} title="Vehículo">
+                  <InfoLine label="Marca / modelo" value={[pedido.marca, pedido.modelo].filter(Boolean).join(' ') || 'Pendiente'} />
+                  <InfoLine label="Motor / potencia" value={[pedido.motor, pedido.cv].filter(Boolean).join(' · ') || '—'} />
+                  <InfoLine label="Año" value={pedido.anio || '—'} />
+                  <InfoLine label="ECU" value={pedido.ecu || 'No identificada'} />
+                </InfoGroup>
+                <InfoGroup icon={Hash} title="Pedido">
+                  <InfoLine label="ID de pedido" value={pedido.numero || pedido.id.slice(0, 8)} />
+                  <InfoLine label="Prioridad" value={pedido.prioridad || 'Normal'} />
+                  <InfoLine label="Precio" value={`${pedido.precio || 0} €`} />
+                  <InfoLine label="Fecha" value={pedido.created_at ? new Date(pedido.created_at).toLocaleString('es-ES') : '—'} />
+                </InfoGroup>
               </div>
-              <div className="mt-6 flex flex-wrap gap-2">{(pedido.servicios || []).map((servicio) => <span key={servicio} className="rounded-full border border-red-400/18 bg-red-400/8 px-4 py-2 text-xs font-black text-red-300">{servicio}</span>)}</div>
-              {pedido.observaciones && <div className="mt-6 rounded-2xl border border-white/7 bg-black/20 p-4 text-sm leading-6 text-white/45">{pedido.observaciones}</div>}
+
+              <div className="mt-6 border-t border-white/[.06] pt-6">
+                <div className="ak5-kicker text-red-300">Servicios solicitados</div>
+                <div className="mt-3 flex flex-wrap gap-2">{(pedido.servicios || []).map((servicio) => <span key={servicio} className="rounded-full border border-red-400/18 bg-red-400/8 px-4 py-2 text-xs font-black text-red-300">{servicio}</span>)}</div>
+              </div>
+
+              {pedido.observaciones && (
+                <div className="mt-6 border-t border-white/[.06] pt-6">
+                  <div className="ak5-kicker text-red-300">Notas del cliente</div>
+                  <div className="mt-3 rounded-2xl border border-white/7 bg-black/20 p-4 text-sm leading-6 text-white/45">{pedido.observaciones}</div>
+                </div>
+              )}
             </div>
+
             <div className="ak5-card p-6">
-              <div className="ak5-kicker text-red-300">Archivos del trabajo</div>
-              <div className="mt-5 grid gap-4 md:grid-cols-2">
-                <FileBox title="Archivo original" name={pedido.ori_nombre} size={formatBytes(pedido.ori_size)} ready={!!pedido.ori_path} loading={downloading === pedido.ori_path} onClick={() => download(pedido.ori_bucket, pedido.ori_path, pedido.ori_nombre)} />
-                <FileBox title="Última versión" name={pedido.mod_nombre} size={pedido.mod_path ? 'Disponible' : 'En preparación'} ready={!!pedido.mod_path} loading={downloading === pedido.mod_path} onClick={() => download(pedido.mod_bucket, pedido.mod_path, pedido.mod_nombre)} />
+              <div className="ak5-kicker text-red-300">Archivos adjuntos</div>
+              <div className="mt-5 space-y-3">
+                <FileRow title="Archivo original (ORI)" name={pedido.ori_nombre} size={formatBytes(pedido.ori_size)} ready={!!pedido.ori_path} loading={downloading === pedido.ori_path} onClick={() => download(pedido.ori_bucket, pedido.ori_path, pedido.ori_nombre)} />
+                <FileRow title="Última versión (MOD)" name={pedido.mod_nombre} size={pedido.mod_path ? 'Disponible' : 'En preparación'} ready={!!pedido.mod_path} loading={downloading === pedido.mod_path} onClick={() => download(pedido.mod_bucket, pedido.mod_path, pedido.mod_nombre)} />
               </div>
             </div>
           </section>
-          <aside className="space-y-6"><AKTimeline estado={pedido.estado}/><AKChat pedidoId={pedido.id} autorTipo="cliente" compact/></aside>
+
+          <aside className="space-y-6">
+            <EstadoActualCard pedido={pedido} />
+            <div className="ak5-card p-5">
+              <div className="ak5-kicker text-red-300">Acciones</div>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <AccionButton icon={Download} label="Descargar archivo" sub={pedido.mod_path ? 'Disponible' : 'Cuando esté listo'} onClick={() => download(pedido.mod_bucket, pedido.mod_path, pedido.mod_nombre)} disabled={!pedido.mod_path || downloading === pedido.mod_path} primary />
+                <AccionButton icon={MessageSquare} label="Enviar mensaje" sub="Hablar con soporte" onClick={() => setActiveTab('conversacion')} />
+                <AccionButton icon={History} label="Ver historial" sub="Seguimiento completo" onClick={() => setActiveTab('historial')} />
+                <AccionButton icon={Printer} label="Imprimir pedido" sub="Generar PDF" onClick={() => window.print()} />
+              </div>
+            </div>
+            <AKTimeline estado={pedido.estado}/>
+          </aside>
         </div>
       )}
 
@@ -183,8 +208,74 @@ function formatWorkspaceEstado(estado?: string | null) {
   return map[estado || ''] || estado || 'Pendiente'
 }
 
-function Info({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-2xl border border-white/7 bg-black/20 p-4"><p className="text-xs font-black uppercase tracking-[0.18em] text-white/30">{label}</p><p className="mt-1 truncate text-sm font-black">{value}</p></div>
+function InfoGroup({ icon: Icon, title, children }: { icon: any; title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-white/50"><Icon size={14} className="text-red-300"/>{title}</div>
+      <div className="mt-3 space-y-2.5">{children}</div>
+    </div>
+  )
+}
+
+function InfoLine({ label, value }: { label: string; value: string }) {
+  return <div><div className="text-[10px] font-bold uppercase tracking-wider text-white/25">{label}</div><div className="mt-0.5 truncate text-sm font-bold text-white/80">{value}</div></div>
+}
+
+function EstadoActualCard({ pedido }: { pedido: FileServicePedido }) {
+  const state = getTimelineState(pedido.estado)
+  const pct = Math.round(((state.activeIndex + 1) / timelineFlow.length) * 100)
+  const circumference = 2 * Math.PI * 42
+  return (
+    <div className="ak5-card p-5">
+      <div className="flex items-center justify-between">
+        <div className="ak5-kicker text-red-300">Estado actual</div>
+        <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider ${state.actionRequired ? 'border-amber-400/30 bg-amber-400/10 text-amber-300' : 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300'}`}>{pedido.estado === 'finalizado' ? 'Entregado' : 'En proceso'}</span>
+      </div>
+      <div className="mt-5 flex items-center justify-center">
+        <div className="relative grid h-32 w-32 place-items-center">
+          <svg viewBox="0 0 100 100" className="absolute inset-0 -rotate-90">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="8"/>
+            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--ak-red)" strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - pct / 100)} />
+          </svg>
+          <div className="text-2xl font-black">{pct}%</div>
+        </div>
+      </div>
+      <p className="mt-4 text-center text-sm leading-6 text-white/50">{state.label}.</p>
+      <p className="mt-2 text-center text-xs text-white/30">Última actualización: {pedido.updated_at ? new Date(pedido.updated_at).toLocaleString('es-ES') : '—'}</p>
+    </div>
+  )
+}
+
+function AccionButton({ icon: Icon, label, sub, onClick, disabled, primary }: { icon: any; label: string; sub: string; onClick: () => void; disabled?: boolean; primary?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-40 ${primary ? 'border-red-400/30 bg-red-400/10 hover:bg-red-400/15' : 'border-white/[.08] bg-black/20 hover:border-white/20'}`}
+    >
+      <Icon size={18} className={primary ? 'text-red-300' : 'text-white/50'} />
+      <div className="mt-2.5 text-xs font-black leading-tight">{label}</div>
+      <div className="mt-0.5 text-[10px] text-white/30">{sub}</div>
+    </button>
+  )
+}
+
+function FileRow({ title, name, size, ready, loading, onClick }: { title: string; name?: string | null; size?: string; ready: boolean; loading?: boolean; onClick: () => void }) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl border border-white/[.08] bg-black/20 p-4">
+      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-red-400/20 bg-red-400/10 text-red-300"><FileArchive size={18}/></div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-bold">{title}</div>
+        <div className="truncate text-xs text-white/35">{name || 'No disponible'} {size ? `· ${size}` : ''}</div>
+      </div>
+      {ready && (
+        <div className="flex shrink-0 items-center gap-1.5">
+          <button type="button" onClick={onClick} disabled={loading} aria-label={`Descargar ${title}`} className="grid h-9 w-9 place-items-center rounded-lg border border-white/10 text-white/50 transition hover:border-red-400/25 hover:text-red-300 disabled:opacity-50">{loading ? <Loader2 size={16} className="animate-spin"/> : <Download size={16}/>}</button>
+        </div>
+      )}
+    </div>
+  )
 }
 
 function FileBox({ title, name, size, ready, loading, onClick }: { title: string; name?: string | null; size?: string; ready: boolean; loading?: boolean; onClick: () => void }) {

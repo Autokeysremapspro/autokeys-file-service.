@@ -2,15 +2,16 @@
 
 import { AlertTriangle, CheckCircle2, Clock, Download, Gauge, Wrench } from 'lucide-react'
 
-const flow = [
+export const timelineFlow = [
   { key: 'recibido', label: 'Pedido recibido', icon: CheckCircle2 },
   { key: 'cola', label: 'En cola', icon: Clock },
   { key: 'proceso', label: 'Técnico trabajando', icon: Wrench },
   { key: 'respuesta', label: 'Prueba / respuesta', icon: Gauge },
   { key: 'descarga', label: 'Disponible para descargar', icon: Download },
 ]
+const flow = timelineFlow
 
-function getTimelineState(estado?: string) {
+export function getTimelineState(estado?: string) {
   switch (estado) {
     case 'finalizado':
       return { activeIndex: 4, label: 'Trabajo finalizado', actionRequired: false }

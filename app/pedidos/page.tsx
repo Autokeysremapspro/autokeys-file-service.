@@ -2,15 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Calendar, Download, Eye, Grid2X2, List, Search, SlidersHorizontal, Sparkles } from 'lucide-react'
+import { ArrowRight, Calendar, Download, Eye, FileDown, Grid2X2, List, Search } from 'lucide-react'
 import AppShell from '@/components/AppShell'
-import { getMisPedidos, type FileServicePedido, formatEstado } from '@/lib/services/pedidos'
+import CustomSelect from '@/components/ak/CustomSelect'
+import { getMisPedidos, type FileServicePedido, formatEstado, type PedidoEstado } from '@/lib/services/pedidos'
 
 function statusClass(estado?: string | null) {
   if (estado === 'finalizado') return 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300'
-  if (estado === 'en_proceso') return 'border-amber-400/20 bg-amber-400/10 text-amber-300'
+  if (estado === 'en_proceso') return 'border-blue-400/20 bg-blue-400/10 text-blue-300'
   if (estado === 'cancelado') return 'border-red-400/20 bg-red-400/10 text-red-300'
-  return 'border-cyan-400/20 bg-cyan-400/10 text-cyan-300'
+  return 'border-amber-400/20 bg-amber-400/10 text-amber-300'
 }
 
 function progress(estado?: string | null) {
@@ -28,9 +29,27 @@ function prioridadInfo(prioridad?: string | null) {
   return { label: 'Normal', cls: 'text-white/40' }
 }
 
+function csvEscape(value: string) {
+  const needsQuotes = /[",\n;]/.test(value)
+  const escaped = value.replace(/"/g, '""')
+  return needsQuotes ? `"${escaped}"` : escaped
+}
+
+const ESTADOS: { value: PedidoEstado | 'todos'; label: string }[] = [
+  { value: 'todos', label: 'Todos los estados' },
+  { value: 'pendiente', label: 'Pendiente' },
+  { value: 'en_proceso', label: 'En proceso' },
+  { value: 'finalizado', label: 'Finalizado' },
+  { value: 'cancelado', label: 'Cancelado' },
+]
+
 export default function PedidosPage() {
   const [pedidos, setPedidos] = useState<FileServicePedido[]>([])
   const [query, setQuery] = useState('')
+  const [estadoFiltro, setEstadoFiltro] = useState<string>('todos')
+  const [servicioFiltro, setServicioFiltro] = useState<string>('todos')
+  const [fechaDesde, setFechaDesde] = useState('')
+  const [fechaHasta, setFechaHasta] = useState('')
   const [view, setView] = useState<'cards' | 'compact'>('compact')
   const [loading, setLoading] = useState(true)
 
@@ -38,34 +57,77 @@ export default function PedidosPage() {
     getMisPedidos().then(setPedidos).catch(console.error).finally(() => setLoading(false))
   }, [])
 
+  const serviciosDisponibles = useMemo(() => {
+    const set = new Set<string>()
+    for (const p of pedidos) for (const s of p.servicios || []) set.add(s)
+    return Array.from(set).sort()
+  }, [pedidos])
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return pedidos
-    return pedidos.filter((pedido) => [pedido.numero, pedido.ori_nombre, pedido.ecu, pedido.hw, pedido.sw, pedido.marca, pedido.modelo, pedido.motor, ...(pedido.servicios || [])].some((value) => (value || '').toLowerCase().includes(q)))
-  }, [pedidos, query])
+    const desde = fechaDesde ? new Date(fechaDesde).getTime() : null
+    const hasta = fechaHasta ? new Date(fechaHasta).getTime() + 24 * 3600 * 1000 - 1 : null
+    return pedidos.filter((pedido) => {
+      if (estadoFiltro !== 'todos' && pedido.estado !== estadoFiltro) return false
+      if (servicioFiltro !== 'todos' && !(pedido.servicios || []).includes(servicioFiltro)) return false
+      if (desde || hasta) {
+        const t = pedido.created_at ? new Date(pedido.created_at).getTime() : null
+        if (!t) return false
+        if (desde && t < desde) return false
+        if (hasta && t > hasta) return false
+      }
+      if (q) {
+        const hit = [pedido.numero, pedido.ori_nombre, pedido.ecu, pedido.hw, pedido.sw, pedido.marca, pedido.modelo, pedido.motor, ...(pedido.servicios || [])].some((value) => (value || '').toLowerCase().includes(q))
+        if (!hit) return false
+      }
+      return true
+    })
+  }, [pedidos, query, estadoFiltro, servicioFiltro, fechaDesde, fechaHasta])
 
-  const abiertos = pedidos.filter((p) => p.estado !== 'finalizado' && p.estado !== 'cancelado').length
+  const total = pedidos.length
   const finalizados = pedidos.filter((p) => p.estado === 'finalizado').length
-  const esperando = pedidos.filter((p) => p.estado === 'pendiente').length
+  const enProceso = pedidos.filter((p) => p.estado === 'en_proceso').length
+  const pendientes = pedidos.filter((p) => p.estado === 'pendiente').length
+
+  function exportarCsv() {
+    const headers = ['Pedido', 'Marca', 'Modelo', 'Motor', 'ECU', 'Servicios', 'Estado', 'Prioridad', 'Fecha']
+    const rows = filtered.map((p) => [
+      p.numero || p.id,
+      p.marca || '',
+      p.modelo || '',
+      p.motor || '',
+      p.ecu || '',
+      (p.servicios || []).join(' + '),
+      formatEstado(p.estado),
+      prioridadInfo(p.prioridad).label,
+      p.created_at ? new Date(p.created_at).toLocaleDateString('es-ES') : '',
+    ])
+    const csv = [headers, ...rows].map((row) => row.map((cell) => csvEscape(String(cell))).join(';')).join('\n')
+    const blob = new Blob([`﻿${csv}`], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `pedidos-${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <AppShell>
       <div className="space-y-6">
-        <section className="ak5-card ak5-gridline relative overflow-hidden rounded-[28px] p-6 sm:p-8">
-          <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full" style={{background:'radial-gradient(circle,rgba(239,16,24,.12),transparent 70%)'}}/>
-          <div className="relative flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
-            <div>
-              <span className="ak5-chip border-red-400/20 bg-red-400/10 text-red-300"><Sparkles size={13}/> Workspace · Pedidos</span>
-              <h1 className="ak5-title mt-4 text-4xl sm:text-5xl">Mis trabajos</h1>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-white/45">Controla cada archivo como un expediente vivo: estado, precio, revisiones, versiones y conversación técnica.</p>
-            </div>
-            <Link href="/nuevo-pedido" className="ak5-primary shrink-0"><Sparkles size={16}/> Crear nuevo trabajo</Link>
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <h1 className="ak5-title text-3xl sm:text-4xl">Pedidos</h1>
+            <p className="mt-2 max-w-2xl text-sm text-white/45">Gestiona y da seguimiento a todos tus pedidos de archivos.</p>
           </div>
-        </section>
+          <Link href="/nuevo-pedido" className="ak5-primary shrink-0"><ArrowRight size={16}/> Nuevo pedido</Link>
+        </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          {[['En curso', abiertos, 'Trabajos activos', 'red'], ['Esperando', esperando, 'Pendientes de análisis', 'amber'], ['Finalizados', finalizados, 'Listos y archivados', 'green']].map(([label, value, helper, t]) => {
-            const glow: any = { red: 'rgba(239,16,24,.14)', amber: 'rgba(245,158,11,.14)', green: 'rgba(52,211,153,.14)' }
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {[['Total pedidos', total, 'Histórico completo', 'red'], ['Completados', finalizados, 'Listos y archivados', 'green'], ['En proceso', enProceso, 'Trabajando ahora mismo', 'blue'], ['Pendientes', pendientes, 'Esperando análisis', 'amber']].map(([label, value, helper, t]) => {
+            const glow: any = { red: 'rgba(239,16,24,.14)', amber: 'rgba(245,158,11,.14)', green: 'rgba(52,211,153,.14)', blue: 'rgba(59,130,246,.14)' }
             return (
               <div key={String(label)} className="ak5-card relative overflow-hidden rounded-[22px] p-5">
                 <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full" style={{ background: `radial-gradient(circle,${glow[t as string]},transparent 70%)` }} />
@@ -77,22 +139,27 @@ export default function PedidosPage() {
           })}
         </div>
 
-        <div className="ak5-card flex flex-col gap-3 rounded-[22px] p-3 md:flex-row md:items-center">
-          <div className="flex flex-1 items-center gap-3 rounded-2xl border border-white/8 bg-black/20 px-4 py-3">
-            <Search size={18} className="text-white/30" />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Pedido, vehículo, ECU, HW, SW o servicio..." className="w-full bg-transparent text-sm outline-none placeholder:text-white/22" />
-          </div>
-          <button className="flex items-center justify-center gap-2 rounded-2xl border border-white/8 bg-white/[.025] px-4 py-3 text-xs font-bold text-white/45"><SlidersHorizontal size={16}/> Filtros</button>
+        <div className="ak5-card grid gap-3 rounded-[22px] p-3 lg:grid-cols-[1fr_1fr_auto_auto_auto_auto]">
+          <CustomSelect value={estadoFiltro} onChange={setEstadoFiltro} options={ESTADOS.map((e) => ({ value: e.value, label: e.label }))} />
+          <CustomSelect value={servicioFiltro} onChange={setServicioFiltro} options={[{ value: 'todos', label: 'Todos los servicios' }, ...serviciosDisponibles.map((s) => ({ value: s, label: s }))]} />
+          <input type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} className="rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-sm text-white/70 outline-none" />
+          <input type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} className="rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-sm text-white/70 outline-none" />
+          <button onClick={exportarCsv} className="flex items-center justify-center gap-2 rounded-2xl border border-white/8 bg-white/[.025] px-4 py-3 text-xs font-bold text-white/55 transition hover:border-red-400/25 hover:text-red-300"><FileDown size={16}/> Exportar</button>
           <div className="flex rounded-2xl border border-white/[.08] bg-black/20 p-1">
-            <button onClick={() => setView('cards')} className={`rounded-xl px-3 py-2 text-[11px] font-black transition ${view === 'cards' ? 'bg-red-400/15 text-red-300' : 'text-white/35'}`}><Grid2X2 size={15}/></button>
-            <button onClick={() => setView('compact')} className={`rounded-xl px-3 py-2 text-[11px] font-black transition ${view === 'compact' ? 'bg-red-400/15 text-red-300' : 'text-white/35'}`}><List size={15}/></button>
+            <button onClick={() => setView('compact')} className={`flex-1 rounded-xl px-3 py-2 text-[11px] font-black transition ${view === 'compact' ? 'bg-red-400/15 text-red-300' : 'text-white/35'}`}><List size={15} className="mx-auto"/></button>
+            <button onClick={() => setView('cards')} className={`flex-1 rounded-xl px-3 py-2 text-[11px] font-black transition ${view === 'cards' ? 'bg-red-400/15 text-red-300' : 'text-white/35'}`}><Grid2X2 size={15} className="mx-auto"/></button>
           </div>
         </div>
 
+        <div className="ak5-card flex items-center gap-3 rounded-[18px] px-4 py-3">
+          <Search size={17} className="shrink-0 text-white/30" />
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por ID, vehículo, ECU o servicio..." className="w-full bg-transparent text-sm outline-none placeholder:text-white/22" />
+        </div>
+
         {loading ? (
-          <div className="ak5-card p-8 text-white/35">Cargando trabajos...</div>
+          <div className="ak5-card p-8 text-white/35">Cargando pedidos...</div>
         ) : filtered.length === 0 ? (
-          <div className="ak5-card p-10 text-center text-white/35">No hay trabajos que coincidan con la búsqueda.</div>
+          <div className="ak5-card p-10 text-center text-white/35">No hay pedidos que coincidan con los filtros.</div>
         ) : view === 'cards' ? (
           <div className="grid gap-4 xl:grid-cols-2">
             {filtered.map((pedido) => (
