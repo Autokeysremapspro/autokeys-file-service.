@@ -2,11 +2,19 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Activity, AlertTriangle, ArrowDown, ArrowRight, ArrowUp, BellRing, Car, CheckCircle2, Clock3, CloudUpload, Cpu, Download, FileText, Gauge, Headphones, Library, Target, UploadCloud, Zap } from 'lucide-react'
+import { Activity, AlertTriangle, ArrowDown, ArrowRight, ArrowUp, BellRing, Car, CheckCircle2, Clock3, CloudUpload, Cpu, Download, FileText, Gauge, Headphones, Info, Library, MoreHorizontal, Target, UploadCloud, Zap } from 'lucide-react'
 import AppShell from '@/components/AppShell'
+import CustomSelect from '@/components/ak/CustomSelect'
 import { supabase } from '@/lib/supabase'
 import { getMisPedidos, type FileServicePedido, formatEstado } from '@/lib/services/pedidos'
 import { getMisNotificaciones, type FileServiceNotificacion } from '@/lib/services/notificaciones'
+
+const RANGE_OPTIONS = [
+  { value: '7', label: 'Últimos 7 días' },
+  { value: '14', label: 'Últimos 14 días' },
+  { value: '30', label: 'Últimos 30 días' },
+  { value: '90', label: 'Últimos 90 días' },
+]
 
 function vehicleTitle(p: FileServicePedido){return [p.marca,p.modelo,p.motor].filter(Boolean).join(' ')||p.ori_nombre||'Vehículo sin identificar'}
 function tone(estado?:string|null){if(estado==='finalizado')return 'text-emerald-300 border-emerald-400/20 bg-emerald-400/10';if(estado==='en_proceso')return 'text-blue-300 border-blue-400/20 bg-blue-400/10';if(estado==='cancelado')return 'text-slate-300 border-slate-400/20 bg-slate-400/10';return 'text-red-300 border-red-400/20 bg-red-400/10'}
@@ -19,11 +27,11 @@ function pctChange(curr:number,prev:number){if(prev===0)return curr>0?100:0;retu
 export default function DashboardPage(){
   const [pedidos,setPedidos]=useState<FileServicePedido[]>([])
   const [notifs,setNotifs]=useState<FileServiceNotificacion[]>([])
-  const [name,setName]=useState('Distribuidor')
   const [loading,setLoading]=useState(true)
   const [error,setError]=useState<string|null>(null)
+  const [rangeDays,setRangeDays]=useState('30')
 
-  async function load(){setLoading(true);setError(null);try{const [p,n,u]=await Promise.all([getMisPedidos(),getMisNotificaciones(),supabase.auth.getUser()]);setPedidos(p);setNotifs(n);const m=u.data.user?.user_metadata||{};setName(String(m.name||m.nombre||m.empresa||u.data.user?.email?.split('@')[0]||'Distribuidor'))}catch(e:any){setError(e?.message||'No se pudo cargar Inicio')}finally{setLoading(false)}}
+  async function load(){setLoading(true);setError(null);try{const [p,n]=await Promise.all([getMisPedidos(),getMisNotificaciones()]);setPedidos(p);setNotifs(n)}catch(e:any){setError(e?.message||'No se pudo cargar Inicio')}finally{setLoading(false)}}
   useEffect(()=>{load()},[])
   useEffect(()=>{let ch:any;supabase.auth.getUser().then(({data})=>{const id=data.user?.id;if(!id)return;ch=supabase.channel(`mission-${id}`).on('postgres_changes',{event:'*',schema:'public',table:'file_service_pedidos',filter:`user_id=eq.${id}`},load).on('postgres_changes',{event:'INSERT',schema:'public',table:'file_service_notificaciones',filter:`user_id=eq.${id}`},load).subscribe()});return()=>{if(ch)supabase.removeChannel(ch)}},[])
 
@@ -52,7 +60,13 @@ export default function DashboardPage(){
     }
   },[pedidos])
 
-  const servicios=useMemo(()=>{const counts=new Map<string,number>();for(const p of pedidos){for(const s of p.servicios||[]){counts.set(s,(counts.get(s)||0)+1)}}const total=Array.from(counts.values()).reduce((a,b)=>a+b,0);const palette=['#ef1018','#3b82f6','#f59e0b','#32d583','#a855f7','#94a3b8'];return Array.from(counts.entries()).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([label,value],i)=>({label,value,pct:total?Math.round((value/total)*1000)/10:0,color:palette[i%palette.length]}))},[pedidos])
+  const rangeFilteredPedidos=useMemo(()=>{
+    const days=Number(rangeDays)||30
+    const cutoff=Date.now()-days*24*3600*1000
+    return pedidos.filter(p=>p.created_at&&new Date(p.created_at).getTime()>=cutoff)
+  },[pedidos,rangeDays])
+
+  const servicios=useMemo(()=>{const counts=new Map<string,number>();for(const p of rangeFilteredPedidos){for(const s of p.servicios||[]){counts.set(s,(counts.get(s)||0)+1)}}const total=Array.from(counts.values()).reduce((a,b)=>a+b,0);const palette=['#ef1018','#3b82f6','#f59e0b','#32d583','#a855f7','#94a3b8'];return Array.from(counts.entries()).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([label,value],i)=>({label,value,pct:total?Math.round((value/total)*1000)/10:0,color:palette[i%palette.length]}))},[rangeFilteredPedidos])
 
   const estadoDonut=useMemo(()=>{
     const segs=[
@@ -68,7 +82,7 @@ export default function DashboardPage(){
   },[stats])
 
   const dailyActivity=useMemo(()=>{
-    const days=30
+    const days=Number(rangeDays)||30
     const now=new Date();now.setHours(0,0,0,0)
     const buckets=Array.from({length:days},(_,i)=>{const d=new Date(now);d.setDate(d.getDate()-(days-1-i));return {date:d,count:0}})
     for(const p of pedidos){
@@ -78,7 +92,7 @@ export default function DashboardPage(){
       if(b)b.count+=1
     }
     return buckets
-  },[pedidos])
+  },[pedidos,rangeDays])
 
   const chart=useMemo(()=>{
     const w=600,h=170,padTop=10,padBottom=10,padLeft=30,padRight=10
@@ -91,10 +105,11 @@ export default function DashboardPage(){
     const ticks=[0,.25,.5,.75,1].map(f=>Math.round(max*f))
     const plotW=w-padLeft-padRight
     const stepX=plotW/Math.max(1,dailyActivity.length-1)
+    const labelStep=Math.max(1,Math.ceil(dailyActivity.length/8))
     const points=dailyActivity.map((b,i)=>[padLeft+i*stepX,h-padBottom-((b.count/max)*(h-padTop-padBottom))] as const)
     const line=points.map((p,i)=>`${i===0?'M':'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ')
     const area=`${line} L${points[points.length-1][0].toFixed(1)},${h-padBottom} L${points[0][0].toFixed(1)},${h-padBottom} Z`
-    return {w,h,padTop,padBottom,padLeft,padRight,stepX,points,line,area,max,ticks}
+    return {w,h,padTop,padBottom,padLeft,padRight,stepX,points,line,area,max,ticks,labelStep}
   },[dailyActivity])
 
   const pipeline=useMemo(()=>[
@@ -113,11 +128,17 @@ export default function DashboardPage(){
   return <AppShell><div className="space-y-6">
     <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
       <div>
-        <div className="ak5-kicker">Bienvenido de nuevo</div>
-        <h1 className="ak5-title mt-2 text-3xl sm:text-4xl">Hola, <span className="bg-gradient-to-r from-[#ff1924] to-[#ff8a3a] bg-clip-text text-transparent">{name}</span></h1>
+        <h1 className="ak5-title text-3xl sm:text-4xl">Bienvenido a AK Cloud</h1>
         <p className="mt-2 max-w-2xl text-sm text-white/45">Resumen de tu actividad y rendimiento de servicios por archivo.</p>
       </div>
-      <Link href="/nuevo-pedido" className="ak5-primary shrink-0"><CloudUpload size={18}/> Nuevo archivo / pedido</Link>
+      <Link href="/nuevo-pedido" className="ak5-primary shrink-0 !py-3 !pl-4 !pr-5" style={{textTransform:'none',letterSpacing:'normal'}}>
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/15"><CloudUpload size={17}/></span>
+        <span className="text-left leading-tight">
+          <span className="block text-sm font-black">Nuevo archivo / pedido</span>
+          <span className="block text-[11px] font-bold text-white/70">Sube un archivo y solicita un servicio</span>
+        </span>
+        <ArrowRight size={16} className="ml-1 shrink-0"/>
+      </Link>
     </div>
 
     {error&&<div className="rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-200">{error}</div>}
@@ -132,8 +153,11 @@ export default function DashboardPage(){
     <section className="grid gap-5 2xl:grid-cols-[1.5fr_1fr]">
       <div className="ak5-card relative overflow-hidden rounded-[26px] p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><div className="ak5-kicker text-red-300">Actividad de pedidos</div><h3 className="mt-1 text-xl font-black">Últimos 30 días</h3></div>
-          <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-white/35"><i className="h-2 w-2 rounded-full bg-[var(--ak-red)]"/> Pedidos</span>
+          <h3 className="flex items-center gap-1.5 text-xl font-black">Actividad de pedidos <Info size={14} className="text-white/25" aria-label="Número de pedidos recibidos por día"/></h3>
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-white/35"><i className="h-2 w-2 rounded-full bg-[var(--ak-red)]"/> Pedidos</span>
+            <CustomSelect value={rangeDays} onChange={setRangeDays} options={RANGE_OPTIONS} className="w-[168px]"/>
+          </div>
         </div>
         {loading ? <div className="py-16 text-center text-sm text-white/30">Cargando actividad...</div> : (
           <svg viewBox={`0 0 ${chart.w} ${chart.h+22}`} className="mt-4 w-full" preserveAspectRatio="none">
@@ -141,14 +165,13 @@ export default function DashboardPage(){
             {chart.ticks.map((t,i)=>{const y=chart.h-chart.padBottom-((t/chart.max)*(chart.h-chart.padTop-chart.padBottom));return <g key={i}><line x1={chart.padLeft} x2={chart.w-chart.padRight} y1={y} y2={y} stroke="rgba(255,255,255,.06)" strokeWidth="1"/><text x={chart.padLeft-8} y={y+3} textAnchor="end" fontSize="9" fill="rgba(255,255,255,.32)">{t}</text></g>})}
             <path d={chart.area} fill="url(#dashArea)" stroke="none"/>
             <path d={chart.line} fill="none" stroke="#ef1018" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            {dailyActivity.map((b,i)=> i%5===0 && <text key={i} x={chart.padLeft+i*chart.stepX} y={chart.h+16} textAnchor="middle" fontSize="9" fill="rgba(255,255,255,.32)">{b.date.toLocaleDateString('es-ES',{day:'2-digit',month:'short'})}</text>)}
+            {dailyActivity.map((b,i)=> i%chart.labelStep===0 && <text key={i} x={chart.padLeft+i*chart.stepX} y={chart.h+16} textAnchor="middle" fontSize="9" fill="rgba(255,255,255,.32)">{b.date.toLocaleDateString('es-ES',{day:'2-digit',month:'short'})}</text>)}
           </svg>
         )}
       </div>
 
       <div className="ak5-card relative overflow-hidden rounded-[26px] p-5 sm:p-6">
-        <div className="ak5-kicker text-emerald-300">Estado de pedidos</div>
-        <h3 className="mt-1 text-xl font-black">Distribución</h3>
+        <h3 className="flex items-center gap-1.5 text-xl font-black">Estado de pedidos <Info size={14} className="text-white/25" aria-label="Distribución de tus pedidos por estado"/></h3>
         <div className="mt-6 flex items-center justify-center">
           <div className="relative h-36 w-36 shrink-0 rounded-full" style={{background:estadoDonut.gradient}}>
             <div className="absolute inset-[13px] grid place-items-center rounded-full bg-[#0a0b0d] text-center">
@@ -166,13 +189,15 @@ export default function DashboardPage(){
         <div className="flex items-center justify-between border-b border-white/[.07] px-5 py-4 sm:px-6"><div><div className="ak5-kicker text-red-300">Actividad reciente</div><h2 className="mt-1 text-xl font-black">Pedidos recientes</h2></div><Link href="/pedidos" className="text-xs font-black uppercase tracking-wider text-red-300 transition hover:text-red-200">Ver todos →</Link></div>
         {loading?<div className="p-10 text-center text-white/35">Cargando Inicio...</div>:latest.length===0?<div className="p-10 text-center text-white/35">Todavía no hay pedidos.</div>:(
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[560px] text-left text-sm">
-              <thead><tr className="border-b border-white/[.06] text-[10px] font-black uppercase tracking-[.14em] text-white/30"><th className="px-5 py-3 sm:px-6">Pedido</th><th className="px-5 py-3">Vehículo</th><th className="px-5 py-3">Estado</th><th className="px-5 py-3 sm:px-6">Actualizado</th></tr></thead>
-              <tbody className="divide-y divide-white/[.05]">{latest.map(p=><tr key={p.id} className="cursor-pointer transition hover:bg-white/[.025]" onClick={()=>{window.location.href=`/pedidos/${p.id}`}}>
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <thead><tr className="border-b border-white/[.06] text-[10px] font-black uppercase tracking-[.14em] text-white/30"><th className="px-5 py-3 sm:px-6">Pedido</th><th className="px-5 py-3">Vehículo</th><th className="px-5 py-3">Servicio</th><th className="px-5 py-3">Estado</th><th className="px-5 py-3">Actualizado</th><th className="px-5 py-3 sm:px-6"></th></tr></thead>
+              <tbody className="divide-y divide-white/[.05]">{latest.map(p=><tr key={p.id} className="group cursor-pointer transition hover:bg-white/[.025]" onClick={()=>{window.location.href=`/pedidos/${p.id}`}}>
                 <td className="px-5 py-3.5 font-mono text-xs font-bold text-red-300 sm:px-6">#{p.numero||p.id.slice(0,8)}</td>
-                <td className="px-5 py-3.5"><div className="font-bold">{vehicleTitle(p)}</div><div className="mt-0.5 text-xs text-white/30">{(p.servicios||[]).slice(0,2).join(' + ')||p.ecu||'—'}</div></td>
+                <td className="px-5 py-3.5"><div className="font-bold">{vehicleTitle(p)}</div><div className="mt-0.5 text-xs text-white/30">{p.ecu||'—'}</div></td>
+                <td className="px-5 py-3.5 text-white/55">{(p.servicios||[]).slice(0,2).join(' + ')||'—'}</td>
                 <td className="px-5 py-3.5"><span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase ${tone(p.estado)}`}>{formatEstado(p.estado)}</span></td>
-                <td className="px-5 py-3.5 text-xs text-white/35 sm:px-6">{dateTime(p.updated_at||p.created_at)}</td>
+                <td className="px-5 py-3.5 text-xs text-white/35">{dateTime(p.updated_at||p.created_at)}</td>
+                <td className="px-5 py-3.5 text-right sm:px-6"><span className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-white/25 transition group-hover:text-white/50"><MoreHorizontal size={16}/></span></td>
               </tr>)}</tbody>
             </table>
           </div>
@@ -180,8 +205,10 @@ export default function DashboardPage(){
       </div>
 
       <div className="ak5-card relative overflow-hidden rounded-[26px] p-5 sm:p-6">
-        <div className="ak5-kicker text-blue-300">Distribución</div>
-        <h3 className="mt-1 text-xl font-black">Servicios más demandados</h3>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="flex items-center gap-1.5 text-xl font-black">Servicios más demandados <Info size={14} className="text-white/25" aria-label="Servicios más solicitados en el periodo"/></h3>
+          <CustomSelect value={rangeDays} onChange={setRangeDays} options={RANGE_OPTIONS} className="w-[168px]"/>
+        </div>
         {servicios.length===0?<div className="mt-8 py-8 text-center text-sm text-white/30">Sin datos de servicios todavía.</div>:(
           <div className="mt-6 space-y-4">{servicios.map(s=>(
             <div key={s.label}>
