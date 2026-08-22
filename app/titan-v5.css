@@ -106,7 +106,7 @@ html[data-ak-theme='light'] .ak5-shell [class*='text-emerald-300']{color:#047857
 .ak5-shell .ak-glass{background:linear-gradient(180deg,rgba(17,19,22,.9),rgba(9,10,12,.92));border-color:rgba(255,255,255,.08)}
 .ak5-shell .ak5-primary{background:linear-gradient(135deg,var(--ak5-red),var(--ak5-red2));box-shadow:0 14px 32px rgba(239,16,24,.28),inset 0 1px 0 rgba(255,255,255,.22)}
 .ak5-shell .ak5-primary:hover{box-shadow:0 18px 42px rgba(239,16,24,.4)}
-.ak5-shell .ak5-nav-active{background:linear-gradient(90deg,rgba(239,16,24,.17),rgba(239,16,24,.035));box-shadow:inset 3px 0 0 var(--ak5-red)}
+.ak5-shell .ak5-nav-active{background:linear-gradient(90deg,rgba(239,16,24,.32),rgba(239,16,24,.08));box-shadow:inset 3px 0 0 var(--ak5-red),0 4px 16px rgba(239,16,24,.18)}
 html[data-ak-theme='light'] .ak5-shell{--ak5-red:#ef1018;--ak5-red2:#b8090f;--ak-red:#ef1018;--ak-glow:#d10d15;--ak-copper:#ef1018;--ak-copper-bright:#ff1924}
 .ak5-shell{background:
   radial-gradient(circle at 70% -15%,rgba(239,16,24,.10),transparent 32%),

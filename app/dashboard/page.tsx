@@ -210,7 +210,7 @@ export default function DashboardPage(){
         </div>
         <div className="ak5-card relative overflow-hidden rounded-[26px] p-5 sm:p-6">
           <div className="pointer-events-none absolute -left-10 -bottom-14 h-48 w-48 rounded-full" style={{background:'radial-gradient(circle,rgba(168,85,247,.1),transparent 70%)'}}/>
-          <div className="relative flex items-center justify-between"><div><div className="ak5-kicker text-purple-300">Sistema</div><h3 className="mt-1 text-xl font-black">Workspace status</h3></div><Activity className="text-emerald-300"/></div>
+          <div className="relative flex items-center justify-between"><div><div className="ak5-kicker text-purple-300">Sistema</div><h3 className="mt-1 text-xl font-black">Estado del sistema</h3></div><Activity className="text-emerald-300"/></div>
           <div className="relative mt-5 space-y-3"><Health label="Sincronización" value="Realtime"/><Health label="Seguridad" value="Activa"/><Health label="Base de datos" value="Conectada"/><Health label="Soporte" value="Disponible"/></div>
           <Link href="/intelligence" className="ak5-secondary relative mt-5 w-full"><Cpu size={16}/> Abrir AK Intelligence</Link>
         </div>

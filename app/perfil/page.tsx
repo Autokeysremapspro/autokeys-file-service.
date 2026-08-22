@@ -80,7 +80,7 @@ export default function PerfilPage() {
   }
 
   return (
-    <AKPageShell title="Mi cuenta" subtitle="Datos fiscales, contacto y herramientas del taller. Se sincronizan con tu ficha de cliente en AK Core." eyebrow="Account">
+    <AKPageShell title="Mi cuenta" subtitle="Datos fiscales, contacto y herramientas del taller. Se sincronizan con tu ficha de cliente en AK Core." eyebrow="Mi cuenta">
       <div className="grid gap-6 xl:grid-cols-[1fr_390px]">
         <AKCard className="p-4 sm:p-6">
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">

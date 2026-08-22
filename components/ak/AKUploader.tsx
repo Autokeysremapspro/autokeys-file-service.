@@ -8,8 +8,9 @@ export default function AKUploader({ fileName, onFile, compact = false }: { file
       <div className="relative flex h-24 w-24 items-center justify-center rounded-[2rem] border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/15 text-[var(--ak-glow)] shadow-[0_0_60px_rgba(239,16,24,.28)] transition group-hover:scale-105">
         {fileName ? <FileArchive size={40} /> : <UploadCloud size={42} />}
       </div>
-      <h2 className="relative mt-7 text-3xl font-black tracking-tight md:text-4xl">{fileName ? 'File loaded' : 'Drop your ORI file'}</h2>
-      <p className="relative mt-3 max-w-lg text-sm leading-6 text-white/40">{fileName ? 'AK Cloud is ready to analyse this file and prepare your order workspace.' : 'Drag your original ECU file here or tap to select. Fast mode takes less than 60 seconds.'}</p>
+      <h2 className="relative mt-7 text-3xl font-black tracking-tight md:text-4xl">{fileName ? 'Archivo cargado' : 'Arrastra tu archivo ORI aquí'}</h2>
+      <p className="relative mt-3 max-w-lg text-sm leading-6 text-white/40">{fileName ? 'AK Cloud está listo para analizar este archivo y preparar tu pedido.' : 'o selecciona un archivo desde tu dispositivo'}</p>
+      {!fileName && <span className="relative mt-6 inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#ef1018,#b8090f)] px-5 py-3 text-sm font-black text-white shadow-[0_14px_32px_rgba(239,16,24,.28)]"><FileArchive size={17}/> Seleccionar archivo</span>}
       {fileName && <div className="relative mt-6 rounded-full border border-[var(--ak-red)]/30 bg-[var(--ak-red)]/10 px-5 py-2 text-sm font-black text-[var(--ak-glow)]">{fileName}</div>}
     </label>
   )

@@ -66,11 +66,11 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
   }
 
   if (loading) {
-    return <AKPageShell title="Cargando trabajo" eyebrow="Workspace"><AKCard className="p-8 text-white/35"><Loader2 className="mr-2 inline animate-spin" /> Cargando pedido...</AKCard></AKPageShell>
+    return <AKPageShell title="Cargando trabajo" eyebrow="Pedidos"><AKCard className="p-8 text-white/35"><Loader2 className="mr-2 inline animate-spin" /> Cargando pedido...</AKCard></AKPageShell>
   }
 
   if (!pedido) {
-    return <AKPageShell title="Pedido no encontrado" eyebrow="Workspace"><AKCard className="p-8 text-white/35">Pedido no encontrado.</AKCard></AKPageShell>
+    return <AKPageShell title="Pedido no encontrado" eyebrow="Pedidos"><AKCard className="p-8 text-white/35">Pedido no encontrado.</AKCard></AKPageShell>
   }
 
   const actionRequired = pedido.estado === 'revision_solicitada'
@@ -79,7 +79,7 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
     <AKPageShell
       title={`Detalle del pedido #${pedido.numero || pedido.id.slice(0, 8)}`}
       subtitle={pedido.created_at ? `Realizado el ${new Date(pedido.created_at).toLocaleDateString('es-ES')} a las ${new Date(pedido.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}` : 'Fecha de creación no disponible'}
-      eyebrow="Order Workspace"
+      eyebrow="Pedido"
       actions={
         <div className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-colors ${actionRequired ? 'border-amber-400/35 bg-amber-400/10 text-amber-300' : justUpdated ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300' : 'border-white/10 bg-black/25 text-white/55'}`}>
           {(justUpdated || actionRequired) && <span className={`h-2 w-2 rounded-full ${actionRequired ? 'bg-amber-300' : 'animate-pulse bg-emerald-400'}`} />}

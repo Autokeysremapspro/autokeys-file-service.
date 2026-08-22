@@ -74,7 +74,7 @@ export default function GaragePage() {
   const hasActiveFilters = hasSearch || onlyOpen
 
   return (
-    <AKPageShell title="Mis vehículos" subtitle="Un garaje técnico vivo con el historial de cada ECU, servicio, archivo y versión." eyebrow="Vehicle Workspace" actions={<div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:flex-wrap"><AKButton href="/nuevo-pedido"><UploadCloud size={18}/> Nuevo trabajo</AKButton><AKButton href="/biblioteca" variant="ghost"><FileArchive size={18}/> Biblioteca</AKButton></div>}>
+    <AKPageShell title="Mis vehículos" subtitle="Un garaje técnico vivo con el historial de cada ECU, servicio, archivo y versión." eyebrow="Taller" actions={<div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:flex-wrap"><AKButton href="/nuevo-pedido"><UploadCloud size={18}/> Nuevo trabajo</AKButton><AKButton href="/biblioteca" variant="ghost"><FileArchive size={18}/> Biblioteca</AKButton></div>}>
         <header className="sr-only">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.3em] text-red-300">Private Garage</p>

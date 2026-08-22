@@ -241,7 +241,7 @@ export default function NuevoPedidoPage() {
     <AKPageShell
       title="Nuevo pedido"
       subtitle="Sube el ORI, añade los datos técnicos manualmente y elige los servicios por vehículo. Pagas solo lo que pidas."
-      eyebrow="File Service"
+      eyebrow="Servicio de archivos"
     >
       <div className="mb-8 flex items-center">
         {WIZARD_STEPS.map((s, index) => {

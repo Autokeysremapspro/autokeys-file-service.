@@ -7,25 +7,25 @@ function Block({ className = '' }: { className?: string }) {
 export default function DashboardLoading() {
   return (
     <AppShell>
-      <div className="space-y-6" aria-busy="true" aria-label="Cargando Mission Control" role="status">
-        <span className="sr-only">Cargando Mission Control</span>
-        <section className="ak5-card min-h-[300px] rounded-[28px] p-6 sm:p-8 lg:p-10">
-          <div className="max-w-2xl space-y-4">
-            <Block className="h-7 w-44" />
-            <Block className="h-14 w-full max-w-xl" />
-            <Block className="h-5 w-full max-w-lg" />
-            <div className="flex gap-3 pt-3"><Block className="h-11 w-44" /><Block className="h-11 w-36" /></div>
-          </div>
+      <div className="space-y-6" aria-busy="true" aria-label="Cargando Inicio" role="status">
+        <span className="sr-only">Cargando Inicio</span>
+        <div className="flex items-end justify-between gap-4">
+          <div className="space-y-3"><Block className="h-4 w-32" /><Block className="h-9 w-64" /></div>
+          <Block className="h-11 w-44" />
+        </div>
+
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => <Block key={index} className="h-24" />)}
         </section>
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-          {Array.from({ length: 6 }).map((_, index) => <Block key={index} className="h-32" />)}
+        <section className="grid gap-5 2xl:grid-cols-[1.5fr_1fr]">
+          <Block className="h-64" />
+          <Block className="h-64" />
         </section>
 
-        <section className="grid gap-5 2xl:grid-cols-[1.3fr_.85fr_.85fr]">
-          <Block className="h-80" />
-          <Block className="h-80" />
-          <Block className="h-80" />
+        <section className="grid gap-5 2xl:grid-cols-[1.5fr_1fr]">
+          <Block className="h-72" />
+          <Block className="h-72" />
         </section>
       </div>
     </AppShell>
