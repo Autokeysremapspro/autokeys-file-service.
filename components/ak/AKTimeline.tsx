@@ -3,11 +3,11 @@
 import { AlertTriangle, CheckCircle2, Clock, Download, Gauge, Wrench } from 'lucide-react'
 
 export const timelineFlow = [
-  { key: 'recibido', label: 'Pedido recibido', icon: CheckCircle2 },
-  { key: 'cola', label: 'En cola', icon: Clock },
-  { key: 'proceso', label: 'Técnico trabajando', icon: Wrench },
-  { key: 'respuesta', label: 'Prueba / respuesta', icon: Gauge },
-  { key: 'descarga', label: 'Disponible para descargar', icon: Download },
+  { key: 'recibido', label: 'Recibido', icon: CheckCircle2 },
+  { key: 'cola', label: 'En revisión', icon: Clock },
+  { key: 'proceso', label: 'En proceso', icon: Wrench },
+  { key: 'respuesta', label: 'Listo para descargar', icon: Gauge },
+  { key: 'descarga', label: 'Entregado', icon: Download },
 ]
 const flow = timelineFlow
 
@@ -69,7 +69,7 @@ export default function AKTimeline({ estado = 'pendiente', orientation = 'vertic
     <div className="rounded-[2rem] border border-white/10 bg-white/[0.035] p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Live Timeline</p>
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-white/35">Historial del pedido</p>
           <p className={`mt-2 text-xs font-bold ${timelineState.actionRequired ? 'text-amber-300' : 'text-white/40'}`}>{timelineState.label}</p>
         </div>
         {timelineState.actionRequired && (

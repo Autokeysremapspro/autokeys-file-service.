@@ -228,6 +228,7 @@ function EstadoActualCard({ pedido }: { pedido: FileServicePedido }) {
   const state = getTimelineState(pedido.estado)
   const pct = Math.round(((state.activeIndex + 1) / timelineFlow.length) * 100)
   const circumference = 2 * Math.PI * 42
+  const ringColor = pedido.estado === 'finalizado' ? '#32d583' : state.actionRequired ? '#f59e0b' : 'var(--ak-red)'
   return (
     <div className="ak5-card p-5">
       <div className="flex items-center justify-between">
@@ -238,7 +239,7 @@ function EstadoActualCard({ pedido }: { pedido: FileServicePedido }) {
         <div className="relative grid h-32 w-32 place-items-center">
           <svg viewBox="0 0 100 100" className="absolute inset-0 -rotate-90">
             <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="8"/>
-            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--ak-red)" strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - pct / 100)} />
+            <circle cx="50" cy="50" r="42" fill="none" stroke={ringColor} strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - pct / 100)} />
           </svg>
           <div className="text-2xl font-black">{pct}%</div>
         </div>

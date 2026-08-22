@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { ArrowRight, Calendar, CheckCircle2, Clock3, Download, Eye, FileDown, Gauge, Grid2X2, List, ShoppingBag, Search } from 'lucide-react'
 import AppShell from '@/components/AppShell'
 import CustomSelect from '@/components/ak/CustomSelect'
-import { getMisPedidos, type FileServicePedido, formatEstado, type PedidoEstado } from '@/lib/services/pedidos'
+import { descargarArchivo, getMisPedidos, type FileServicePedido, formatEstado, type PedidoEstado } from '@/lib/services/pedidos'
 
 function statusClass(estado?: string | null) {
   if (estado === 'finalizado') return 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300'
@@ -52,10 +52,27 @@ export default function PedidosPage() {
   const [fechaHasta, setFechaHasta] = useState('')
   const [view, setView] = useState<'cards' | 'compact'>('compact')
   const [loading, setLoading] = useState(true)
+  const [downloadingId, setDownloadingId] = useState<string | null>(null)
 
   useEffect(() => {
     getMisPedidos().then(setPedidos).catch(console.error).finally(() => setLoading(false))
   }, [])
+
+  async function download(pedido: FileServicePedido) {
+    if (!pedido.mod_bucket || !pedido.mod_path) return
+    setDownloadingId(pedido.id)
+    try {
+      const blob = await descargarArchivo(pedido.mod_bucket, pedido.mod_path)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = pedido.mod_nombre || `MOD-${pedido.numero || pedido.id}.bin`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setDownloadingId(null)
+    }
+  }
 
   const serviciosDisponibles = useMemo(() => {
     const set = new Set<string>()
@@ -117,12 +134,9 @@ export default function PedidosPage() {
   return (
     <AppShell>
       <div className="space-y-6">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div>
-            <h1 className="ak5-title text-3xl sm:text-4xl">Pedidos</h1>
-            <p className="mt-2 max-w-2xl text-sm text-white/45">Gestiona y da seguimiento a todos tus pedidos de archivos.</p>
-          </div>
-          <Link href="/nuevo-pedido" className="ak5-primary shrink-0"><ArrowRight size={16}/> Nuevo pedido</Link>
+        <div>
+          <h1 className="ak5-title text-3xl sm:text-4xl">Pedidos</h1>
+          <p className="mt-2 max-w-2xl text-sm text-white/45">Gestiona y da seguimiento a todos tus pedidos de archivos.</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -224,8 +238,11 @@ export default function PedidosPage() {
                         <td className="px-5 py-4"><span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${statusClass(pedido.estado)}`}>{formatEstado(pedido.estado)}</span></td>
                         <td className={`px-5 py-4 text-xs font-bold ${prio.cls}`}>{prio.label}</td>
                         <td className="px-5 py-4 text-xs text-white/40">{pedido.created_at ? new Date(pedido.created_at).toLocaleDateString('es-ES') : '—'}</td>
-                        <td className="px-5 py-4 text-right">
-                          <Link href={`/pedidos/${pedido.id}`} aria-label={`Ver pedido ${pedido.numero || ''}`} className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/8 bg-white/[.025] text-white/40 transition hover:border-red-400/25 hover:text-red-300"><Eye size={15}/></Link>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Link href={`/pedidos/${pedido.id}`} aria-label={`Ver pedido ${pedido.numero || ''}`} className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/8 bg-white/[.025] text-white/40 transition hover:border-red-400/25 hover:text-red-300"><Eye size={15}/></Link>
+                            <button type="button" onClick={() => download(pedido)} disabled={!pedido.mod_path || downloadingId === pedido.id} aria-label={`Descargar ${pedido.numero || ''}`} className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/8 bg-white/[.025] text-white/40 transition hover:border-red-400/25 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-30"><Download size={15}/></button>
+                          </div>
                         </td>
                       </tr>
                     )
