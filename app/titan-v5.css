@@ -58,6 +58,9 @@ html[data-ak-theme='light'] .ak5-theme-toggle{color:#475467!important;border-col
 html[data-ak-theme='light'] .ak5-brand-panel{border-color:rgba(15,23,42,.10)!important;background:linear-gradient(145deg,#11151c,#07090d)!important;box-shadow:0 12px 30px rgba(15,23,42,.12)}
 html[data-ak-theme='light'] .ak5-brand-panel .ak5-brand-logo{background:radial-gradient(circle at 50% 50%,rgba(239,68,68,.10),transparent 70%)}
 html[data-ak-theme='light'] .ak5-brand-panel{color:#fff!important}
+html[data-ak-theme='light'] .ak5-shell .ak5-sidebar-promo{background:#0a0b0d!important;border-color:rgba(255,255,255,.08)!important;color:#fff!important}
+html[data-ak-theme='light'] .ak5-shell .ak5-sidebar-promo [class*='text-white']{color:#fff!important}
+html[data-ak-theme='light'] .ak5-shell .ak5-sidebar-promo [class*='text-red']{color:#ff4d55!important}
 html[data-ak-theme='light'] .ak5-brand-panel [class*='text-white/']{color:rgba(255,255,255,.42)!important}
 html[data-ak-theme='light'] .ak5-shell .text-white{color:#152033!important}
 html[data-ak-theme='light'] .ak5-shell [class*='text-white/']{color:rgba(21,32,51,.58)!important}
