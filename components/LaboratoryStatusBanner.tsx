@@ -44,7 +44,7 @@ export default function LaboratoryStatusBanner() {
     : null
 
   return (
-    <div className="mb-5 rounded-2xl border border-white/[.07] bg-[#080b11]/85 px-4 py-3 shadow-xl backdrop-blur sm:px-5">
+    <div className="mb-5 rounded-2xl border border-white/[.08] bg-[#0b0c0e]/90 px-4 py-3 shadow-xl backdrop-blur sm:px-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-start gap-3">
           <span className={`mt-0.5 inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[.12em] ${meta.cls}`}>

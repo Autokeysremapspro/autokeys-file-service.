@@ -87,7 +87,7 @@ export default function AKNotificationBell() {
       >
         <Bell size={18} />
         {unread > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--ak-red)] px-1 text-[10px] font-black text-white shadow-[0_0_25px_rgba(217,4,41,.65)]">
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--ak-red)] px-1 text-[10px] font-black text-white shadow-[0_0_25px_rgba(239,16,24,.65)]">
             {unread > 99 ? '99+' : unread}
           </span>
         )}

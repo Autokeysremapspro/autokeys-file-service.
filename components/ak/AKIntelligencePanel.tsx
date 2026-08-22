@@ -25,14 +25,14 @@ export default function AKIntelligencePanel({ visible, info }: { visible: boolea
 
   return (
     <AKCard className="overflow-hidden">
-      <div className="border-b border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(217,4,41,.24),transparent_42%),rgba(255,255,255,.025)] p-6">
+      <div className="border-b border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(239,16,24,.24),transparent_42%),rgba(255,255,255,.025)] p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--ak-glow)]">AK Intelligence</p>
             <h3 className="mt-2 text-2xl font-black">ECU identificada</h3>
             <p className="mt-1 text-sm text-white/40">Análisis visual preparado para detección real en futuras versiones.</p>
           </div>
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 text-[var(--ak-glow)] shadow-[0_0_50px_rgba(217,4,41,.22)]">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 text-[var(--ak-glow)] shadow-[0_0_50px_rgba(239,16,24,.22)]">
             <Cpu size={27} />
           </div>
         </div>

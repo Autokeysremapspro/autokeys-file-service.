@@ -74,10 +74,10 @@ export default function GaragePage() {
   const hasActiveFilters = hasSearch || onlyOpen
 
   return (
-    <AKPageShell title="Mis vehículos" subtitle="Un garaje técnico vivo con el historial de cada ECU, servicio, archivo y versión." eyebrow="Vehicle Workspace" actions={<div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:flex-wrap"><AKButton href="/nuevo-pedido"><UploadCloud size={18}/> Nuevo trabajo</AKButton><AKButton href="/biblioteca" variant="ghost"><FileArchive size={18}/> Biblioteca</AKButton></div>}>
+    <AKPageShell title="Mis vehículos" subtitle="Un garaje técnico vivo con el historial de cada ECU, servicio, archivo y versión." eyebrow="Taller" actions={<div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:flex-wrap"><AKButton href="/nuevo-pedido"><UploadCloud size={18}/> Nuevo trabajo</AKButton><AKButton href="/biblioteca" variant="ghost"><FileArchive size={18}/> Biblioteca</AKButton></div>}>
         <header className="sr-only">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.3em] text-red-300">Private Garage</p>
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-red-300">Garaje privado</p>
             <h1 className="mt-2 text-4xl font-black tracking-tight md:text-5xl">Mi Garaje</h1>
             <p className="mt-2 max-w-2xl text-sm text-white/40">
               Cada vehículo con su historial técnico, ORI, MOD, servicios realizados y pedidos asociados.
@@ -86,7 +86,7 @@ export default function GaragePage() {
         </header>
 
         <div className="grid gap-4 sm:gap-5 md:grid-cols-2 2xl:grid-cols-4">
-          <GarageStat label="Vehículos" value={stats.vehicles} helper="Garage privado" glow="rgba(255,66,90,.14)" valueClass="" />
+          <GarageStat label="Vehículos" value={stats.vehicles} helper="Garage privado" glow="rgba(239,16,24,.14)" valueClass="" />
           <GarageStat label="Trabajos" value={stats.trabajos} helper="Historial acumulado" glow="rgba(34,211,238,.14)" valueClass="" />
           <GarageStat label="Finalizados" value={stats.finalizados} helper="MOD disponibles" glow="rgba(52,211,153,.14)" valueClass="text-emerald-300" />
           <GarageStat label="Abiertos" value={stats.abiertos} helper="Trabajos en cola o proceso" glow="rgba(245,158,11,.14)" valueClass="text-amber-300" />
@@ -96,7 +96,7 @@ export default function GaragePage() {
           <div className="grid gap-5 xl:grid-cols-[1fr_330px] xl:items-center">
             <div className="min-w-0">
               <div className="ak5-chip border-red-400/20 bg-red-400/10 text-red-300">
-                <Sparkles size={15} /> Vehicle Intelligence
+                <Sparkles size={15} /> Inteligencia del vehículo
               </div>
               <h2 className="mt-4 break-words text-3xl font-black tracking-tight">Historial técnico vivo por vehículo</h2>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-white/42">

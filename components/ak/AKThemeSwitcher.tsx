@@ -139,7 +139,7 @@ export default function AKThemeSwitcher() {
         <div
           role="menu"
           aria-label="Seleccionar tema"
-          className="absolute right-0 top-full z-[80] mt-2 w-44 overflow-hidden rounded-xl border border-white/10 bg-[#080c13]/95 p-1.5 shadow-2xl backdrop-blur-xl"
+          className="absolute right-0 top-full z-[80] mt-2 w-44 overflow-hidden rounded-xl border border-white/10 bg-[#0a0b0d]/95 p-1.5 shadow-2xl backdrop-blur-xl"
         >
           {OPTIONS.map(option => {
             const Icon = option.icon

@@ -91,7 +91,7 @@ export default function NotificacionesPage() {
       <section className="flex-1">
         <header className="mb-7 flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.3em] text-[var(--ak-glow)]">Live Center</p>
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-[var(--ak-glow)]">Centro de actividad</p>
             <h1 className="mt-2 text-4xl font-black tracking-tight md:text-5xl">Notificaciones</h1>
             <p className="mt-2 max-w-2xl text-sm text-white/40">Cambios de estado, mensajes de chat, archivos MOD listos y avisos importantes de AK Cloud.</p>
           </div>

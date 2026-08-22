@@ -8,7 +8,7 @@ html[data-ak-theme='light'] .ak-notification-bell > button {
 
 html[data-ak-theme='light'] .ak-notification-bell > button:hover {
   color: #152033 !important;
-  border-color: rgba(255, 66, 90, .28) !important;
+  border-color: rgba(239, 16, 24, .28) !important;
 }
 
 html[data-ak-theme='light'] .ak-notification-popover {

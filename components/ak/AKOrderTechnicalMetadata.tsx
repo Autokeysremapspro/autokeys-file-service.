@@ -45,7 +45,7 @@ export default function AKOrderTechnicalMetadata() {
 
       {open && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-xl rounded-[2rem] border border-white/10 bg-[#0b0e14] p-6 shadow-2xl">
+          <div className="w-full max-w-xl rounded-[2rem] border border-white/10 bg-[#0a0b0d] p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-black uppercase tracking-[.2em] text-red-300">Información técnica</p>
@@ -87,7 +87,7 @@ export default function AKOrderTechnicalMetadata() {
               <div className="mt-4 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">Indica qué cambios contiene el archivo o qué hardware monta el vehículo para que el laboratorio pueda valorarlo correctamente.</div>
             )}
 
-            <button type="button" onClick={() => setOpen(false)} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-[#c9102b] to-[#ff425a] px-4 py-3 font-bold text-white">Guardar datos</button>
+            <button type="button" onClick={() => setOpen(false)} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-[#b8090f] to-[#ef1018] px-4 py-3 font-bold text-white">Guardar datos</button>
           </div>
         </div>
       )}

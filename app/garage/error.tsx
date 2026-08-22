@@ -21,7 +21,7 @@ export default function GarageError({
     <AKPageShell
       title="Mis vehículos"
       subtitle="Tu historial técnico sigue protegido."
-      eyebrow="Vehicle Workspace"
+      eyebrow="Taller"
     >
       <AKCard className="mx-auto mt-6 max-w-2xl p-6 text-center sm:mt-8 sm:p-8 md:p-10">
         <div role="alert" aria-live="assertive">

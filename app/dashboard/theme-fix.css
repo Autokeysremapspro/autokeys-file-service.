@@ -25,7 +25,7 @@ html[data-ak-theme='light'] .ak-dashboard-theme-scope [class*='hover:bg-white/']
   background-color: rgba(15, 23, 42, .035) !important;
 }
 
-html[data-ak-theme='light'] .ak-dashboard-theme-scope [class~='bg-[#0b1018]'] {
+html[data-ak-theme='light'] .ak-dashboard-theme-scope [class~='bg-[#0a0b0d]'] {
   background-color: #f8fafc !important;
   box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .08);
 }

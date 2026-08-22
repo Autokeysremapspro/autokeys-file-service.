@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { AlertCircle, Bike, Car, Check, ChevronDown, Cog, FileUp, Gauge, ScanLine, Send, Sparkles, Truck, Wrench, ShieldCheck, CheckCircle2, X } from 'lucide-react'
+import { AlertCircle, ArrowLeft, ArrowRight, Bike, Car, Check, ChevronDown, Cog, FileUp, Gauge, ScanLine, Send, Sparkles, Truck, Wrench, ShieldCheck, CheckCircle2, X } from 'lucide-react'
 import AKPageShell from '@/components/ak/AKPageShell'
 import AKUploader from '@/components/ak/AKUploader'
 import AKCard from '@/components/ak/AKCard'
@@ -46,8 +46,16 @@ function serviceToCard(service: ServicioConPrecioReal): AKService {
   }
 }
 
+const WIZARD_STEPS = [
+  { n: 1, label: 'Archivo' },
+  { n: 2, label: 'Vehículo' },
+  { n: 3, label: 'Servicios' },
+  { n: 4, label: 'Resumen y pago' },
+] as const
+
 export default function NuevoPedidoPage() {
   const router = useRouter()
+  const [step, setStep] = useState(1)
   const [file, setFile] = useState<File | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [selected, setSelected] = useState<string[]>([])
@@ -162,13 +170,25 @@ export default function NuevoPedidoPage() {
     ecu: Boolean(vehicle.ecu.trim()),
     servicios: selected.length > 0,
   }
-  const steps = [
-    { label: 'Archivo', done: stepsDone.archivo },
-    { label: 'Vehículo', done: stepsDone.vehiculo },
-    { label: 'ECU', done: stepsDone.ecu },
-    { label: 'Servicios', done: stepsDone.servicios },
-    { label: 'Revisar y enviar', done: stepsDone.archivo && stepsDone.vehiculo && stepsDone.ecu && stepsDone.servicios && legalAccepted },
-  ]
+
+  const stepValid: Record<number, boolean> = {
+    1: stepsDone.archivo,
+    2: stepsDone.vehiculo && stepsDone.ecu,
+    3: stepsDone.servicios,
+    4: true,
+  }
+  const maxUnlockedStep = stepValid[1] ? (stepValid[2] ? (stepValid[3] ? 4 : 3) : 2) : 1
+
+  function goToStep(n: number) {
+    if (n <= maxUnlockedStep || n <= step) setStep(n)
+  }
+  function goNext() {
+    if (!stepValid[step]) return
+    setStep((s) => Math.min(4, s + 1))
+  }
+  function goBack() {
+    setStep((s) => Math.max(1, s - 1))
+  }
 
   async function enviarPedido() {
     if (!legalAccepted) { setLegalOpen(true); return }
@@ -221,179 +241,268 @@ export default function NuevoPedidoPage() {
     <AKPageShell
       title="Nuevo pedido"
       subtitle="Sube el ORI, añade los datos técnicos manualmente y elige los servicios por vehículo. Pagas solo lo que pidas."
-      eyebrow="File Service"
+      eyebrow="Servicio de archivos"
     >
-      <div className="mb-6 grid grid-cols-2 gap-2.5 sm:grid-cols-5">
-        {steps.map((step, index) => (
-          <div
-            key={step.label}
-            className={`flex items-center gap-2.5 rounded-2xl border px-3.5 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
-              step.done
-                ? 'border-red-400/35 bg-red-400/[.09] text-red-300'
-                : 'border-white/10 bg-black/25 text-white/45'
-            }`}
-          >
-            <span className={`ak-mono grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] ${step.done ? 'bg-red-400 text-[#0a0d12]' : 'bg-white/10 text-white/50'}`}>
-              {step.done ? <Check size={13} /> : index + 1}
-            </span>
-            <span className="truncate">{step.label}</span>
-          </div>
-        ))}
+      <div className="mb-8 flex items-center">
+        {WIZARD_STEPS.map((s, index) => {
+          const reachable = s.n <= maxUnlockedStep || s.n <= step
+          const isDone = s.n < step || (s.n <= maxUnlockedStep && s.n !== step && stepValid[s.n])
+          const isCurrent = s.n === step
+          return (
+            <div key={s.n} className="flex flex-1 items-center last:flex-none">
+              <button
+                type="button"
+                onClick={() => goToStep(s.n)}
+                disabled={!reachable}
+                className="flex shrink-0 flex-col items-center gap-2 disabled:cursor-not-allowed"
+              >
+                <span
+                  className={`ak-mono grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 text-sm font-black transition ${
+                    isCurrent
+                      ? 'border-[var(--ak-red)] bg-[var(--ak-red)]/15 text-white shadow-[0_0_24px_rgba(239,16,24,.35)]'
+                      : isDone
+                        ? 'border-[var(--ak-red)] bg-[var(--ak-red)] text-white'
+                        : 'border-white/15 bg-black/25 text-white/35'
+                  }`}
+                >
+                  {isDone ? <Check size={16} /> : s.n}
+                </span>
+                <span className={`hidden text-center text-[10px] font-bold uppercase tracking-[.14em] sm:block ${isCurrent ? 'text-white' : isDone ? 'text-white/60' : 'text-white/30'}`}>
+                  {s.label}
+                </span>
+              </button>
+              {index < WIZARD_STEPS.length - 1 && (
+                <div className={`mx-2 h-[2px] flex-1 rounded-full transition sm:mx-4 ${s.n < step || (s.n <= maxUnlockedStep && stepValid[s.n]) ? 'bg-[var(--ak-red)]' : 'bg-white/10'}`} />
+              )}
+            </div>
+          )
+        })}
       </div>
 
       <div className="grid gap-6 2xl:grid-cols-[1fr_430px]">
         <div className="space-y-6">
-          <AKCard className="p-5 md:p-6">
-            <div className="mb-5 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-400/25 bg-red-400/10 text-red-300"><FileUp size={24} /></div>
-                <div>
-                  <h2 className="text-2xl font-bold">Archivo ORI</h2>
-                  <p className="text-sm text-white/40">Formatos recomendados: .bin, .ori, .hex, .mod, .zip.</p>
-                </div>
-              </div>
-              <Link href="/intelligence" className="hidden shrink-0 items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-[11px] font-black uppercase tracking-wider text-cyan-300 transition hover:bg-cyan-400/20 sm:flex">
-                <Sparkles size={14}/> Analizar antes con AK Intelligence
-              </Link>
-            </div>
-            <AKUploader fileName={fileName} onFile={handleFile} compact />
-
-            {detecting && (
-              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-white/60">
-                <ScanLine size={18} className="animate-pulse text-[#5eead4]" /> Analizando archivo (huella + firmas verificadas + calidad)...
-              </div>
-            )}
-
-            {!detecting && detection && <AKEcuDetectionSummary detection={detection} onApply={aplicarDeteccion} />}
-          </AKCard>
-
-          <AKCard className="p-5 md:p-6">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-400/25 bg-red-400/10 text-red-300"><Car size={24} /></div>
-              <div>
-                <h2 className="text-2xl font-bold">Datos del vehículo</h2>
-                <p className="text-sm text-white/40">Estos datos los introduce el cliente manualmente. Nada de detección automática forzada.</p>
-              </div>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              <Field label="Marca *" value={vehicle.marca} onChange={(v) => updateVehicle('marca', v)} placeholder="BMW, Audi, VW..." />
-              <Field label="Modelo *" value={vehicle.modelo} onChange={(v) => updateVehicle('modelo', v)} placeholder="320d, A4, Golf 7..." />
-              <Field label="Motor" value={vehicle.motor} onChange={(v) => updateVehicle('motor', v)} placeholder="2.0 TDI, 3.0d..." />
-              <Field label="Año" value={vehicle.anio} onChange={(v) => updateVehicle('anio', v)} placeholder="2017" />
-              <Field label="Potencia" value={vehicle.cv} onChange={(v) => updateVehicle('cv', v)} placeholder="150 cv" />
-              <Field label="Cambio" value={vehicle.cambio} onChange={(v) => updateVehicle('cambio', v)} placeholder="Manual, DSG, ZF..." />
-            </div>
-          </AKCard>
-
-          <AKCard className="p-5 md:p-6">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-400/25 bg-red-400/10 text-red-300"><Gauge size={24} /></div>
-              <div>
-                <h2 className="text-2xl font-bold">Datos ECU</h2>
-                <p className="text-sm text-white/40">El cliente rellena ECU / HW / SW manualmente. Si no lo sabe, puede escribir “revisar”.</p>
-              </div>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <Field label="ECU *" value={vehicle.ecu} onChange={(v) => updateVehicle('ecu', v)} placeholder="EDC17C64, MD1CS003..." />
-              <Field label="Hardware" value={vehicle.hw} onChange={(v) => updateVehicle('hw', v)} placeholder="HW / Bosch / referencia" />
-              <Field label="Software" value={vehicle.sw} onChange={(v) => updateVehicle('sw', v)} placeholder="SW / versión" />
-              <Field label="Herramienta lectura" value={vehicle.lectura} onChange={(v) => updateVehicle('lectura', v)} placeholder="KESS3, FLEX, Autotuner..." />
-            </div>
-          </AKCard>
-
-          <AKCard className="p-5 md:p-6">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-400/25 bg-red-400/10 text-red-300"><Wrench size={24} /></div>
-              <div>
-                <h2 className="text-2xl font-bold">Servicios</h2>
-                <p className="text-sm text-white/40">Elige el tipo de vehículo y selecciona los servicios — el precio de cada uno se cobra por archivo.</p>
-              </div>
-            </div>
-
-            {loadingConfig ? (
-              <div className="rounded-2xl border border-white/10 bg-black/25 p-5 text-sm text-white/45">Cargando catálogo desde Core...</div>
-            ) : (
-              <div className="space-y-5">
-                <div className="flex flex-wrap gap-2">
-                  {FAMILIAS.map((f) => {
-                    const Icon = FAMILIA_ICONS[f.slug] || Wrench
-                    const activa = familia === f.slug
-                    const count = (grupos[f.slug] || []).length
-                    return (
-                      <button
-                        key={f.slug}
-                        type="button"
-                        onClick={() => setFamilia(f.slug)}
-                        className={`flex items-center gap-2.5 rounded-2xl border px-4 py-3 text-sm font-bold transition ${
-                          activa
-                            ? 'border-red-400/45 bg-red-400/[.12] text-white shadow-[0_0_28px_rgba(255,66,90,.18)]'
-                            : 'border-white/10 bg-black/20 text-white/55 hover:border-white/25 hover:text-white'
-                        }`}
-                      >
-                        <span className={`flex h-8 w-8 items-center justify-center rounded-xl ${activa ? 'bg-red-400/20 text-red-300' : 'bg-white/5 text-white/45'}`}>
-                          <Icon size={16} />
-                        </span>
-                        {f.nombre}
-                        <span className={`ak-mono rounded-full px-1.5 py-0.5 text-[10px] ${activa ? 'bg-red-400/25 text-red-300' : 'bg-white/5 text-white/30'}`}>{count}</span>
-                        <ChevronDown size={14} className={`transition-transform ${activa ? 'rotate-180 text-red-300' : 'text-white/30'}`} />
-                      </button>
-                    )
-                  })}
-                </div>
-
-                {selectedFueraDeFamilia.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
-                    <span className="font-bold">También en tu pedido, de otra categoría:</span>
-                    {selectedFueraDeFamilia.map((s) => (
-                      <button
-                        key={s.slug}
-                        type="button"
-                        onClick={() => toggle(s.slug)}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/25 bg-amber-500/10 px-2.5 py-1 font-semibold hover:bg-amber-500/20"
-                      >
-                        {s.nombre} <X size={12} />
-                      </button>
-                    ))}
+          {step === 1 && (
+            <AKCard className="p-5 md:p-6">
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 text-[var(--ak-glow)]"><FileUp size={24} /></div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Archivo ORI</h2>
+                    <p className="text-sm text-white/40">Formatos recomendados: .bin, .ori, .hex, .mod, .zip.</p>
                   </div>
-                )}
+                </div>
+                <Link href="/intelligence" className="hidden shrink-0 items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-[11px] font-black uppercase tracking-wider text-cyan-300 transition hover:bg-cyan-400/20 sm:flex">
+                  <Sparkles size={14}/> Analizar antes con AK Intelligence
+                </Link>
+              </div>
+              <AKUploader fileName={fileName} onFile={handleFile} compact />
 
-                <div key={familia} className="ak-expand-in rounded-[1.6rem] border border-white/10 bg-black/20 p-4 sm:p-5">
-                  {serviciosDeFamilia.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-white/10 p-6 text-center text-sm text-white/40">
-                      Todavía no hay servicios publicados en esta categoría.
-                    </div>
-                  ) : (
-                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                      {serviciosDeFamilia.map((service) => (
-                        <AKServiceCard key={service.slug} service={serviceToCard(service)} selected={selected.includes(service.slug)} onToggle={() => toggle(service.slug)} />
+              {detecting && (
+                <div className="mt-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-white/60">
+                  <ScanLine size={18} className="animate-pulse text-[#5eead4]" /> Analizando archivo (huella + firmas verificadas + calidad)...
+                </div>
+              )}
+
+              {!detecting && detection && <AKEcuDetectionSummary detection={detection} onApply={aplicarDeteccion} />}
+
+              <StepNav canBack={false} canNext={stepValid[1]} onNext={goNext} />
+            </AKCard>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-6">
+              <AKCard className="p-5 md:p-6">
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 text-[var(--ak-glow)]"><Car size={24} /></div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Datos del vehículo</h2>
+                    <p className="text-sm text-white/40">Estos datos los introduce el cliente manualmente. Nada de detección automática forzada.</p>
+                  </div>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  <Field label="Marca *" value={vehicle.marca} onChange={(v) => updateVehicle('marca', v)} placeholder="BMW, Audi, VW..." />
+                  <Field label="Modelo *" value={vehicle.modelo} onChange={(v) => updateVehicle('modelo', v)} placeholder="320d, A4, Golf 7..." />
+                  <Field label="Motor" value={vehicle.motor} onChange={(v) => updateVehicle('motor', v)} placeholder="2.0 TDI, 3.0d..." />
+                  <Field label="Año" value={vehicle.anio} onChange={(v) => updateVehicle('anio', v)} placeholder="2017" />
+                  <Field label="Potencia" value={vehicle.cv} onChange={(v) => updateVehicle('cv', v)} placeholder="150 cv" />
+                  <Field label="Cambio" value={vehicle.cambio} onChange={(v) => updateVehicle('cambio', v)} placeholder="Manual, DSG, ZF..." />
+                </div>
+              </AKCard>
+
+              <AKCard className="p-5 md:p-6">
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 text-[var(--ak-glow)]"><Gauge size={24} /></div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Datos ECU</h2>
+                    <p className="text-sm text-white/40">El cliente rellena ECU / HW / SW manualmente. Si no lo sabe, puede escribir “revisar”.</p>
+                  </div>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  <Field label="ECU *" value={vehicle.ecu} onChange={(v) => updateVehicle('ecu', v)} placeholder="EDC17C64, MD1CS003..." />
+                  <Field label="Hardware" value={vehicle.hw} onChange={(v) => updateVehicle('hw', v)} placeholder="HW / Bosch / referencia" />
+                  <Field label="Software" value={vehicle.sw} onChange={(v) => updateVehicle('sw', v)} placeholder="SW / versión" />
+                  <Field label="Herramienta lectura" value={vehicle.lectura} onChange={(v) => updateVehicle('lectura', v)} placeholder="KESS3, FLEX, Autotuner..." />
+                </div>
+                <StepNav canBack canNext={stepValid[2]} onBack={goBack} onNext={goNext} />
+              </AKCard>
+            </div>
+          )}
+
+          {step === 3 && (
+            <AKCard className="p-5 md:p-6">
+              <div className="mb-5 flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 text-[var(--ak-glow)]"><Wrench size={24} /></div>
+                <div>
+                  <h2 className="text-2xl font-bold">Servicios</h2>
+                  <p className="text-sm text-white/40">Elige el tipo de vehículo y selecciona los servicios — el precio de cada uno se cobra por archivo.</p>
+                </div>
+              </div>
+
+              {loadingConfig ? (
+                <div className="rounded-2xl border border-white/10 bg-black/25 p-5 text-sm text-white/45">Cargando catálogo desde Core...</div>
+              ) : (
+                <div className="space-y-5">
+                  <div className="flex flex-wrap gap-2">
+                    {FAMILIAS.map((f) => {
+                      const Icon = FAMILIA_ICONS[f.slug] || Wrench
+                      const activa = familia === f.slug
+                      const count = (grupos[f.slug] || []).length
+                      return (
+                        <button
+                          key={f.slug}
+                          type="button"
+                          onClick={() => setFamilia(f.slug)}
+                          className={`flex items-center gap-2.5 rounded-2xl border px-4 py-3 text-sm font-bold transition ${
+                            activa
+                              ? 'border-[var(--ak-red)]/45 bg-[var(--ak-red)]/[.12] text-white shadow-[0_0_28px_rgba(239,16,24,.18)]'
+                              : 'border-white/10 bg-black/20 text-white/55 hover:border-white/25 hover:text-white'
+                          }`}
+                        >
+                          <span className={`flex h-8 w-8 items-center justify-center rounded-xl ${activa ? 'bg-[var(--ak-red)]/20 text-[var(--ak-glow)]' : 'bg-white/5 text-white/45'}`}>
+                            <Icon size={16} />
+                          </span>
+                          {f.nombre}
+                          <span className={`ak-mono rounded-full px-1.5 py-0.5 text-[10px] ${activa ? 'bg-[var(--ak-red)]/25 text-[var(--ak-glow)]' : 'bg-white/5 text-white/30'}`}>{count}</span>
+                          <ChevronDown size={14} className={`transition-transform ${activa ? 'rotate-180 text-[var(--ak-glow)]' : 'text-white/30'}`} />
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  {selectedFueraDeFamilia.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
+                      <span className="font-bold">También en tu pedido, de otra categoría:</span>
+                      {selectedFueraDeFamilia.map((s) => (
+                        <button
+                          key={s.slug}
+                          type="button"
+                          onClick={() => toggle(s.slug)}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/25 bg-amber-500/10 px-2.5 py-1 font-semibold hover:bg-amber-500/20"
+                        >
+                          {s.nombre} <X size={12} />
+                        </button>
                       ))}
                     </div>
                   )}
-                </div>
 
-                {dtcOffSelected && (
-                  <div className="rounded-[1.6rem] border border-amber-400/30 bg-amber-500/[.07] p-4 sm:p-5">
-                    <label className="block">
-                      <span className="ak-mono mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-amber-300">DTC a eliminar *</span>
-                      <input
-                        value={dtcCodes}
-                        onChange={(e) => setDtcCodes(e.target.value.toUpperCase())}
-                        placeholder="P0401, P2002, U0100"
-                        className="w-full rounded-2xl border border-amber-400/25 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-amber-300/70"
-                      />
-                    </label>
-                    <p className="mt-2 text-xs leading-5 text-white/45">Introduce únicamente los códigos DTC que deseas solicitar, separados por comas. Ejemplo: P0401, P2002, P2453.</p>
+                  <div key={familia} className="ak-expand-in rounded-[1.6rem] border border-white/10 bg-black/20 p-4 sm:p-5">
+                    {serviciosDeFamilia.length === 0 ? (
+                      <div className="rounded-2xl border border-dashed border-white/10 p-6 text-center text-sm text-white/40">
+                        Todavía no hay servicios publicados en esta categoría.
+                      </div>
+                    ) : (
+                      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                        {serviciosDeFamilia.map((service) => (
+                          <AKServiceCard key={service.slug} service={serviceToCard(service)} selected={selected.includes(service.slug)} onToggle={() => toggle(service.slug)} />
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
+
+                  {dtcOffSelected && (
+                    <div className="rounded-[1.6rem] border border-amber-400/30 bg-amber-500/[.07] p-4 sm:p-5">
+                      <label className="block">
+                        <span className="ak-mono mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-amber-300">DTC a eliminar *</span>
+                        <input
+                          value={dtcCodes}
+                          onChange={(e) => setDtcCodes(e.target.value.toUpperCase())}
+                          placeholder="P0401, P2002, U0100"
+                          className="w-full rounded-2xl border border-amber-400/25 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-amber-300/70"
+                        />
+                      </label>
+                      <p className="mt-2 text-xs leading-5 text-white/45">Introduce únicamente los códigos DTC que deseas solicitar, separados por comas. Ejemplo: P0401, P2002, P2453.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              <StepNav canBack canNext={stepValid[3]} onBack={goBack} onNext={goNext} />
+            </AKCard>
+          )}
+
+          {step === 4 && (
+            <AKCard className="p-5 md:p-6">
+              <div className="mb-5 flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 text-[var(--ak-glow)]"><ShieldCheck size={24} /></div>
+                <div>
+                  <h2 className="text-2xl font-bold">Resumen y pago</h2>
+                  <p className="text-sm text-white/40">Revisa el pedido, acepta las condiciones y confirma para enviarlo.</p>
+                </div>
               </div>
-            )}
-          </AKCard>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <SummaryBlock label="Archivo" value={fileName || 'Sin archivo'} />
+                <SummaryBlock label="Vehículo" value={[vehicle.marca, vehicle.modelo, vehicle.motor].filter(Boolean).join(' ') || 'Pendiente'} />
+                <SummaryBlock label="ECU" value={[vehicle.ecu, vehicle.hw, vehicle.sw].filter(Boolean).join(' · ') || 'Pendiente'} />
+                <SummaryBlock label="Servicios" value={selectedServices.length ? `${selectedServices.length} seleccionados` : 'Ninguno'} />
+              </div>
+
+              <div className="mt-5 space-y-2">
+                {selectedServices.map((service) => (
+                  <div key={service.slug} className="flex items-center justify-between gap-3 rounded-2xl bg-black/25 px-4 py-3 text-sm">
+                    <span className="truncate">{service.icono || '⚙️'} {service.nombre}</span>
+                    <strong className="ak-mono shrink-0 text-white">{Number(service.precio_final).toFixed(2)} €</strong>
+                  </div>
+                ))}
+              </div>
+
+              <label className="mt-5 block">
+                <span className="ak-mono mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-white/35">Observaciones para el técnico</span>
+                <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="min-h-[110px] w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-[var(--ak-red)]/60" placeholder="Observaciones para el técnico..." />
+              </label>
+
+              <StepNav canBack canNext={false} onBack={goBack} />
+            </AKCard>
+          )}
         </div>
 
         <aside className="space-y-6 2xl:sticky 2xl:top-24 2xl:self-start">
+          {step === 1 && (
+            <AKCard className="p-6">
+              <p className="ak-mono text-xs font-bold uppercase tracking-[0.22em] text-[var(--ak-glow)]">Requisitos de calidad del archivo</p>
+              <div className="mt-4 space-y-3">
+                {['Archivo original sin modificaciones', 'Archivo completo, no truncado', 'Lectura estable, realizada con equipo profesional', 'Sin errores de lectura'].map((req) => (
+                  <div key={req} className="flex items-start gap-2.5 text-sm text-white/60"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-400"/>{req}</div>
+                ))}
+              </div>
+              {serviciosConPrecioReal.length > 0 && (
+                <div className="mt-6 border-t border-white/10 pt-5">
+                  <p className="ak-mono text-xs font-bold uppercase tracking-[0.22em] text-[var(--ak-glow)]">Servicios compatibles</p>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    {serviciosConPrecioReal.slice(0, 8).map((s) => (
+                      <span key={s.slug} className="truncate rounded-lg border border-white/10 bg-white/[.03] px-2.5 py-1.5 text-xs font-bold text-white/60">{s.icono || '⚙️'} {s.nombre}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </AKCard>
+          )}
           <AKCard className="p-6">
-            <p className="ak-mono text-xs font-bold uppercase tracking-[0.22em] text-red-300">Resumen</p>
-            <h2 className="mt-2 text-3xl font-bold">Pedido</h2>
+            <div className="flex items-center justify-between">
+              <p className="ak-mono text-xs font-bold uppercase tracking-[0.22em] text-[var(--ak-glow)]">Resumen</p>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/30">Paso {step} de 4</span>
+            </div>
+            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/[.07]"><div className="h-full rounded-full bg-[var(--ak-red)] transition-[width]" style={{ width: `${(step / 4) * 100}%` }} /></div>
+            <h2 className="mt-4 text-3xl font-bold">Pedido</h2>
             <div className="mt-5 space-y-3 text-sm">
               <SummaryRow label="Archivo" value={fileName || 'Sin archivo'} />
               <SummaryRow label="Vehículo" value={[vehicle.marca, vehicle.modelo, vehicle.motor].filter(Boolean).join(' ') || 'Pendiente'} />
@@ -411,22 +520,27 @@ export default function NuevoPedidoPage() {
                 </div>
               ))}
             </div>
-            <div className="mt-5 rounded-[1.6rem] border border-red-400/25 bg-red-400/[.08] p-4">
+            <div className="mt-5 rounded-[1.6rem] border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/[.08] p-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-white/50">Total a pagar</span>
                 <strong className="ak-mono text-4xl font-bold text-white">{total.toFixed(2)} €</strong>
               </div>
             </div>
             {error && <div className="mt-4 flex gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200"><AlertCircle size={18} /> {error}</div>}
-            <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="mt-4 min-h-[120px] w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-red-400/60" placeholder="Observaciones para el técnico..." />
             <button type="button" onClick={()=>setLegalOpen(true)} className={`mt-4 flex w-full items-center gap-3 rounded-2xl border p-4 text-left ${legalAccepted ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-amber-500/30 bg-amber-500/10'}`}>
               {legalAccepted ? <CheckCircle2 className="text-emerald-300"/> : <ShieldCheck className="text-amber-300"/>}
               <div><div className="font-bold">{legalAccepted ? 'Condiciones aceptadas' : 'Debes aceptar las condiciones'}</div><div className="text-xs text-white/45">Uso legal, responsabilidad del cliente y posible restricción en vía pública.</div></div>
             </button>
-            <AKButton onClick={enviarPedido} disabled={sending || !legalAccepted} className="mt-4 w-full">
-              <Send size={18} /> {sending ? 'Enviando...' : total > 0 ? `Pagar ${total.toFixed(2)} € con PayPal` : 'Enviar pedido (sin coste)'}
-            </AKButton>
-            {total > 0 && !sending && (
+            {step === 4 ? (
+              <AKButton onClick={enviarPedido} disabled={sending || !legalAccepted} className="mt-4 w-full">
+                <Send size={18} /> {sending ? 'Enviando...' : total > 0 ? `Pagar ${total.toFixed(2)} € con PayPal` : 'Enviar pedido (sin coste)'}
+              </AKButton>
+            ) : (
+              <AKButton onClick={goNext} disabled={!stepValid[step]} className="mt-4 w-full">
+                Continuar <ArrowRight size={18} />
+              </AKButton>
+            )}
+            {step === 4 && total > 0 && !sending && (
               <p className="mt-2 text-center text-xs text-white/35">Te llevaremos a PayPal para completar el pago — el pedido se crea en cuanto se confirme.</p>
             )}
           </AKCard>
@@ -434,7 +548,7 @@ export default function NuevoPedidoPage() {
       </div>
       {legalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-[2rem] border border-white/10 bg-[#0b0e14] p-6 shadow-2xl md:p-8">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-[2rem] border border-white/10 bg-[#0a0b0d] p-6 shadow-2xl md:p-8">
             <div className="flex items-start gap-4"><div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300"><ShieldCheck size={28}/></div><div><p className="text-xs font-bold uppercase tracking-[.2em] text-amber-300">Aviso obligatorio</p><h2 className="mt-1 text-3xl font-bold">Condiciones de uso del servicio</h2></div></div>
             <div className="mt-6 space-y-4 text-sm leading-7 text-white/65">
               <p>Las soluciones suministradas se destinan exclusivamente a usos permitidos por la legislación aplicable, como competición, investigación, desarrollo, diagnóstico, exportación o utilización fuera de vías públicas cuando corresponda.</p>
@@ -445,7 +559,7 @@ export default function NuevoPedidoPage() {
             <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-black/25 p-4"><input type="checkbox" checked={legalAccepted} onChange={(e)=>setLegalAccepted(e.target.checked)} className="mt-1 h-5 w-5"/><span className="font-semibold">He leído, comprendo y acepto estas condiciones y asumo la responsabilidad del uso solicitado.</span></label>
             <div className="mt-6 flex gap-3">
               <button onClick={()=>setLegalOpen(false)} className="flex-1 rounded-2xl border border-white/10 px-4 py-3 font-bold">Cancelar</button>
-              <button disabled={!legalAccepted} onClick={()=>setLegalOpen(false)} className="flex-1 rounded-2xl bg-gradient-to-r from-[#c9102b] to-[#ff425a] px-4 py-3 font-bold text-white disabled:opacity-40">Aceptar y continuar</button>
+              <button disabled={!legalAccepted} onClick={()=>setLegalOpen(false)} className="flex-1 rounded-2xl bg-gradient-to-r from-[#b8090f] to-[#ef1018] px-4 py-3 font-bold text-white disabled:opacity-40">Aceptar y continuar</button>
             </div>
           </div>
         </div>
@@ -454,15 +568,42 @@ export default function NuevoPedidoPage() {
   )
 }
 
+function StepNav({ canBack, canNext, onBack, onNext }: { canBack: boolean; canNext: boolean; onBack?: () => void; onNext?: () => void }) {
+  if (!canBack && !onNext) return null
+  return (
+    <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
+      {canBack ? (
+        <button type="button" onClick={onBack} className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[.03] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white/55 transition hover:border-white/20 hover:text-white">
+          <ArrowLeft size={15} /> Atrás
+        </button>
+      ) : <span />}
+      {onNext && (
+        <button type="button" onClick={onNext} disabled={!canNext} className="flex items-center gap-2 rounded-xl border border-[var(--ak-red)]/35 bg-[var(--ak-red)]/10 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--ak-glow)] transition hover:bg-[var(--ak-red)]/20 disabled:cursor-not-allowed disabled:opacity-40">
+          Continuar <ArrowRight size={15} />
+        </button>
+      )}
+    </div>
+  )
+}
+
 function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
     <label className="block">
       <span className="ak-mono mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-white/35">{label}</span>
-      <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-red-400/60" />
+      <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-[var(--ak-red)]/60" />
     </label>
   )
 }
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return <div className="flex justify-between gap-4"><span className="text-white/35">{label}</span><strong className="max-w-[220px] truncate text-right text-white/75">{value}</strong></div>
+}
+
+function SummaryBlock({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+      <div className="ak-mono text-[10px] font-black uppercase tracking-[.18em] text-white/30">{label}</div>
+      <div className="mt-1.5 truncate text-sm font-bold text-white/80">{value}</div>
+    </div>
+  )
 }

@@ -22,7 +22,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         html[data-ak-theme='light'] .ak5-shell [class*='text-amber-200'] {
           color: #b45309 !important;
         }
-        html[data-ak-theme='light'] .ak5-shell [class*='bg-[#0b1018]'] {
+        html[data-ak-theme='light'] .ak5-shell [class*='bg-[#0a0b0d]'] {
           background: #fff !important;
           color: #152033 !important;
           box-shadow: inset 0 0 0 1px rgba(15,23,42,.08);

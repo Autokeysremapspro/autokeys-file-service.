@@ -7,6 +7,7 @@ html[data-ak-theme='light'] .ak-orders-theme-scope [class~='bg-black/30'] {
   background-color: rgba(15, 23, 42, .035) !important;
 }
 
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='bg-white/[.02]'],
 html[data-ak-theme='light'] .ak-orders-theme-scope [class~='bg-white/[.025]'],
 html[data-ak-theme='light'] .ak-orders-theme-scope [class~='bg-white/[.055]'] {
   background-color: rgba(15, 23, 42, .05) !important;
@@ -15,18 +16,31 @@ html[data-ak-theme='light'] .ak-orders-theme-scope [class~='bg-white/[.055]'] {
 html[data-ak-theme='light'] .ak-orders-theme-scope [class~='border-white/6'],
 html[data-ak-theme='light'] .ak-orders-theme-scope [class~='border-white/7'],
 html[data-ak-theme='light'] .ak-orders-theme-scope [class~='border-white/8'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='border-white/10'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='border-white/20'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='border-white/[.06]'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='border-white/[.07]'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='border-white/[.075]'],
 html[data-ak-theme='light'] .ak-orders-theme-scope [class~='border-white/[.08]'] {
   border-color: rgba(15, 23, 42, .12) !important;
 }
 
 html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/22'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/25'],
 html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/28'],
 html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/30'],
 html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/32'],
 html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/35'],
 html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/38'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/40'],
 html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/42'],
-html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/45'] {
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/45'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/50'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/55'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/60'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/70'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/80'],
+html[data-ak-theme='light'] .ak-orders-theme-scope [class~='text-white/85'] {
   color: rgba(15, 23, 42, .68) !important;
 }
 
