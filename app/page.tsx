@@ -65,11 +65,19 @@ export default function HomePage() {
       <header className="ak-v5-topbar sticky top-0 z-50">
         <div className="mx-auto flex max-w-[1480px] items-center justify-between px-5 py-4 lg:px-8">
           <Link href="/" className="flex items-center">
-            <img src="/images/brand/ak-cloud-logo.webp" alt="AK Cloud by Autokeys Remaps Pro" className="h-9 w-auto sm:h-11" />
+            <img src="/images/brand/ak-cloud-logo.webp" alt="AK Cloud by Autokeys Remaps Pro" className="h-12 w-auto sm:h-14" />
           </Link>
           <nav className="hidden items-center gap-7 text-xs font-bold lg:flex">
             {nav.map(item => (
-              <a key={item.label} href={item.href} className={item.active ? 'text-[#ff425a]' : 'text-white/45 transition hover:text-white'}>
+              <a
+                key={item.label}
+                href={item.href}
+                className={
+                  item.active
+                    ? 'relative text-[#ff425a] after:absolute after:-bottom-3 after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-[#ff425a]'
+                    : 'text-white/45 transition hover:text-white'
+                }
+              >
                 {item.label}
               </a>
             ))}
@@ -90,7 +98,7 @@ export default function HomePage() {
         <div className="relative mx-auto grid min-h-[780px] max-w-[1480px] items-center gap-12 px-5 py-20 lg:grid-cols-[.92fr_1.08fr] lg:px-8">
         <div className="ak-v5-reveal">
           <div className="ak-v5-kicker">Plataforma profesional</div>
-          <h1 className="ak-v5-title mt-6 text-6xl sm:text-7xl xl:text-[5.6rem]">El portal profesional<br />de <span className="text-[#ff425a]">File Service</span></h1>
+          <h1 className="ak-v5-title mt-6 text-5xl sm:text-6xl xl:text-[4.4rem]">El portal profesional<br />de <span className="text-[#ff425a]">File Service</span></h1>
           <p className="mt-7 max-w-xl text-lg leading-8 text-white/48">Sube tus archivos originales (ORI), solicita el servicio que necesitas y recibe tus archivos procesados de forma rápida, segura y centralizada.</p>
           <p className="mt-4 max-w-xl leading-7 text-white/40">Los nuevos usuarios requieren aprobación por <span className="text-[#ff425a] font-semibold">Autokeys Remaps Pro</span> para garantizar un servicio profesional y de calidad.</p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -209,9 +217,9 @@ export default function HomePage() {
       <section id="como-funciona" className="relative z-10 mx-auto max-w-[1480px] px-5 py-20 lg:px-8">
         <div className="mb-14 text-center"><div className="ak-v5-kicker">Cómo funciona</div></div>
         <div className="relative grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-          <div className="pointer-events-none absolute inset-x-[12%] top-6 hidden border-t border-dashed border-white/15 xl:block" />
+          <div className="pointer-events-none absolute inset-x-[12%] top-[70px] hidden border-t border-dashed border-white/15 xl:block" />
           {steps.map(({ n, icon: Icon, title, text }) => (
-            <div key={n} className="relative">
+            <div key={n} className="ak-v5-card relative p-6">
               <div className="flex items-center gap-3">
                 <div className="grid h-11 w-11 place-items-center rounded-full bg-[#ff425a] text-sm font-black shadow-[0_0_24px_rgba(255,66,90,.4)]">{n}</div>
                 <Icon size={20} className="text-white/35" />
@@ -243,21 +251,24 @@ export default function HomePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.map(o => (
-                    <tr key={o.vehicle} className="border-t border-white/[.06]">
-                      <td className="py-3 font-bold text-white/80">{o.vehicle}</td>
-                      <td className="py-3 text-white/50">{o.service}</td>
-                      <td className="py-3"><span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold ${statusStyles[o.tone]}`}>{o.status}</span></td>
-                      <td className="py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-20 rounded-full bg-white/[.08]"><div className="h-full rounded-full bg-gradient-to-r from-[#ff425a] to-[#67e8d1]" style={{ width: `${o.progress}%` }} /></div>
-                          <span className="text-[10px] text-white/35">{o.progress}%</span>
-                        </div>
-                      </td>
-                      <td className="py-3 text-white/35">{o.updated}</td>
-                      <td className="py-3 text-white/30"><Eye size={15} /></td>
-                    </tr>
-                  ))}
+                  {orders.map(o => {
+                    const RowIcon = o.tone === 'green' ? Download : Eye
+                    return (
+                      <tr key={o.vehicle} className="border-t border-white/[.06]">
+                        <td className="py-3 font-bold text-white/80">{o.vehicle}</td>
+                        <td className="py-3 text-white/50">{o.service}</td>
+                        <td className="py-3"><span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold ${statusStyles[o.tone]}`}>{o.status}</span></td>
+                        <td className="py-3">
+                          <div className="flex items-center gap-2">
+                            <div className="h-1.5 w-20 rounded-full bg-white/[.08]"><div className="h-full rounded-full bg-gradient-to-r from-[#ff425a] to-[#67e8d1]" style={{ width: `${o.progress}%` }} /></div>
+                            <span className="text-[10px] text-white/35">{o.progress}%</span>
+                          </div>
+                        </td>
+                        <td className="py-3 text-white/35">{o.updated}</td>
+                        <td className="py-3 text-white/30"><RowIcon size={15} /></td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -279,14 +290,14 @@ export default function HomePage() {
       </section>
 
       <section id="precios" className="relative z-10 mx-auto max-w-[1480px] px-5 pb-24 pt-6 lg:px-8">
-        <div className="ak-v5-glass relative overflow-hidden rounded-[36px] p-8 text-center sm:p-14">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,66,90,.20),transparent_48%)]" />
-          <div className="relative">
-            <h2 className="ak-v5-title mx-auto max-w-3xl text-4xl sm:text-6xl">Empieza a trabajar con <span className="text-[#ff425a]">AK Cloud</span></h2>
-            <p className="mx-auto mt-5 max-w-xl text-lg leading-8 text-white/42">Acceso profesional, rápido y centralizado para tu servicio de archivos.</p>
-            <div className="mt-8 flex justify-center">
-              <Link href="/register" className="ak-v5-button"><UserPlus size={18} /> Solicitar acceso ahora</Link>
+        <div className="ak-v5-card relative overflow-hidden p-8 sm:p-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_100%,rgba(255,66,90,.18),transparent_55%)]" />
+          <div className="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="ak-v5-title text-3xl sm:text-4xl">Empieza a trabajar con <span className="text-[#ff425a]">AK Cloud</span></h2>
+              <p className="mt-3 max-w-md leading-7 text-white/42">Acceso profesional, rápido y centralizado para tu servicio de archivos.</p>
             </div>
+            <Link href="/register" className="ak-v5-button shrink-0"><UserPlus size={18} /> Solicitar acceso ahora</Link>
           </div>
         </div>
       </section>
