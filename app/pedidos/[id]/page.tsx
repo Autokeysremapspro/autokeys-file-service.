@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Download, FileArchive, Loader2, ShieldCheck, MessageSquare, History, Layers3, Activity } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, Download, FileArchive, Loader2, ShieldCheck, MessageSquare, History, Layers3, Activity } from 'lucide-react'
 import AKPageShell from '@/components/ak/AKPageShell'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import AKTimeline from '@/components/ak/AKTimeline'
 import AKChat from '@/components/ak/AKChat'
-import { descargarArchivo, formatBytes, formatEstado, getPedidoById, type FileServicePedido } from '@/lib/services/pedidos'
+import { descargarArchivo, formatBytes, getPedidoById, type FileServicePedido } from '@/lib/services/pedidos'
 import { supabase } from '@/lib/supabase'
 
 export default function PedidoDetallePage({ params }: { params: { id: string } }) {
@@ -73,19 +73,37 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
     return <AKPageShell title="Pedido no encontrado" eyebrow="Workspace"><AKCard className="p-8 text-white/35">Pedido no encontrado.</AKCard></AKPageShell>
   }
 
+  const actionRequired = pedido.estado === 'revision_solicitada'
+
   return (
     <AKPageShell
       title={pedido.numero || 'Pedido File Service'}
       subtitle={`${pedido.ecu || 'ECU pendiente'} · ${[pedido.marca, pedido.modelo, pedido.motor].filter(Boolean).join(' ') || 'Vehículo pendiente'}`}
       eyebrow="Order Workspace"
       actions={
-        <div className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-colors ${justUpdated ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300' : 'border-white/10 bg-black/25 text-white/55'}`}>
-          {justUpdated && <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />}
-          {formatEstado(pedido.estado)}
+        <div className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-colors ${actionRequired ? 'border-amber-400/35 bg-amber-400/10 text-amber-300' : justUpdated ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300' : 'border-white/10 bg-black/25 text-white/55'}`}>
+          {(justUpdated || actionRequired) && <span className={`h-2 w-2 rounded-full ${actionRequired ? 'bg-amber-300' : 'animate-pulse bg-emerald-400'}`} />}
+          {formatWorkspaceEstado(pedido.estado)}
         </div>
       }
     >
       <Link href="/pedidos" className="mb-5 inline-flex items-center gap-2 text-sm font-black text-white/40 transition hover:text-white"><ArrowLeft size={17} /> Volver a trabajos</Link>
+
+      {actionRequired && (
+        <div className="mb-6 rounded-[1.75rem] border border-amber-400/25 bg-amber-400/[0.08] p-5 shadow-[0_18px_60px_rgba(245,158,11,0.08)]">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-amber-300/25 bg-amber-300/10 text-amber-300"><AlertTriangle size={21} /></div>
+              <div>
+                <div className="text-xs font-black uppercase tracking-[0.2em] text-amber-300">Acción requerida</div>
+                <h2 className="mt-1 text-lg font-black text-white">Autokeys necesita información o una comprobación para continuar</h2>
+                <p className="mt-1 max-w-3xl text-sm leading-6 text-white/45">Revisa la conversación del pedido y responde a la solicitud del laboratorio. El trabajo permanece abierto y la decisión técnica final sigue siendo de Autokeys.</p>
+              </div>
+            </div>
+            <AKButton onClick={() => setActiveTab('conversacion')} className="shrink-0"><MessageSquare size={17} /> Abrir conversación</AKButton>
+          </div>
+        </div>
+      )}
 
       <div className="ak5-card mb-6 p-4 md:p-5">
         <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
@@ -96,7 +114,7 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
             <Info label="Precio" value={`${pedido.precio || 0} €`} />
           </div>
           <div className="flex items-center gap-3 rounded-2xl border border-emerald-400/15 bg-emerald-400/[.055] px-4 py-3 text-emerald-300">
-            <Activity size={18}/><div><div className="text-[10px] font-black uppercase tracking-wider">Estado vivo</div><div className="text-xs text-emerald-200/65">Actualización en tiempo real</div></div>
+            <Activity size={18}/><div><div className="text-[10px] font-black uppercase tracking-wider">Estado vivo</div><div className="text-xs text-emerald-200/65">Sincronizado con AK Core</div></div>
           </div>
         </div>
       </div>
@@ -149,6 +167,18 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
       {activeTab === 'historial' && <div className="mx-auto max-w-4xl"><AKTimeline estado={pedido.estado}/></div>}
     </AKPageShell>
   )
+}
+
+function formatWorkspaceEstado(estado?: string | null) {
+  const map: Record<string, string> = {
+    pendiente: 'Pendiente',
+    en_proceso: 'En proceso',
+    esperando_prueba: 'Esperando prueba',
+    revision_solicitada: 'Acción requerida',
+    finalizado: 'Finalizado',
+    cancelado: 'Cancelado',
+  }
+  return map[estado || ''] || estado || 'Pendiente'
 }
 
 function Info({ label, value }: { label: string; value: string }) {
