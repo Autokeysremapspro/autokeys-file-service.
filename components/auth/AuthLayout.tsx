@@ -11,12 +11,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <main className="relative min-h-screen w-full overflow-hidden bg-[#020203] text-[#f4f4f5]">
       <div className="absolute inset-0">
         <img
-          src="/images/marketing/hero-car.webp"
+          src="/images/marketing/auth-car-black.webp"
           alt=""
-          className="h-full w-full object-cover object-[92%_50%]"
+          className="h-full w-full object-cover object-[12%_50%]"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/78 via-black/55 to-black/93" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-black/25 to-black/85" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40" />
       </div>
 
       <div className="relative z-10 flex min-h-screen flex-col">
