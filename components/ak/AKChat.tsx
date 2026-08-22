@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Loader2, MessageCircle, Send } from 'lucide-react'
+import { AlertTriangle, Loader2, MessageCircle, Send } from 'lucide-react'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import { supabase } from '@/lib/supabase'
@@ -18,9 +18,10 @@ type Props = {
   autorTipo?: AutorTipo
   title?: string
   compact?: boolean
+  actionRequired?: boolean
 }
 
-export default function AKChat({ pedidoId, autorTipo = 'cliente', title = 'Chat técnico', compact = false }: Props) {
+export default function AKChat({ pedidoId, autorTipo = 'cliente', title = 'Chat técnico', compact = false, actionRequired = false }: Props) {
   const [mensajes, setMensajes] = useState<FileServiceMensaje[]>([])
   const [texto, setTexto] = useState('')
   const [loading, setLoading] = useState(true)
@@ -115,6 +116,15 @@ export default function AKChat({ pedidoId, autorTipo = 'cliente', title = 'Chat 
         </div>
       </div>
 
+      {actionRequired && !isAdmin && (
+        <div className="border-b border-amber-400/15 bg-amber-400/[0.06] px-5 py-3">
+          <div className="flex items-start gap-2.5 text-amber-200">
+            <AlertTriangle className="mt-0.5 shrink-0" size={16} />
+            <p className="text-xs font-bold leading-5">El laboratorio espera tu respuesta. Revisa la última solicitud y adjunta o indica exactamente la información pedida antes de continuar el trabajo.</p>
+          </div>
+        </div>
+      )}
+
       <div className={compact ? 'h-[300px] overflow-y-auto p-4' : 'h-[420px] overflow-y-auto p-5'}>
         {loading ? (
           <div className="flex h-full items-center justify-center text-sm font-bold text-white/35">
@@ -162,7 +172,7 @@ export default function AKChat({ pedidoId, autorTipo = 'cliente', title = 'Chat 
                 send()
               }
             }}
-            placeholder={isAdmin ? 'Responder al distribuidor...' : 'Escribe tu mensaje para Autokeys...'}
+            placeholder={isAdmin ? 'Responder al distribuidor...' : actionRequired ? 'Responde aquí a la solicitud del laboratorio...' : 'Escribe tu mensaje para Autokeys...'}
             rows={2}
             className="min-h-[54px] flex-1 resize-none rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-sm text-white outline-none transition focus:border-[var(--ak-red)]/45"
           />
