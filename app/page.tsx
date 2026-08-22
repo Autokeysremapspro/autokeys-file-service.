@@ -64,12 +64,8 @@ export default function HomePage() {
     <main className="ak-v5-bg min-h-screen overflow-hidden text-white">
       <header className="ak-v5-topbar sticky top-0 z-50">
         <div className="mx-auto flex max-w-[1480px] items-center justify-between px-5 py-4 lg:px-8">
-          <Link href="/" className="flex items-center gap-3">
-            <img src="/images/brand/autokeys-logo-small-transparent.webp" alt="Autokeys" className="h-10 w-auto" />
-            <div className="hidden sm:block">
-              <div className="text-sm font-black tracking-[.18em]">AK <span className="text-[#ff425a]">CLOUD</span></div>
-              <div className="text-[9px] uppercase tracking-[.25em] text-white/30">by Autokeys Remaps Pro</div>
-            </div>
+          <Link href="/" className="flex items-center">
+            <img src="/images/brand/ak-cloud-logo.webp" alt="AK Cloud by Autokeys Remaps Pro" className="h-9 w-auto sm:h-11" />
           </Link>
           <nav className="hidden items-center gap-7 text-xs font-bold lg:flex">
             {nav.map(item => (
@@ -101,7 +97,7 @@ export default function HomePage() {
           <div className="absolute -inset-20 rounded-full bg-[#ff425a]/10 blur-[110px]" />
           <div className="ak-v5-glass relative overflow-hidden rounded-[34px] p-3">
             <div className="flex items-center justify-between border-b border-white/[.07] px-4 py-3">
-              <div className="flex items-center gap-2 text-sm font-black tracking-[.1em]">AK <span className="text-[#ff425a]">Cloud</span></div>
+              <img src="/images/brand/ak-cloud-logo.webp" alt="AK Cloud" className="h-6 w-auto" />
               <div className="flex items-center gap-4">
                 <Bell size={16} className="text-white/35" />
                 <div className="flex items-center gap-2">
@@ -291,8 +287,7 @@ export default function HomePage() {
       <footer id="contacto" className="relative z-10 border-t border-white/[.07]">
         <div className="mx-auto grid max-w-[1480px] gap-10 px-5 py-14 lg:grid-cols-[1.3fr_.8fr_.8fr_.8fr_1fr] lg:px-8">
           <div>
-            <div className="flex items-center gap-2 text-sm font-black tracking-[.1em]">AK <span className="text-[#ff425a]">Cloud</span></div>
-            <div className="mt-1 text-[10px] uppercase tracking-[.2em] text-white/30">by Autokeys Remaps Pro</div>
+            <img src="/images/brand/ak-cloud-logo.webp" alt="AK Cloud by Autokeys Remaps Pro" className="h-9 w-auto" />
             <p className="mt-4 max-w-xs text-sm leading-6 text-white/35">Plataforma profesional de File Service para talleres y expertos en electrónica.</p>
           </div>
           {footerColumns.map(col => (
