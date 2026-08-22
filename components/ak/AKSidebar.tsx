@@ -28,7 +28,7 @@ export default function AKSidebar({mobile=false,onClose}:{mobile?:boolean;onClos
     <div className="flex h-full flex-col p-4">
       <div className="mb-4 flex items-start gap-2">
         <Link href="/dashboard" onClick={onClose} className="ak5-brand-panel min-w-0 flex-1 rounded-2xl border border-white/[.07] bg-white/[.025] p-4">
-          <div className="ak5-brand-logo rounded-xl px-2 py-1"><Image src="/images/brand/autokeys-logo-wide-transparent.webp" alt="Autokeys" width={210} height={54} className="h-auto w-[168px]" priority/></div>
+          <div className="ak5-brand-logo rounded-xl px-2 py-1"><Image src="/images/brand/ak-cloud-logo.webp" alt="AK Cloud by Autokeys Remaps Pro" width={2172} height={724} className="h-auto w-[168px]" priority/></div>
         </Link>
         {mobile&&<button onClick={onClose} className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/[.04]"><X size={18}/></button>}
       </div>
