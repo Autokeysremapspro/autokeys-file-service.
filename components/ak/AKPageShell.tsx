@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronDown, Command, LogOut, Menu, Plus, Search, ShieldCheck, Sparkles, UserCircle, X } from 'lucide-react'
+import { ChevronDown, Command, LogOut, Menu, Plus, Search, UserCircle, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import AKSidebar from './AKSidebar'
 import AKThemeSwitcher from './AKThemeSwitcher'
@@ -95,7 +95,7 @@ export default function AKPageShell({ children, title, subtitle, eyebrow = 'AK L
       <section className="min-w-0 flex-1 overflow-x-hidden">
         <header className="ak5-topbar sticky top-0 z-40 flex min-h-[68px] items-center justify-between gap-2 px-3 sm:h-[72px] sm:px-4 lg:px-7">
           <div className="flex min-w-0 items-center gap-3"><button aria-label="Abrir navegación" onClick={() => setMobileOpen(true)} className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[.035] lg:hidden"><Menu size={19}/></button><button onClick={() => setCommandOpen(true)} className="hidden h-11 min-w-[320px] items-center gap-3 rounded-xl border border-white/[.08] bg-black/20 px-4 text-sm text-white/35 transition hover:border-white/15 hover:bg-white/[.035] md:flex xl:min-w-[420px]"><Search size={17}/><span className="truncate">Buscar pedido, ECU, HW, SW, cliente...</span><span className="ml-auto flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[10px]"><Command size={11}/> K</span></button></div>
-          <div className="flex min-w-0 items-center gap-1.5 sm:gap-2"><div className="ak5-desktop-only hidden items-center gap-5 text-[11px] font-bold text-white/45 xl:flex"><span className="flex items-center gap-2"><i className="ak5-live h-2 w-2 rounded-full bg-emerald-400"/> Realtime Sync</span><span className="flex items-center gap-2"><ShieldCheck size={15}/> Secure Workspace</span><span className="flex items-center gap-2"><Sparkles size={15}/> AI Systems Online</span></div><AKThemeSwitcher /><Link href="/nuevo-pedido" className="ak5-primary !px-3 !py-2.5 sm:!px-4"><Plus size={16}/><span className="hidden sm:inline">Nueva operación</span></Link><AKNotificationBell />
+          <div className="flex min-w-0 items-center gap-1.5 sm:gap-2"><AKThemeSwitcher /><Link href="/nuevo-pedido" className="ak5-primary !px-3 !py-2.5 sm:!px-4"><Plus size={16}/><span className="hidden sm:inline">Nueva operación</span></Link><AKNotificationBell />
             <div ref={userMenuRef} className="relative shrink-0">
               <button type="button" onClick={() => setUserMenuOpen((v) => !v)} className="flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/[.035] px-2 transition hover:border-white/20 sm:pr-3">
                 <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-red-400/25 bg-red-400/10 text-xs font-black text-red-300">{initials}</span>

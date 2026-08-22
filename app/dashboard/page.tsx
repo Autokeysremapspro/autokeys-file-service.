@@ -81,14 +81,20 @@ export default function DashboardPage(){
   },[pedidos])
 
   const chart=useMemo(()=>{
-    const w=600,h=170,pad=10
+    const w=600,h=170,padTop=10,padBottom=10,padLeft=30,padRight=10
     const counts=dailyActivity.map(b=>b.count)
-    const max=Math.max(5,...counts)
-    const stepX=(w-pad*2)/Math.max(1,dailyActivity.length-1)
-    const points=dailyActivity.map((b,i)=>[pad+i*stepX,h-pad-((b.count/max)*(h-pad*2))] as const)
+    const rawMax=Math.max(5,...counts)
+    const pow=Math.pow(10,Math.floor(Math.log10(rawMax)))
+    const norm=rawMax/pow
+    const niceNorm=norm<=1?1:norm<=2?2:norm<=5?5:10
+    const max=niceNorm*pow
+    const ticks=[0,.25,.5,.75,1].map(f=>Math.round(max*f))
+    const plotW=w-padLeft-padRight
+    const stepX=plotW/Math.max(1,dailyActivity.length-1)
+    const points=dailyActivity.map((b,i)=>[padLeft+i*stepX,h-padBottom-((b.count/max)*(h-padTop-padBottom))] as const)
     const line=points.map((p,i)=>`${i===0?'M':'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ')
-    const area=`${line} L${points[points.length-1][0].toFixed(1)},${h-pad} L${points[0][0].toFixed(1)},${h-pad} Z`
-    return {w,h,pad,stepX,points,line,area,max}
+    const area=`${line} L${points[points.length-1][0].toFixed(1)},${h-padBottom} L${points[0][0].toFixed(1)},${h-padBottom} Z`
+    return {w,h,padTop,padBottom,padLeft,padRight,stepX,points,line,area,max,ticks}
   },[dailyActivity])
 
   const pipeline=useMemo(()=>[
@@ -132,10 +138,10 @@ export default function DashboardPage(){
         {loading ? <div className="py-16 text-center text-sm text-white/30">Cargando actividad...</div> : (
           <svg viewBox={`0 0 ${chart.w} ${chart.h+22}`} className="mt-4 w-full" preserveAspectRatio="none">
             <defs><linearGradient id="dashArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ef1018" stopOpacity="0.35"/><stop offset="100%" stopColor="#ef1018" stopOpacity="0"/></linearGradient></defs>
-            {[0,1,2,3].map(i=><line key={i} x1={chart.pad} x2={chart.w-chart.pad} y1={chart.pad+((chart.h-chart.pad*2)/3)*i} y2={chart.pad+((chart.h-chart.pad*2)/3)*i} stroke="rgba(255,255,255,.06)" strokeWidth="1"/>)}
+            {chart.ticks.map((t,i)=>{const y=chart.h-chart.padBottom-((t/chart.max)*(chart.h-chart.padTop-chart.padBottom));return <g key={i}><line x1={chart.padLeft} x2={chart.w-chart.padRight} y1={y} y2={y} stroke="rgba(255,255,255,.06)" strokeWidth="1"/><text x={chart.padLeft-8} y={y+3} textAnchor="end" fontSize="9" fill="rgba(255,255,255,.32)">{t}</text></g>})}
             <path d={chart.area} fill="url(#dashArea)" stroke="none"/>
             <path d={chart.line} fill="none" stroke="#ef1018" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            {dailyActivity.map((b,i)=> i%5===0 && <text key={i} x={chart.pad+i*chart.stepX} y={chart.h+16} textAnchor="middle" fontSize="9" fill="rgba(255,255,255,.32)">{b.date.toLocaleDateString('es-ES',{day:'2-digit',month:'short'})}</text>)}
+            {dailyActivity.map((b,i)=> i%5===0 && <text key={i} x={chart.padLeft+i*chart.stepX} y={chart.h+16} textAnchor="middle" fontSize="9" fill="rgba(255,255,255,.32)">{b.date.toLocaleDateString('es-ES',{day:'2-digit',month:'short'})}</text>)}
           </svg>
         )}
       </div>
