@@ -137,7 +137,7 @@ export default function DashboardPage(){
         </div>
         {loading ? <div className="py-16 text-center text-sm text-white/30">Cargando actividad...</div> : (
           <svg viewBox={`0 0 ${chart.w} ${chart.h+22}`} className="mt-4 w-full" preserveAspectRatio="none">
-            <defs><linearGradient id="dashArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ef1018" stopOpacity="0.35"/><stop offset="100%" stopColor="#ef1018" stopOpacity="0"/></linearGradient></defs>
+            <defs><linearGradient id="dashArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ef1018" stopOpacity="0.5"/><stop offset="100%" stopColor="#ef1018" stopOpacity="0.02"/></linearGradient></defs>
             {chart.ticks.map((t,i)=>{const y=chart.h-chart.padBottom-((t/chart.max)*(chart.h-chart.padTop-chart.padBottom));return <g key={i}><line x1={chart.padLeft} x2={chart.w-chart.padRight} y1={y} y2={y} stroke="rgba(255,255,255,.06)" strokeWidth="1"/><text x={chart.padLeft-8} y={y+3} textAnchor="end" fontSize="9" fill="rgba(255,255,255,.32)">{t}</text></g>})}
             <path d={chart.area} fill="url(#dashArea)" stroke="none"/>
             <path d={chart.line} fill="none" stroke="#ef1018" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
