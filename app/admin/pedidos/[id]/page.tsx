@@ -233,7 +233,7 @@ export default function AdminPedidoDetallePage() {
               <div className="mb-5 flex items-center gap-3"><ScanLine className="text-red-400" /><h2 className="text-xl font-black">Datos técnicos</h2></div>
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {[
-                  ['Marca', pedido.marca], ['Modelo', pedido.modelo], ['Motor', pedido.motor], ['Año', pedido.anio], ['ECU', pedido.ecu], ['HW', pedido.hw], ['SW', pedido.sw], ['CV', pedido.cv], ['Lectura', pedido.tipo_lectura],
+                  ['Marca', pedido.marca], ['Modelo', pedido.modelo], ['Motor', pedido.motor], ['Año', pedido.anio], ['ECU', pedido.ecu], ['HW', pedido.hw], ['SW', pedido.sw], ['CV', pedido.cv], ['Lectura', pedido.metodo_lectura],
                 ].map(([k, v]) => <div key={String(k)} className="rounded-2xl border border-white/10 bg-black/25 p-4"><p className="text-[11px] font-black uppercase tracking-[0.16em] text-zinc-600">{k}</p><p className="mt-1 font-black">{v || '—'}</p></div>)}
               </div>
               <button onClick={confirmarEcu} disabled={confirmandoEcu} className="mt-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm font-black text-emerald-300 hover:bg-emerald-500/15 disabled:opacity-50">
@@ -249,7 +249,7 @@ export default function AdminPedidoDetallePage() {
                   <button onClick={() => download(pedido.ori_bucket, pedido.ori_path, pedido.ori_nombre)} disabled={!pedido.ori_path} className="rounded-xl border border-white/10 px-4 py-2 text-sm font-black hover:bg-white/5 disabled:opacity-30"><Download className="mr-2 inline" size={15} /> Descargar</button>
                 </div>
                 <div className="flex flex-col justify-between gap-3 rounded-2xl border border-white/10 bg-black/25 p-4 md:flex-row md:items-center">
-                  <div><p className="text-xs font-black uppercase tracking-[0.16em] text-zinc-500">MOD</p><p className="font-black">{pedido.mod_nombre || 'Pendiente'}</p><p className="text-xs text-zinc-600">{formatBytes(pedido.mod_size)}</p></div>
+                  <div><p className="text-xs font-black uppercase tracking-[0.16em] text-zinc-500">MOD</p><p className="font-black">{pedido.mod_nombre || 'Pendiente'}</p><p className="text-xs text-zinc-600">{pedido.mod_path ? 'Disponible' : '—'}</p></div>
                   <button onClick={() => download(pedido.mod_bucket, pedido.mod_path, pedido.mod_nombre)} disabled={!pedido.mod_path} className="rounded-xl border border-white/10 px-4 py-2 text-sm font-black hover:bg-white/5 disabled:opacity-30"><Download className="mr-2 inline" size={15} /> Descargar</button>
                 </div>
               </div>
