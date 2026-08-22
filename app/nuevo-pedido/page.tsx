@@ -476,9 +476,33 @@ export default function NuevoPedidoPage() {
         </div>
 
         <aside className="space-y-6 2xl:sticky 2xl:top-24 2xl:self-start">
+          {step === 1 && (
+            <AKCard className="p-6">
+              <p className="ak-mono text-xs font-bold uppercase tracking-[0.22em] text-[var(--ak-glow)]">Requisitos de calidad del archivo</p>
+              <div className="mt-4 space-y-3">
+                {['Archivo original sin modificaciones', 'Archivo completo, no truncado', 'Lectura estable, realizada con equipo profesional', 'Sin errores de lectura'].map((req) => (
+                  <div key={req} className="flex items-start gap-2.5 text-sm text-white/60"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-400"/>{req}</div>
+                ))}
+              </div>
+              {serviciosConPrecioReal.length > 0 && (
+                <div className="mt-6 border-t border-white/10 pt-5">
+                  <p className="ak-mono text-xs font-bold uppercase tracking-[0.22em] text-[var(--ak-glow)]">Servicios compatibles</p>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    {serviciosConPrecioReal.slice(0, 8).map((s) => (
+                      <span key={s.slug} className="truncate rounded-lg border border-white/10 bg-white/[.03] px-2.5 py-1.5 text-xs font-bold text-white/60">{s.icono || '⚙️'} {s.nombre}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </AKCard>
+          )}
           <AKCard className="p-6">
-            <p className="ak-mono text-xs font-bold uppercase tracking-[0.22em] text-[var(--ak-glow)]">Resumen</p>
-            <h2 className="mt-2 text-3xl font-bold">Pedido</h2>
+            <div className="flex items-center justify-between">
+              <p className="ak-mono text-xs font-bold uppercase tracking-[0.22em] text-[var(--ak-glow)]">Resumen</p>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/30">Paso {step} de 4</span>
+            </div>
+            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/[.07]"><div className="h-full rounded-full bg-[var(--ak-red)] transition-[width]" style={{ width: `${(step / 4) * 100}%` }} /></div>
+            <h2 className="mt-4 text-3xl font-bold">Pedido</h2>
             <div className="mt-5 space-y-3 text-sm">
               <SummaryRow label="Archivo" value={fileName || 'Sin archivo'} />
               <SummaryRow label="Vehículo" value={[vehicle.marca, vehicle.modelo, vehicle.motor].filter(Boolean).join(' ') || 'Pendiente'} />
