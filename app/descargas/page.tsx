@@ -144,7 +144,7 @@ export default function DescargasPage() {
 
           <AKCard className="p-5 sm:p-6">
             <div className="flex items-center justify-between"><h3 className="text-lg font-black">Actividad mensual</h3></div>
-            <div className="mt-5 flex items-end gap-3" style={{ height: 140 }}>
+            <div className="mt-5 flex items-stretch gap-3" style={{ height: 140 }}>
               {actividadMensual.map((b) => (
                 <div key={b.key} className="flex flex-1 flex-col items-center gap-2">
                   <div className="flex w-full flex-1 items-end justify-center">

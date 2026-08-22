@@ -137,7 +137,7 @@ export default function BibliotecaPage() {
             <div className="ak5-card relative overflow-hidden p-6">
               <div className="pointer-events-none absolute -right-20 -top-20 h-44 w-44 rounded-full bg-red-400/18 blur-3xl" />
               <div className="relative">
-                <p className="ak5-kicker text-red-300">Smart filters</p>
+                <p className="ak5-kicker text-red-300">Filtros inteligentes</p>
                 <h2 className="mt-2 text-2xl font-black">Búsqueda rápida</h2>
                 <p className="mt-2 text-sm leading-6 text-white/35">Pulsa una etiqueta para filtrar tu biblioteca técnica privada.</p>
                 <div className="mt-5 flex flex-wrap gap-2">

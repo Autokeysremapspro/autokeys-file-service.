@@ -77,7 +77,7 @@ export default function GaragePage() {
     <AKPageShell title="Mis vehículos" subtitle="Un garaje técnico vivo con el historial de cada ECU, servicio, archivo y versión." eyebrow="Taller" actions={<div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:flex-wrap"><AKButton href="/nuevo-pedido"><UploadCloud size={18}/> Nuevo trabajo</AKButton><AKButton href="/biblioteca" variant="ghost"><FileArchive size={18}/> Biblioteca</AKButton></div>}>
         <header className="sr-only">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.3em] text-red-300">Private Garage</p>
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-red-300">Garaje privado</p>
             <h1 className="mt-2 text-4xl font-black tracking-tight md:text-5xl">Mi Garaje</h1>
             <p className="mt-2 max-w-2xl text-sm text-white/40">
               Cada vehículo con su historial técnico, ORI, MOD, servicios realizados y pedidos asociados.
@@ -96,7 +96,7 @@ export default function GaragePage() {
           <div className="grid gap-5 xl:grid-cols-[1fr_330px] xl:items-center">
             <div className="min-w-0">
               <div className="ak5-chip border-red-400/20 bg-red-400/10 text-red-300">
-                <Sparkles size={15} /> Vehicle Intelligence
+                <Sparkles size={15} /> Inteligencia del vehículo
               </div>
               <h2 className="mt-4 break-words text-3xl font-black tracking-tight">Historial técnico vivo por vehículo</h2>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-white/42">
