@@ -17,7 +17,7 @@ export default function AKServiceCard({ service, selected, onToggle }: { service
       type="button"
       onClick={() => !locked && onToggle()}
       disabled={locked}
-      className={`group relative rounded-[1.7rem] border p-4 text-left transition duration-200 active:scale-[0.98] ${selected ? 'border-[var(--ak-red)] bg-[var(--ak-red)]/12 shadow-[0_0_45px_rgba(217,4,41,.22)]' : locked ? 'border-white/8 bg-white/[0.02] opacity-45' : 'border-white/10 bg-white/[0.035] hover:border-[var(--ak-red)]/35 hover:bg-white/[0.055]'}`}
+      className={`group relative rounded-[1.7rem] border p-4 text-left transition duration-200 active:scale-[0.98] ${selected ? 'border-[var(--ak-red)] bg-[var(--ak-red)]/12 shadow-[0_0_45px_rgba(239,16,24,.22)]' : locked ? 'border-white/8 bg-white/[0.02] opacity-45' : 'border-white/10 bg-white/[0.035] hover:border-[var(--ak-red)]/35 hover:bg-white/[0.055]'}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-black/25 text-2xl transition group-hover:scale-105">{service.icon}</div>

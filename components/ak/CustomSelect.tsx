@@ -43,7 +43,7 @@ export default function CustomSelect({ value, onChange, options, className = '',
           background: 'rgba(0,0,0,.3)',
           borderColor: open ? 'var(--ak-red)' : 'rgba(255,255,255,.10)',
           color: selected ? '#ffffff' : 'rgba(255,255,255,.35)',
-          boxShadow: open ? '0 0 0 3px rgba(217,4,41,.18)' : 'none',
+          boxShadow: open ? '0 0 0 3px rgba(239,16,24,.18)' : 'none',
         }}
       >
         <span>{selected?.label || placeholder}</span>
@@ -66,7 +66,7 @@ export default function CustomSelect({ value, onChange, options, className = '',
               className="block w-full px-4 py-2.5 text-left text-sm transition"
               style={
                 opt.value === value
-                  ? { background: 'rgba(217,4,41,.14)', color: '#ff8fa3', fontWeight: 700 }
+                  ? { background: 'rgba(239,16,24,.14)', color: '#ff8fa3', fontWeight: 700 }
                   : { color: 'rgba(255,255,255,.85)' }
               }
               onMouseEnter={(e) => {
