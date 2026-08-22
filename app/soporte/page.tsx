@@ -199,7 +199,7 @@ export default function SoportePage() {
 
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xl">
-          <div className="w-full max-w-2xl rounded-[2rem] border border-white/10 bg-[#080b12] p-6 shadow-2xl shadow-black">
+          <div className="w-full max-w-2xl rounded-[2rem] border border-white/10 bg-[#0a0b0d] p-6 shadow-2xl shadow-black">
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-black">Nuevo ticket</h2>

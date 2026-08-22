@@ -548,7 +548,7 @@ export default function NuevoPedidoPage() {
       </div>
       {legalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-[2rem] border border-white/10 bg-[#0b0e14] p-6 shadow-2xl md:p-8">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-[2rem] border border-white/10 bg-[#0a0b0d] p-6 shadow-2xl md:p-8">
             <div className="flex items-start gap-4"><div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300"><ShieldCheck size={28}/></div><div><p className="text-xs font-bold uppercase tracking-[.2em] text-amber-300">Aviso obligatorio</p><h2 className="mt-1 text-3xl font-bold">Condiciones de uso del servicio</h2></div></div>
             <div className="mt-6 space-y-4 text-sm leading-7 text-white/65">
               <p>Las soluciones suministradas se destinan exclusivamente a usos permitidos por la legislación aplicable, como competición, investigación, desarrollo, diagnóstico, exportación o utilización fuera de vías públicas cuando corresponda.</p>
