@@ -81,7 +81,13 @@ export default function HomePage() {
         </div>
       </header>
 
-      <section className="relative z-10 mx-auto grid min-h-[780px] max-w-[1480px] items-center gap-12 px-5 py-20 lg:grid-cols-[.92fr_1.08fr] lg:px-8">
+      <section className="relative z-10 overflow-hidden">
+        <div className="absolute inset-0 -z-10">
+          <img src="/images/marketing/hero-car.webp" alt="" className="h-full w-full object-cover object-[75%_50%] opacity-55" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#05070b] via-[#05070b]/75 to-[#05070b]/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#05070b] via-transparent to-[#05070b]/60" />
+        </div>
+        <div className="relative mx-auto grid min-h-[780px] max-w-[1480px] items-center gap-12 px-5 py-20 lg:grid-cols-[.92fr_1.08fr] lg:px-8">
         <div className="ak-v5-reveal">
           <div className="ak-v5-kicker">Plataforma profesional</div>
           <h1 className="ak-v5-title mt-6 text-6xl sm:text-7xl xl:text-[5.6rem]">El portal profesional<br />de <span className="text-[#ff425a]">File Service</span></h1>
@@ -164,6 +170,7 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </section>
 
