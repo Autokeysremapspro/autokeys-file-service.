@@ -89,6 +89,8 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
     >
       <Link href="/pedidos" className="mb-5 inline-flex items-center gap-2 text-sm font-black text-white/40 transition hover:text-white"><ArrowLeft size={17} /> Volver a trabajos</Link>
 
+      <div className="mb-6"><AKTimeline estado={pedido.estado} orientation="horizontal" /></div>
+
       {actionRequired && (
         <div className="mb-6 rounded-[1.75rem] border border-amber-400/25 bg-amber-400/[0.08] p-5 shadow-[0_18px_60px_rgba(245,158,11,0.08)]">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
