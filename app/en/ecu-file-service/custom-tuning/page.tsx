@@ -9,7 +9,7 @@ const url = '/en/ecu-file-service/custom-tuning'
 export const metadata: Metadata = {
   title,
   description,
-  alternates: { canonical: url },
+  alternates: { canonical: url, languages: { en: url, 'x-default': url } },
   openGraph: { type: 'website', title, description, url, images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Custom ECU Tuning File Service · AK Cloud' }] },
   twitter: { card: 'summary_large_image', title, description, images: ['/og-image.png'] },
 }

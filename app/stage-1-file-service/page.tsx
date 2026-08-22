@@ -5,7 +5,7 @@ import { ArrowRight, CheckCircle2, FileUp, Gauge, ShieldCheck, Wrench } from 'lu
 export const metadata: Metadata = {
   title: 'Stage 1 File Service para profesionales | AK Cloud',
   description: 'Stage 1 tuning file service para talleres y preparadores. Sube tu ORI, identifica vehículo y ECU y solicita tu calibración desde AK Cloud. Pago por archivo.',
-  alternates: { canonical: '/stage-1-file-service' },
+  alternates: { canonical: '/stage-1-file-service', languages: { es: '/stage-1-file-service', en: '/en/stage-1-file-service', 'x-default': '/stage-1-file-service' } },
 }
 
 export default function Stage1FileServicePage() {

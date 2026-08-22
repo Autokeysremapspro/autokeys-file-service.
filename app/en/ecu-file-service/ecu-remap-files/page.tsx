@@ -5,7 +5,7 @@ import { ArrowRight, CheckCircle2, FileUp, Gauge } from 'lucide-react'
 export const metadata: Metadata = {
   title: 'ECU Remap Files | Professional File Service | AK Cloud',
   description: 'Professional ECU remap files for workshops and tuners. Upload the original ECU read, submit the calibration requirements and manage the job through AK Cloud.',
-  alternates: { canonical: '/en/ecu-file-service/ecu-remap-files', languages: { en: '/en/ecu-file-service/ecu-remap-files', es: '/ecu-file-service/ecu-remap-files', 'x-default': '/ecu-file-service/ecu-remap-files' } },
+  alternates: { canonical: '/en/ecu-file-service/ecu-remap-files', languages: { en: '/en/ecu-file-service/ecu-remap-files', 'x-default': '/en/ecu-file-service/ecu-remap-files' } },
 }
 
 export default function Page() {

@@ -5,7 +5,7 @@ import { ArrowRight, CheckCircle2, CloudUpload, Gauge } from 'lucide-react'
 export const metadata: Metadata = {
   title: 'ECU Tuning Files Online | Professional File Service | AK Cloud',
   description: 'Order ECU tuning files online through a professional workflow for workshops and tuners. Upload your ORI, specify the request and receive the modified file in AK Cloud.',
-  alternates: { canonical: '/en/ecu-file-service/tuning-files-online', languages: { en: '/en/ecu-file-service/tuning-files-online', es: '/ecu-file-service/tuning-files-online', 'x-default': '/ecu-file-service/tuning-files-online' } },
+  alternates: { canonical: '/en/ecu-file-service/tuning-files-online', languages: { en: '/en/ecu-file-service/tuning-files-online', 'x-default': '/en/ecu-file-service/tuning-files-online' } },
 }
 
 export default function Page() {

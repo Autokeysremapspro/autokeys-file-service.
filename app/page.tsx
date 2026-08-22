@@ -1,9 +1,12 @@
 import Link from 'next/link'
 import {
   ArrowRight, Bell, CheckCircle2, Cpu, Download, Eye,
-  Facebook, Filter, Gauge, Headphones, Instagram, LayoutGrid, PlayCircle,
-  Settings, ShieldCheck, UploadCloud, UserPlus, UserRound, Users, Youtube, Zap,
+  Filter, Gauge, Headphones, Instagram, LayoutGrid, PlayCircle,
+  Settings, ShieldCheck, UploadCloud, UserPlus, UserRound, Users, Zap,
 } from 'lucide-react'
+
+const TIKTOK_URL = 'https://www.tiktok.com/@autokeys.pro'
+const INSTAGRAM_URL = 'https://www.instagram.com/autokeys.pro'
 
 const nav = [
   { label: 'Inicio', href: '#', active: true },
@@ -65,9 +68,31 @@ const footerColumns = [
   { title: 'Soporte', links: [['Contacto', '#contacto'], ['Soporte técnico', '/soporte'], ['Preguntas frecuentes', '#faq']] },
 ]
 
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'AK Cloud',
+    alternateName: 'Autokeys Remaps Pro',
+    url: 'https://akcloud.es',
+    logo: 'https://akcloud.es/images/brand/ak-cloud-logo.webp',
+    description: 'Portal profesional de File Service para reprogramación ECU: Stage 1, Stage 2, EGR/DPF/AdBlue OFF e Immo Off para talleres y distribuidores.',
+    sameAs: [INSTAGRAM_URL, TIKTOK_URL],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'AK Cloud',
+    url: 'https://akcloud.es',
+    inLanguage: 'es-ES',
+    publisher: { '@type': 'Organization', name: 'Autokeys Remaps Pro' },
+  },
+]
+
 export default function HomePage() {
   return (
     <main className="akhome ak-v5-bg min-h-screen overflow-hidden text-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <header className="ak-v5-topbar sticky top-0 z-50">
         <div className="mx-auto flex max-w-[1480px] items-center justify-between px-5 py-4 lg:px-8">
           <Link href="/" className="flex items-center">
@@ -97,7 +122,7 @@ export default function HomePage() {
 
       <section className="relative z-10 overflow-hidden">
         <div className="absolute inset-0 -z-10">
-          <img src="/images/marketing/hero-car.webp" alt="" className="h-full w-full object-cover object-[65%_45%] opacity-90" />
+          <img src="/images/marketing/hero-car.webp" alt="" fetchPriority="high" className="h-full w-full object-cover object-[65%_45%] opacity-90" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#05070b]/85 via-[#05070b]/35 to-[#05070b]/15" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#05070b] via-transparent to-[#05070b]/45" />
         </div>
@@ -206,7 +231,7 @@ export default function HomePage() {
             <article key={title} className="ak-v5-card relative overflow-hidden p-7">
               {image && (
                 <>
-                  <img src={image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35" />
+                  <img src={image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-35" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#070a10] via-[#070a10]/75 to-[#070a10]/30" />
                 </>
               )}
@@ -289,7 +314,7 @@ export default function HomePage() {
             </div>
             <div className="relative mt-8">
               <div className="absolute -inset-10 -z-10 rounded-full bg-[#ff2b2b]/10 blur-[90px]" />
-              <img src="/images/marketing/dashboard-devices.webp" alt="AK Cloud en laptop y tablet" className="w-full rounded-[24px]" />
+              <img src="/images/marketing/dashboard-devices.webp" alt="AK Cloud en laptop y tablet" loading="lazy" className="w-full rounded-[24px]" />
             </div>
           </div>
         </div>
@@ -315,7 +340,7 @@ export default function HomePage() {
       <footer id="contacto" className="relative z-10 border-t border-white/[.07]">
         <div className="mx-auto grid max-w-[1480px] gap-10 px-5 py-14 lg:grid-cols-[1.3fr_.8fr_.8fr_.8fr_1fr] lg:px-8">
           <div>
-            <img src="/images/brand/ak-cloud-logo.webp" alt="AK Cloud by Autokeys Remaps Pro" className="h-9 w-auto" />
+            <img src="/images/brand/ak-cloud-logo.webp" alt="AK Cloud by Autokeys Remaps Pro" loading="lazy" className="h-9 w-auto" />
             <p className="mt-4 max-w-xs text-sm leading-6 text-white/35">Plataforma profesional de File Service para talleres y expertos en electrónica.</p>
           </div>
           {footerColumns.map(col => (
@@ -332,14 +357,21 @@ export default function HomePage() {
             <div className="text-sm font-black">Autokeys <span className="text-[#ff2b2b]">Remaps Pro</span></div>
             <p className="mt-3 text-sm leading-6 text-white/35">Expertos en electrónica y software automotriz.</p>
             <div className="mt-5 flex gap-3">
-              <a href="#" aria-label="YouTube" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/50 transition hover:text-white"><Youtube size={16} /></a>
-              <a href="#" aria-label="Facebook" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/50 transition hover:text-white"><Facebook size={16} /></a>
-              <a href="#" aria-label="Instagram" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/50 transition hover:text-white"><Instagram size={16} /></a>
+              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/50 transition hover:text-white"><Instagram size={16} /></a>
+              <a href={TIKTOK_URL} target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/50 transition hover:text-white"><TikTokIcon size={16} /></a>
             </div>
           </div>
         </div>
         <div className="border-t border-white/[.06] px-5 py-6 text-center text-xs text-white/30 lg:px-8">© 2026 AK Cloud by Autokeys Remaps Pro. Todos los derechos reservados.</div>
       </footer>
     </main>
+  )
+}
+
+function TikTokIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M16.6 5.82c-.9-.98-1.4-2.26-1.4-3.57h-3.03v13.68c0 1.5-1.22 2.72-2.72 2.72a2.72 2.72 0 0 1 0-5.44c.27 0 .53.04.78.11V10.3a5.75 5.75 0 0 0-.78-.05A5.75 5.75 0 0 0 3.7 16a5.75 5.75 0 0 0 5.75 5.75A5.75 5.75 0 0 0 15.2 16V8.9a8.25 8.25 0 0 0 4.8 1.54V7.4a5.1 5.1 0 0 1-3.4-1.58Z" />
+    </svg>
   )
 }

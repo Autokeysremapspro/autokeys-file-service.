@@ -42,6 +42,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     { url: SITE_URL, lastModified: now, changeFrequency: 'weekly', priority: 1 },
+    { url: `${SITE_URL}/register`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${SITE_URL}/file-service-ecu`, lastModified: now, changeFrequency: 'weekly', priority: 0.95 },
     { url: `${SITE_URL}/stage-1-file-service`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${SITE_URL}/ecu-file-service/edc17`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 },
