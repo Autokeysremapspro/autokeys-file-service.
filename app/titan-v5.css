@@ -65,6 +65,9 @@ html[data-ak-theme='light'] .ak5-brand-panel .text-white,html[data-ak-theme='lig
 html[data-ak-theme='light'] .ak5-shell [class*='border-white/']{border-color:rgba(15,23,42,.11)!important}
 html[data-ak-theme='light'] .ak5-shell [class*='bg-white/[']{background-color:rgba(15,23,42,.035)!important}
 html[data-ak-theme='light'] .ak5-shell [class*='bg-black/']{background-color:rgba(255,255,255,.82)!important}
+html[data-ak-theme='light'] .ak5-shell [class*='bg-[#0a0b0d]']{background:#fff!important;color:#152033!important;box-shadow:inset 0 0 0 1px rgba(15,23,42,.08)}
+html[data-ak-theme='light'] .ak5-shell [class*='bg-[#0a0b0d]'] [class*='text-white']{color:#152033!important}
+html[data-ak-theme='light'] .ak5-shell [class*='bg-[#0a0b0d]'] [class*='text-red-300']{color:#c81f28!important}
 html[data-ak-theme='light'] .ak5-shell input,html[data-ak-theme='light'] .ak5-shell textarea,html[data-ak-theme='light'] .ak5-shell select{color:#152033;background-color:#fff;border-color:rgba(15,23,42,.12);box-shadow:0 1px 2px rgba(15,23,42,.03)}
 html[data-ak-theme='light'] .ak5-shell input::placeholder,html[data-ak-theme='light'] .ak5-shell textarea::placeholder{color:rgba(15,23,42,.35)}
 html[data-ak-theme='light'] .ak5-shell [class*='bg-red-400/[']{background-color:rgba(239,68,68,.08)!important}

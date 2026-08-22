@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, Download, FileDown, FolderOpen, ListRestart, RefreshCcw, Search } from 'lucide-react'
+import { CheckCircle2, Database, Download, FileDown, FolderOpen, Gauge, ListRestart, RefreshCcw, Search, ShoppingBag } from 'lucide-react'
 import AKPageShell from '@/components/ak/AKPageShell'
 import AKCard from '@/components/ak/AKCard'
 import CustomSelect from '@/components/ak/CustomSelect'
@@ -136,10 +136,10 @@ export default function DescargasPage() {
       <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
         <div className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard label="Archivos entregados" value={entregados} sub="Versiones MOD disponibles" tone="red" />
-            <StatCard label="Completados" value={completados} sub="Pedidos finalizados" tone="green" />
-            <StatCard label="En proceso" value={enProceso} sub="Trabajando ahora mismo" tone="blue" />
-            <StatCard label="Almacenamiento" value={formatBytes(almacenamiento)} sub="Tamaño de archivos ORI" tone="amber" />
+            <StatCard label="Archivos entregados" value={entregados} sub="Versiones MOD disponibles" tone="red" icon={ShoppingBag} />
+            <StatCard label="Completados" value={completados} sub="Pedidos finalizados" tone="green" icon={CheckCircle2} />
+            <StatCard label="En proceso" value={enProceso} sub="Trabajando ahora mismo" tone="amber" icon={Gauge} />
+            <StatCard label="Almacenamiento" value={formatBytes(almacenamiento)} sub="Tamaño de archivos ORI" tone="blue" icon={Database} />
           </div>
 
           <AKCard className="p-5 sm:p-6">
@@ -245,13 +245,15 @@ export default function DescargasPage() {
   )
 }
 
-function StatCard({ label, value, sub, tone }: { label: string; value: any; sub: string; tone: 'red' | 'green' | 'blue' | 'amber' }) {
+function StatCard({ label, value, sub, tone, icon: Icon }: { label: string; value: any; sub: string; tone: 'red' | 'green' | 'blue' | 'amber'; icon: any }) {
   const glow: any = { red: 'rgba(239,16,24,.14)', green: 'rgba(52,211,153,.14)', blue: 'rgba(59,130,246,.14)', amber: 'rgba(245,158,11,.14)' }
+  const badge: any = { red: 'border-red-400/20 bg-red-400/10 text-red-300', amber: 'border-amber-400/20 bg-amber-400/10 text-amber-300', green: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300', blue: 'border-blue-400/20 bg-blue-400/10 text-blue-300' }
   return (
     <AKCard className="relative overflow-hidden p-5">
       <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full" style={{ background: `radial-gradient(circle,${glow[tone]},transparent 70%)` }} />
-      <div className="relative text-[10px] font-black uppercase tracking-[.2em] text-white/28">{label}</div>
-      <div className="relative mt-3 text-3xl font-black tracking-tight">{value}</div>
+      <div className={`relative grid h-11 w-11 place-items-center rounded-full border ${badge[tone]}`}><Icon size={19}/></div>
+      <div className="relative mt-4 text-3xl font-black tracking-tight">{value}</div>
+      <div className="relative mt-1 text-[10px] font-black uppercase tracking-[.2em] text-white/40">{label}</div>
       <div className="relative mt-1 text-xs text-white/35">{sub}</div>
     </AKCard>
   )

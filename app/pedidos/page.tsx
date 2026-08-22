@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Calendar, Download, Eye, FileDown, Grid2X2, List, Search } from 'lucide-react'
+import { ArrowRight, Calendar, CheckCircle2, Clock3, Download, Eye, FileDown, Gauge, Grid2X2, List, ShoppingBag, Search } from 'lucide-react'
 import AppShell from '@/components/AppShell'
 import CustomSelect from '@/components/ak/CustomSelect'
 import { getMisPedidos, type FileServicePedido, formatEstado, type PedidoEstado } from '@/lib/services/pedidos'
@@ -10,8 +10,8 @@ import { getMisPedidos, type FileServicePedido, formatEstado, type PedidoEstado 
 function statusClass(estado?: string | null) {
   if (estado === 'finalizado') return 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300'
   if (estado === 'en_proceso') return 'border-blue-400/20 bg-blue-400/10 text-blue-300'
-  if (estado === 'cancelado') return 'border-red-400/20 bg-red-400/10 text-red-300'
-  return 'border-amber-400/20 bg-amber-400/10 text-amber-300'
+  if (estado === 'cancelado') return 'border-slate-400/20 bg-slate-400/10 text-slate-300'
+  return 'border-red-400/20 bg-red-400/10 text-red-300'
 }
 
 function progress(estado?: string | null) {
@@ -126,14 +126,16 @@ export default function PedidosPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {[['Total pedidos', total, 'Histórico completo', 'red'], ['Completados', finalizados, 'Listos y archivados', 'green'], ['En proceso', enProceso, 'Trabajando ahora mismo', 'blue'], ['Pendientes', pendientes, 'Esperando análisis', 'amber']].map(([label, value, helper, t]) => {
+          {([['Total pedidos', total, 'Histórico completo', 'red', ShoppingBag], ['Completados', finalizados, 'Listos y archivados', 'green', CheckCircle2], ['En proceso', enProceso, 'Trabajando ahora mismo', 'amber', Gauge], ['Pendientes', pendientes, 'Esperando análisis', 'red', Clock3]] as const).map(([label, value, helper, t, Icon]) => {
             const glow: any = { red: 'rgba(239,16,24,.14)', amber: 'rgba(245,158,11,.14)', green: 'rgba(52,211,153,.14)', blue: 'rgba(59,130,246,.14)' }
+            const badge: any = { red: 'border-red-400/20 bg-red-400/10 text-red-300', amber: 'border-amber-400/20 bg-amber-400/10 text-amber-300', green: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300', blue: 'border-blue-400/20 bg-blue-400/10 text-blue-300' }
             return (
               <div key={String(label)} className="ak5-card relative overflow-hidden rounded-[22px] p-5">
                 <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full" style={{ background: `radial-gradient(circle,${glow[t as string]},transparent 70%)` }} />
-                <div className="relative text-[10px] font-black uppercase tracking-[.22em] text-white/28">{label}</div>
-                <div className="relative mt-3 text-4xl font-black tracking-tight">{value}</div>
-                <div className="relative mt-1 text-xs text-white/35">{helper}</div>
+                <div className={`relative grid h-11 w-11 place-items-center rounded-full border ${badge[t as string]}`}><Icon size={19}/></div>
+                <div className="relative mt-4 text-4xl font-black tracking-tight">{value}</div>
+                <div className="relative mt-1 text-[10px] font-black uppercase tracking-[.2em] text-white/40">{label}</div>
+                <div className="relative mt-1 text-xs text-white/28">{helper}</div>
               </div>
             )
           })}

@@ -2,16 +2,19 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Activity, AlertTriangle, ArrowRight, BellRing, Car, CheckCircle2, Clock3, CloudUpload, Cpu, Download, FileText, Gauge, Headphones, Library, Target, UploadCloud, Zap } from 'lucide-react'
+import { Activity, AlertTriangle, ArrowDown, ArrowRight, ArrowUp, BellRing, Car, CheckCircle2, Clock3, CloudUpload, Cpu, Download, FileText, Gauge, Headphones, Library, Target, UploadCloud, Zap } from 'lucide-react'
 import AppShell from '@/components/AppShell'
 import { supabase } from '@/lib/supabase'
 import { getMisPedidos, type FileServicePedido, formatEstado } from '@/lib/services/pedidos'
 import { getMisNotificaciones, type FileServiceNotificacion } from '@/lib/services/notificaciones'
 
 function vehicleTitle(p: FileServicePedido){return [p.marca,p.modelo,p.motor].filter(Boolean).join(' ')||p.ori_nombre||'Vehículo sin identificar'}
-function tone(estado?:string|null){if(estado==='finalizado')return 'text-emerald-300 border-emerald-400/20 bg-emerald-400/10';if(estado==='en_proceso')return 'text-blue-300 border-blue-400/20 bg-blue-400/10';if(estado==='cancelado')return 'text-red-300 border-red-400/20 bg-red-400/10';return 'text-amber-300 border-amber-400/20 bg-amber-400/10'}
+function tone(estado?:string|null){if(estado==='finalizado')return 'text-emerald-300 border-emerald-400/20 bg-emerald-400/10';if(estado==='en_proceso')return 'text-blue-300 border-blue-400/20 bg-blue-400/10';if(estado==='cancelado')return 'text-slate-300 border-slate-400/20 bg-slate-400/10';return 'text-red-300 border-red-400/20 bg-red-400/10'}
 function dateTime(v?:string|null){if(!v)return '—';const d=new Date(v);return Number.isNaN(d.getTime())?'—':d.toLocaleString('es-ES',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}
 function formatDuration(ms:number){if(!Number.isFinite(ms)||ms<=0)return '—';const h=Math.floor(ms/3600000);const m=Math.round((ms%3600000)/60000);if(h<=0)return `${m}m`;return `${h}h ${m}m`}
+function formatDurationDelta(ms:number){if(!Number.isFinite(ms)||ms===0)return null;const sign=ms<0?'-':'+';const abs=Math.abs(ms);const h=Math.floor(abs/3600000);const m=Math.round((abs%3600000)/60000);return `${sign}${h>0?`${h}h `:''}${m}m`}
+function avgTurnaroundMs(list:FileServicePedido[]){const t=list.filter(p=>p.created_at&&p.updated_at).map(p=>new Date(p.updated_at as string).getTime()-new Date(p.created_at as string).getTime()).filter(ms=>Number.isFinite(ms)&&ms>0);return t.length?t.reduce((a,b)=>a+b,0)/t.length:0}
+function pctChange(curr:number,prev:number){if(prev===0)return curr>0?100:0;return Math.round(((curr-prev)/prev)*1000)/10}
 
 export default function DashboardPage(){
   const [pedidos,setPedidos]=useState<FileServicePedido[]>([])
@@ -30,14 +33,33 @@ export default function DashboardPage(){
     return{pendientes,enProceso,finalizados,cancelados,descargas,vehiculos,activos:pendientes+enProceso,tasaExito,tiempoMedioMs}},[pedidos])
   const latest=pedidos.slice(0,6);const unread=notifs.filter(n=>!n.leida).length
 
+  const trends=useMemo(()=>{
+    const day=24*3600*1000;const now=Date.now();const thisStart=now-7*day;const prevStart=now-14*day
+    const inRange=(iso?:string|null,from?:number,to?:number)=>{if(!iso)return false;const t=new Date(iso).getTime();return t>=(from as number)&&t<(to as number)}
+    const createdThis=pedidos.filter(p=>inRange(p.created_at,thisStart,now)).length
+    const createdPrev=pedidos.filter(p=>inRange(p.created_at,prevStart,thisStart)).length
+    const finalizadosThis=pedidos.filter(p=>p.estado==='finalizado'&&inRange(p.updated_at,thisStart,now)).length
+    const finalizadosPrev=pedidos.filter(p=>p.estado==='finalizado'&&inRange(p.updated_at,prevStart,thisStart)).length
+    const enProcesoThis=pedidos.filter(p=>p.estado==='en_proceso'&&inRange(p.created_at,thisStart,now)).length
+    const enProcesoPrev=pedidos.filter(p=>p.estado==='en_proceso'&&inRange(p.created_at,prevStart,thisStart)).length
+    const tiempoThis=avgTurnaroundMs(pedidos.filter(p=>p.estado==='finalizado'&&inRange(p.updated_at,thisStart,now)))
+    const tiempoPrev=avgTurnaroundMs(pedidos.filter(p=>p.estado==='finalizado'&&inRange(p.updated_at,prevStart,thisStart)))
+    return{
+      activos:pctChange(createdThis,createdPrev),
+      completados:pctChange(finalizadosThis,finalizadosPrev),
+      enProceso:pctChange(enProcesoThis,enProcesoPrev),
+      tiempoMedioDeltaMs:(tiempoThis&&tiempoPrev)?tiempoThis-tiempoPrev:0,
+    }
+  },[pedidos])
+
   const servicios=useMemo(()=>{const counts=new Map<string,number>();for(const p of pedidos){for(const s of p.servicios||[]){counts.set(s,(counts.get(s)||0)+1)}}const total=Array.from(counts.values()).reduce((a,b)=>a+b,0);const palette=['#ef1018','#3b82f6','#f59e0b','#32d583','#a855f7','#94a3b8'];return Array.from(counts.entries()).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([label,value],i)=>({label,value,pct:total?Math.round((value/total)*1000)/10:0,color:palette[i%palette.length]}))},[pedidos])
 
   const estadoDonut=useMemo(()=>{
     const segs=[
       {label:'Completados',value:stats.finalizados,color:'#32d583'},
       {label:'En proceso',value:stats.enProceso,color:'#3b82f6'},
-      {label:'Pendientes',value:stats.pendientes,color:'#f59e0b'},
-      {label:'Cancelados',value:stats.cancelados,color:'#ef1018'},
+      {label:'Pendientes',value:stats.pendientes,color:'#ef1018'},
+      {label:'Cancelados',value:stats.cancelados,color:'#94a3b8'},
     ]
     const total=segs.reduce((a,s)=>a+s.value,0)
     let acc=0
@@ -95,10 +117,10 @@ export default function DashboardPage(){
     {error&&<div className="rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-200">{error}</div>}
 
     <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <Stat label="Pedidos activos" value={stats.activos} sub={`${stats.pendientes} pendientes · ${stats.enProceso} en proceso`} icon={Clock3} tone="red"/>
-      <Stat label="Completados" value={stats.finalizados} sub={`${pedidos.length} pedidos totales`} icon={CheckCircle2} tone="green"/>
-      <Stat label="En proceso" value={stats.enProceso} sub="Trabajando ahora mismo" icon={Gauge} tone="amber"/>
-      <Stat label="Tiempo medio" value={formatDuration(stats.tiempoMedioMs)} sub="Desde recepción hasta entrega" icon={Target} tone="blue"/>
+      <Stat label="Pedidos activos" value={stats.activos} sub="vs. semana anterior" trendPct={trends.activos} icon={Clock3} tone="red"/>
+      <Stat label="Completados" value={stats.finalizados} sub="vs. semana anterior" trendPct={trends.completados} icon={CheckCircle2} tone="green"/>
+      <Stat label="En proceso" value={stats.enProceso} sub="vs. semana anterior" trendPct={trends.enProceso} icon={Gauge} tone="amber"/>
+      <Stat label="Tiempo medio" value={formatDuration(stats.tiempoMedioMs)} sub="vs. semana anterior" trendDurationMs={trends.tiempoMedioDeltaMs} icon={Target} tone="blue"/>
     </section>
 
     <section className="grid gap-5 2xl:grid-cols-[1.5fr_1fr]">
@@ -191,7 +213,7 @@ export default function DashboardPage(){
   </div></AppShell>
 }
 
-function Stat({label,value,sub,icon:Icon,tone}:{label:string;value:any;sub:string;icon:any;tone:'amber'|'green'|'blue'|'red'|'purple'}){
+function Stat({label,value,sub,icon:Icon,tone,trendPct,trendDurationMs}:{label:string;value:any;sub:string;icon:any;tone:'amber'|'green'|'blue'|'red'|'purple';trendPct?:number;trendDurationMs?:number}){
   const map:any={
     amber:{badge:'text-amber-300 bg-amber-400/10 border-amber-400/20',glow:'rgba(245,158,11,.16)',line:'rgba(245,158,11,.35)',dot:'bg-amber-400'},
     green:{badge:'text-emerald-300 bg-emerald-400/10 border-emerald-400/20',glow:'rgba(52,211,153,.16)',line:'rgba(52,211,153,.35)',dot:'bg-emerald-400'},
@@ -200,6 +222,9 @@ function Stat({label,value,sub,icon:Icon,tone}:{label:string;value:any;sub:strin
     purple:{badge:'text-purple-300 bg-purple-400/10 border-purple-400/20',glow:'rgba(168,85,247,.16)',line:'rgba(168,85,247,.35)',dot:'bg-purple-400'},
   }
   const t=map[tone]
+  const durationLabel=trendDurationMs!==undefined?formatDurationDelta(trendDurationMs):null
+  const positive=trendDurationMs!==undefined?(trendDurationMs!==0?trendDurationMs<0:null):(trendPct!==undefined?trendPct>0:null)
+  const trendLabel=durationLabel||(trendPct!==undefined?`${trendPct>0?'+':''}${trendPct}%`:null)
   return (
     <div className="ak5-card ak5-card-hover relative overflow-hidden rounded-[22px] p-5">
       <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full" style={{background:`radial-gradient(circle,${t.glow},transparent 70%)`}}/>
@@ -210,7 +235,14 @@ function Stat({label,value,sub,icon:Icon,tone}:{label:string;value:any;sub:strin
           <div className="mt-1 text-2xl font-black xl:text-3xl">{value}</div>
         </div>
       </div>
-      <div className="relative mt-3 text-xs text-white/30">{sub}</div>
+      <div className="relative mt-3 flex items-center gap-1.5 text-xs">
+        {trendLabel && positive!==null ? (
+          <>
+            <span className={`flex items-center gap-0.5 font-bold ${positive?'text-emerald-400':'text-red-400'}`}>{positive?<ArrowUp size={12}/>:<ArrowDown size={12}/>}{trendLabel}</span>
+            <span className="text-white/28">{sub}</span>
+          </>
+        ) : <span className="text-white/30">{sub}</span>}
+      </div>
     </div>
   )
 }
