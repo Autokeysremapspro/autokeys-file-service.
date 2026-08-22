@@ -8,7 +8,7 @@ import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
 import AKTimeline, { getTimelineState, timelineFlow } from '@/components/ak/AKTimeline'
 import AKChat from '@/components/ak/AKChat'
-import { descargarArchivo, formatBytes, getPedidoById, type FileServicePedido } from '@/lib/services/pedidos'
+import { descargarArchivo, formatBytes, formatEstado, getPedidoById, type FileServicePedido } from '@/lib/services/pedidos'
 import { supabase } from '@/lib/supabase'
 
 export default function PedidoDetallePage({ params }: { params: { id: string } }) {
@@ -77,8 +77,8 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
 
   return (
     <AKPageShell
-      title={pedido.numero || 'Pedido File Service'}
-      subtitle={`${pedido.ecu || 'ECU pendiente'} · ${[pedido.marca, pedido.modelo, pedido.motor].filter(Boolean).join(' ') || 'Vehículo pendiente'}`}
+      title={`Detalle del pedido #${pedido.numero || pedido.id.slice(0, 8)}`}
+      subtitle={pedido.created_at ? `Realizado el ${new Date(pedido.created_at).toLocaleDateString('es-ES')} a las ${new Date(pedido.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}` : 'Fecha de creación no disponible'}
       eyebrow="Order Workspace"
       actions={
         <div className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-colors ${actionRequired ? 'border-amber-400/35 bg-amber-400/10 text-amber-300' : justUpdated ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300' : 'border-white/10 bg-black/25 text-white/55'}`}>
@@ -136,7 +136,10 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
                 </InfoGroup>
                 <InfoGroup icon={Hash} title="Pedido">
                   <InfoLine label="ID de pedido" value={pedido.numero || pedido.id.slice(0, 8)} />
-                  <InfoLine label="Prioridad" value={pedido.prioridad || 'Normal'} />
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-white/25">Prioridad</div>
+                    <span className={`mt-1 inline-block rounded-md px-2 py-0.5 text-xs font-black uppercase ${prioridadPillClass(pedido.prioridad)}`}>{pedido.prioridad || 'Normal'}</span>
+                  </div>
                   <InfoLine label="Precio" value={`${pedido.precio || 0} €`} />
                   <InfoLine label="Fecha" value={pedido.created_at ? new Date(pedido.created_at).toLocaleString('es-ES') : '—'} />
                 </InfoGroup>
@@ -144,7 +147,7 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
 
               <div className="mt-6 border-t border-white/[.06] pt-6">
                 <div className="ak5-kicker text-red-300">Servicios solicitados</div>
-                <div className="mt-3 flex flex-wrap gap-2">{(pedido.servicios || []).map((servicio) => <span key={servicio} className="rounded-full border border-red-400/18 bg-red-400/8 px-4 py-2 text-xs font-black text-red-300">{servicio}</span>)}</div>
+                <div className="mt-3 flex flex-wrap gap-2">{(pedido.servicios || []).map((servicio, i) => <span key={servicio} className={i === 0 ? 'rounded-full border border-red-400/30 bg-red-400/15 px-4 py-2 text-xs font-black text-red-300' : 'rounded-full border border-white/10 bg-white/[.03] px-4 py-2 text-xs font-black text-white/60'}>{servicio}</span>)}</div>
               </div>
 
               {pedido.observaciones && (
@@ -156,7 +159,7 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
             </div>
 
             <div className="ak5-card p-6">
-              <div className="ak5-kicker text-red-300">Archivos adjuntos</div>
+              <div className="ak5-kicker text-red-300">Archivos adjuntos ({[pedido.ori_path, pedido.mod_path].filter(Boolean).length})</div>
               <div className="mt-5 space-y-3">
                 <FileRow title="Archivo original (ORI)" name={pedido.ori_nombre} size={formatBytes(pedido.ori_size)} ready={!!pedido.ori_path} loading={downloading === pedido.ori_path} onClick={() => download(pedido.ori_bucket, pedido.ori_path, pedido.ori_nombre)} />
                 <FileRow title="Última versión (MOD)" name={pedido.mod_nombre} size={pedido.mod_path ? 'Disponible' : 'En preparación'} ready={!!pedido.mod_path} loading={downloading === pedido.mod_path} onClick={() => download(pedido.mod_bucket, pedido.mod_path, pedido.mod_nombre)} />
@@ -229,7 +232,7 @@ function EstadoActualCard({ pedido }: { pedido: FileServicePedido }) {
     <div className="ak5-card p-5">
       <div className="flex items-center justify-between">
         <div className="ak5-kicker text-red-300">Estado actual</div>
-        <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider ${state.actionRequired ? 'border-amber-400/30 bg-amber-400/10 text-amber-300' : 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300'}`}>{pedido.estado === 'finalizado' ? 'Entregado' : 'En proceso'}</span>
+        <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider ${state.actionRequired ? 'border-amber-400/30 bg-amber-400/10 text-amber-300' : pedido.estado === 'finalizado' ? 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300' : 'border-blue-400/25 bg-blue-400/10 text-blue-300'}`}>{formatEstado(pedido.estado)}</span>
       </div>
       <div className="mt-5 flex items-center justify-center">
         <div className="relative grid h-32 w-32 place-items-center">
@@ -261,12 +264,26 @@ function AccionButton({ icon: Icon, label, sub, onClick, disabled, primary }: { 
   )
 }
 
+function fileExtBadge(name?: string | null) {
+  const ext = name?.split('.').pop()?.toUpperCase()
+  return ext && ext.length <= 5 ? `Archivo ${ext}` : null
+}
+
+function prioridadPillClass(prioridad?: string | null) {
+  const v = (prioridad || '').toLowerCase()
+  if (v === 'urgente' || v === 'alta') return 'bg-red-500 text-white'
+  if (v === 'media') return 'bg-amber-500/20 text-amber-300'
+  if (v === 'baja') return 'bg-emerald-500/20 text-emerald-300'
+  return 'bg-white/10 text-white/60'
+}
+
 function FileRow({ title, name, size, ready, loading, onClick }: { title: string; name?: string | null; size?: string; ready: boolean; loading?: boolean; onClick: () => void }) {
+  const typeBadge = ready ? fileExtBadge(name) : null
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-white/[.08] bg-black/20 p-4">
       <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-red-400/20 bg-red-400/10 text-red-300"><FileArchive size={18}/></div>
       <div className="min-w-0 flex-1">
-        <div className="text-sm font-bold">{title}</div>
+        <div className="flex flex-wrap items-center gap-2"><span className="text-sm font-bold">{title}</span>{typeBadge && <span className="rounded-md border border-white/10 bg-white/[.04] px-1.5 py-0.5 text-[10px] font-bold uppercase text-white/40">{typeBadge}</span>}</div>
         <div className="truncate text-xs text-white/35">{name || 'No disponible'} {size ? `· ${size}` : ''}</div>
       </div>
       {ready && (
