@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import {
   ArrowRight, Bell, CheckCircle2, Cpu, Download, Eye,
-  Facebook, Filter, Gauge, Headphones, Instagram, LayoutGrid, PlayCircle,
-  Settings, ShieldCheck, UploadCloud, UserPlus, UserRound, Users, Youtube, Zap,
+  Filter, Gauge, Headphones, Instagram, LayoutGrid, PlayCircle,
+  Settings, ShieldCheck, UploadCloud, UserPlus, UserRound, Users, Zap,
 } from 'lucide-react'
+
+const TIKTOK_URL = 'https://www.tiktok.com/@autokeys.pro'
 
 const nav = [
   { label: 'Inicio', href: '#', active: true },
@@ -74,6 +76,7 @@ const jsonLd = [
     url: 'https://akcloud.es',
     logo: 'https://akcloud.es/images/brand/ak-cloud-logo.webp',
     description: 'Portal profesional de File Service para reprogramación ECU: Stage 1, Stage 2, EGR/DPF/AdBlue OFF e Immo Off para talleres y distribuidores.',
+    sameAs: [TIKTOK_URL],
   },
   {
     '@context': 'https://schema.org',
@@ -353,14 +356,21 @@ export default function HomePage() {
             <div className="text-sm font-black">Autokeys <span className="text-[#ff2b2b]">Remaps Pro</span></div>
             <p className="mt-3 text-sm leading-6 text-white/35">Expertos en electrónica y software automotriz.</p>
             <div className="mt-5 flex gap-3">
-              <a href="#" aria-label="YouTube" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/50 transition hover:text-white"><Youtube size={16} /></a>
-              <a href="#" aria-label="Facebook" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/50 transition hover:text-white"><Facebook size={16} /></a>
               <a href="#" aria-label="Instagram" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/50 transition hover:text-white"><Instagram size={16} /></a>
+              <a href={TIKTOK_URL} target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/50 transition hover:text-white"><TikTokIcon size={16} /></a>
             </div>
           </div>
         </div>
         <div className="border-t border-white/[.06] px-5 py-6 text-center text-xs text-white/30 lg:px-8">© 2026 AK Cloud by Autokeys Remaps Pro. Todos los derechos reservados.</div>
       </footer>
     </main>
+  )
+}
+
+function TikTokIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M16.6 5.82c-.9-.98-1.4-2.26-1.4-3.57h-3.03v13.68c0 1.5-1.22 2.72-2.72 2.72a2.72 2.72 0 0 1 0-5.44c.27 0 .53.04.78.11V10.3a5.75 5.75 0 0 0-.78-.05A5.75 5.75 0 0 0 3.7 16a5.75 5.75 0 0 0 5.75 5.75A5.75 5.75 0 0 0 15.2 16V8.9a8.25 8.25 0 0 0 4.8 1.54V7.4a5.1 5.1 0 0 1-3.4-1.58Z" />
+    </svg>
   )
 }
