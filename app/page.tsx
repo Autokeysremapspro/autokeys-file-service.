@@ -23,8 +23,8 @@ const highlights = [
 const services = [
   { icon: Gauge, title: 'Stage 1 / Stage 2 / Stage 3', text: 'Potencia, par y eficiencia adaptados a cada motor.', image: '/images/marketing/service-stage.webp' },
   { icon: Filter, title: 'DPF / EGR / AdBlue / Lambda', text: 'Soluciones profesionales para sistemas de emisiones.', image: '/images/marketing/service-dpf.webp' },
-  { icon: Cpu, title: 'Immo Off y soluciones ECU', text: 'Eliminación de inmovilizador y soluciones electrónicas avanzadas.' },
-  { icon: Download, title: 'Archivos listos para descargar', text: 'Archivos verificados y listos para instalar en tu cliente.' },
+  { icon: Cpu, title: 'Immo Off y soluciones ECU', text: 'Eliminación de inmovilizador y soluciones electrónicas avanzadas.', image: '/images/marketing/service-ecu.webp' },
+  { icon: Download, title: 'Archivos listos para descargar', text: 'Archivos verificados y listos para instalar en tu cliente.', image: '/images/marketing/service-download.webp' },
 ]
 
 const steps = [
@@ -270,13 +270,9 @@ export default function HomePage() {
                 <div key={x} className="flex items-center gap-3 text-sm font-semibold text-white/70"><CheckCircle2 size={18} className="text-[#ff425a]" />{x}</div>
               ))}
             </div>
-            <div className="relative mt-8 ak-v5-glass overflow-hidden rounded-[28px] p-5">
-              <div className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#ff4964]" /><i className="h-2.5 w-2.5 rounded-full bg-[#ff425a]" /><i className="h-2.5 w-2.5 rounded-full bg-[#53e6a8]" /></div>
-              <div className="mt-4 grid grid-cols-3 gap-2">
-                <div className="ak-v5-stat !p-3"><div className="text-[9px] uppercase text-white/30">Activos</div><div className="mt-1 text-xl font-black">12</div></div>
-                <div className="ak-v5-stat !p-3"><div className="text-[9px] uppercase text-white/30">Entregados</div><div className="mt-1 text-xl font-black text-[#67e8d1]">48</div></div>
-                <div className="ak-v5-stat !p-3"><div className="text-[9px] uppercase text-white/30">Satisfacción</div><div className="mt-1 text-xl font-black text-[#ff425a]">99%</div></div>
-              </div>
+            <div className="relative mt-8">
+              <div className="absolute -inset-10 -z-10 rounded-full bg-[#ff425a]/10 blur-[90px]" />
+              <img src="/images/marketing/dashboard-devices.webp" alt="AK Cloud en laptop y tablet" className="w-full rounded-[24px]" />
             </div>
           </div>
         </div>
