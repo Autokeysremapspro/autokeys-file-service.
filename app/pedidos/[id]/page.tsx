@@ -19,32 +19,16 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
   const [activeTab, setActiveTab] = useState<'resumen' | 'versiones' | 'conversacion' | 'historial'>('resumen')
 
   useEffect(() => {
-    getPedidoById(params.id)
-      .then(setPedido)
-      .catch(console.error)
-      .finally(() => setLoading(false))
+    getPedidoById(params.id).then(setPedido).catch(console.error).finally(() => setLoading(false))
   }, [params.id])
 
-  // Sin esto, el distribuidor tenía que refrescar la página a mano para
-  // enterarse de que su pedido cambió de estado — justo el momento en el
-  // que más pendiente está de la pantalla. Ahora se entera al instante.
   useEffect(() => {
-    const channel = supabase
-      .channel(`pedido-${params.id}`)
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'file_service_pedidos', filter: `id=eq.${params.id}` },
-        (payload) => {
-          setPedido((current) => (current ? { ...current, ...(payload.new as Partial<FileServicePedido>) } : current))
-          setJustUpdated(true)
-          setTimeout(() => setJustUpdated(false), 4000)
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    const channel = supabase.channel(`pedido-${params.id}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'file_service_pedidos', filter: `id=eq.${params.id}` }, (payload) => {
+      setPedido((current) => (current ? { ...current, ...(payload.new as Partial<FileServicePedido>) } : current))
+      setJustUpdated(true)
+      setTimeout(() => setJustUpdated(false), 4000)
+    }).subscribe()
+    return () => { supabase.removeChannel(channel) }
   }, [params.id])
 
   async function download(bucket?: string | null, path?: string | null, name?: string | null) {
@@ -60,9 +44,7 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
       link.click()
       link.remove()
       URL.revokeObjectURL(url)
-    } finally {
-      setDownloading(null)
-    }
+    } finally { setDownloading(null) }
   }
 
   if (loading) {
@@ -183,31 +165,16 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
         </div>
       )}
 
-      {activeTab === 'versiones' && (
-        <div className="ak5-card p-6">
-          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center"><div><div className="ak5-kicker text-red-300">Control de revisiones</div><h2 className="mt-2 text-2xl font-black">Versiones entregadas</h2><p className="mt-2 text-sm text-white/38">Cada revisión queda vinculada al pedido y nunca sustituye el historial anterior.</p></div></div>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <FileBox title="ORI · Base" name={pedido.ori_nombre} size={formatBytes(pedido.ori_size)} ready={!!pedido.ori_path} loading={downloading === pedido.ori_path} onClick={() => download(pedido.ori_bucket, pedido.ori_path, pedido.ori_nombre)} />
-            <FileBox title={pedido.mod_path ? 'V1 · Última entrega' : 'V1 · Pendiente'} name={pedido.mod_nombre} size={pedido.mod_path ? 'Versión disponible' : 'El laboratorio está trabajando'} ready={!!pedido.mod_path} loading={downloading === pedido.mod_path} onClick={() => download(pedido.mod_bucket, pedido.mod_path, pedido.mod_nombre)} />
-          </div>
-        </div>
-      )}
+      {activeTab === 'versiones' && <div className="ak5-card p-6"><div className="flex flex-col justify-between gap-4 md:flex-row md:items-center"><div><div className="ak5-kicker text-red-300">Control de revisiones</div><h2 className="mt-2 text-2xl font-black">Versiones entregadas</h2><p className="mt-2 text-sm text-white/38">Cada revisión queda vinculada al pedido y nunca sustituye el historial anterior.</p></div></div><div className="mt-6 grid gap-4 md:grid-cols-2"><FileBox title="ORI · Base" name={pedido.ori_nombre} size={formatBytes(pedido.ori_size)} ready={!!pedido.ori_path} loading={downloading === pedido.ori_path} onClick={() => download(pedido.ori_bucket, pedido.ori_path, pedido.ori_nombre)} /><FileBox title={pedido.mod_path ? 'V1 · Última entrega' : 'V1 · Pendiente'} name={pedido.mod_nombre} size={pedido.mod_path ? 'Versión disponible' : 'El laboratorio está trabajando'} ready={!!pedido.mod_path} loading={downloading === pedido.mod_path} onClick={() => download(pedido.mod_bucket, pedido.mod_path, pedido.mod_nombre)} /></div></div>}
 
-      {activeTab === 'conversacion' && <div className="mx-auto max-w-5xl"><AKChat pedidoId={pedido.id} autorTipo="cliente" /></div>}
+      {activeTab === 'conversacion' && <div className="mx-auto max-w-5xl"><AKChat pedidoId={pedido.id} autorTipo="cliente" actionRequired={actionRequired} /></div>}
       {activeTab === 'historial' && <div className="mx-auto max-w-4xl"><AKTimeline estado={pedido.estado}/></div>}
     </AKPageShell>
   )
 }
 
 function formatWorkspaceEstado(estado?: string | null) {
-  const map: Record<string, string> = {
-    pendiente: 'Pendiente',
-    en_proceso: 'En proceso',
-    esperando_prueba: 'Esperando prueba',
-    revision_solicitada: 'Acción requerida',
-    finalizado: 'Finalizado',
-    cancelado: 'Cancelado',
-  }
+  const map: Record<string, string> = { pendiente: 'Pendiente', en_proceso: 'En proceso', esperando_prueba: 'Esperando prueba', revision_solicitada: 'Acción requerida', finalizado: 'Finalizado', cancelado: 'Cancelado' }
   return map[estado || ''] || estado || 'Pendiente'
 }
 
@@ -297,12 +264,5 @@ function FileRow({ title, name, size, ready, loading, onClick }: { title: string
 }
 
 function FileBox({ title, name, size, ready, loading, onClick }: { title: string; name?: string | null; size?: string; ready: boolean; loading?: boolean; onClick: () => void }) {
-  return (
-    <button disabled={!ready || loading} onClick={onClick} className="rounded-[22px] border border-white/[.08] bg-black/20 p-5 text-left transition hover:-translate-y-0.5 hover:border-red-400/25 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:border-white/[.08]">
-      <FileArchive className="text-red-300" size={24} />
-      <div className="mt-3 text-lg font-black">{title}</div>
-      <div className="mt-1 truncate text-sm text-white/35">{name || 'No disponible'}</div>
-      <div className="mt-4 flex items-center justify-between text-xs font-black uppercase tracking-[0.18em] text-white/35"><span>{size || '—'}</span>{ready && (loading ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />)}</div>
-    </button>
-  )
+  return <button disabled={!ready || loading} onClick={onClick} className="rounded-[22px] border border-white/[.08] bg-black/20 p-5 text-left transition hover:-translate-y-0.5 hover:border-red-400/25 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:border-white/[.08]"><FileArchive className="text-red-300" size={24} /><div className="mt-3 text-lg font-black">{title}</div><div className="mt-1 truncate text-sm text-white/35">{name || 'No disponible'}</div><div className="mt-4 flex items-center justify-between text-xs font-black uppercase tracking-[0.18em] text-white/35"><span>{size || '—'}</span>{ready && (loading ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />)}</div></button>
 }
