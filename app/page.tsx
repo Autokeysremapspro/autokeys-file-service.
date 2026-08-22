@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 
 const TIKTOK_URL = 'https://www.tiktok.com/@autokeys.pro'
+const INSTAGRAM_URL = 'https://www.instagram.com/autokeys.pro'
 
 const nav = [
   { label: 'Inicio', href: '#', active: true },
@@ -76,7 +77,7 @@ const jsonLd = [
     url: 'https://akcloud.es',
     logo: 'https://akcloud.es/images/brand/ak-cloud-logo.webp',
     description: 'Portal profesional de File Service para reprogramación ECU: Stage 1, Stage 2, EGR/DPF/AdBlue OFF e Immo Off para talleres y distribuidores.',
-    sameAs: [TIKTOK_URL],
+    sameAs: [INSTAGRAM_URL, TIKTOK_URL],
   },
   {
     '@context': 'https://schema.org',
@@ -356,7 +357,7 @@ export default function HomePage() {
             <div className="text-sm font-black">Autokeys <span className="text-[#ff2b2b]">Remaps Pro</span></div>
             <p className="mt-3 text-sm leading-6 text-white/35">Expertos en electrónica y software automotriz.</p>
             <div className="mt-5 flex gap-3">
-              <a href="#" aria-label="Instagram" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/50 transition hover:text-white"><Instagram size={16} /></a>
+              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/50 transition hover:text-white"><Instagram size={16} /></a>
               <a href={TIKTOK_URL} target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/50 transition hover:text-white"><TikTokIcon size={16} /></a>
             </div>
           </div>
