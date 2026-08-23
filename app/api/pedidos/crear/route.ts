@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     const [{ data: distribuidor }, { data: staff }] = await Promise.all([
       admin
         .from('akcloud_distribuidores')
-        .select('estado')
+        .select('id, estado')
         .eq('auth_user_id', user.id)
         .maybeSingle(),
       admin
@@ -99,7 +99,23 @@ export async function POST(request: Request) {
     const archivoOrigen = normalizarArchivoOrigen(body.archivoOrigen)
     const modificacionesHardware = String(body.modificacionesHardware || '').trim() || null
 
-    const conPrecioReal = seleccionados.map((s) => ({ ...s, precio_final: Number(s.precio ?? 0) }))
+    // Precio efectivo por servicio: override propio del distribuidor si lo tiene, si no la tarifa
+    // estándar de akcloud_servicios. Se recalcula siempre aquí, en el servidor, con datos leídos
+    // de la base de datos — nunca se usa ningún precio que venga del body de la petición.
+    let overridesMap = new Map<string, number>()
+    if (distribuidor?.id) {
+      const { data: overrides } = await admin
+        .from('distribuidor_precios')
+        .select('servicio_id,precio')
+        .eq('distribuidor_id', distribuidor.id)
+        .in('servicio_id', seleccionados.map((s) => s.id).filter(Boolean))
+      overridesMap = new Map((overrides || []).map((o: any) => [o.servicio_id, Number(o.precio)]))
+    }
+
+    const conPrecioReal = seleccionados.map((s) => ({
+      ...s,
+      precio_final: overridesMap.has(String(s.id)) ? overridesMap.get(String(s.id))! : Number(s.precio ?? 0),
+    }))
     const totalPrecio = Number(conPrecioReal.reduce((sum, s) => sum + Number(s.precio_final ?? 0), 0).toFixed(2))
 
     const commonPayload = {

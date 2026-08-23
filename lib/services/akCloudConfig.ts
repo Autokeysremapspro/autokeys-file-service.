@@ -11,6 +11,8 @@ export type AkCloudServicio = {
   icono?: string | null
   activo?: boolean | null
   orden?: number | null
+  precioEstandar?: number
+  personalizado?: boolean
 }
 
 export type AkCloudPlan = {
@@ -218,6 +220,10 @@ function sortByOrden<T extends { orden?: number | null }>(items: T[]) {
   return [...items].sort((a, b) => Number(a.orden || 999) - Number(b.orden || 999))
 }
 
+// Precio efectivo = precio personalizado del distribuidor que ha iniciado sesión (si tiene uno
+// para ese servicio) o si no, el precio estándar del catálogo. Esta es la única función que
+// resuelve precios para el distribuidor — el mismo valor se vuelve a calcular en el servidor
+// (nunca se confía en el precio mostrado aquí) al crear el pedido, ver app/api/pedidos/crear.
 export async function getServiciosActivos(): Promise<AkCloudServicio[]> {
   const { data, error } = await supabase
     .from('akcloud_servicios')
@@ -226,12 +232,43 @@ export async function getServiciosActivos(): Promise<AkCloudServicio[]> {
     .order('orden', { ascending: true })
 
   if (error || !data?.length) return FALLBACK_SERVICIOS
-  return sortByOrden(data.map((item: any) => ({
+
+  const base = data.map((item: any) => ({
     ...item,
     categoria: item.categoria || 'General',
     precio: Number(item.precio || item.creditos || 0),
     creditos: Number(item.creditos || item.precio || 0),
-  })))
+    precioEstandar: Number(item.precio || item.creditos || 0),
+    personalizado: false,
+  }))
+
+  try {
+    const { data: auth } = await supabase.auth.getUser()
+    const user = auth.user
+    if (!user) return sortByOrden(base)
+
+    const { data: distribuidor } = await supabase
+      .from('akcloud_distribuidores')
+      .select('id')
+      .eq('auth_user_id', user.id)
+      .maybeSingle()
+    if (!distribuidor) return sortByOrden(base)
+
+    const { data: overrides } = await supabase
+      .from('distribuidor_precios')
+      .select('servicio_id,precio')
+      .eq('distribuidor_id', distribuidor.id)
+    if (!overrides?.length) return sortByOrden(base)
+
+    const overrideMap = new Map(overrides.map((o: any) => [o.servicio_id, Number(o.precio)]))
+    return sortByOrden(base.map((item: any) => {
+      const override = overrideMap.get(item.id)
+      if (override === undefined) return item
+      return { ...item, precio: override, creditos: override, personalizado: true }
+    }))
+  } catch {
+    return sortByOrden(base)
+  }
 }
 
 export async function getPlanesActivos(): Promise<AkCloudPlan[]> {
