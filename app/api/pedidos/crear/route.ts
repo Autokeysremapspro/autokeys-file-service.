@@ -5,6 +5,7 @@ import { createPayPalOrderForPedido } from '@/lib/paypal'
 import { createSumUpOrderForPedido } from '@/lib/sumup'
 import { FALLBACK_SERVICIOS, type AkCloudServicio } from '@/lib/services/akCloudConfig'
 import { extractDtcCodes } from '@/lib/dtc'
+import { notificarNuevoPedido } from '@/lib/notifyStaff'
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -165,6 +166,7 @@ export async function POST(request: Request) {
         .single()
 
       if (pedidoError) throw pedidoError
+      await notificarNuevoPedido(pedido)
       return NextResponse.json({ ok: true, requierePago: false, pedido })
     }
 

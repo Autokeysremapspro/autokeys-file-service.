@@ -1,4 +1,5 @@
 import { getSiteUrl, getSupabaseAdmin } from '@/lib/paypal'
+import { notificarNuevoPedido } from '@/lib/notifyStaff'
 
 const SUMUP_BASE_URL = 'https://api.sumup.com'
 
@@ -238,6 +239,8 @@ export async function confirmarSumUpYCrearPedido(pendienteId: string) {
     mensaje: `Tu pago de ${Number(pendiente.importe).toFixed(2)} € se confirmó y tu pedido ${pedido.numero || ''} ya está en cola.`,
     tipo: 'success',
   })
+
+  await notificarNuevoPedido(pedido)
 
   return pedido
 }

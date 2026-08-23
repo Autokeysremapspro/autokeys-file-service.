@@ -264,6 +264,12 @@ body {
   box-shadow: 0 0 0 4px rgba(226,149,77,.11), 0 14px 34px rgba(0,0,0,.24);
 }
 
+/* Un <select> nativo pinta su lista de <option> con el fondo del sistema
+   (blanco en la mayoría de casos), que este CSS no puede tocar por fuera —
+   el texto claro (--ak-chalk) heredado queda casi invisible sobre ese fondo
+   claro al abrir el desplegable. */
+select option, select optgroup { background: #0e1116; color: var(--ak-chalk); }
+
 button, a { -webkit-tap-highlight-color: transparent; }
 button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
   outline: 2px solid rgba(226,149,77,.85);

@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { notificarNuevoPedido } from '@/lib/notifyStaff'
 
 const PAYPAL_ENV = process.env.PAYPAL_ENV || 'sandbox'
 const PAYPAL_BASE_URL = PAYPAL_ENV === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com'
@@ -137,5 +138,6 @@ export async function capturarYCrearPedido(pendienteId: string, expectedUserId: 
   if (pedidoError) throw new Error(pedidoError.message)
   await supabase.from('ak_pedidos_pendientes_pago').update({ estado: 'pagado', pagado_at: new Date().toISOString(), payload: { ...payload, __pedido_id_creado: pedido.id } }).eq('id', pendienteId)
   await supabase.from('file_service_notificaciones').insert({ user_id: pendiente.user_id, titulo: 'Pago confirmado — pedido creado', mensaje: `Tu pago de ${Number(pendiente.importe).toFixed(2)} € se confirmó y tu pedido ${pedido.numero || ''} ya está en cola.`, tipo: 'success' })
+  await notificarNuevoPedido(pedido)
   return pedido
 }

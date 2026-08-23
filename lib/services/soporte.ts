@@ -27,6 +27,16 @@ export type AkCloudTicketMensaje = {
   created_at?: string | null
 }
 
+// Best-effort: si esto falla, el ticket/mensaje ya se creó igual — solo
+// el aviso al staff se pierde, no la funcionalidad del ticket en sí.
+function avisarStaff(ticketId: string, mensaje: string, esNuevoTicket: boolean) {
+  fetch('/api/soporte/notificar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ticketId, mensaje, esNuevoTicket }),
+  }).catch(() => undefined)
+}
+
 function createTicketNumber() {
   const now = new Date()
   const year = now.getFullYear()
@@ -157,6 +167,8 @@ export async function crearTicketSoporte(payload: {
     interno: false,
   })
 
+  avisarStaff(data.id, payload.descripcion, true)
+
   return data as AkCloudTicket
 }
 
@@ -185,5 +197,8 @@ export async function enviarMensajeTicket(ticketId: string, mensaje: string) {
     .eq('user_id', userId)
 
   if (updateError) throw new Error(updateError.message)
+
+  avisarStaff(ticketId, mensaje, false)
+
   return data as AkCloudTicketMensaje
 }
