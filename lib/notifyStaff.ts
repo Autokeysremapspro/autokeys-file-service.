@@ -98,7 +98,7 @@ export async function notificarSoporte(input: {
       modulo: 'ak_cloud',
       tipo: input.esNuevoTicket ? 'warning' : 'info',
       prioridad: input.esNuevoTicket ? 'alta' : 'normal',
-      href: `/ak-cloud/soporte/${input.ticketId}`,
+      href: `/ak-cloud/soporte?ticket=${input.ticketId}`,
       accion_texto: 'Abrir ticket',
       // 'mensaje_cliente' es el event_type más cercano de los que ya escucha
       // trg_akcore_dispatch_web_push (lo usa file_service_mensajes) — así este
@@ -107,7 +107,7 @@ export async function notificarSoporte(input: {
     })
 
     await sendWhatsAppNotification(
-      `🎫 ${titulo}\n${referencia}${asunto}${input.empresa ? `\n${input.empresa}` : ''}\n${input.mensaje.slice(0, 300)}\n\nVer: ${coreUrl(`/ak-cloud/soporte/${input.ticketId}`)}`
+      `🎫 ${titulo}\n${referencia}${asunto}${input.empresa ? `\n${input.empresa}` : ''}\n${input.mensaje.slice(0, 300)}\n\nVer: ${coreUrl(`/ak-cloud/soporte?ticket=${input.ticketId}`)}`
     )
 
     if (process.env.STAFF_NOTIFICATION_EMAIL) {
@@ -116,7 +116,7 @@ export async function notificarSoporte(input: {
         subject: `${titulo}: ${referencia}`,
         title: titulo,
         bodyHtml: `<b>${referencia}</b>${asunto}${input.empresa ? `<br>${input.empresa}` : ''}<br><br>${input.mensaje}`,
-        ctaHref: coreUrl(`/ak-cloud/soporte/${input.ticketId}`),
+        ctaHref: coreUrl(`/ak-cloud/soporte?ticket=${input.ticketId}`),
         ctaLabel: 'Abrir ticket',
       })
     }
