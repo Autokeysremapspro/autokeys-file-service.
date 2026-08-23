@@ -85,22 +85,11 @@ export async function POST(request: Request) {
 
     if (error) throw error
 
-    // Avisa a Core: sin esto, la solicitud se creaba bien en la base de
-    // datos pero nadie del staff se enteraba salvo que entrara a mirar
-    // /ak-cloud/solicitudes por su cuenta. Se inserta en el centro de
-    // notificaciones interno de Core (usuario_id null = para todo el
-    // staff) y, si hay RESEND_API_KEY, también un email al staff.
-    await admin.from('notificaciones').insert({
-      usuario_id: null,
-      titulo: 'Nueva solicitud de distribuidor AK Cloud',
-      mensaje: `${empresa} (${nombre}) ha solicitado acceso como distribuidor.${mensaje ? `\n\nMensaje: ${mensaje}` : ''}`,
-      modulo: 'ak_cloud',
-      tipo: 'info',
-      prioridad: 'normal',
-      href: '/ak-cloud/solicitudes',
-      accion_texto: 'Revisar solicitud',
-    })
-
+    // El aviso en el centro de notificaciones de Core (y el push real) ya lo
+    // dispara solo el trigger trg_akcore_notify_distributor_request en cuanto
+    // se inserta la fila de arriba en akcloud_solicitudes_distribuidores — si
+    // además insertamos aquí, sale duplicado en el centro de avisos. Lo que
+    // sí falta cubrir aquí es WhatsApp y email, que el trigger no manda.
     await sendWhatsAppNotification(
       `🆕 Nueva solicitud AK Cloud\n${empresa} (${nombre})\n${email}${clean(body.ciudad) ? `\nCiudad: ${body.ciudad}` : ''}${clean(body.especialidad) ? `\nEspecialidad: ${body.especialidad}` : ''}${mensaje ? `\nMensaje: ${mensaje}` : ''}\n\nRevisar: ${process.env.NEXT_PUBLIC_CORE_URL ? `${process.env.NEXT_PUBLIC_CORE_URL}/ak-cloud/solicitudes` : '/ak-cloud/solicitudes'}`
     )

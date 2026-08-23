@@ -45,6 +45,10 @@ export async function notificarNuevoPedido(pedido: {
       prioridad: 'normal',
       href: '/ak-cloud',
       accion_texto: 'Ver pedido',
+      // event_type: 'pedido_nuevo' es el que ya escucha el trigger
+      // trg_akcore_dispatch_web_push sobre notificaciones — sin esto la fila
+      // se crea igual pero nunca llega el push real (móvil / pestaña cerrada).
+      metadata: { event_key: `akcloud-order-${pedido.id}`, event_type: 'pedido_nuevo', pedido_id: pedido.id },
     })
 
     await sendWhatsAppNotification(
@@ -96,6 +100,10 @@ export async function notificarSoporte(input: {
       prioridad: input.esNuevoTicket ? 'alta' : 'normal',
       href: `/ak-cloud/soporte/${input.ticketId}`,
       accion_texto: 'Abrir ticket',
+      // 'mensaje_cliente' es el event_type más cercano de los que ya escucha
+      // trg_akcore_dispatch_web_push (lo usa file_service_mensajes) — así este
+      // aviso también dispara push real, no solo el toast en pestaña abierta.
+      metadata: { event_key: `akcloud-ticket-${input.ticketId}-${Date.now()}`, event_type: 'mensaje_cliente', ticket_id: input.ticketId },
     })
 
     await sendWhatsAppNotification(
