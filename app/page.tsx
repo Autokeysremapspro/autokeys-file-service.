@@ -13,6 +13,7 @@ const nav = [
   { label: 'Servicios', href: '#servicios' },
   { label: 'Cómo funciona', href: '#como-funciona' },
   { label: 'Precios', href: '#precios' },
+  { label: 'FAQ', href: '#faq' },
   { label: 'Contacto', href: '#contacto' },
 ]
 
@@ -37,10 +38,18 @@ const steps = [
   { n: 4, icon: Download, title: 'Descarga y trabaja', text: 'Descarga el archivo listo y aplícalo en el vehículo de tu cliente.' },
 ]
 
+// Fechas relativas al momento del despliegue en vez de fijas, para que este
+// bloque de ejemplo de la portada nunca vuelva a quedarse con un año viejo.
+function recentDate(daysAgo: number, hour: string) {
+  const d = new Date()
+  d.setDate(d.getDate() - daysAgo)
+  return `${d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })} ${hour}`
+}
+
 const orders = [
-  { vehicle: 'BMW 320d F30', service: 'Stage 1', status: 'Completado', tone: 'green', progress: 100, updated: '10/05/2024 11:32' },
-  { vehicle: 'VW Golf 2.0 TDI', service: 'DPF Off + EGR Off', status: 'En proceso', tone: 'amber', progress: 66, updated: '09/05/2024 16:45' },
-  { vehicle: 'Audi A4 2.0 TDI', service: 'Stage 2', status: 'En cola', tone: 'slate', progress: 20, updated: '09/05/2024 09:21' },
+  { vehicle: 'BMW 320d F30', service: 'Stage 1', status: 'Completado', tone: 'green', progress: 100, updated: recentDate(1, '11:32') },
+  { vehicle: 'VW Golf 2.0 TDI', service: 'DPF Off + EGR Off', status: 'En proceso', tone: 'amber', progress: 66, updated: recentDate(2, '16:45') },
+  { vehicle: 'Audi A4 2.0 TDI', service: 'Stage 2', status: 'En cola', tone: 'slate', progress: 20, updated: recentDate(2, '09:21') },
 ]
 
 const statusStyles: Record<string, string> = {
@@ -59,7 +68,35 @@ const checklist = [
   'Gestión clara de pedidos y proyectos',
   'Seguimiento del estado en tiempo real',
   'Entrega rápida y archivos verificados',
+  'Precios personalizados para distribuidores',
   'Diseñado para profesionales del sector',
+]
+
+const faqs = [
+  {
+    q: '¿Cómo consigo acceso a AK Cloud?',
+    a: 'Solicitas cuenta desde el registro y el equipo de Autokeys Remaps Pro la revisa y aprueba. Es un acceso profesional, no abierto al público general.',
+  },
+  {
+    q: '¿Qué formatos de archivo aceptáis?',
+    a: 'ORI en .bin, .ori, .hex o .ecu. Al subirlo, el detector intenta identificar la ECU automáticamente; si no puede, el laboratorio la identifica a mano antes de procesar el pedido.',
+  },
+  {
+    q: '¿Cuánto tarda un pedido?',
+    a: 'Depende del servicio y de la carga del laboratorio, pero verás el estado en tiempo real en tu pedido — pendiente, en proceso, listo para descargar — sin tener que preguntar.',
+  },
+  {
+    q: '¿Los precios son iguales para todos los distribuidores?',
+    a: 'No necesariamente. Cada distribuidor puede tener su propia tarifa acordada con Autokeys Remaps Pro; si no tiene una personalizada, se aplica la tarifa estándar.',
+  },
+  {
+    q: '¿Es seguro subir mis archivos originales?',
+    a: 'Los archivos se guardan cifrados y solo son accesibles por ti y por el laboratorio que procesa tu pedido — nunca quedan expuestos a otros distribuidores.',
+  },
+  {
+    q: '¿Qué hago si tengo un problema con un pedido?',
+    a: 'Cada pedido tiene su propio chat con el laboratorio, y también puedes abrir un ticket de soporte independiente desde tu cuenta.',
+  },
 ]
 
 const footerColumns = [
@@ -86,6 +123,15 @@ const jsonLd = [
     url: 'https://akcloud.es',
     inLanguage: 'es-ES',
     publisher: { '@type': 'Organization', name: 'Autokeys Remaps Pro' },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
   },
 ]
 
@@ -317,6 +363,21 @@ export default function HomePage() {
               <img src="/images/marketing/dashboard-devices.webp" alt="AK Cloud en laptop y tablet" loading="lazy" className="w-full rounded-[24px]" />
             </div>
           </div>
+        </div>
+      </section>
+
+      <section id="faq" className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
+        <div className="mb-9 text-center"><div className="ak-v5-kicker !text-[#ff2b2b]">Preguntas frecuentes</div></div>
+        <div className="mx-auto grid max-w-3xl gap-3">
+          {faqs.map(({ q, a }) => (
+            <details key={q} className="ak-v5-card group p-5 sm:p-6">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-bold text-white/85 sm:text-base">
+                {q}
+                <span className="shrink-0 text-lg text-[#ff2b2b] transition group-open:rotate-45">+</span>
+              </summary>
+              <p className="mt-3 leading-6 text-white/45">{a}</p>
+            </details>
+          ))}
         </div>
       </section>
 
