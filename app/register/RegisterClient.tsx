@@ -9,6 +9,8 @@ import AuthLayout from '@/components/auth/AuthLayout'
 import AuthCard, { AuthButton } from '@/components/auth/AuthCard'
 import { AuthInput, AuthTextarea } from '@/components/auth/AuthInput'
 
+const SIGNUP_REDIRECT_URL = 'https://akcloud.es/login?confirmado=1'
+
 type FormState = {
   nombre: string
   email: string
@@ -75,19 +77,22 @@ export default function RegisterClient() {
       email: form.email.trim(),
       password: form.password,
       options: {
+        emailRedirectTo: SIGNUP_REDIRECT_URL,
         data: {
           empresa: form.empresa.trim(),
           nombre: form.nombre.trim(),
           telefono: form.telefono.trim(),
           ciudad: form.ciudad.trim(),
+          mensaje: form.mensaje.trim(),
           tipo_usuario: 'distribuidor',
           estado_acceso: 'pendiente',
         },
       },
     })
 
+    setLoading(false)
+
     if (error) {
-      setLoading(false)
       if (error.message?.toLowerCase().includes('rate limit')) {
         toast.error('Estamos recibiendo muchas solicitudes ahora mismo. Espera unos minutos y vuelve a intentarlo.')
       } else {
@@ -97,31 +102,13 @@ export default function RegisterClient() {
     }
 
     if (!signUp.user) {
-      setLoading(false)
       toast.error('No se pudo crear la solicitud de acceso')
       return
     }
 
-    const solicitudResponse = await fetch('/api/register-distributor', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        auth_user_id: signUp.user.id,
-        empresa: form.empresa.trim(),
-        nombre: form.nombre.trim(),
-        telefono: form.telefono.trim(),
-        ciudad: form.ciudad.trim(),
-        mensaje: form.mensaje.trim(),
-      }),
-    })
-    const solicitudPayload = await solicitudResponse.json()
-    setLoading(false)
-
-    if (!solicitudResponse.ok) {
-      toast.error(solicitudPayload.error || 'La cuenta se creó, pero no se pudo enviar la solicitud a Core.')
-      return
-    }
-
+    // La solicitud de distribuidor se crea automáticamente en Supabase mediante
+    // trg_akcloud_auth_signup_intake. No depende de una sesión previa ni de que
+    // el usuario haya confirmado ya el email, evitando cuentas creadas a medias.
     setEnviado(true)
   }
 
@@ -132,9 +119,9 @@ export default function RegisterClient() {
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10">
             <CheckCircle2 size={34} className="text-emerald-400" />
           </div>
-          <h2 className="mt-6 text-[28px] font-bold text-white">Solicitud enviada</h2>
+          <h2 className="mt-6 text-[28px] font-bold text-white">Solicitud registrada</h2>
           <p className="mt-3 text-[15px] leading-[1.65] text-[#a1a1a6]">
-            Hemos recibido tu solicitud correctamente. Nuestro equipo revisará tu información y te notificará una vez aprobada. Después podrás acceder con el email y la contraseña que acabas de crear.
+            Tu solicitud ya está pendiente de revisión en AK Cloud. Revisa ahora tu correo y confirma tu dirección de email. Cuando Autokeys Remaps Pro apruebe la cuenta podrás acceder con el email y la contraseña que acabas de crear.
           </p>
           <Link href="/login" className="mt-8 block">
             <AuthButton type="button">Volver al inicio de sesión <ArrowRight size={19} /></AuthButton>
