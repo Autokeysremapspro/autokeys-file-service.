@@ -41,20 +41,20 @@ export default function AKServiceCard({ service, selected, onToggle }: { service
       <div className="mt-4 text-base font-black text-white">{service.name}</div>
 
       {pricingBadges.length > 0 && (
-        <div className="mt-2 space-y-1.5">
+        <div className="mt-2 space-y-2">
           {pricingBadges.map((badge) => (
-            <div
-              key={badge.ruleId}
-              className={`inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${badge.tone === 'pack' ? 'border-amber-400/30 bg-amber-400/10 text-amber-200' : 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'}`}
-            >
-              <Tag size={11} className="shrink-0" />
-              <span className="truncate">{badge.label}</span>
+            <div key={badge.ruleId} className={`rounded-xl border px-2.5 py-2 ${badge.tone === 'pack' ? 'border-amber-400/25 bg-amber-400/[0.08]' : 'border-emerald-400/25 bg-emerald-400/[0.08]'}`}>
+              <div className={`flex max-w-full items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.08em] ${badge.tone === 'pack' ? 'text-amber-200' : 'text-emerald-200'}`}>
+                <Tag size={11} className="shrink-0" />
+                <span className="leading-4">{badge.label}</span>
+              </div>
+              {badge.helper && <div className={`mt-1 text-[10px] font-semibold leading-4 ${badge.tone === 'pack' ? 'text-amber-100/60' : 'text-emerald-100/60'}`}>{badge.helper}</div>}
             </div>
           ))}
         </div>
       )}
 
-      <div className="mt-1 min-h-[38px] text-xs leading-5 text-white/38">{service.description}</div>
+      <div className="mt-2 min-h-[38px] text-xs leading-5 text-white/38">{service.description}</div>
       <div className="mt-4 flex items-center justify-between">
         <span className="ak-mono text-sm font-bold text-[var(--ak-glow)]">{service.price} €</span>
         <span className={`ak-mono rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${locked ? 'bg-white/5 text-white/25' : 'bg-[var(--ak-green)]/10 text-[var(--ak-green)]'}`}>{locked ? 'Locked' : 'Compatible'}</span>
