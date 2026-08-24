@@ -8,6 +8,7 @@ const PUBLIC_PATHS = [
   '/',
   '/login',
   '/register',
+  '/auth/recovery',
   '/paypal',
   '/sumup/pedido-completado',
   '/embed',
