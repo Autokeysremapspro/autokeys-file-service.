@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
-import { ArrowRight, Building2, CheckCircle2, Info, Mail, MapPin, MessageSquare, Phone, User } from 'lucide-react'
+import { ArrowRight, Building2, CheckCircle2, Eye, EyeOff, Info, Lock, Mail, MapPin, MessageSquare, Phone, User } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import AuthLayout from '@/components/auth/AuthLayout'
 import AuthCard, { AuthButton } from '@/components/auth/AuthCard'
@@ -12,17 +12,23 @@ import { AuthInput, AuthTextarea } from '@/components/auth/AuthInput'
 type FormState = {
   nombre: string
   email: string
+  password: string
+  confirmPassword: string
   telefono: string
   empresa: string
   ciudad: string
   mensaje: string
 }
 
-const initialForm: FormState = { nombre: '', email: '', telefono: '', empresa: '', ciudad: '', mensaje: '' }
-
-function generateTempPassword() {
-  const uuid = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`
-  return `${uuid}Aa1!`
+const initialForm: FormState = {
+  nombre: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  telefono: '',
+  empresa: '',
+  ciudad: '',
+  mensaje: '',
 }
 
 export default function RegisterClient() {
@@ -32,6 +38,8 @@ export default function RegisterClient() {
   const [legalError, setLegalError] = useState('')
   const [loading, setLoading] = useState(false)
   const [enviado, setEnviado] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   function setField(field: keyof FormState, value: string) {
     setForm((current) => ({ ...current, [field]: value }))
@@ -43,6 +51,10 @@ export default function RegisterClient() {
     if (!form.nombre.trim()) nextErrors.nombre = 'Indica tu nombre completo'
     if (!form.email.trim()) nextErrors.email = 'Indica tu email'
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) nextErrors.email = 'Introduce un email válido'
+    if (!form.password) nextErrors.password = 'Crea una contraseña'
+    else if (form.password.length < 8) nextErrors.password = 'La contraseña debe tener al menos 8 caracteres'
+    if (!form.confirmPassword) nextErrors.confirmPassword = 'Repite tu contraseña'
+    else if (form.confirmPassword !== form.password) nextErrors.confirmPassword = 'Las contraseñas no coinciden'
     if (!form.telefono.trim()) nextErrors.telefono = 'Indica un teléfono de contacto'
     if (!form.empresa.trim()) nextErrors.empresa = 'Indica el nombre de tu taller o empresa'
     if (!form.ciudad.trim()) nextErrors.ciudad = 'Indica tu localidad o país'
@@ -61,7 +73,7 @@ export default function RegisterClient() {
     setLoading(true)
     const { data: signUp, error } = await supabase.auth.signUp({
       email: form.email.trim(),
-      password: generateTempPassword(),
+      password: form.password,
       options: {
         data: {
           empresa: form.empresa.trim(),
@@ -122,7 +134,7 @@ export default function RegisterClient() {
           </div>
           <h2 className="mt-6 text-[28px] font-bold text-white">Solicitud enviada</h2>
           <p className="mt-3 text-[15px] leading-[1.65] text-[#a1a1a6]">
-            Hemos recibido tu solicitud correctamente. Nuestro equipo revisará tu información y te notificará una vez aprobada.
+            Hemos recibido tu solicitud correctamente. Nuestro equipo revisará tu información y te notificará una vez aprobada. Después podrás acceder con el email y la contraseña que acabas de crear.
           </p>
           <Link href="/login" className="mt-8 block">
             <AuthButton type="button">Volver al inicio de sesión <ArrowRight size={19} /></AuthButton>
@@ -147,11 +159,43 @@ export default function RegisterClient() {
         </div>
 
         <form onSubmit={submit} className="mt-5 space-y-4">
-          <AuthInput icon={User} label="Nombre completo" value={form.nombre} onChange={(e) => setField('nombre', e.target.value)} placeholder="Tu nombre completo" error={errors.nombre} className="h-[52px]" />
-          <AuthInput icon={Mail} label="Correo electrónico" type="email" value={form.email} onChange={(e) => setField('email', e.target.value)} placeholder="tu@email.com" error={errors.email} className="h-[52px]" />
-          <AuthInput icon={Phone} label="Teléfono / WhatsApp" value={form.telefono} onChange={(e) => setField('telefono', e.target.value)} placeholder="+34 600 123 456" error={errors.telefono} className="h-[52px]" />
-          <AuthInput icon={Building2} label="Nombre del taller o empresa" value={form.empresa} onChange={(e) => setField('empresa', e.target.value)} placeholder="Nombre de tu taller o empresa" error={errors.empresa} className="h-[52px]" />
-          <AuthInput icon={MapPin} label="Localidad / País" value={form.ciudad} onChange={(e) => setField('ciudad', e.target.value)} placeholder="Tu localidad o país" error={errors.ciudad} className="h-[52px]" />
+          <AuthInput icon={User} label="Nombre completo" value={form.nombre} onChange={(e) => setField('nombre', e.target.value)} placeholder="Tu nombre completo" error={errors.nombre} className="h-[52px]" autoComplete="name" />
+          <AuthInput icon={Mail} label="Correo electrónico" type="email" value={form.email} onChange={(e) => setField('email', e.target.value)} placeholder="tu@email.com" error={errors.email} className="h-[52px]" autoComplete="email" />
+          <AuthInput
+            icon={Lock}
+            label="Contraseña"
+            type={showPassword ? 'text' : 'password'}
+            value={form.password}
+            onChange={(e) => setField('password', e.target.value)}
+            placeholder="Mínimo 8 caracteres"
+            error={errors.password}
+            className="h-[52px]"
+            autoComplete="new-password"
+            rightSlot={
+              <button type="button" onClick={() => setShowPassword((v) => !v)} className="text-[#85868c] transition hover:text-white" aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            }
+          />
+          <AuthInput
+            icon={Lock}
+            label="Repetir contraseña"
+            type={showConfirmPassword ? 'text' : 'password'}
+            value={form.confirmPassword}
+            onChange={(e) => setField('confirmPassword', e.target.value)}
+            placeholder="Repite tu contraseña"
+            error={errors.confirmPassword}
+            className="h-[52px]"
+            autoComplete="new-password"
+            rightSlot={
+              <button type="button" onClick={() => setShowConfirmPassword((v) => !v)} className="text-[#85868c] transition hover:text-white" aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            }
+          />
+          <AuthInput icon={Phone} label="Teléfono / WhatsApp" value={form.telefono} onChange={(e) => setField('telefono', e.target.value)} placeholder="+34 600 123 456" error={errors.telefono} className="h-[52px]" autoComplete="tel" />
+          <AuthInput icon={Building2} label="Nombre del taller o empresa" value={form.empresa} onChange={(e) => setField('empresa', e.target.value)} placeholder="Nombre de tu taller o empresa" error={errors.empresa} className="h-[52px]" autoComplete="organization" />
+          <AuthInput icon={MapPin} label="Localidad / País" value={form.ciudad} onChange={(e) => setField('ciudad', e.target.value)} placeholder="Tu localidad o país" error={errors.ciudad} className="h-[52px]" autoComplete="address-level2" />
           <AuthTextarea
             icon={MessageSquare}
             label="Cuéntanos brevemente tu actividad o los servicios que necesitas"
