@@ -15,7 +15,7 @@ type Topic = {
 
 const topics: Record<string, Topic> = {
   edc17: {
-    title: 'Bosch EDC17: qué revisar antes de enviar un archivo',
+    title: 'Bosch EDC17: guía antes de enviar un archivo',
     meta: 'Guía profesional sobre Bosch EDC17: identificación HW/SW, tipo de lectura, datos del vehículo y comprobaciones antes de solicitar un File Service.',
     kicker: 'BOSCH EDC17 · GUÍA PROFESIONAL',
     intro: 'Bosch EDC17 es una familia muy extendida, pero el nombre EDC17 por sí solo no identifica una ECU concreta. Dentro de la familia existen múltiples variantes, revisiones de hardware y versiones de software. Para que un File Service trabaje con una base clara, el taller debe asociar el ORI a la unidad real, al vehículo y al método con el que se obtuvo la lectura.',
@@ -129,7 +129,7 @@ const topics: Record<string, Topic> = {
     ],
   },
   kess3: {
-    title: 'KESS3 y File Service: flujo de trabajo recomendado',
+    title: 'KESS3 y File Service: flujo recomendado',
     meta: 'Cómo organizar un File Service cuando trabajas con KESS3: identificación, ORI, método de lectura, datos del vehículo y entrega del MOD.',
     kicker: 'KESS3 · FLUJO DE FILE SERVICE',
     intro: 'KESS3 es la herramienta con la que el profesional identifica, lee o escribe una unidad cuando existe un protocolo compatible. AK Cloud no sustituye esa herramienta: recibe el material del trabajo y centraliza ORI, información técnica, solicitud, soporte y entrega del archivo modificado.',
@@ -201,7 +201,7 @@ const topics: Record<string, Topic> = {
     ],
   },
   autotuner: {
-    title: 'AutoTuner y File Service: buenas prácticas para talleres',
+    title: 'AutoTuner y File Service: guía para talleres',
     meta: 'Cómo trabajar con AutoTuner y un File Service: identificación, archivo original, método de lectura, datos del vehículo y gestión del MOD.',
     kicker: 'AUTOTUNER · FLUJO DE FILE SERVICE',
     intro: 'AutoTuner es una herramienta de lectura y escritura utilizada por profesionales para acceder a unidades compatibles. El trabajo del File Service comienza cuando el taller ya dispone de un archivo correctamente identificado y del contexto técnico del vehículo. AK Cloud organiza ese intercambio para que ORI, solicitud y MOD permanezcan asociados.',
