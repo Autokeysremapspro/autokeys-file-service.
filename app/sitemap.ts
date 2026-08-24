@@ -23,10 +23,18 @@ const EN_TUNING_TOPICS = [
   'custom-tuning-files',
 ]
 
-function entry(path: string, priority: number): MetadataRoute.Sitemap[number] {
+const ES_GUIDES = [
+  'que-es-ecu-file-service',
+  'como-preparar-archivo-ori',
+  'obd-vs-bench-vs-boot',
+  'stage-1-vs-stage-2-vs-stage-3',
+  'errores-al-enviar-archivos-file-service',
+]
+
+function entry(path: string, priority: number, changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency'] = 'weekly'): MetadataRoute.Sitemap[number] {
   return {
     url: `${SITE_URL}${path}`,
-    changeFrequency: 'weekly',
+    changeFrequency,
     priority,
   }
 }
@@ -34,6 +42,9 @@ function entry(path: string, priority: number): MetadataRoute.Sitemap[number] {
 export default function sitemap(): MetadataRoute.Sitemap {
   const tuningLandings: MetadataRoute.Sitemap = EN_TUNING_TOPICS.map((topic) =>
     entry(`/en/ecu-file-service/${topic}`, 0.78),
+  )
+  const guides: MetadataRoute.Sitemap = ES_GUIDES.map((slug) =>
+    entry(`/guias/${slug}`, 0.82, 'monthly'),
   )
 
   return [
@@ -46,6 +57,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entry('/file-service-herramientas/kess3', 0.8),
     entry('/file-service-herramientas/flex', 0.8),
     entry('/file-service-herramientas/autotuner', 0.8),
+    entry('/guias', 0.86, 'weekly'),
+    ...guides,
     entry('/en/ecu-file-service', 0.95),
     entry('/en/stage-1-file-service', 0.9),
     entry('/en/ecu-file-service/edc17', 0.85),
