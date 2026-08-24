@@ -9,7 +9,7 @@ import AuthLayout from '@/components/auth/AuthLayout'
 import AuthCard, { AuthButton } from '@/components/auth/AuthCard'
 import { AuthInput, AuthTextarea } from '@/components/auth/AuthInput'
 
-const SIGNUP_REDIRECT_URL = 'https://akcloud.es/login?confirmado=1'
+const SIGNUP_REDIRECT_URL = 'https://www.akcloud.es/login?confirmado=1'
 
 type FormState = {
   nombre: string
