@@ -9,36 +9,42 @@ const display = Space_Grotesk({ subsets: ['latin'], weight: ['500', '700'], vari
 const mono = JetBrains_Mono({ subsets: ['latin'], weight: ['400', '500', '700'], variable: '--font-mono' })
 const body = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-body' })
 
-const SITE_URL = 'https://akcloud.es'
+const SITE_URL = 'https://www.akcloud.es'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'AK Cloud — Reprogramación ECU para talleres y distribuidores | Autokeys',
+    default: 'AK Cloud | File Service ECU para Talleres',
     template: '%s | AK Cloud',
   },
   description:
-    'Portal profesional de Autokeys Remaps Pro para talleres y distribuidores: Stage 1, Stage 2, EGR/DPF/AdBlue OFF y más soluciones ECU. Sube tu archivo, nosotros lo optimizamos — pago seguro y seguimiento en tiempo real.',
+    'File Service ECU profesional para talleres y preparadores. Sube tu archivo ORI, elige el servicio y recibe tu MOD con seguimiento y soporte técnico.',
   keywords: [
-    'reprogramación ECU',
-    'remap online',
-    'Stage 1',
-    'Stage 2',
-    'EGR OFF',
-    'DPF OFF',
-    'AdBlue OFF',
-    'archivo ECU',
-    'portal distribuidores tuning',
-    'Autokeys',
-    'AK Cloud',
     'file service ECU',
+    'archivo ECU',
+    'reprogramación ECU',
+    'Stage 1 file service',
+    'Stage 2 file service',
+    'tuning files',
+    'ECU tuning files',
+    'portal talleres',
+    'Autokeys Remaps Pro',
+    'AK Cloud',
   ],
   authors: [{ name: 'Autokeys Remaps Pro' }],
-  alternates: { canonical: SITE_URL },
+  creator: 'Autokeys Remaps Pro',
+  publisher: 'Autokeys Remaps Pro',
+  alternates: { canonical: '/' },
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true },
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
   },
   icons: {
     icon: [
@@ -51,17 +57,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'es_ES',
-    url: SITE_URL,
+    url: '/',
     siteName: 'AK Cloud',
-    title: 'AK Cloud — Reprogramación ECU para talleres y distribuidores',
+    title: 'AK Cloud | File Service ECU para Talleres',
     description:
-      'Stage 1, Stage 2, EGR/DPF/AdBlue OFF y más soluciones ECU profesionales. Sube tu archivo, nosotros lo optimizamos.',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'AK Cloud — Autokeys Remaps Pro' }],
+      'File Service ECU profesional para talleres y preparadores. Sube tu ORI, selecciona el servicio y gestiona todo el trabajo desde AK Cloud.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'AK Cloud by Autokeys Remaps Pro — File Service ECU' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AK Cloud — Reprogramación ECU para talleres y distribuidores',
-    description: 'Stage 1, Stage 2, EGR/DPF/AdBlue OFF y más soluciones ECU profesionales.',
+    title: 'AK Cloud | File Service ECU para Talleres',
+    description: 'File Service ECU profesional para talleres y preparadores, con seguimiento y soporte técnico.',
     images: ['/og-image.png'],
   },
 }

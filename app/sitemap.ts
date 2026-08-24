@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-const SITE_URL = 'https://akcloud.es'
+const SITE_URL = 'https://www.akcloud.es'
 
 const EN_TUNING_TOPICS = [
   'diesel-tuning',
@@ -31,45 +31,44 @@ const EN_TUNING_TOPICS = [
   'tuning-files-online',
 ]
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date()
-  const tuningLandings: MetadataRoute.Sitemap = EN_TUNING_TOPICS.map((topic) => ({
-    url: `${SITE_URL}/en/ecu-file-service/${topic}`,
-    lastModified: now,
+function entry(path: string, priority: number): MetadataRoute.Sitemap[number] {
+  return {
+    url: `${SITE_URL}${path}`,
     changeFrequency: 'weekly',
-    priority: 0.78,
-  }))
+    priority,
+  }
+}
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  const tuningLandings: MetadataRoute.Sitemap = EN_TUNING_TOPICS.map((topic) =>
+    entry(`/en/ecu-file-service/${topic}`, 0.78),
+  )
 
   return [
-    { url: SITE_URL, lastModified: now, changeFrequency: 'weekly', priority: 1 },
-    { url: `${SITE_URL}/register`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${SITE_URL}/file-service-ecu`, lastModified: now, changeFrequency: 'weekly', priority: 0.95 },
-    { url: `${SITE_URL}/stage-1-file-service`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${SITE_URL}/ecu-file-service/edc17`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 },
-    { url: `${SITE_URL}/ecu-file-service/md1`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 },
-    { url: `${SITE_URL}/ecu-file-service/mg1`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 },
-    { url: `${SITE_URL}/file-service-herramientas/kess3`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/file-service-herramientas/flex`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/file-service-herramientas/autotuner`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/en/ecu-file-service`, lastModified: now, changeFrequency: 'weekly', priority: 0.95 },
-    { url: `${SITE_URL}/en/stage-1-file-service`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${SITE_URL}/en/ecu-file-service/edc17`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 },
-    { url: `${SITE_URL}/en/ecu-file-service/md1`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 },
-    { url: `${SITE_URL}/en/ecu-file-service/mg1`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 },
-    { url: `${SITE_URL}/en/ecu-file-service/autotuner`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/en/ecu-file-service/remote`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/en/ecu-file-service/tuners`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/en/ecu-file-service/workshops`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/en/ecu-file-service/custom-tuning`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/en/ecu-file-service/performance-tuning`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/en/ecu-file-service/stage-2`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/en/ecu-file-service/stage-3`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/en/file-service-tools/kess3`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/en/file-service-tools/flex`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
+    entry('/', 1),
+    entry('/file-service-ecu', 0.95),
+    entry('/stage-1-file-service', 0.9),
+    entry('/ecu-file-service/edc17', 0.85),
+    entry('/ecu-file-service/md1', 0.85),
+    entry('/ecu-file-service/mg1', 0.85),
+    entry('/file-service-herramientas/kess3', 0.8),
+    entry('/file-service-herramientas/flex', 0.8),
+    entry('/file-service-herramientas/autotuner', 0.8),
+    entry('/en/ecu-file-service', 0.95),
+    entry('/en/stage-1-file-service', 0.9),
+    entry('/en/ecu-file-service/edc17', 0.85),
+    entry('/en/ecu-file-service/md1', 0.85),
+    entry('/en/ecu-file-service/mg1', 0.85),
+    entry('/en/ecu-file-service/autotuner', 0.8),
+    entry('/en/ecu-file-service/remote', 0.8),
+    entry('/en/ecu-file-service/tuners', 0.8),
+    entry('/en/ecu-file-service/workshops', 0.8),
+    entry('/en/ecu-file-service/custom-tuning', 0.8),
+    entry('/en/ecu-file-service/performance-tuning', 0.8),
+    entry('/en/ecu-file-service/stage-2', 0.8),
+    entry('/en/ecu-file-service/stage-3', 0.8),
+    entry('/en/file-service-tools/kess3', 0.8),
+    entry('/en/file-service-tools/flex', 0.8),
     ...tuningLandings,
-    { url: `${SITE_URL}/legal/terminos`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
-    { url: `${SITE_URL}/legal/privacidad`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
-    { url: `${SITE_URL}/legal/aviso-legal`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
-    { url: `${SITE_URL}/legal/cookies`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
   ]
 }
