@@ -142,7 +142,7 @@ const topics = {
     intro: 'AK Cloud is designed for professional workshops and tuners that need a clear ECU tuning file supply workflow. Send the original ECU read with vehicle identification, ECU details, read method and calibration requirements, then keep the technical exchange and delivered file connected to the job.',
   },
   'remap-files-for-tuners': {
-    title: 'ECU Remap Files for Tuners | Professional File Service',
+    title: 'ECU Remap Files for Tuners',
     description: 'ECU remap files for professional tuners. Upload original ECU reads and calibration requirements through the AK Cloud online file service workflow.',
     kicker: 'ECU REMAP FILES · TUNERS',
     heading: 'ECU remap files for tuners.',
@@ -167,27 +167,33 @@ export function generateStaticParams() {
   return Object.keys(topics).map((topic) => ({ topic }))
 }
 
+function clip(value: string, max = 155) {
+  if (value.length <= max) return value
+  return value.slice(0, max + 1).replace(/\s+\S*$/, '').replace(/[,:;\-.]+$/, '').trim()
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ topic: string }> }): Promise<Metadata> {
   const { topic } = await params
   const item = topics[topic as TopicKey]
   if (!item) return {}
 
   const url = `/en/ecu-file-service/${topic}`
+  const description = clip(item.description)
   return {
     title: item.title,
-    description: item.description,
+    description,
     alternates: { canonical: url, languages: { en: url, 'x-default': url } },
     openGraph: {
       type: 'website',
-      title: item.title,
-      description: item.description,
+      title: `${item.title} | AK Cloud`,
+      description,
       url,
       images: [{ url: '/og-image.png', width: 1200, height: 630, alt: `${item.title} · AK Cloud` }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: item.title,
-      description: item.description,
+      title: `${item.title} | AK Cloud`,
+      description,
       images: ['/og-image.png'],
     },
   }
@@ -197,9 +203,30 @@ export default async function TopicPage({ params }: { params: Promise<{ topic: s
   const { topic } = await params
   const item = topics[topic as TopicKey]
   if (!item) notFound()
+  const url = `https://www.akcloud.es/en/ecu-file-service/${topic}`
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: item.title,
+    serviceType: 'Professional ECU tuning file service',
+    description: item.description,
+    url,
+    provider: {
+      '@type': 'Organization',
+      name: 'AK Cloud',
+      url: 'https://www.akcloud.es',
+      parentOrganization: {
+        '@type': 'Organization',
+        name: 'Autokeys Remaps Pro',
+        url: 'https://www.autokeysremapspro.es/',
+      },
+    },
+    audience: { '@type': 'BusinessAudience', audienceType: 'Automotive workshops and professional tuners' },
+  }
 
   return (
     <main className="ak-v5-bg min-h-screen text-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <header className="ak-v5-topbar sticky top-0 z-50">
         <div className="mx-auto flex max-w-[1180px] items-center justify-between px-5 py-4 lg:px-8">
           <Link href="/" className="text-sm font-black tracking-[.18em]">AK <span className="text-[#ff425a]">CLOUD</span></Link>
@@ -229,6 +256,22 @@ export default async function TopicPage({ params }: { params: Promise<{ topic: s
           <div className="ak-v5-kicker">PROFESSIONAL FILE SERVICE</div>
           <h2 className="ak-v5-title mt-4 max-w-4xl text-4xl">Accurate ECU identification and job data matter.</h2>
           <p className="mt-6 max-w-3xl leading-7 text-white/45">Availability and calibration scope depend on the exact vehicle, ECU hardware and software, reading method and information supplied with the request. AK Cloud organises the workflow; the professional workshop performs reading and writing with its own compatible tool.</p>
+          <p className="mt-4 max-w-3xl leading-7 text-white/45">Before sending a job, keep a verified original backup and confirm that the ECU identification matches the file you are uploading. If several reading protocols are available for the same control unit, the data contained in the read can differ, so the method used is part of the technical context of the request.</p>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1180px] px-5 py-20 lg:px-8">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="ak-v5-card p-7">
+            <h2 className="text-2xl font-bold">What AK Cloud keeps with the job</h2>
+            <p className="mt-4 leading-7 text-white/45">The original file, vehicle and ECU details, requested calibration, technical messages and delivered MOD remain connected to the same request. This creates a clearer audit trail than exchanging files across unrelated chat or email threads.</p>
+            <p className="mt-4 leading-7 text-white/45">Professional users can return to the job history to identify which file was supplied for a specific vehicle and keep future revisions tied to the original work.</p>
+          </div>
+          <div className="ak-v5-card p-7">
+            <h2 className="text-2xl font-bold">Workshop checks remain essential</h2>
+            <p className="mt-4 leading-7 text-white/45">A tuning file does not replace diagnostics. The workshop remains responsible for checking mechanical condition, active faults, power supply stability and programming-tool compatibility before reading or writing an ECU.</p>
+            <p className="mt-4 leading-7 text-white/45">AK Cloud is built for professionals who already manage the vehicle-side process and need a structured B2B channel for file requests, support and delivery.</p>
+          </div>
         </div>
       </section>
     </main>
