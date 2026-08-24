@@ -10,7 +10,7 @@ import AuthLayout from '@/components/auth/AuthLayout'
 import AuthCard, { AuthButton } from '@/components/auth/AuthCard'
 import { AuthInput } from '@/components/auth/AuthInput'
 
-const PASSWORD_RESET_URL = 'https://akcloud.es/restablecer-contrasena'
+const PASSWORD_RESET_URL = 'https://www.akcloud.es/restablecer-contrasena'
 
 export default function LoginClient() {
   const router = useRouter()
