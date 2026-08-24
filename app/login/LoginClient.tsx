@@ -17,14 +17,22 @@ export default function LoginClient() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [remember, setRemember] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [sendingReset, setSendingReset] = useState(false)
 
   useEffect(() => {
-    // Si Supabase cae en la Site URL (/login) por una configuración antigua
-    // de Redirect URLs, conservamos el token y lo mandamos a la pantalla
-    // correcta de cambio de contraseña.
+    const params = new URLSearchParams(window.location.search)
+
+    if (params.get('confirmado') === '1') {
+      toast.success('Email confirmado correctamente. Tu solicitud está pendiente de aprobación.')
+    } else if (params.get('confirmacion_error') === '1') {
+      toast.error('El enlace de confirmación no es válido o ha caducado. Solicita uno nuevo si lo necesitas.')
+    } else if (params.get('recovery_error') === '1') {
+      toast.error('El enlace de recuperación no es válido o ha caducado. Solicita uno nuevo.')
+    }
+
+    // Compatibilidad con enlaces de recuperación antiguos que puedan seguir
+    // llegando a /login con el token en el hash.
     if (window.location.hash.includes('type=recovery')) {
       window.location.replace(`/restablecer-contrasena${window.location.hash}`)
       return
@@ -46,8 +54,6 @@ export default function LoginClient() {
     setLoading(false)
     if (error) { toast.error(error.message); return }
 
-    // Leer el retorno solo en navegador evita el bailout de prerender de
-    // useSearchParams y conserva el comportamiento de volver a la ruta pedida.
     const requested = typeof window !== 'undefined'
       ? new URLSearchParams(window.location.search).get('next') || '/dashboard'
       : '/dashboard'
@@ -102,11 +108,7 @@ export default function LoginClient() {
             }
           />
 
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center gap-2 text-[#92939a]">
-              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="h-4 w-4 accent-[#ef1018]" />
-              Recordarme
-            </label>
+          <div className="flex justify-end text-sm">
             <button type="button" disabled={sendingReset} onClick={recuperarContrasena} className="font-medium text-[#ef1018] transition hover:text-[#ff1c25] disabled:opacity-60">
               {sendingReset ? 'Enviando...' : '¿Olvidaste tu contraseña?'}
             </button>
