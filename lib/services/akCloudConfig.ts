@@ -1,5 +1,11 @@
 import { supabase } from '@/lib/supabase'
 
+export type PrecioCondicionalDistribuidor = {
+  requiere_servicio_id: string
+  precio: number
+  activo?: boolean | null
+}
+
 export type AkCloudServicio = {
   id?: string
   nombre: string
@@ -13,6 +19,7 @@ export type AkCloudServicio = {
   orden?: number | null
   precioEstandar?: number
   personalizado?: boolean
+  preciosCondicionales?: PrecioCondicionalDistribuidor[]
 }
 
 export type AkCloudPlan = {
@@ -221,9 +228,9 @@ function sortByOrden<T extends { orden?: number | null }>(items: T[]) {
 }
 
 // Precio efectivo = precio personalizado del distribuidor que ha iniciado sesión (si tiene uno
-// para ese servicio) o si no, el precio estándar del catálogo. Esta es la única función que
-// resuelve precios para el distribuidor — el mismo valor se vuelve a calcular en el servidor
-// (nunca se confía en el precio mostrado aquí) al crear el pedido, ver app/api/pedidos/crear.
+// para ese servicio) o si no, el precio estándar del catálogo. Las reglas condicionales se
+// adjuntan a cada servicio y se aplican en la pantalla según la combinación seleccionada.
+// El servidor vuelve a calcular todo antes de cobrar; nunca confía en el precio del navegador.
 export async function getServiciosActivos(): Promise<AkCloudServicio[]> {
   const { data, error } = await supabase
     .from('akcloud_servicios')
@@ -240,6 +247,7 @@ export async function getServiciosActivos(): Promise<AkCloudServicio[]> {
     creditos: Number(item.creditos || item.precio || 0),
     precioEstandar: Number(item.precio || item.creditos || 0),
     personalizado: false,
+    preciosCondicionales: [] as PrecioCondicionalDistribuidor[],
   }))
 
   try {
@@ -254,17 +262,42 @@ export async function getServiciosActivos(): Promise<AkCloudServicio[]> {
       .maybeSingle()
     if (!distribuidor) return sortByOrden(base)
 
-    const { data: overrides } = await supabase
-      .from('distribuidor_precios')
-      .select('servicio_id,precio')
-      .eq('distribuidor_id', distribuidor.id)
-    if (!overrides?.length) return sortByOrden(base)
+    const [{ data: overrides }, { data: condicionales }] = await Promise.all([
+      supabase
+        .from('distribuidor_precios')
+        .select('servicio_id,precio')
+        .eq('distribuidor_id', distribuidor.id),
+      supabase
+        .from('distribuidor_precios_condicionales')
+        .select('servicio_id,requiere_servicio_id,precio,activo')
+        .eq('distribuidor_id', distribuidor.id)
+        .eq('activo', true),
+    ])
 
-    const overrideMap = new Map(overrides.map((o: any) => [o.servicio_id, Number(o.precio)]))
+    const overrideMap = new Map((overrides || []).map((o: any) => [String(o.servicio_id), Number(o.precio)]))
+    const condicionalMap = new Map<string, PrecioCondicionalDistribuidor[]>()
+    for (const row of condicionales || []) {
+      const key = String((row as any).servicio_id)
+      const list = condicionalMap.get(key) || []
+      list.push({
+        requiere_servicio_id: String((row as any).requiere_servicio_id),
+        precio: Number((row as any).precio),
+        activo: (row as any).activo,
+      })
+      condicionalMap.set(key, list)
+    }
+
     return sortByOrden(base.map((item: any) => {
-      const override = overrideMap.get(item.id)
-      if (override === undefined) return item
-      return { ...item, precio: override, creditos: override, personalizado: true }
+      const override = overrideMap.get(String(item.id))
+      const preciosCondicionales = condicionalMap.get(String(item.id)) || []
+      if (override === undefined) return { ...item, preciosCondicionales }
+      return {
+        ...item,
+        precio: override,
+        creditos: override,
+        personalizado: true,
+        preciosCondicionales,
+      }
     }))
   } catch {
     return sortByOrden(base)
