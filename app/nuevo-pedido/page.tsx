@@ -150,10 +150,29 @@ export default function NuevoPedidoPage() {
     setSelected((current) => current.includes(slug) ? current.filter((x) => x !== slug) : [...current, slug])
   }
 
-  const serviciosConPrecioReal: ServicioConPrecioReal[] = useMemo(
-    () => servicios.map((s) => ({ ...s, precio_final: Number(s.precio ?? 0), incluido_en_plan: false })),
-    [servicios],
-  )
+  const serviciosConPrecioReal: ServicioConPrecioReal[] = useMemo(() => {
+    const selectedIds = new Set(
+      servicios
+        .filter((service) => selected.includes(service.slug))
+        .map((service) => String(service.id || ''))
+        .filter(Boolean),
+    )
+
+    return servicios.map((service) => {
+      const precioBase = Number(service.precio ?? 0)
+      const preciosCondicionales = (service.preciosCondicionales || [])
+        .filter((regla) => regla.activo !== false && selectedIds.has(String(regla.requiere_servicio_id)))
+        .map((regla) => Number(regla.precio))
+
+      return {
+        ...service,
+        precio_final: preciosCondicionales.length > 0
+          ? Math.min(precioBase, ...preciosCondicionales)
+          : precioBase,
+        incluido_en_plan: false,
+      }
+    })
+  }, [servicios, selected])
   const grupos = useMemo(() => groupServicios(serviciosConPrecioReal), [serviciosConPrecioReal])
   const serviciosDeFamilia = useMemo(() => grupos[familia] || [], [grupos, familia])
   const selectedFueraDeFamilia = useMemo(
