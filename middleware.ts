@@ -21,6 +21,7 @@ const PUBLIC_PATHS = [
   '/stage-1-file-service',
   '/ecu-file-service',
   '/file-service-herramientas',
+  '/guias',
   '/en/ecu-file-service',
   '/en/stage-1-file-service',
   '/en/file-service-tools',
