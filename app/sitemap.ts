@@ -31,6 +31,8 @@ const ES_GUIDES = [
   'errores-al-enviar-archivos-file-service',
 ]
 
+const ES_TECH_GUIDES = ['edc17', 'md1', 'mg1', 'kess3', 'flex', 'autotuner']
+
 function entry(path: string, priority: number, changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency'] = 'weekly'): MetadataRoute.Sitemap[number] {
   return {
     url: `${SITE_URL}${path}`,
@@ -46,6 +48,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const guides: MetadataRoute.Sitemap = ES_GUIDES.map((slug) =>
     entry(`/guias/${slug}`, 0.82, 'monthly'),
   )
+  const technicalGuides: MetadataRoute.Sitemap = ES_TECH_GUIDES.map((slug) =>
+    entry(`/guias/file-service/${slug}`, 0.82, 'monthly'),
+  )
 
   return [
     entry('/', 1),
@@ -59,6 +64,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entry('/file-service-herramientas/autotuner', 0.8),
     entry('/guias', 0.86, 'weekly'),
     ...guides,
+    ...technicalGuides,
     entry('/en/ecu-file-service', 0.95),
     entry('/en/stage-1-file-service', 0.9),
     entry('/en/ecu-file-service/edc17', 0.85),

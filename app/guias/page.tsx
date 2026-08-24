@@ -4,7 +4,7 @@ import { ArrowRight, BookOpen, Cpu, FileCheck2, Gauge, GitCompareArrows, Triangl
 
 export const metadata: Metadata = {
   title: 'Guías de File Service ECU para talleres',
-  description: 'Guías técnicas de AK Cloud para talleres y preparadores: ORI, OBD, Bench, Boot, Stage 1/2/3 y buenas prácticas al solicitar archivos ECU.',
+  description: 'Guías técnicas de AK Cloud para talleres y preparadores: ORI, OBD, Bench, Boot, Stage 1/2/3, EDC17, MD1, MG1 y herramientas de programación.',
   alternates: { canonical: '/guias' },
   openGraph: {
     title: 'Guías de File Service ECU | AK Cloud',
@@ -47,6 +47,15 @@ const guides = [
   },
 ] as const
 
+const technicalGuides = [
+  { href: '/guias/file-service/edc17', title: 'Bosch EDC17', text: 'Identificación HW/SW, tipo de lectura, diagnosis y datos que debe llevar el pedido.' },
+  { href: '/guias/file-service/md1', title: 'Bosch MD1', text: 'Cómo relacionar ORI, referencia, software y protocolo antes de solicitar un archivo.' },
+  { href: '/guias/file-service/mg1', title: 'Bosch MG1', text: 'Buenas prácticas para unidades gasolina modernas y trazabilidad del trabajo.' },
+  { href: '/guias/file-service/kess3', title: 'KESS3', text: 'Flujo recomendado desde identificación y lectura hasta la entrega del MOD.' },
+  { href: '/guias/file-service/flex', title: 'FLEX', text: 'Qué datos conservar de la herramienta y cómo preparar una solicitud clara.' },
+  { href: '/guias/file-service/autotuner', title: 'AutoTuner', text: 'Checklist profesional para mantener ORI, identificación y pedido bien documentados.' },
+] as const
+
 export default function GuidesPage() {
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -54,7 +63,7 @@ export default function GuidesPage() {
     name: 'Guías de File Service ECU para talleres',
     url: 'https://www.akcloud.es/guias',
     isPartOf: { '@type': 'WebSite', name: 'AK Cloud', url: 'https://www.akcloud.es' },
-    about: ['ECU File Service', 'ECU tuning files', 'OBD Bench Boot', 'ORI ECU', 'Stage 1 Stage 2 Stage 3'],
+    about: ['ECU File Service', 'ECU tuning files', 'OBD Bench Boot', 'ORI ECU', 'Stage 1 Stage 2 Stage 3', 'Bosch EDC17', 'Bosch MD1', 'Bosch MG1', 'KESS3', 'FLEX', 'AutoTuner'],
   }
 
   return (
@@ -87,7 +96,25 @@ export default function GuidesPage() {
       </section>
 
       <section className="border-y border-white/[.06] bg-white/[.018]">
-        <div className="mx-auto grid max-w-[1180px] gap-8 px-5 py-20 lg:grid-cols-[1.15fr_.85fr] lg:px-8">
+        <div className="mx-auto max-w-[1180px] px-5 py-20 lg:px-8">
+          <div className="ak-v5-kicker">ECU Y HERRAMIENTAS</div>
+          <h2 className="ak-v5-title mt-4 max-w-4xl text-4xl">Guías específicas para preparar mejor cada trabajo.</h2>
+          <p className="mt-5 max-w-3xl leading-7 text-white/45">Estas guías profundizan en las familias ECU y herramientas que ya tienen landing propia en AK Cloud. El objetivo es que la búsqueda informativa y la página comercial se refuercen mutuamente: primero entiendes qué datos debes comprobar y después accedes al servicio correspondiente.</p>
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {technicalGuides.map((guide) => (
+              <Link key={guide.href} href={guide.href} className="ak-v5-card group p-6 transition hover:border-white/20">
+                <div className="text-xs font-black tracking-[.12em] text-[#67e8d1]">GUÍA TÉCNICA</div>
+                <h3 className="mt-4 text-2xl font-black">{guide.title}</h3>
+                <p className="mt-4 leading-7 text-white/45">{guide.text}</p>
+                <div className="mt-6 flex items-center gap-2 text-xs font-black text-[#ff425a]">Abrir guía <ArrowRight size={14} className="transition group-hover:translate-x-1"/></div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1180px] px-5 py-20 lg:px-8">
+        <div className="grid gap-8 lg:grid-cols-[1.15fr_.85fr]">
           <div>
             <div className="ak-v5-kicker">Del conocimiento al trabajo real</div>
             <h2 className="ak-v5-title mt-4 text-4xl">Cuando tengas el ORI listo, el pedido empieza en AK Cloud.</h2>
