@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Clock3, Euro, FileUp, ShieldCheck, Wrench } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'ECU File Service para talleres | Sin créditos ni suscripción',
-  description: 'File service ECU profesional para talleres y preparadores. Sube tu archivo ORI, selecciona el servicio, conoce el precio y recibe tu MOD. Sin créditos ni suscripciones.',
+  title: 'ECU File Service profesional para talleres',
+  description: 'File Service ECU para talleres y preparadores. Sube tu ORI, selecciona el servicio, conoce el precio y recibe tu MOD con soporte técnico.',
   alternates: { canonical: '/file-service-ecu', languages: { es: '/file-service-ecu', en: '/en/ecu-file-service', 'x-default': '/file-service-ecu' } },
   openGraph: { title: 'ECU File Service profesional | AK Cloud', description: 'Archivos ECU para profesionales con precio por trabajo, soporte técnico e historial de versiones.', url: '/file-service-ecu' },
 }
@@ -21,7 +21,21 @@ const cluster = [
 ] as const
 
 export default function EcuFileServicePage() {
-  const jsonLd = { '@context':'https://schema.org','@type':'Service',name:'AK Cloud ECU File Service',serviceType:'Professional ECU and TCU tuning file service',provider:{'@type':'Organization',name:'Autokeys Remaps Pro',url:'https://akcloud.es'},areaServed:'Worldwide',audience:{'@type':'BusinessAudience',audienceType:'Automotive workshops and professional tuners'},url:'https://akcloud.es/file-service-ecu' }
+  const jsonLd = {
+    '@context':'https://schema.org',
+    '@type':'Service',
+    name:'AK Cloud ECU File Service',
+    serviceType:'Professional ECU and TCU tuning file service',
+    provider:{
+      '@type':'Organization',
+      name:'AK Cloud',
+      url:'https://www.akcloud.es',
+      parentOrganization:{ '@type':'Organization', name:'Autokeys Remaps Pro', url:'https://www.autokeysremapspro.es/' },
+    },
+    areaServed:{ '@type':'Country', name:'España' },
+    audience:{'@type':'BusinessAudience',audienceType:'Automotive workshops and professional tuners'},
+    url:'https://www.akcloud.es/file-service-ecu',
+  }
   return (
     <main className="ak-v5-bg min-h-screen text-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
