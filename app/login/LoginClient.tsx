@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
@@ -10,6 +10,8 @@ import AuthLayout from '@/components/auth/AuthLayout'
 import AuthCard, { AuthButton } from '@/components/auth/AuthCard'
 import { AuthInput } from '@/components/auth/AuthInput'
 
+const PASSWORD_RESET_URL = 'https://akcloud.es/restablecer-contrasena'
+
 export default function LoginClient() {
   const router = useRouter()
   const [email, setEmail] = useState('')
@@ -18,6 +20,24 @@ export default function LoginClient() {
   const [remember, setRemember] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [sendingReset, setSendingReset] = useState(false)
+
+  useEffect(() => {
+    // Si Supabase cae en la Site URL (/login) por una configuración antigua
+    // de Redirect URLs, conservamos el token y lo mandamos a la pantalla
+    // correcta de cambio de contraseña.
+    if (window.location.hash.includes('type=recovery')) {
+      window.location.replace(`/restablecer-contrasena${window.location.hash}`)
+      return
+    }
+
+    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        window.location.replace('/restablecer-contrasena')
+      }
+    })
+
+    return () => listener.subscription.unsubscribe()
+  }, [])
 
   async function login(e: React.FormEvent) {
     e.preventDefault()
@@ -39,7 +59,7 @@ export default function LoginClient() {
   async function recuperarContrasena() {
     if (!email) { toast.error('Escribe primero tu email arriba, para saber a quién mandarlo'); return }
     setSendingReset(true)
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/restablecer-contrasena` })
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: PASSWORD_RESET_URL })
     setSendingReset(false)
     if (error) { toast.error(error.message); return }
     toast.success(`Te hemos enviado un email a ${email} para restablecer tu contraseña.`)
