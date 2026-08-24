@@ -100,23 +100,56 @@ export async function POST(request: Request) {
     const archivoOrigen = normalizarArchivoOrigen(body.archivoOrigen)
     const modificacionesHardware = String(body.modificacionesHardware || '').trim() || null
 
-    // Precio efectivo por servicio: override propio del distribuidor si lo tiene, si no la tarifa
-    // estándar de akcloud_servicios. Se recalcula siempre aquí, en el servidor, con datos leídos
-    // de la base de datos — nunca se usa ningún precio que venga del body de la petición.
+    // Precio efectivo por servicio:
+    // 1) override individual del distribuidor, si existe; si no, tarifa estándar.
+    // 2) si el mismo pedido cumple una regla condicional, se aplica el precio condicional más bajo.
+    // Se recalcula siempre aquí con datos de BD; nunca se confía en el precio del navegador.
     let overridesMap = new Map<string, number>()
-    if (distribuidor?.id) {
-      const { data: overrides } = await admin
-        .from('distribuidor_precios')
-        .select('servicio_id,precio')
-        .eq('distribuidor_id', distribuidor.id)
-        .in('servicio_id', seleccionados.map((s) => s.id).filter(Boolean))
-      overridesMap = new Map((overrides || []).map((o: any) => [o.servicio_id, Number(o.precio)]))
+    let reglasCondicionales: Array<{ servicio_id: string; requiere_servicio_id: string; precio: number }> = []
+    const selectedIds = seleccionados.map((s) => String(s.id || '')).filter(Boolean)
+    const selectedIdsSet = new Set(selectedIds)
+
+    if (distribuidor?.id && selectedIds.length > 0) {
+      const [{ data: overrides }, { data: condicionales }] = await Promise.all([
+        admin
+          .from('distribuidor_precios')
+          .select('servicio_id,precio')
+          .eq('distribuidor_id', distribuidor.id)
+          .in('servicio_id', selectedIds),
+        admin
+          .from('distribuidor_precios_condicionales')
+          .select('servicio_id,requiere_servicio_id,precio')
+          .eq('distribuidor_id', distribuidor.id)
+          .eq('activo', true)
+          .in('servicio_id', selectedIds)
+          .in('requiere_servicio_id', selectedIds),
+      ])
+
+      overridesMap = new Map((overrides || []).map((o: any) => [String(o.servicio_id), Number(o.precio)]))
+      reglasCondicionales = (condicionales || []).map((r: any) => ({
+        servicio_id: String(r.servicio_id),
+        requiere_servicio_id: String(r.requiere_servicio_id),
+        precio: Number(r.precio),
+      }))
     }
 
-    const conPrecioReal = seleccionados.map((s) => ({
-      ...s,
-      precio_final: overridesMap.has(String(s.id)) ? overridesMap.get(String(s.id))! : Number(s.precio ?? 0),
-    }))
+    const conPrecioReal = seleccionados.map((s) => {
+      const servicioId = String(s.id || '')
+      const precioBase = overridesMap.has(servicioId)
+        ? overridesMap.get(servicioId)!
+        : Number(s.precio ?? 0)
+
+      const preciosCondicionales = reglasCondicionales
+        .filter((r) => r.servicio_id === servicioId && selectedIdsSet.has(r.requiere_servicio_id))
+        .map((r) => r.precio)
+
+      return {
+        ...s,
+        precio_final: preciosCondicionales.length > 0
+          ? Math.min(precioBase, ...preciosCondicionales)
+          : precioBase,
+      }
+    })
     const totalPrecio = Number(conPrecioReal.reduce((sum, s) => sum + Number(s.precio_final ?? 0), 0).toFixed(2))
 
     const commonPayload = {
