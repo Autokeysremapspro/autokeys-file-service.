@@ -71,6 +71,8 @@ export default function GuidesPage() {
         <div className="ak-v5-pill inline-flex"><BookOpen size={14}/> CENTRO TÉCNICO · FILE SERVICE</div>
         <h1 className="ak-v5-title mt-7 max-w-5xl text-5xl sm:text-7xl">Guías de File Service ECU.<br/><span className="text-[#ff425a]">Contenido útil para talleres.</span></h1>
         <p className="mt-7 max-w-3xl text-lg leading-8 text-white/50">Documentación pensada para profesionales que ya trabajan con herramientas de lectura y escritura y quieren enviar solicitudes con mejor información, reducir errores y entender mejor el flujo ORI → servicio → MOD.</p>
+        <p className="mt-5 max-w-3xl leading-7 text-white/45">El objetivo de este centro técnico no es sustituir la documentación de cada herramienta ni ofrecer recetas universales. Una misma familia de ECU puede incluir distintas referencias, versiones de hardware, software y métodos de acceso. Por eso reunimos criterios prácticos para identificar mejor cada trabajo antes de subirlo.</p>
+        <p className="mt-4 max-w-3xl leading-7 text-white/45">Encontrarás contenidos sobre preparación del archivo original, diferencias entre OBD, Bench y Boot, niveles de calibración y errores habituales al trabajar con un File Service. Cada guía enlaza después con el servicio relacionado para que la parte informativa y el flujo profesional permanezcan conectados.</p>
 
         <div className="mt-12 grid gap-5 md:grid-cols-2">
           {guides.map(({ href, icon: Icon, title, text }) => (
