@@ -1,4 +1,8 @@
-import { Check, Lock } from 'lucide-react'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { Check, Lock, Tag } from 'lucide-react'
+import { getPricingRuleBadges, type PricingRuleBadge } from '@/lib/services/pricingRuleBadges'
 
 export type AKService = {
   id: string
@@ -12,6 +16,16 @@ export type AKService = {
 
 export default function AKServiceCard({ service, selected, onToggle }: { service: AKService; selected: boolean; onToggle: () => void }) {
   const locked = service.compatible === false
+  const [pricingBadges, setPricingBadges] = useState<PricingRuleBadge[]>([])
+
+  useEffect(() => {
+    let mounted = true
+    getPricingRuleBadges().then((map) => {
+      if (mounted) setPricingBadges(map.get(service.id) || [])
+    })
+    return () => { mounted = false }
+  }, [service.id])
+
   return (
     <button
       type="button"
@@ -25,6 +39,21 @@ export default function AKServiceCard({ service, selected, onToggle }: { service
         {locked && <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/5 text-white/45"><Lock size={14} /></div>}
       </div>
       <div className="mt-4 text-base font-black text-white">{service.name}</div>
+
+      {pricingBadges.length > 0 && (
+        <div className="mt-2 space-y-1.5">
+          {pricingBadges.map((badge) => (
+            <div
+              key={badge.ruleId}
+              className={`inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${badge.tone === 'pack' ? 'border-amber-400/30 bg-amber-400/10 text-amber-200' : 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'}`}
+            >
+              <Tag size={11} className="shrink-0" />
+              <span className="truncate">{badge.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="mt-1 min-h-[38px] text-xs leading-5 text-white/38">{service.description}</div>
       <div className="mt-4 flex items-center justify-between">
         <span className="ak-mono text-sm font-bold text-[var(--ak-glow)]">{service.price} €</span>
