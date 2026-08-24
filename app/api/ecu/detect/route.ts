@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
 import { distinctDetectorEcuKeys, normalizeDetectorIdentity } from '@/lib/ecu/detectorKeys'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 export const runtime = 'nodejs'
 
@@ -216,6 +217,35 @@ export async function POST(request: Request) {
     const quality = fileQuality(buffer, extension, hw, sw)
     const admin = adminClient()
 
+    let loggingUserId: string | null = null
+    try {
+      const { data: authData } = await createServerSupabaseClient().auth.getUser()
+      loggingUserId = authData.user?.id || null
+    } catch {
+      // El log de métricas nunca debe romper el análisis si no hay sesión legible aquí.
+    }
+
+    // Registra cada resultado (identificado o no) para medir la tasa de acierto real del
+    // detector antes de invertir en mejorar la extracción de HW/SW. Nunca bloquea la respuesta.
+    const fileSize = file.size
+    const logAndRespond = (payload: Record<string, any>, init?: { status?: number }) => {
+      void admin.from('ak_ecu_detection_log').insert({
+        user_id: loggingUserId,
+        sha256,
+        extension,
+        file_size: fileSize,
+        status: payload.status,
+        method: payload.method,
+        confidence: payload.confidence,
+        review_required: payload.review_required,
+        hw: payload.hw,
+        sw: payload.sw,
+        quality_verdict: quality.verdict,
+        quality_score: quality.quality_score,
+      })
+      return NextResponse.json(payload, init)
+    }
+
     const { data: fingerprints, error: fingerprintError } = await admin
       .from('ak_ecu_fingerprints')
       .select('*, ak_ecu_detection_rules(*)')
@@ -236,7 +266,7 @@ export async function POST(request: Request) {
           .eq('id', fingerprint.id)
 
         const rule = fingerprint.ak_ecu_detection_rules || null
-        return NextResponse.json({
+        return logAndRespond({
           identified: true,
           status: 'identified',
           method: 'huella_exacta_confirmada',
@@ -263,7 +293,7 @@ export async function POST(request: Request) {
     }
 
     if (fingerprintRows.length > 1 && distinctFingerprintEcus.size > 1) {
-      return NextResponse.json({
+      return logAndRespond({
         identified: false,
         status: 'review_required',
         method: 'huella_confirmada_ambigua',
@@ -302,7 +332,7 @@ export async function POST(request: Request) {
         const match = signatures[0] as any
         const normalizedMatch = normalizeDetectorIdentity(match)
         if (!normalizedMatch.ecu) {
-          return NextResponse.json({
+          return logAndRespond({
             identified: false,
             status: 'review_required',
             method: 'firma_verificada_incompleta',
@@ -321,7 +351,7 @@ export async function POST(request: Request) {
           })
         }
 
-        return NextResponse.json({
+        return logAndRespond({
           identified: true,
           status: 'identified',
           method: 'firma_verificada',
@@ -351,7 +381,7 @@ export async function POST(request: Request) {
       }
 
       if (signatures.length > 1 && distinctEcus.size > 1) {
-        return NextResponse.json({
+        return logAndRespond({
           identified: false,
           status: 'review_required',
           method: 'firma_verificada_ambigua',
@@ -371,7 +401,7 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({
+    return logAndRespond({
       identified: false,
       status: quality.usable ? 'unidentified' : 'invalid_reading_suspected',
       method: quality.usable ? 'informacion_insuficiente' : 'calidad_archivo_dudosa',
