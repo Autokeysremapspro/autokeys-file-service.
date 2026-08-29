@@ -54,16 +54,11 @@ export type PlanServicioOverride = {
   precio_override: number | null
 }
 
-// Precio REAL de un pedido: se basa únicamente en "Servicios por plan"
-// (akcloud_plan_servicios), que es lo mismo que usa /api/pedidos/crear
-// en el servidor para cobrar. Así lo que ve el distribuidor en pantalla
-// coincide siempre con lo que se le cobra.
 export async function getPlanServiciosDe(planId: string): Promise<PlanServicioOverride[]> {
   const { data, error } = await supabase
     .from('akcloud_plan_servicios')
     .select('servicio_id, incluido, precio_override')
     .eq('plan_id', planId)
-
   if (error || !data) return []
   return data as PlanServicioOverride[]
 }
@@ -86,47 +81,27 @@ export function aplicarPrecioReal(
   })
 }
 
-// Catálogo de servicios de AK Cloud, organizado por las 5 categorías de
-// negocio (coches, motos, agricola, camion, especiales). Esta es la lista
-// que se usa si Supabase no responde; la real vive en akcloud_servicios
-// (ver migración v25_categorias_precios_file_service.sql).
+// Fallback mínimo. El catálogo completo y los precios reales viven en Supabase.
 export const FALLBACK_SERVICIOS: AkCloudServicio[] = [
-  // --- COCHES ---
-  { nombre: 'Stage 1', slug: 'stage-1-coche', categoria: 'coches', descripcion: 'Optimización de potencia segura para uso diario.', precio: 35, creditos: 35, icono: '🚀', orden: 10 },
-  { nombre: 'Stage 2', slug: 'stage-2-coche', categoria: 'coches', descripcion: 'Calibración avanzada para vehículos con hardware modificado.', precio: 55, creditos: 55, icono: '🏁', orden: 20 },
-  { nombre: 'DPF OFF', slug: 'dpf-off-coche', categoria: 'coches', descripcion: 'Solución para sistema DPF según solicitud del profesional.', precio: 30, creditos: 30, icono: '🚫', orden: 30 },
-  { nombre: 'EGR OFF', slug: 'egr-off-coche', categoria: 'coches', descripcion: 'Solución para sistema EGR según solicitud del profesional.', precio: 30, creditos: 30, icono: '🌿', orden: 40 },
-  { nombre: 'AdBlue OFF', slug: 'adblue-off-coche', categoria: 'coches', descripcion: 'Solución SCR / AdBlue.', precio: 30, creditos: 30, icono: '💧', orden: 50 },
-  { nombre: 'Decat', slug: 'decat-coche', categoria: 'coches', descripcion: 'Eliminación lógica del catalizador según solicitud.', precio: 25, creditos: 25, icono: '⚠️', orden: 60 },
-  { nombre: 'Pops & Bangs', slug: 'pops-bangs-coche', categoria: 'coches', descripcion: 'Configuración de petardeo bajo solicitud.', precio: 20, creditos: 20, icono: '💥', orden: 70 },
-  { nombre: 'Hardcut', slug: 'hardcut-coche', categoria: 'coches', descripcion: 'Limitador tipo hardcut según configuración solicitada.', precio: 20, creditos: 20, icono: '🍿', orden: 80 },
-  { nombre: 'Launch Control', slug: 'launch-control-coche', categoria: 'coches', descripcion: 'Salida asistida bajo configuración técnica.', precio: 25, creditos: 25, icono: '🏁', orden: 90 },
-  { nombre: 'Reset adaptaciones DSG', slug: 'dsg-reset-coche', categoria: 'coches', descripcion: 'Reset de adaptaciones de caja DSG bajo solicitud.', precio: 30, creditos: 30, icono: '⚙️', orden: 100 },
-
-  // --- MOTOS ---
-  { nombre: 'Stage 1', slug: 'stage-1-moto', categoria: 'motos', descripcion: 'Optimización de potencia segura para moto.', precio: 25, creditos: 25, icono: '🚀', orden: 110 },
-  { nombre: 'Quickshifter / Limitador OFF', slug: 'quickshifter-limitador-off-moto', categoria: 'motos', descripcion: 'Configuración de quickshifter o eliminación de limitador según solicitud.', precio: 20, creditos: 20, icono: '⚙️', orden: 120 },
-  { nombre: 'DPF/EGR/AdBlue OFF', slug: 'anulaciones-off-moto', categoria: 'motos', descripcion: 'Solución para sistemas DPF/EGR/AdBlue en motos que lo incorporan.', precio: 25, creditos: 25, icono: '🚫', orden: 130 },
-
-  // --- AGRÍCOLA ---
-  { nombre: 'Stage 1', slug: 'stage-1-agricola', categoria: 'agricola', descripcion: 'Optimización de potencia para maquinaria agrícola.', precio: 150, creditos: 150, icono: '🚜', orden: 140 },
-  { nombre: 'Stage 2', slug: 'stage-2-agricola', categoria: 'agricola', descripcion: 'Calibración avanzada para maquinaria agrícola.', precio: 200, creditos: 200, icono: '🚜', orden: 150 },
-  { nombre: 'DPF/EGR/AdBlue OFF', slug: 'anulaciones-off-agricola', categoria: 'agricola', descripcion: 'Solución para sistemas DPF/EGR/AdBlue en maquinaria agrícola.', precio: 80, creditos: 80, icono: '🚫', orden: 160 },
-
-  // --- CAMIÓN ---
-  { nombre: 'Stage 1', slug: 'stage-1-camion', categoria: 'camion', descripcion: 'Optimización de potencia para vehículo pesado.', precio: 180, creditos: 180, icono: '🚛', orden: 170 },
-  { nombre: 'Stage 2', slug: 'stage-2-camion', categoria: 'camion', descripcion: 'Calibración avanzada para vehículo pesado.', precio: 230, creditos: 230, icono: '🚛', orden: 180 },
-  { nombre: 'DPF/EGR/AdBlue OFF', slug: 'anulaciones-off-camion', categoria: 'camion', descripcion: 'Solución para sistemas DPF/EGR/AdBlue en vehículo pesado.', precio: 90, creditos: 90, icono: '🚫', orden: 190 },
-  { nombre: 'Decat', slug: 'decat-camion', categoria: 'camion', descripcion: 'Eliminación lógica del catalizador en vehículo pesado.', precio: 70, creditos: 70, icono: '⚠️', orden: 200 },
-
-  // --- SERVICIOS ESPECIALES (transversal, precio distinto según vehículo) ---
-  { nombre: 'IMMO OFF (coche / moto)', slug: 'immo-off-ligero', categoria: 'especiales', descripcion: 'Solución inmovilizador estándar para coche o moto, vía archivo.', precio: 90, creditos: 90, icono: '🔑', orden: 210 },
-  { nombre: 'IMMO OFF (camión / agrícola)', slug: 'immo-off-pesado', categoria: 'especiales', descripcion: 'Solución inmovilizador estándar para vehículo pesado o agrícola, vía archivo.', precio: 180, creditos: 180, icono: '🔑', orden: 220 },
-  { nombre: 'IMMO OFF MD1MG1 (coche / moto)', slug: 'immo-off-md1mg1-ligero', categoria: 'especiales', descripcion: 'Solución inmovilizador de máxima dificultad para coche o moto.', precio: 150, creditos: 150, icono: '🔐', orden: 230 },
-  { nombre: 'IMMO OFF MD1MG1 (camión / agrícola)', slug: 'immo-off-md1mg1-pesado', categoria: 'especiales', descripcion: 'Solución inmovilizador de máxima dificultad para vehículo pesado o agrícola.', precio: 250, creditos: 250, icono: '🔐', orden: 240 },
-  { nombre: 'Airbag crash data (coche / moto)', slug: 'airbag-crash-data-ligero', categoria: 'especiales', descripcion: 'Reset de datos de colisión de airbag para coche o moto, vía archivo.', precio: 70, creditos: 70, icono: '🛟', orden: 250 },
-  { nombre: 'Airbag crash data (camión / agrícola)', slug: 'airbag-crash-data-pesado', categoria: 'especiales', descripcion: 'Reset de datos de colisión de airbag para vehículo pesado o agrícola.', precio: 120, creditos: 120, icono: '🛟', orden: 260 },
-  { nombre: 'Corrección de kilometraje', slug: 'correccion-kilometraje', categoria: 'especiales', descripcion: 'Corrección de kilometraje vía archivo. El profesional es responsable de cumplir la normativa aplicable al usar este servicio.', precio: 60, creditos: 60, icono: '📟', orden: 270 },
+  { nombre: 'Stage 1', slug: 'stage-1-coche', categoria: 'coches', precio: 44.90, creditos: 45, icono: '🚀', orden: 10 },
+  { nombre: 'Stage 2', slug: 'stage-2-coche', categoria: 'coches', precio: 64.90, creditos: 65, icono: '🏁', orden: 20 },
+  { nombre: 'DPF', slug: 'dpf-off-coche', categoria: 'coches', precio: 34.90, creditos: 35, icono: '🚫', orden: 30 },
+  { nombre: 'EGR', slug: 'egr-off-coche', categoria: 'coches', precio: 29.90, creditos: 30, icono: '🌿', orden: 40 },
+  { nombre: 'AdBlue / SCR', slug: 'adblue-off-coche', categoria: 'coches', precio: 39.90, creditos: 40, icono: '💧', orden: 50 },
+  { nombre: 'Pops & Bangs', slug: 'pops-bangs-coche', categoria: 'coches', precio: 39.90, creditos: 40, icono: '💥', orden: 70 },
+  { nombre: 'Hardcut / Popcorn', slug: 'hardcut-coche', categoria: 'coches', precio: 39.90, creditos: 40, icono: '🍿', orden: 80 },
+  { nombre: 'DTC OFF', slug: 'dtc-off', categoria: 'coches', precio: 19.90, creditos: 20, icono: '🧰', orden: 100 },
+  { nombre: 'Stage 1 Moto', slug: 'stage-1-moto', categoria: 'motos', precio: 39.90, creditos: 40, icono: '🏍️', orden: 300 },
+  { nombre: 'Stage 1 Agrícola', slug: 'stage-1-agricola', categoria: 'agricola', precio: 119.90, creditos: 120, icono: '🚜', orden: 400 },
+  { nombre: 'TCU Stage 1', slug: 'tcu-stage-1', categoria: 'tcu', precio: 59.90, creditos: 60, icono: '⚙️', orden: 500 },
+  { nombre: 'Stage 1 Camión', slug: 'stage-1-camion', categoria: 'camion', precio: 129.90, creditos: 130, icono: '🚛', orden: 600 },
+  { nombre: 'IMMO OFF EDC15 / EDC16', slug: 'immo-off-ligero', categoria: 'immo', precio: 44.90, creditos: 45, icono: '🔑', orden: 700 },
+  { nombre: 'IMMO OFF EDC17', slug: 'immo-off-edc17', categoria: 'immo', precio: 59.90, creditos: 60, icono: '🔑', orden: 710 },
+  { nombre: 'IMMO OFF MD1 / MG1', slug: 'immo-off-md1mg1-ligero', categoria: 'immo', precio: 79.90, creditos: 80, icono: '🔐', orden: 720 },
+  { nombre: 'Airbag Crash Data Reset', slug: 'airbag-crash-data-ligero', categoria: 'airbag', precio: 34.90, creditos: 35, icono: '🛟', orden: 800 },
+  { nombre: 'Original File / ORI', slug: 'original-file-ori', categoria: 'herramientas', precio: 19.90, creditos: 20, icono: '📄', orden: 900 },
+  { nombre: 'File Revision', slug: 'file-revision', categoria: 'herramientas', precio: 19.90, creditos: 20, icono: '🔍', orden: 902 },
+  { nombre: 'MD1/MG1 Special Solution', slug: 'md1mg1-special-solution', categoria: 'especiales', precio: 99.90, creditos: 100, icono: '⭐', orden: 1010 },
 ]
 
 export const FALLBACK_PLANES: AkCloudPlan[] = [
@@ -157,8 +132,12 @@ export const CATEGORIA_LABELS: Record<string, string> = {
   coches: 'Coches',
   motos: 'Motos',
   agricola: 'Agrícola',
+  tcu: 'TCU / Cajas',
   camion: 'Camión',
-  especiales: 'Servicios especiales',
+  immo: 'IMMO / ECU Data',
+  airbag: 'Airbag',
+  herramientas: 'File Tools',
+  especiales: 'Special Lab',
 }
 
 export function labelCategoria(categoria: string) {
@@ -173,64 +152,27 @@ export type Familia = {
   categorias: string[]
 }
 
-// Agrupación de más alto nivel que la "categoría" del servicio, pensada
-// para el primer paso de "Nuevo pedido": el distribuidor elige primero
-// el tipo de vehículo/servicio y solo entonces ve los servicios de esa
-// familia. Aquí familia y categoría coinciden 1:1 (son las 5 categorías
-// de negocio). Cualquier categoría que no esté listada aquí cae en
-// "coches" por defecto (ver familiaDeCategoria), así nunca desaparece un
-// servicio nuevo por olvido de actualizar este mapa.
 export const FAMILIAS: Familia[] = [
-  {
-    slug: 'coches',
-    nombre: 'Coches',
-    descripcion: 'Reprogramación, anulaciones y opciones para turismos',
-    icono: '🚗',
-    categorias: ['coches'],
-  },
-  {
-    slug: 'motos',
-    nombre: 'Motos',
-    descripcion: 'Reprogramación y anulaciones para motocicletas',
-    icono: '🏍️',
-    categorias: ['motos'],
-  },
-  {
-    slug: 'agricola',
-    nombre: 'Agrícola',
-    descripcion: 'Soluciones para maquinaria y tractores agrícolas',
-    icono: '🚜',
-    categorias: ['agricola'],
-  },
-  {
-    slug: 'camion',
-    nombre: 'Camión',
-    descripcion: 'Soluciones para vehículo pesado',
-    icono: '🚛',
-    categorias: ['camion'],
-  },
-  {
-    slug: 'especiales',
-    nombre: 'Servicios especiales',
-    descripcion: 'IMMO OFF, airbag crash data, corrección de kilometraje y otros servicios de alta especialización',
-    icono: '⭐',
-    categorias: ['especiales'],
-  },
+  { slug: 'coches', nombre: 'Coches', descripcion: 'Performance y soluciones ECU para turismos', icono: '🚗', categorias: ['coches'] },
+  { slug: 'motos', nombre: 'Motos', descripcion: 'Performance y soluciones para motocicletas', icono: '🏍️', categorias: ['motos'] },
+  { slug: 'agricola', nombre: 'Agrícola', descripcion: 'Soluciones para maquinaria agrícola', icono: '🚜', categorias: ['agricola'] },
+  { slug: 'tcu', nombre: 'TCU / Cajas', descripcion: 'DSG, ZF y transmisiones automáticas', icono: '⚙️', categorias: ['tcu'] },
+  { slug: 'camion', nombre: 'Camión', descripcion: 'Soluciones para vehículo pesado', icono: '🚛', categorias: ['camion'] },
+  { slug: 'immo', nombre: 'IMMO / ECU Data', descripcion: 'IMMO, virgin, clone, sync y reparación de datos', icono: '🔑', categorias: ['immo'] },
+  { slug: 'airbag', nombre: 'Airbag', descripcion: 'Crash data, virgin y reparación de datos SRS', icono: '🛟', categorias: ['airbag'] },
+  { slug: 'herramientas', nombre: 'File Tools', descripcion: 'ORI, revisión, checksum y conversiones', icono: '🧰', categorias: ['herramientas'] },
+  { slug: 'especiales', nombre: 'Special Lab', descripcion: 'MD1/MG1 y soluciones especiales', icono: '⭐', categorias: ['especiales'] },
 ]
 
 export function familiaDeCategoria(categoria: string): string {
   const match = FAMILIAS.find((f) => f.categorias.includes(categoria))
-  return match?.slug || 'coches'
+  return match?.slug || 'especiales'
 }
 
 function sortByOrden<T extends { orden?: number | null }>(items: T[]) {
   return [...items].sort((a, b) => Number(a.orden || 999) - Number(b.orden || 999))
 }
 
-// Precio efectivo = precio personalizado del distribuidor que ha iniciado sesión (si tiene uno
-// para ese servicio) o si no, el precio estándar del catálogo. Las reglas condicionales se
-// adjuntan a cada servicio y se aplican en la pantalla según la combinación seleccionada.
-// El servidor vuelve a calcular todo antes de cobrar; nunca confía en el precio del navegador.
 export async function getServiciosActivos(): Promise<AkCloudServicio[]> {
   const { data, error } = await supabase
     .from('akcloud_servicios')
@@ -242,7 +184,7 @@ export async function getServiciosActivos(): Promise<AkCloudServicio[]> {
 
   const base = data.map((item: any) => ({
     ...item,
-    categoria: item.categoria || 'General',
+    categoria: item.categoria || 'especiales',
     precio: Number(item.precio || item.creditos || 0),
     creditos: Number(item.creditos || item.precio || 0),
     precioEstandar: Number(item.precio || item.creditos || 0),
@@ -263,15 +205,8 @@ export async function getServiciosActivos(): Promise<AkCloudServicio[]> {
     if (!distribuidor) return sortByOrden(base)
 
     const [{ data: overrides }, { data: condicionales }] = await Promise.all([
-      supabase
-        .from('distribuidor_precios')
-        .select('servicio_id,precio')
-        .eq('distribuidor_id', distribuidor.id),
-      supabase
-        .from('distribuidor_precios_condicionales')
-        .select('servicio_id,requiere_servicio_id,precio,activo')
-        .eq('distribuidor_id', distribuidor.id)
-        .eq('activo', true),
+      supabase.from('distribuidor_precios').select('servicio_id,precio').eq('distribuidor_id', distribuidor.id),
+      supabase.from('distribuidor_precios_condicionales').select('servicio_id,requiere_servicio_id,precio,activo').eq('distribuidor_id', distribuidor.id).eq('activo', true),
     ])
 
     const overrideMap = new Map((overrides || []).map((o: any) => [String(o.servicio_id), Number(o.precio)]))
@@ -279,11 +214,7 @@ export async function getServiciosActivos(): Promise<AkCloudServicio[]> {
     for (const row of condicionales || []) {
       const key = String((row as any).servicio_id)
       const list = condicionalMap.get(key) || []
-      list.push({
-        requiere_servicio_id: String((row as any).requiere_servicio_id),
-        precio: Number((row as any).precio),
-        activo: (row as any).activo,
-      })
+      list.push({ requiere_servicio_id: String((row as any).requiere_servicio_id), precio: Number((row as any).precio), activo: (row as any).activo })
       condicionalMap.set(key, list)
     }
 
@@ -291,13 +222,7 @@ export async function getServiciosActivos(): Promise<AkCloudServicio[]> {
       const override = overrideMap.get(String(item.id))
       const preciosCondicionales = condicionalMap.get(String(item.id)) || []
       if (override === undefined) return { ...item, preciosCondicionales }
-      return {
-        ...item,
-        precio: override,
-        creditos: override,
-        personalizado: true,
-        preciosCondicionales,
-      }
+      return { ...item, precio: override, creditos: override, personalizado: true, preciosCondicionales }
     }))
   } catch {
     return sortByOrden(base)
@@ -305,47 +230,26 @@ export async function getServiciosActivos(): Promise<AkCloudServicio[]> {
 }
 
 export async function getPlanesActivos(): Promise<AkCloudPlan[]> {
-  const { data, error } = await supabase
-    .from('akcloud_planes')
-    .select('*')
-    .eq('activo', true)
-    .order('orden', { ascending: true })
-
+  const { data, error } = await supabase.from('akcloud_planes').select('*').eq('activo', true).order('orden', { ascending: true })
   if (error || !data?.length) return FALLBACK_PLANES
-  return sortByOrden(data.map((item: any) => ({
-    ...item,
-    precio_mensual: Number(item.precio_mensual || 0),
-    creditos_mes: Number(item.creditos_mes || 0),
-    ventajas: Array.isArray(item.ventajas) ? item.ventajas : [],
-  })))
+  return sortByOrden(data.map((item: any) => ({ ...item, precio_mensual: Number(item.precio_mensual || 0), creditos_mes: Number(item.creditos_mes || 0), ventajas: Array.isArray(item.ventajas) ? item.ventajas : [] })))
 }
 
 export async function getMetodosPagoActivos(): Promise<AkCloudMetodoPago[]> {
-  const { data, error } = await supabase
-    .from('akcloud_metodos_pago')
-    .select('*')
-    .eq('activo', true)
-    .order('orden', { ascending: true })
-
+  const { data, error } = await supabase.from('akcloud_metodos_pago').select('*').eq('activo', true).order('orden', { ascending: true })
   if (error || !data?.length) return FALLBACK_METODOS
   return sortByOrden(data)
 }
 
 export async function getNovedadesActivas(): Promise<AkCloudNovedad[]> {
-  const { data, error } = await supabase
-    .from('akcloud_novedades')
-    .select('*')
-    .eq('activo', true)
-    .order('orden', { ascending: true })
-    .order('created_at', { ascending: false })
-
+  const { data, error } = await supabase.from('akcloud_novedades').select('*').eq('activo', true).order('orden', { ascending: true }).order('created_at', { ascending: false })
   if (error || !data) return []
   return data as AkCloudNovedad[]
 }
 
 export function groupServicios<T extends AkCloudServicio>(servicios: T[]) {
   return servicios.reduce<Record<string, T[]>>((acc, servicio) => {
-    const key = servicio.categoria || 'General'
+    const key = servicio.categoria || 'especiales'
     acc[key] = acc[key] || []
     acc[key].push(servicio)
     return acc
