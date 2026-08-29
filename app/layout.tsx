@@ -4,6 +4,7 @@ import './globals.css'
 import './titan-v5.css'
 import './phase2-responsive.css'
 import { Toaster } from 'react-hot-toast'
+import HomePricingPortal from '@/components/landing/HomePricingPortal'
 
 const display = Space_Grotesk({ subsets: ['latin'], weight: ['500', '700'], variable: '--font-display' })
 const mono = JetBrains_Mono({ subsets: ['latin'], weight: ['400', '500', '700'], variable: '--font-mono' })
@@ -78,6 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Toaster position="top-right" />
         {children}
+        <HomePricingPortal />
       </body>
     </html>
   )
