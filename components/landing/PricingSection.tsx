@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, BadgeCheck, Gauge, ShieldCheck, Sparkles, UserPlus } from 'lucide-react'
+import { ArrowRight, BadgeCheck, Gauge, ShieldCheck, UserPlus } from 'lucide-react'
 
 const rates = [
   { service: 'Stage 1', price: '44,90 €', note: 'Calibración profesional' },
@@ -20,7 +20,7 @@ export default function PricingSection() {
       <div className="mb-9 text-center">
         <div className="ak-v5-kicker !text-[#ff2b2b]">Tarifas profesionales</div>
         <h2 className="ak-v5-title mt-4 text-4xl sm:text-5xl">Precios claros. <span className="text-[#ff2b2b]">Soporte real.</span></h2>
-        <p className="mx-auto mt-4 max-w-2xl leading-7 text-white/42">Una selección de nuestras tarifas estándar por archivo. Accede a AK Cloud para consultar el catálogo completo y tus condiciones personalizadas.</p>
+        <p className="mx-auto mt-4 max-w-2xl leading-7 text-white/42">Tarifas estándar por archivo para nuevos clientes. Accede a AK Cloud para consultar el catálogo completo.</p>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1fr_340px]">
@@ -48,12 +48,12 @@ export default function PricingSection() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(255,43,43,.18),transparent_52%)]" />
           <div className="relative">
             <div className="grid h-12 w-12 place-items-center rounded-2xl border border-[#ff2b2b]/20 bg-[#ff2b2b]/10 text-[#ff2b2b]"><Gauge size={21} /></div>
-            <h3 className="mt-6 text-2xl font-black">¿Trabajas con nosotros habitualmente?</h3>
-            <p className="mt-3 text-sm leading-6 text-white/42">Los talleres y distribuidores recurrentes pueden disponer de condiciones personalizadas dentro de su cuenta.</p>
+            <h3 className="mt-6 text-2xl font-black">Tarifas estándar públicas</h3>
+            <p className="mt-3 text-sm leading-6 text-white/42">Los importes de esta sección son las tarifas estándar visibles para nuevos clientes.</p>
             <div className="mt-6 space-y-3 text-sm font-semibold text-white/65">
-              <div className="flex gap-3"><BadgeCheck size={17} className="mt-0.5 shrink-0 text-[#ff2b2b]" />Tarifas personalizadas por cuenta</div>
+              <div className="flex gap-3"><BadgeCheck size={17} className="mt-0.5 shrink-0 text-[#ff2b2b]" />Precios claros por servicio</div>
               <div className="flex gap-3"><ShieldCheck size={17} className="mt-0.5 shrink-0 text-[#ff2b2b]" />Soporte técnico incluido</div>
-              <div className="flex gap-3"><Sparkles size={17} className="mt-0.5 shrink-0 text-[#ff2b2b]" />Special Lab bajo valoración</div>
+              <div className="flex gap-3"><Gauge size={17} className="mt-0.5 shrink-0 text-[#ff2b2b]" />Servicios avanzados bajo valoración</div>
             </div>
             <Link href="/register" className="ak-v5-button mt-7 w-full justify-center !bg-gradient-to-b !from-[#ff2b2b] !to-[#b30012]"><UserPlus size={17} /> Solicitar cuenta</Link>
             <Link href="/login" className="mt-3 flex items-center justify-center gap-2 text-xs font-bold text-white/40 transition hover:text-white">Ya soy cliente <ArrowRight size={14} /></Link>
@@ -61,7 +61,7 @@ export default function PricingSection() {
         </aside>
       </div>
 
-      <p className="mx-auto mt-5 max-w-4xl text-center text-[11px] leading-5 text-white/28">Tarifas estándar orientativas por archivo. El precio final puede variar según ECU, software, complejidad y solución requerida. Los servicios avanzados y Special Lab se valoran individualmente. Las condiciones personalizadas solo se muestran al usuario correspondiente dentro de AK Cloud.</p>
+      <p className="mx-auto mt-5 max-w-4xl text-center text-[11px] leading-5 text-white/28">Tarifas estándar orientativas por archivo. El precio final puede variar según ECU, software, complejidad y solución requerida. Los servicios avanzados y Special Lab se valoran individualmente. Las tarifas privadas nunca se muestran en esta página.</p>
     </section>
   )
 }

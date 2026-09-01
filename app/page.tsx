@@ -4,6 +4,7 @@ import {
   Filter, Gauge, Headphones, Instagram, LayoutGrid, PlayCircle,
   Settings, ShieldCheck, UploadCloud, UserPlus, UserRound, Users, Zap,
 } from 'lucide-react'
+import PricingSection from '@/components/landing/PricingSection'
 
 const TIKTOK_URL = 'https://www.tiktok.com/@autokeys.pro'
 const INSTAGRAM_URL = 'https://www.instagram.com/autokeys.pro'
@@ -381,7 +382,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="precios" className="relative z-10 mx-auto max-w-[1480px] px-5 pb-16 pt-2 lg:px-8">
+      <PricingSection />
+
+      <section className="relative z-10 mx-auto max-w-[1480px] px-5 pb-16 pt-2 lg:px-8">
         <div className="ak-v5-card relative overflow-hidden p-8 sm:p-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_100%,rgba(255,43,43,.18),transparent_55%)]" />
           <div className="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">

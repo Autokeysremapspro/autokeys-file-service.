@@ -4,12 +4,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { ArrowRight, Building2, CheckCircle2, Eye, EyeOff, Info, Lock, Mail, MapPin, MessageSquare, Phone, User } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
 import AuthLayout from '@/components/auth/AuthLayout'
 import AuthCard, { AuthButton } from '@/components/auth/AuthCard'
 import { AuthInput, AuthTextarea } from '@/components/auth/AuthInput'
-
-const SIGNUP_REDIRECT_URL = 'https://www.akcloud.es/login?confirmado=1'
 
 type FormState = {
   nombre: string
@@ -73,43 +70,38 @@ export default function RegisterClient() {
     if (!validar()) return
 
     setLoading(true)
-    const { data: signUp, error } = await supabase.auth.signUp({
-      email: form.email.trim(),
-      password: form.password,
-      options: {
-        emailRedirectTo: SIGNUP_REDIRECT_URL,
-        data: {
+    try {
+      const response = await fetch('/api/register-distributor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: form.email.trim(),
+          password: form.password,
           empresa: form.empresa.trim(),
           nombre: form.nombre.trim(),
           telefono: form.telefono.trim(),
           ciudad: form.ciudad.trim(),
           mensaje: form.mensaje.trim(),
-          tipo_usuario: 'distribuidor',
-          estado_acceso: 'pendiente',
-        },
-      },
-    })
+        }),
+      })
+      const result = await response.json().catch(() => null)
 
-    setLoading(false)
-
-    if (error) {
-      if (error.message?.toLowerCase().includes('rate limit')) {
-        toast.error('Estamos recibiendo muchas solicitudes ahora mismo. Espera unos minutos y vuelve a intentarlo.')
-      } else {
-        toast.error(error.message)
+      if (!response.ok || !result?.ok || !result?.requestId) {
+        const message = result?.error || 'No se pudo registrar la solicitud en AK Core'
+        if (message.toLowerCase().includes('rate limit')) {
+          toast.error('Estamos recibiendo muchas solicitudes ahora mismo. Espera unos minutos y vuelve a intentarlo.')
+        } else {
+          toast.error(message)
+        }
+        return
       }
-      return
-    }
 
-    if (!signUp.user) {
-      toast.error('No se pudo crear la solicitud de acceso')
-      return
+      setEnviado(true)
+    } catch {
+      toast.error('No se pudo conectar con AK Core. La solicitud no se ha confirmado; inténtalo de nuevo.')
+    } finally {
+      setLoading(false)
     }
-
-    // La solicitud de distribuidor se crea automáticamente en Supabase mediante
-    // trg_akcloud_auth_signup_intake. No depende de una sesión previa ni de que
-    // el usuario haya confirmado ya el email, evitando cuentas creadas a medias.
-    setEnviado(true)
   }
 
   if (enviado) {
