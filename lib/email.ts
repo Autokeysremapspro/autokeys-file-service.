@@ -8,6 +8,19 @@ function getClient() {
   return new Resend(key)
 }
 
+// Escapa cualquier valor que provenga de un usuario (nombre, empresa, mensaje…)
+// antes de interpolarlo en el HTML del email. bodyHtml en sí puede seguir
+// llevando etiquetas de maquetación (<b>, <br>) puestas por nosotros; lo único
+// que debe pasar por aquí es el texto insertado dentro de esas etiquetas.
+export function escapeHtml(value: unknown) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 function wrapTemplate(title: string, bodyHtml: string, ctaHref?: string, ctaLabel?: string) {
   return `
   <div style="background:#050505;padding:32px 16px;font-family:-apple-system,Segoe UI,Roboto,sans-serif;">

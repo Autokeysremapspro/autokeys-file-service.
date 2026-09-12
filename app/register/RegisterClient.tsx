@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
-import { ArrowRight, Building2, CheckCircle2, Eye, EyeOff, Info, Lock, Mail, MapPin, MessageSquare, Phone, User } from 'lucide-react'
+import { ArrowRight, Building2, CheckCircle2, Eye, EyeOff, Gift, Info, Lock, Mail, MapPin, MessageSquare, Phone, User } from 'lucide-react'
 import AuthLayout from '@/components/auth/AuthLayout'
 import AuthCard, { AuthButton } from '@/components/auth/AuthCard'
 import { AuthInput, AuthTextarea } from '@/components/auth/AuthInput'
@@ -39,6 +39,15 @@ export default function RegisterClient() {
   const [enviado, setEnviado] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [refCode, setRefCode] = useState('')
+
+  // Lee ?ref=CODIGO de la URL al entrar (enlace compartido por otro
+  // taller). Se hace en el cliente con window.location en vez de
+  // useSearchParams para no forzar un boundary de Suspense en esta página.
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get('ref')
+    if (fromUrl) setRefCode(fromUrl.trim().toUpperCase())
+  }, [])
 
   function setField(field: keyof FormState, value: string) {
     setForm((current) => ({ ...current, [field]: value }))
@@ -82,6 +91,7 @@ export default function RegisterClient() {
           telefono: form.telefono.trim(),
           ciudad: form.ciudad.trim(),
           mensaje: form.mensaje.trim(),
+          refCode: refCode.trim() || undefined,
         }),
       })
       const result = await response.json().catch(() => null)
@@ -113,7 +123,7 @@ export default function RegisterClient() {
           </div>
           <h2 className="mt-6 text-[28px] font-bold text-white">Solicitud registrada</h2>
           <p className="mt-3 text-[15px] leading-[1.65] text-[#a1a1a6]">
-            Tu solicitud ya está pendiente de revisión en AK Cloud. Revisa ahora tu correo y confirma tu dirección de email. Cuando Autokeys Remaps Pro apruebe la cuenta podrás acceder con el email y la contraseña que acabas de crear.
+            Tu solicitud ya está pendiente de revisión en AK Cloud. Revisa ahora tu correo y confirma tu dirección de email. Autokeys Remaps Pro aprueba la mayoría de cuentas en unos <span className="font-semibold text-[#ef1018]">15 minutos</span>; en cuanto se apruebe, podrás acceder con el email y la contraseña que acabas de crear.
           </p>
           <Link href="/login" className="mt-8 block">
             <AuthButton type="button">Volver al inicio de sesión <ArrowRight size={19} /></AuthButton>
@@ -134,7 +144,7 @@ export default function RegisterClient() {
 
         <div className="mt-5 flex items-start gap-2.5 border-y border-white/[.08] py-3 text-[13px] leading-relaxed text-[#a1a1a6]">
           <Info size={16} className="mt-0.5 shrink-0 text-[#ef1018]" />
-          <p>Todos los nuevos usuarios requieren aprobación por <span className="text-[#ef1018]">Autokeys Remaps Pro.</span></p>
+          <p>Todos los nuevos usuarios requieren aprobación por <span className="text-[#ef1018]">Autokeys Remaps Pro</span> — normalmente en unos <span className="text-[#ef1018]">15 minutos</span>.</p>
         </div>
 
         <form onSubmit={submit} className="mt-5 space-y-4">
@@ -175,6 +185,7 @@ export default function RegisterClient() {
           <AuthInput icon={Phone} label="Teléfono / WhatsApp" value={form.telefono} onChange={(e) => setField('telefono', e.target.value)} placeholder="+34 600 123 456" error={errors.telefono} className="h-[52px]" autoComplete="tel" />
           <AuthInput icon={Building2} label="Nombre del taller o empresa" value={form.empresa} onChange={(e) => setField('empresa', e.target.value)} placeholder="Nombre de tu taller o empresa" error={errors.empresa} className="h-[52px]" autoComplete="organization" />
           <AuthInput icon={MapPin} label="Localidad / País" value={form.ciudad} onChange={(e) => setField('ciudad', e.target.value)} placeholder="Tu localidad o país" error={errors.ciudad} className="h-[52px]" autoComplete="address-level2" />
+          <AuthInput icon={Gift} label="Código de referido (opcional)" value={refCode} onChange={(e) => setRefCode(e.target.value.toUpperCase())} placeholder="¿Te lo pasó otro taller?" className="h-[52px]" />
           <AuthTextarea
             icon={MessageSquare}
             label="Cuéntanos brevemente tu actividad o los servicios que necesitas"

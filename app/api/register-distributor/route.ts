@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
-import { sendNotificationEmail } from '@/lib/email'
+import { sendNotificationEmail, escapeHtml } from '@/lib/email'
 
 const SIGNUP_REDIRECT_URL = 'https://www.akcloud.es/login?confirmado=1'
 
@@ -72,6 +72,21 @@ export async function POST(request: Request) {
 
     const admin = adminClient()
 
+    // Programa de referidos: si vienen con un código de otro taller, lo
+    // resolvemos ya aquí al distribuidor real. Guardamos también el texto
+    // tal cual lo escribieron por si el código no existe o está mal
+    // tecleado — así queda constancia y se puede revisar a mano.
+    const refCodeRaw = clean(body.refCode)
+    let referidoPorDistribuidorId: string | null = null
+    if (refCodeRaw) {
+      const { data: referrer } = await admin
+        .from('akcloud_distribuidores')
+        .select('id')
+        .eq('codigo_referido', refCodeRaw.toUpperCase())
+        .maybeSingle()
+      referidoPorDistribuidorId = referrer?.id || null
+    }
+
     // Supabase no revela si un email ya existe. En ese caso puede devolver un
     // usuario ofuscado sin identidades: nunca debemos vincular ese ID ficticio
     // a una solicitud real.
@@ -108,6 +123,8 @@ export async function POST(request: Request) {
       observaciones: mensaje,
       estado: 'pendiente',
       motivo_estado: null,
+      referido_por_codigo: refCodeRaw,
+      referido_por_distribuidor_id: referidoPorDistribuidorId,
       updated_at: new Date().toISOString(),
     }
 
@@ -172,7 +189,7 @@ export async function POST(request: Request) {
         to: process.env.STAFF_NOTIFICATION_EMAIL,
         subject: `Nueva solicitud de distribuidor: ${empresa}`,
         title: 'Nueva solicitud de distribuidor',
-        bodyHtml: `<b>${empresa}</b> (${nombre}, ${email}) ha solicitado acceso como distribuidor en AK Cloud.${clean(body.ciudad) ? `<br>Ciudad: ${body.ciudad}` : ''}${clean(body.especialidad) ? `<br>Especialidad: ${body.especialidad}` : ''}${mensaje ? `<br>Mensaje: ${mensaje}` : ''}`,
+        bodyHtml: `<b>${escapeHtml(empresa)}</b> (${escapeHtml(nombre)}, ${escapeHtml(email)}) ha solicitado acceso como distribuidor en AK Cloud.${clean(body.ciudad) ? `<br>Ciudad: ${escapeHtml(body.ciudad)}` : ''}${clean(body.especialidad) ? `<br>Especialidad: ${escapeHtml(body.especialidad)}` : ''}${mensaje ? `<br>Mensaje: ${escapeHtml(mensaje)}` : ''}`,
         ctaHref: process.env.NEXT_PUBLIC_CORE_URL ? `${process.env.NEXT_PUBLIC_CORE_URL}/ak-cloud/solicitudes` : undefined,
         ctaLabel: 'Revisar solicitud',
       })

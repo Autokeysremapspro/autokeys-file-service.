@@ -1,9 +1,19 @@
 import { NextResponse } from 'next/server'
 import { getSumUpMerchantCode, getSumUpProfile } from '@/lib/sumup'
+import { requireStaff } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
+// Solo staff: esto hace una llamada real (autenticada con la clave privada
+// de SumUp) contra su API y devuelve datos del comercio, así que no puede
+// ser público ni dejar que cualquiera consuma la cuota de la clave a voluntad.
 export async function GET() {
+  try {
+    await requireStaff()
+  } catch {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
+
   try {
     const [profile, merchantCode] = await Promise.all([
       getSumUpProfile(),

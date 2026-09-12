@@ -1,10 +1,13 @@
 import Link from 'next/link'
 import {
   ArrowRight, Bell, CheckCircle2, Cpu, Download, Eye,
-  Filter, Gauge, Headphones, Instagram, LayoutGrid, PlayCircle,
-  Settings, ShieldCheck, UploadCloud, UserPlus, UserRound, Users, Zap,
+  Filter, Gauge, Headphones, Instagram, LayoutGrid, Lock, PlayCircle,
+  Settings, ShieldCheck, TrendingUp, UploadCloud, UserPlus, UserRound, Users, Wrench, Zap,
 } from 'lucide-react'
 import PricingSection from '@/components/landing/PricingSection'
+import AkProfessionalFit from '@/components/marketing/AkProfessionalFit'
+import AkOrderSimulator from '@/components/marketing/AkOrderSimulator'
+import { getPublicStats } from '@/lib/services/publicStats'
 
 const TIKTOK_URL = 'https://www.tiktok.com/@autokeys.pro'
 const INSTAGRAM_URL = 'https://www.instagram.com/autokeys.pro'
@@ -33,7 +36,7 @@ const services = [
 ]
 
 const steps = [
-  { n: 1, icon: UserRound, title: 'Solicita acceso', text: 'Completa el formulario y espera la aprobación de Autokeys Remaps Pro.' },
+  { n: 1, icon: UserRound, title: 'Solicita acceso', text: 'Completa el formulario y espera la aprobación de Autokeys Remaps Pro — normalmente en unos 15 minutos.' },
   { n: 2, icon: UploadCloud, title: 'Sube tu ORI', text: 'Sube tu archivo original desde la plataforma de forma segura.' },
   { n: 3, icon: Settings, title: 'Recibe el archivo procesado', text: 'Nuestro equipo procesa tu archivo con la mejor calidad y pruebas profesionales.' },
   { n: 4, icon: Download, title: 'Descarga y trabaja', text: 'Descarga el archivo listo y aplícalo en el vehículo de tu cliente.' },
@@ -65,6 +68,16 @@ const progressStyles: Record<string, string> = {
   slate: 'bg-sky-400',
 }
 
+const trustBadges = [
+  { icon: Lock, title: 'Pago seguro', text: 'Cobros procesados por PayPal y SumUp, nunca guardamos tus datos de tarjeta.' },
+  { icon: ShieldCheck, title: 'Archivos cifrados', text: 'Cada ORI solo lo ve tu cuenta y el laboratorio que procesa tu pedido.' },
+  { icon: Wrench, title: 'Acceso verificado', text: 'Cada cuenta la revisa y aprueba el equipo de Autokeys Remaps Pro antes de operar.' },
+]
+
+function formatStatNumber(value: number) {
+  return value >= 1000 ? `${Math.floor(value / 100) / 10}k` : String(value)
+}
+
 const checklist = [
   'Gestión clara de pedidos y proyectos',
   'Seguimiento del estado en tiempo real',
@@ -76,7 +89,7 @@ const checklist = [
 const faqs = [
   {
     q: '¿Cómo consigo acceso a AK Cloud?',
-    a: 'Solicitas cuenta desde el registro y el equipo de Autokeys Remaps Pro la revisa y aprueba. Es un acceso profesional, no abierto al público general.',
+    a: 'Solicitas cuenta desde el registro y el equipo de Autokeys Remaps Pro la revisa y aprueba, normalmente en unos 15 minutos. Es un acceso profesional, no abierto al público general.',
   },
   {
     q: '¿Qué formatos de archivo aceptáis?',
@@ -136,7 +149,9 @@ const jsonLd = [
   },
 ]
 
-export default function HomePage() {
+export default async function HomePage() {
+  const stats = await getPublicStats()
+
   return (
     <main className="akhome ak-v5-bg min-h-screen overflow-hidden text-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -178,7 +193,7 @@ export default function HomePage() {
           <div className="ak-v5-kicker !text-[#ff2b2b]">Plataforma profesional</div>
           <h1 className="ak-v5-title mt-6 text-5xl sm:text-6xl xl:text-[4.4rem]">El portal profesional<br />de <span className="text-[#ff2b2b]">File Service</span></h1>
           <p className="mt-7 max-w-xl text-lg leading-8 text-white/48">Sube tus archivos originales (ORI), solicita el servicio que necesitas y recibe tus archivos procesados de forma rápida, segura y centralizada.</p>
-          <p className="mt-4 max-w-xl leading-7 text-white/40">Los nuevos usuarios requieren aprobación por <span className="text-[#ff2b2b] font-semibold">Autokeys Remaps Pro</span> para garantizar un servicio profesional y de calidad.</p>
+          <p className="mt-4 max-w-xl leading-7 text-white/40">Los nuevos usuarios requieren aprobación por <span className="text-[#ff2b2b] font-semibold">Autokeys Remaps Pro</span> para garantizar un servicio profesional y de calidad — normalmente en unos <span className="text-[#ff2b2b] font-semibold">15 minutos</span>.</p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link href="/register" className="ak-v5-button !bg-gradient-to-b !from-[#ff2b2b] !to-[#b30012] !shadow-[0_16px_42px_rgba(230,10,20,.35),inset_0_1px_0_rgba(255,255,255,.25)] hover:!shadow-[0_22px_56px_rgba(230,10,20,.48)]"><UploadCloud size={18} /> Subir archivo</Link>
             <a href="#como-funciona" className="ak-v5-button-secondary"><PlayCircle size={18} /> Ver funcionamiento</a>
@@ -260,6 +275,26 @@ export default function HomePage() {
         </div>
       </section>
 
+      {stats && (
+        <section className="relative z-10 border-y border-white/[.06] bg-white/[.018]">
+          <div className="mx-auto grid max-w-[1480px] grid-cols-1 gap-8 px-5 py-10 sm:grid-cols-3 lg:px-8">
+            {[
+              { icon: Download, value: stats.pedidosCompletados, label: 'Pedidos completados' },
+              { icon: Users, value: stats.talleresActivos, label: 'Talleres y distribuidores activos' },
+              { icon: TrendingUp, value: stats.ecusSoportadas, label: 'ECUs soportadas en el detector' },
+            ].map(({ icon: Icon, value, label }) => (
+              <div key={label} className="flex items-center gap-4">
+                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-[#ff2b2b]/20 bg-[#ff2b2b]/10 text-[#ff2b2b]"><Icon size={24} /></div>
+                <div>
+                  <div className="text-3xl font-black tracking-tight">+{formatStatNumber(value)}</div>
+                  <div className="text-xs font-semibold text-white/40">{label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="relative z-10 border-y border-white/[.06] bg-white/[.018]">
         <div className="mx-auto grid max-w-[1480px] grid-cols-2 gap-4 px-5 py-8 md:grid-cols-4 lg:px-8">
           {highlights.map(({ icon: Icon, title, text }) => (
@@ -269,6 +304,10 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
+        <AkProfessionalFit />
       </section>
 
       <section id="servicios" className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
@@ -307,6 +346,10 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
+        <AkOrderSimulator />
       </section>
 
       <section className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
@@ -364,6 +407,17 @@ export default function HomePage() {
               <img src="/images/marketing/dashboard-devices.webp" alt="AK Cloud en laptop y tablet" loading="lazy" className="w-full rounded-[24px]" />
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
+        <div className="grid gap-5 md:grid-cols-3">
+          {trustBadges.map(({ icon: Icon, title, text }) => (
+            <div key={title} className="ak-v5-card flex items-start gap-4 p-6">
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-[#ff2b2b]/20 bg-[#ff2b2b]/10 text-[#ff2b2b]"><Icon size={19} /></div>
+              <div><div className="text-sm font-bold">{title}</div><div className="mt-1 text-xs leading-5 text-white/38">{text}</div></div>
+            </div>
+          ))}
         </div>
       </section>
 
