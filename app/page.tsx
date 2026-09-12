@@ -5,6 +5,8 @@ import {
   Settings, ShieldCheck, TrendingUp, UploadCloud, UserPlus, UserRound, Users, Wrench, Zap,
 } from 'lucide-react'
 import PricingSection from '@/components/landing/PricingSection'
+import AkProfessionalFit from '@/components/marketing/AkProfessionalFit'
+import AkOrderSimulator from '@/components/marketing/AkOrderSimulator'
 import { getPublicStats } from '@/lib/services/publicStats'
 
 const TIKTOK_URL = 'https://www.tiktok.com/@autokeys.pro'
@@ -304,6 +306,10 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
+        <AkProfessionalFit />
+      </section>
+
       <section id="servicios" className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
         <div className="mb-8 text-center"><div className="ak-v5-kicker !text-[#ff2b2b]">Nuestros servicios</div></div>
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -340,6 +346,10 @@ export default async function HomePage() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
+        <AkOrderSimulator />
       </section>
 
       <section className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
