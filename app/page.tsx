@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import {
   ArrowRight, Bell, CheckCircle2, Cpu, Download, Eye,
-  Filter, Gauge, Headphones, Instagram, LayoutGrid, PlayCircle,
-  Settings, ShieldCheck, UploadCloud, UserPlus, UserRound, Users, Zap,
+  Filter, Gauge, Headphones, Instagram, LayoutGrid, Lock, PlayCircle,
+  Settings, ShieldCheck, TrendingUp, UploadCloud, UserPlus, UserRound, Users, Wrench, Zap,
 } from 'lucide-react'
 import PricingSection from '@/components/landing/PricingSection'
+import { getPublicStats } from '@/lib/services/publicStats'
 
 const TIKTOK_URL = 'https://www.tiktok.com/@autokeys.pro'
 const INSTAGRAM_URL = 'https://www.instagram.com/autokeys.pro'
@@ -63,6 +64,16 @@ const progressStyles: Record<string, string> = {
   green: 'bg-green-400',
   amber: 'bg-amber-400',
   slate: 'bg-sky-400',
+}
+
+const trustBadges = [
+  { icon: Lock, title: 'Pago seguro', text: 'Cobros procesados por PayPal y SumUp, nunca guardamos tus datos de tarjeta.' },
+  { icon: ShieldCheck, title: 'Archivos cifrados', text: 'Cada ORI solo lo ve tu cuenta y el laboratorio que procesa tu pedido.' },
+  { icon: Wrench, title: 'Acceso verificado', text: 'Cada cuenta la revisa y aprueba el equipo de Autokeys Remaps Pro antes de operar.' },
+]
+
+function formatStatNumber(value: number) {
+  return value >= 1000 ? `${Math.floor(value / 100) / 10}k` : String(value)
 }
 
 const checklist = [
@@ -136,7 +147,9 @@ const jsonLd = [
   },
 ]
 
-export default function HomePage() {
+export default async function HomePage() {
+  const stats = await getPublicStats()
+
   return (
     <main className="akhome ak-v5-bg min-h-screen overflow-hidden text-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -260,6 +273,26 @@ export default function HomePage() {
         </div>
       </section>
 
+      {stats && (
+        <section className="relative z-10 border-y border-white/[.06] bg-white/[.018]">
+          <div className="mx-auto grid max-w-[1480px] grid-cols-1 gap-8 px-5 py-10 sm:grid-cols-3 lg:px-8">
+            {[
+              { icon: Download, value: stats.pedidosCompletados, label: 'Pedidos completados' },
+              { icon: Users, value: stats.talleresActivos, label: 'Talleres y distribuidores activos' },
+              { icon: TrendingUp, value: stats.ecusSoportadas, label: 'ECUs soportadas en el detector' },
+            ].map(({ icon: Icon, value, label }) => (
+              <div key={label} className="flex items-center gap-4">
+                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-[#ff2b2b]/20 bg-[#ff2b2b]/10 text-[#ff2b2b]"><Icon size={24} /></div>
+                <div>
+                  <div className="text-3xl font-black tracking-tight">+{formatStatNumber(value)}</div>
+                  <div className="text-xs font-semibold text-white/40">{label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="relative z-10 border-y border-white/[.06] bg-white/[.018]">
         <div className="mx-auto grid max-w-[1480px] grid-cols-2 gap-4 px-5 py-8 md:grid-cols-4 lg:px-8">
           {highlights.map(({ icon: Icon, title, text }) => (
@@ -364,6 +397,17 @@ export default function HomePage() {
               <img src="/images/marketing/dashboard-devices.webp" alt="AK Cloud en laptop y tablet" loading="lazy" className="w-full rounded-[24px]" />
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
+        <div className="grid gap-5 md:grid-cols-3">
+          {trustBadges.map(({ icon: Icon, title, text }) => (
+            <div key={title} className="ak-v5-card flex items-start gap-4 p-6">
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-[#ff2b2b]/20 bg-[#ff2b2b]/10 text-[#ff2b2b]"><Icon size={19} /></div>
+              <div><div className="text-sm font-bold">{title}</div><div className="mt-1 text-xs leading-5 text-white/38">{text}</div></div>
+            </div>
+          ))}
         </div>
       </section>
 
