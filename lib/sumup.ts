@@ -154,7 +154,7 @@ export async function createSumUpOrderForPedido(input: {
   }
 }
 
-export async function confirmarSumUpYCrearPedido(pendienteId: string) {
+export async function confirmarSumUpYCrearPedido(pendienteId: string, expectedUserId?: string) {
   const supabase = getSupabaseAdmin()
   const { data: pendiente, error: fetchError } = await supabase
     .from('ak_pedidos_pendientes_pago')
@@ -164,6 +164,10 @@ export async function confirmarSumUpYCrearPedido(pendienteId: string) {
 
   if (fetchError) throw new Error(fetchError.message)
   if (pendiente.payment_provider !== 'sumup') throw new Error('El pago no pertenece a SumUp')
+  // expectedUserId solo se omite en la llamada interna del webhook (server-to-server,
+  // sin sesión de navegador que comprobar). Cuando la ruta la invoca un cliente
+  // autenticado, sí debe coincidir con el dueño del pendiente.
+  if (expectedUserId && pendiente.user_id !== expectedUserId) throw new Error('No autorizado')
 
   if (pendiente.estado === 'pagado') {
     const pedidoId = pendiente.payload?.__pedido_id_creado

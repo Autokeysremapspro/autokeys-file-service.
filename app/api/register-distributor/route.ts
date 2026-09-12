@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
-import { sendNotificationEmail } from '@/lib/email'
+import { sendNotificationEmail, escapeHtml } from '@/lib/email'
 
 const SIGNUP_REDIRECT_URL = 'https://www.akcloud.es/login?confirmado=1'
 
@@ -172,7 +172,7 @@ export async function POST(request: Request) {
         to: process.env.STAFF_NOTIFICATION_EMAIL,
         subject: `Nueva solicitud de distribuidor: ${empresa}`,
         title: 'Nueva solicitud de distribuidor',
-        bodyHtml: `<b>${empresa}</b> (${nombre}, ${email}) ha solicitado acceso como distribuidor en AK Cloud.${clean(body.ciudad) ? `<br>Ciudad: ${body.ciudad}` : ''}${clean(body.especialidad) ? `<br>Especialidad: ${body.especialidad}` : ''}${mensaje ? `<br>Mensaje: ${mensaje}` : ''}`,
+        bodyHtml: `<b>${escapeHtml(empresa)}</b> (${escapeHtml(nombre)}, ${escapeHtml(email)}) ha solicitado acceso como distribuidor en AK Cloud.${clean(body.ciudad) ? `<br>Ciudad: ${escapeHtml(body.ciudad)}` : ''}${clean(body.especialidad) ? `<br>Especialidad: ${escapeHtml(body.especialidad)}` : ''}${mensaje ? `<br>Mensaje: ${escapeHtml(mensaje)}` : ''}`,
         ctaHref: process.env.NEXT_PUBLIC_CORE_URL ? `${process.env.NEXT_PUBLIC_CORE_URL}/ak-cloud/solicitudes` : undefined,
         ctaLabel: 'Revisar solicitud',
       })

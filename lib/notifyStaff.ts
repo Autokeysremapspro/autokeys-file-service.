@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
-import { sendNotificationEmail } from '@/lib/email'
+import { sendNotificationEmail, escapeHtml } from '@/lib/email'
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -60,7 +60,7 @@ export async function notificarNuevoPedido(pedido: {
         to: process.env.STAFF_NOTIFICATION_EMAIL,
         subject: `Nuevo pedido AK Cloud: ${referencia}`,
         title: 'Nuevo pedido AK Cloud',
-        bodyHtml: `<b>${referencia}</b> · ${pedido.cliente_nombre || 'Cliente'}<br>${servicios}${importe > 0 ? `<br>Importe: ${importe.toFixed(2)} €` : ''}`,
+        bodyHtml: `<b>${escapeHtml(referencia)}</b> · ${escapeHtml(pedido.cliente_nombre || 'Cliente')}<br>${escapeHtml(servicios)}${importe > 0 ? `<br>Importe: ${importe.toFixed(2)} €` : ''}`,
         ctaHref: coreUrl('/ak-cloud'),
         ctaLabel: 'Ver pedido',
       })
@@ -115,7 +115,7 @@ export async function notificarSoporte(input: {
         to: process.env.STAFF_NOTIFICATION_EMAIL,
         subject: `${titulo}: ${referencia}`,
         title: titulo,
-        bodyHtml: `<b>${referencia}</b>${asunto}${input.empresa ? `<br>${input.empresa}` : ''}<br><br>${input.mensaje}`,
+        bodyHtml: `<b>${escapeHtml(referencia)}</b>${escapeHtml(asunto)}${input.empresa ? `<br>${escapeHtml(input.empresa)}` : ''}<br><br>${escapeHtml(input.mensaje)}`,
         ctaHref: coreUrl(`/ak-cloud/soporte?ticket=${input.ticketId}`),
         ctaLabel: 'Abrir ticket',
       })
