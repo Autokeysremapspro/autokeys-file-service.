@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/recordatorio-confirmacion",
+      "schedule": "0 9 * * *"
+    }
+  ]
+}
