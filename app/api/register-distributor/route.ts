@@ -72,6 +72,21 @@ export async function POST(request: Request) {
 
     const admin = adminClient()
 
+    // Programa de referidos: si vienen con un código de otro taller, lo
+    // resolvemos ya aquí al distribuidor real. Guardamos también el texto
+    // tal cual lo escribieron por si el código no existe o está mal
+    // tecleado — así queda constancia y se puede revisar a mano.
+    const refCodeRaw = clean(body.refCode)
+    let referidoPorDistribuidorId: string | null = null
+    if (refCodeRaw) {
+      const { data: referrer } = await admin
+        .from('akcloud_distribuidores')
+        .select('id')
+        .eq('codigo_referido', refCodeRaw.toUpperCase())
+        .maybeSingle()
+      referidoPorDistribuidorId = referrer?.id || null
+    }
+
     // Supabase no revela si un email ya existe. En ese caso puede devolver un
     // usuario ofuscado sin identidades: nunca debemos vincular ese ID ficticio
     // a una solicitud real.
@@ -108,6 +123,8 @@ export async function POST(request: Request) {
       observaciones: mensaje,
       estado: 'pendiente',
       motivo_estado: null,
+      referido_por_codigo: refCodeRaw,
+      referido_por_distribuidor_id: referidoPorDistribuidorId,
       updated_at: new Date().toISOString(),
     }
 

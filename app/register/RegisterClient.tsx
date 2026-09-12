@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
-import { ArrowRight, Building2, CheckCircle2, Eye, EyeOff, Info, Lock, Mail, MapPin, MessageSquare, Phone, User } from 'lucide-react'
+import { ArrowRight, Building2, CheckCircle2, Eye, EyeOff, Gift, Info, Lock, Mail, MapPin, MessageSquare, Phone, User } from 'lucide-react'
 import AuthLayout from '@/components/auth/AuthLayout'
 import AuthCard, { AuthButton } from '@/components/auth/AuthCard'
 import { AuthInput, AuthTextarea } from '@/components/auth/AuthInput'
@@ -39,6 +39,15 @@ export default function RegisterClient() {
   const [enviado, setEnviado] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [refCode, setRefCode] = useState('')
+
+  // Lee ?ref=CODIGO de la URL al entrar (enlace compartido por otro
+  // taller). Se hace en el cliente con window.location en vez de
+  // useSearchParams para no forzar un boundary de Suspense en esta página.
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get('ref')
+    if (fromUrl) setRefCode(fromUrl.trim().toUpperCase())
+  }, [])
 
   function setField(field: keyof FormState, value: string) {
     setForm((current) => ({ ...current, [field]: value }))
@@ -82,6 +91,7 @@ export default function RegisterClient() {
           telefono: form.telefono.trim(),
           ciudad: form.ciudad.trim(),
           mensaje: form.mensaje.trim(),
+          refCode: refCode.trim() || undefined,
         }),
       })
       const result = await response.json().catch(() => null)
@@ -175,6 +185,7 @@ export default function RegisterClient() {
           <AuthInput icon={Phone} label="Teléfono / WhatsApp" value={form.telefono} onChange={(e) => setField('telefono', e.target.value)} placeholder="+34 600 123 456" error={errors.telefono} className="h-[52px]" autoComplete="tel" />
           <AuthInput icon={Building2} label="Nombre del taller o empresa" value={form.empresa} onChange={(e) => setField('empresa', e.target.value)} placeholder="Nombre de tu taller o empresa" error={errors.empresa} className="h-[52px]" autoComplete="organization" />
           <AuthInput icon={MapPin} label="Localidad / País" value={form.ciudad} onChange={(e) => setField('ciudad', e.target.value)} placeholder="Tu localidad o país" error={errors.ciudad} className="h-[52px]" autoComplete="address-level2" />
+          <AuthInput icon={Gift} label="Código de referido (opcional)" value={refCode} onChange={(e) => setRefCode(e.target.value.toUpperCase())} placeholder="¿Te lo pasó otro taller?" className="h-[52px]" />
           <AuthTextarea
             icon={MessageSquare}
             label="Cuéntanos brevemente tu actividad o los servicios que necesitas"
