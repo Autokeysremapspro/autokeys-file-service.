@@ -113,7 +113,7 @@ export default function RegisterClient() {
           </div>
           <h2 className="mt-6 text-[28px] font-bold text-white">Solicitud registrada</h2>
           <p className="mt-3 text-[15px] leading-[1.65] text-[#a1a1a6]">
-            Tu solicitud ya está pendiente de revisión en AK Cloud. Revisa ahora tu correo y confirma tu dirección de email. Cuando Autokeys Remaps Pro apruebe la cuenta podrás acceder con el email y la contraseña que acabas de crear.
+            Tu solicitud ya está pendiente de revisión en AK Cloud. Revisa ahora tu correo y confirma tu dirección de email. Autokeys Remaps Pro aprueba la mayoría de cuentas en unos <span className="font-semibold text-[#ef1018]">15 minutos</span>; en cuanto se apruebe, podrás acceder con el email y la contraseña que acabas de crear.
           </p>
           <Link href="/login" className="mt-8 block">
             <AuthButton type="button">Volver al inicio de sesión <ArrowRight size={19} /></AuthButton>
@@ -134,7 +134,7 @@ export default function RegisterClient() {
 
         <div className="mt-5 flex items-start gap-2.5 border-y border-white/[.08] py-3 text-[13px] leading-relaxed text-[#a1a1a6]">
           <Info size={16} className="mt-0.5 shrink-0 text-[#ef1018]" />
-          <p>Todos los nuevos usuarios requieren aprobación por <span className="text-[#ef1018]">Autokeys Remaps Pro.</span></p>
+          <p>Todos los nuevos usuarios requieren aprobación por <span className="text-[#ef1018]">Autokeys Remaps Pro</span> — normalmente en unos <span className="text-[#ef1018]">15 minutos</span>.</p>
         </div>
 
         <form onSubmit={submit} className="mt-5 space-y-4">

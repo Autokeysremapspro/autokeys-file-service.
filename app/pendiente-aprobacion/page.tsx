@@ -22,7 +22,7 @@ export default function PendienteAprobacionPage() {
         <h1 className="text-2xl font-black uppercase">Solicitud en revisión</h1>
         <p className="mt-3 text-sm leading-6 text-white/55">
           Tu cuenta todavía no está activada como distribuidor AK Cloud. El equipo de Autokeys revisa cada
-          solicitud manualmente — te avisaremos por email en cuanto esté aprobada.
+          solicitud manualmente — normalmente en unos <span className="font-semibold text-orange-300">15 minutos</span>. Te avisaremos por email en cuanto esté aprobada; puedes recargar esta página más tarde para comprobarlo.
         </p>
         <button
           onClick={logout}
