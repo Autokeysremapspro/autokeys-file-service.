@@ -8,6 +8,9 @@ const PUBLIC_PATHS = [
   '/',
   '/login',
   '/register',
+  // La antigua página de precios ya no existe; dejarla pasar permite que Next.js
+  // responda con un 404 real en vez de redirigir al usuario al inicio de sesión.
+  '/precios',
   '/auth/recovery',
   '/auth/confirm',
   '/paypal',
