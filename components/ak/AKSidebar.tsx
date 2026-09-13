@@ -3,13 +3,13 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutGrid, PlusSquare, BriefcaseBusiness, MessageSquare, UserRound, X } from 'lucide-react'
+import { LayoutGrid, PlusSquare, BriefcaseBusiness, LifeBuoy, UserRound, X } from 'lucide-react'
 
 const items = [
   ['/dashboard', 'Dashboard', LayoutGrid],
   ['/nuevo-pedido', 'Nuevo servicio', PlusSquare],
   ['/pedidos', 'Mis servicios', BriefcaseBusiness],
-  ['/soporte', 'Mensajes', MessageSquare],
+  ['/soporte', 'Soporte / Tickets', LifeBuoy],
   ['/perfil', 'Perfil', UserRound],
 ] as const
 
@@ -29,12 +29,10 @@ export default function AKSidebar({ mobile = false, onClose }: { mobile?: boolea
         <nav className="mt-3 space-y-2 px-3">
           {items.map(([href, label, Icon]) => {
             const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
-            const badge = label === 'Mensajes' ? 3 : null
             return (
               <Link key={href} href={href} onClick={onClose} className={`ak10-nav ${active ? 'ak10-nav-active' : ''}`}>
                 <Icon size={19} strokeWidth={1.8} />
                 <span>{label}</span>
-                {badge && <span className="ak10-nav-badge">{badge}</span>}
               </Link>
             )
           })}
