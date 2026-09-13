@@ -3,18 +3,38 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutGrid, PlusSquare, BriefcaseBusiness, LifeBuoy, UserRound, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { BarChart3, Bell, BookOpen, BrainCircuit, Car, Download, FolderOpen, LayoutDashboard, LifeBuoy, Settings, ShieldCheck, UploadCloud, UserCircle, X } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 const items = [
-  ['/dashboard', 'Dashboard', LayoutGrid],
-  ['/nuevo-pedido', 'Nuevo servicio', PlusSquare],
-  ['/pedidos', 'Mis servicios', BriefcaseBusiness],
+  ['/dashboard', 'Inicio', LayoutDashboard],
+  ['/nuevo-pedido', 'Nuevo pedido', UploadCloud],
+  ['/pedidos', 'Pedidos', FolderOpen],
+  ['/descargas', 'Versiones', Download],
+  ['/garage', 'Garage', Car],
+  ['/biblioteca', 'Knowledge Base', BookOpen],
+  ['/intelligence', 'AK Intelligence', BrainCircuit],
+  ['/analitica', 'Analítica', BarChart3],
   ['/soporte', 'Soporte / Tickets', LifeBuoy],
-  ['/perfil', 'Perfil', UserRound],
+  ['/notificaciones', 'Actividad', Bell],
+  ['/perfil', 'Mi workspace', UserCircle],
 ] as const
 
 export default function AKSidebar({ mobile = false, onClose }: { mobile?: boolean; onClose?: () => void }) {
   const pathname = usePathname()
+  const [isStaff, setIsStaff] = useState(false)
+
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      const { data: userData } = await supabase.auth.getUser()
+      if (!userData.user?.id) return
+      const { data } = await supabase.from('usuarios_app').select('rol, activo').eq('auth_user_id', userData.user.id).maybeSingle()
+      if (alive) setIsStaff(Boolean(data) && data?.activo !== false && ['admin', 'desarrollo', 'laboratorio', 'atencion_cliente'].includes(data?.rol))
+    })()
+    return () => { alive = false }
+  }, [])
 
   return (
     <aside className={`ak10-sidebar h-screen w-[232px] shrink-0 flex-col ${mobile ? 'flex' : 'hidden lg:sticky lg:top-0 lg:flex'}`}>
@@ -37,6 +57,20 @@ export default function AKSidebar({ mobile = false, onClose }: { mobile?: boolea
             )
           })}
         </nav>
+
+        {isStaff && (
+          <div className="mt-5 border-t border-white/[.08] px-3 pt-5">
+            <div className="mb-2 px-3 text-[9px] font-black uppercase tracking-[.22em] text-white/30">Laboratorio</div>
+            <nav className="space-y-2">
+              <Link href="/admin/pedidos" onClick={onClose} className={`ak10-nav ${pathname.startsWith('/admin/pedidos') ? 'ak10-nav-active' : ''}`}>
+                <ShieldCheck size={19} strokeWidth={1.8} /><span>Lab Control</span>
+              </Link>
+              <Link href="/admin/ecu-database" onClick={onClose} className={`ak10-nav ${pathname.startsWith('/admin/ecu-database') ? 'ak10-nav-active' : ''}`}>
+                <Settings size={19} strokeWidth={1.8} /><span>ECU Intelligence</span>
+              </Link>
+            </nav>
+          </div>
+        )}
 
         <div className="ak10-sidebar-art mt-auto">
           <Image src="/images/marketing/auth-car-black.webp" alt="" fill sizes="232px" className="object-cover object-[28%_center]" />
