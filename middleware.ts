@@ -6,6 +6,7 @@ import { createMiddlewareSupabaseClient } from '@/lib/supabase/middleware'
 // protected below.
 const PUBLIC_PATHS = [
   '/',
+  '/precios',
   '/login',
   '/register',
   '/auth/recovery',
