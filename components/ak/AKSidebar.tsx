@@ -3,13 +3,12 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutGrid, PlusSquare, BriefcaseBusiness, BadgeEuro, MessageSquare, UserRound, X } from 'lucide-react'
+import { LayoutGrid, PlusSquare, BriefcaseBusiness, MessageSquare, UserRound, X } from 'lucide-react'
 
 const items = [
   ['/dashboard', 'Dashboard', LayoutGrid],
   ['/nuevo-pedido', 'Nuevo servicio', PlusSquare],
   ['/pedidos', 'Mis servicios', BriefcaseBusiness],
-  ['/precios', 'Precios', BadgeEuro],
   ['/soporte', 'Mensajes', MessageSquare],
   ['/perfil', 'Perfil', UserRound],
 ] as const

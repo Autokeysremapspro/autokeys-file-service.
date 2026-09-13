@@ -12,7 +12,6 @@ const commands = [
   ['Dashboard', '/dashboard'],
   ['Nuevo servicio', '/nuevo-pedido'],
   ['Mis servicios', '/pedidos'],
-  ['Precios', '/precios'],
   ['Mensajes', '/soporte'],
   ['Perfil / Ajustes', '/perfil'],
 ]

@@ -4,9 +4,7 @@ import {
   Filter, Gauge, Headphones, Instagram, LayoutGrid, Lock, PlayCircle,
   Settings, ShieldCheck, TrendingUp, UploadCloud, UserPlus, UserRound, Users, Wrench, Zap,
 } from 'lucide-react'
-import PricingSection from '@/components/landing/PricingSection'
 import AkProfessionalFit from '@/components/marketing/AkProfessionalFit'
-import AkOrderSimulator from '@/components/marketing/AkOrderSimulator'
 import { getPublicStats } from '@/lib/services/publicStats'
 
 const TIKTOK_URL = 'https://www.tiktok.com/@autokeys.pro'
@@ -16,7 +14,6 @@ const nav = [
   { label: 'Inicio', href: '#', active: true },
   { label: 'Servicios', href: '#servicios' },
   { label: 'Cómo funciona', href: '#como-funciona' },
-  { label: 'Precios', href: '#precios' },
   { label: 'FAQ', href: '#faq' },
   { label: 'Contacto', href: '#contacto' },
 ]
@@ -82,7 +79,7 @@ const checklist = [
   'Gestión clara de pedidos y proyectos',
   'Seguimiento del estado en tiempo real',
   'Entrega rápida y archivos verificados',
-  'Precios personalizados para distribuidores',
+  'Pago claro por cada archivo solicitado',
   'Diseñado para profesionales del sector',
 ]
 
@@ -100,10 +97,6 @@ const faqs = [
     a: 'Depende del servicio y de la carga del laboratorio, pero verás el estado en tiempo real en tu pedido — pendiente, en proceso, listo para descargar — sin tener que preguntar.',
   },
   {
-    q: '¿Los precios son iguales para todos los distribuidores?',
-    a: 'No necesariamente. Cada distribuidor puede tener su propia tarifa acordada con Autokeys Remaps Pro; si no tiene una personalizada, se aplica la tarifa estándar.',
-  },
-  {
     q: '¿Es seguro subir mis archivos originales?',
     a: 'Los archivos se guardan cifrados y solo son accesibles por ti y por el laboratorio que procesa tu pedido — nunca quedan expuestos a otros distribuidores.',
   },
@@ -114,7 +107,7 @@ const faqs = [
 ]
 
 const footerColumns = [
-  { title: 'Plataforma', links: [['Inicio', '/'], ['Servicios', '#servicios'], ['Cómo funciona', '#como-funciona'], ['Precios', '#precios']] },
+  { title: 'Plataforma', links: [['Inicio', '/'], ['Servicios', '#servicios'], ['Cómo funciona', '#como-funciona']] },
   { title: 'Cuenta', links: [['Acceder', '/login'], ['Solicitar cuenta', '/register'], ['Mi cuenta', '/perfil']] },
   { title: 'Soporte', links: [['Contacto', '#contacto'], ['Soporte técnico', '/soporte'], ['Preguntas frecuentes', '#faq']] },
 ]
@@ -349,10 +342,6 @@ export default async function HomePage() {
       </section>
 
       <section className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
-        <AkOrderSimulator />
-      </section>
-
-      <section className="relative z-10 mx-auto max-w-[1480px] px-5 py-14 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-[1.05fr_.95fr]">
           <div className="ak-v5-card p-7 sm:p-8">
             <div className="flex items-center justify-between">
@@ -435,8 +424,6 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
-
-      <PricingSection />
 
       <section className="relative z-10 mx-auto max-w-[1480px] px-5 pb-16 pt-2 lg:px-8">
         <div className="ak-v5-card relative overflow-hidden p-8 sm:p-10">
