@@ -104,8 +104,11 @@ export default function PerfilPage() {
   }
 
   return (
-    <AKPageShell title="Mi cuenta" subtitle="Datos fiscales, contacto y herramientas del taller. Se sincronizan con tu ficha de cliente en AK Core." eyebrow="Mi cuenta">
-      <div className="grid gap-6 xl:grid-cols-[1fr_390px]">
+    <AKPageShell>
+      <section className="ak10-orders-head -mx-[22px] mb-5 flex items-end px-7 py-7 lg:px-10">
+        <div className="relative z-10"><div className="ak10-eyebrow">Cuenta y preferencias</div><h1 className="ak5-title mt-2 text-4xl sm:text-5xl">Perfil <span className="font-normal text-white/70">/ Ajustes</span></h1><p className="mt-2 text-sm text-white/55">Gestiona los datos de tu taller, preferencias y seguridad de tu cuenta.</p></div>
+      </section>
+      <div className="grid gap-5 xl:grid-cols-[1fr_390px]">
         <AKCard className="p-4 sm:p-6">
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-red-500/25 bg-red-500/10 text-red-300 sm:h-16 sm:w-16 sm:rounded-3xl"><UserCircle size={32} /></div>

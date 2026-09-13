@@ -118,16 +118,16 @@ export default function SoportePage() {
   return (
     <AppShell>
       <div className="space-y-7">
-        <section className="ak5-card ak5-gridline relative overflow-hidden rounded-[28px] p-6 lg:p-8">
+        <section className="ak10-orders-head -mx-[22px] relative overflow-hidden p-6 lg:p-8">
           <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full" style={{background:'radial-gradient(circle,rgba(239,16,24,.14),transparent 70%)'}}/>
           <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <span className="ak5-chip border-red-400/20 bg-red-400/10 text-red-300"><Headphones size={15} /> AK Cloud Support</span>
-              <h1 className="ak5-title mt-4 text-4xl sm:text-5xl">Centro de soporte</h1>
-              <p className="mt-3 max-w-2xl text-white/45">Abre tickets por pedido, pagos, archivos o soporte técnico. Toda la conversación queda ordenada dentro de AK Cloud.</p>
+              <span className="ak10-eyebrow">De técnicos para técnicos</span>
+              <h1 className="ak5-title mt-4 text-4xl sm:text-5xl">Mensajes <span className="font-normal text-white/75">/ Soporte</span></h1>
+              <p className="mt-3 max-w-2xl text-white/55">Soporte técnico de AK Cloud. Cada conversación queda vinculada a su servicio.</p>
             </div>
             <button onClick={() => setModalOpen(true)} className="ak5-primary shrink-0">
-              <MessageSquarePlus size={18} /> Nuevo ticket
+              <MessageSquarePlus size={18} /> Nuevo mensaje
             </button>
           </div>
         </section>
@@ -141,8 +141,8 @@ export default function SoportePage() {
         <section className="ak5-card rounded-[28px] p-5">
           <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h2 className="text-2xl font-black">Mis tickets</h2>
-              <p className="text-sm text-white/35">Historial de conversaciones con soporte Autokeys.</p>
+              <h2 className="text-2xl font-black">Conversaciones</h2>
+              <p className="text-sm text-white/35">Historial de mensajes con el equipo técnico de AK Cloud.</p>
             </div>
             <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/25 px-4 py-3 lg:w-[380px]">
               <Search size={18} className="text-white/35" />

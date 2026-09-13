@@ -22,21 +22,6 @@ export type AkCloudServicio = {
   preciosCondicionales?: PrecioCondicionalDistribuidor[]
 }
 
-export type AkCloudPlan = {
-  id?: string
-  nombre: string
-  slug: string
-  descripcion?: string | null
-  precio_mensual: number
-  creditos_mes: number
-  ventajas?: string[] | null
-  destacado?: boolean | null
-  activo?: boolean | null
-  orden?: number | null
-  duracion_dias?: number | null
-  limite_diario_pedidos?: number | null
-}
-
 export type AkCloudMetodoPago = {
   id?: string
   codigo: string
@@ -48,36 +33,15 @@ export type AkCloudMetodoPago = {
   orden?: number | null
 }
 
-export type PlanServicioOverride = {
-  servicio_id: string
-  incluido: boolean
-  precio_override: number | null
-}
-
-export async function getPlanServiciosDe(planId: string): Promise<PlanServicioOverride[]> {
-  const { data, error } = await supabase
-    .from('akcloud_plan_servicios')
-    .select('servicio_id, incluido, precio_override')
-    .eq('plan_id', planId)
-  if (error || !data) return []
-  return data as PlanServicioOverride[]
-}
-
 export type ServicioConPrecioReal = AkCloudServicio & {
   precio_final: number
-  incluido_en_plan: boolean
 }
 
 export function aplicarPrecioReal(
   servicios: AkCloudServicio[],
-  planServiciosMap: Map<string, PlanServicioOverride>,
 ): ServicioConPrecioReal[] {
   return servicios.map((servicio) => {
-    const override = servicio.id ? planServiciosMap.get(servicio.id) : undefined
-    if (override?.incluido) {
-      return { ...servicio, precio_final: Number(override.precio_override ?? 0), incluido_en_plan: true }
-    }
-    return { ...servicio, precio_final: Number(servicio.precio ?? servicio.creditos ?? 0), incluido_en_plan: false }
+    return { ...servicio, precio_final: Number(servicio.precio ?? servicio.creditos ?? 0) }
   })
 }
 
@@ -102,12 +66,6 @@ export const FALLBACK_SERVICIOS: AkCloudServicio[] = [
   { nombre: 'Original File / ORI', slug: 'original-file-ori', categoria: 'herramientas', precio: 19.90, creditos: 20, icono: '📄', orden: 900 },
   { nombre: 'File Revision', slug: 'file-revision', categoria: 'herramientas', precio: 19.90, creditos: 20, icono: '🔍', orden: 902 },
   { nombre: 'MD1/MG1 Special Solution', slug: 'md1mg1-special-solution', categoria: 'especiales', precio: 99.90, creditos: 100, icono: '⭐', orden: 1010 },
-]
-
-export const FALLBACK_PLANES: AkCloudPlan[] = [
-  { nombre: 'Starter', slug: 'starter', descripcion: 'Para trabajos puntuales.', precio_mensual: 50, creditos_mes: 50, ventajas: ['50 créditos', 'Soporte estándar'], destacado: false, orden: 10 },
-  { nombre: 'Professional', slug: 'pro', descripcion: 'El pack más equilibrado para talleres activos.', precio_mensual: 110, creditos_mes: 120, ventajas: ['120 créditos', 'Soporte preferente'], destacado: true, orden: 20 },
-  { nombre: 'Business', slug: 'business', descripcion: 'Para distribuidores con volumen semanal.', precio_mensual: 260, creditos_mes: 300, ventajas: ['300 créditos', 'Prioridad'], destacado: false, orden: 30 },
 ]
 
 export const FALLBACK_METODOS: AkCloudMetodoPago[] = [
@@ -227,12 +185,6 @@ export async function getServiciosActivos(): Promise<AkCloudServicio[]> {
   } catch {
     return sortByOrden(base)
   }
-}
-
-export async function getPlanesActivos(): Promise<AkCloudPlan[]> {
-  const { data, error } = await supabase.from('akcloud_planes').select('*').eq('activo', true).order('orden', { ascending: true })
-  if (error || !data?.length) return FALLBACK_PLANES
-  return sortByOrden(data.map((item: any) => ({ ...item, precio_mensual: Number(item.precio_mensual || 0), creditos_mes: Number(item.creditos_mes || 0), ventajas: Array.isArray(item.ventajas) ? item.ventajas : [] })))
 }
 
 export async function getMetodosPagoActivos(): Promise<AkCloudMetodoPago[]> {

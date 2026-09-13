@@ -1,78 +1,32 @@
-import { Gauge, ShieldCheck, Users } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { FileCheck2, Headphones, Zap } from 'lucide-react'
 import AuthFooter from './AuthFooter'
 
 const benefits = [
-  { icon: ShieldCheck, title: 'Seguro y confiable', text: 'Tus archivos siempre protegidos' },
-  { icon: Gauge, title: 'Respuesta rápida', text: 'Procesamos tu solicitud lo antes posible' },
+  { icon: FileCheck2, title: 'Archivos verificados', text: 'Calidad y fiabilidad garantizada' },
+  { icon: Headphones, title: 'Soporte técnico experto', text: 'Técnicos a tu lado' },
+  { icon: Zap, title: 'Sin cuotas. Pago por archivo.', text: 'Máxima flexibilidad' },
 ]
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="relative min-h-screen w-full overflow-hidden bg-[#020203] text-[#f4f4f5]">
-      <div className="absolute inset-0">
-        <img
-          src="/images/marketing/auth-car-black.webp"
-          alt=""
-          fetchPriority="high"
-          className="h-full w-full object-cover object-[12%_50%]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-black/25 to-black/85" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40" />
+    <main className="ak10-auth relative overflow-hidden">
+      <div className="ak10-auth-bg"><Image src="/images/marketing/auth-car-black.webp" alt="" fill sizes="100vw" priority /></div>
+      <div className="ak10-auth-grid">
+        <section className="ak10-auth-promo">
+          <Link href="/" className="inline-block"><Image src="/images/brand/ak-cloud-logo.webp" alt="AK Cloud by Autokeys Remaps Pro" width={2172} height={724} className="h-auto w-[330px]" priority /></Link>
+          <div className="mt-9 text-[11px] font-black uppercase tracking-[.24em] text-[#ff001b]">ECU solutions for a higher performance</div>
+          <h1 className="mt-4 text-[clamp(2.8rem,4.4vw,5.3rem)] font-black leading-[.94] tracking-[-.055em]">Acceso profesional<br />para <span className="text-[#ff001b]">talleres</span></h1>
+          <p className="mt-5 max-w-[600px] text-lg leading-7 text-white/65">Archivos ORI, MOD y lecturas en banco/OBD con soporte técnico de expertos.<br />Solo pagas por lo que necesitas.</p>
+          <div className="mt-9 space-y-5">{benefits.map(({ icon: Icon, title, text }) => <div key={title} className="flex items-center gap-4"><span className="grid h-12 w-12 place-items-center rounded-full border-2 border-red-500 text-red-500"><Icon size={21} /></span><span><strong className="block text-sm">{title}</strong><span className="text-xs text-white/45">{text}</span></span></div>)}</div>
+          <div className="mt-10 h-[3px] w-10 bg-[#ff001b]" />
+          <div className="mt-4 text-[10px] font-bold uppercase leading-5 tracking-[.3em] text-white/45">Más potencia<br />Más posibilidades<br />Tu taller, un paso por delante.</div>
+        </section>
+
+        <section className="relative flex min-h-full items-center justify-center py-5">{children}</section>
       </div>
-
-      <div className="relative z-10 flex min-h-screen flex-col">
-        <div className="flex flex-1 flex-col lg:flex-row">
-          <div className="flex flex-col justify-center px-5 py-12 sm:px-8 lg:w-[58%] lg:px-14 xl:px-20">
-            <a href="/" className="inline-block drop-shadow-[0_2px_10px_rgba(0,0,0,.85)]">
-              <img
-                src="/images/brand/ak-cloud-logo.webp"
-                alt="AK Cloud by Autokeys Remaps Pro"
-                className="h-auto w-[240px] max-w-full sm:w-[320px] lg:w-[390px]"
-              />
-            </a>
-
-            <div className="mt-9 text-[16px] font-semibold uppercase tracking-[.08em] text-[#ef1018] [text-shadow:0_2px_10px_rgba(0,0,0,.9)]">
-              Plataforma profesional
-            </div>
-            <h1 className="mt-3 font-bold leading-[1.12] text-white text-[clamp(34px,4vw,58px)] [text-shadow:0_2px_16px_rgba(0,0,0,.9)]">
-              El portal profesional
-              <br />
-              de <span className="text-[#ef1018]">File Service</span>
-            </h1>
-            <p className="mt-5 max-w-[510px] text-[17px] leading-[1.65] text-[#a1a1a6] [text-shadow:0_2px_10px_rgba(0,0,0,.9)]">
-              Sube tus archivos originales (ORI), solicita el servicio que necesitas y recibe tus archivos
-              procesados de forma rápida, segura y centralizada.
-            </p>
-
-            <div className="mt-9 space-y-5 [text-shadow:0_2px_8px_rgba(0,0,0,.9)]">
-              {benefits.map(({ icon: Icon, title, text }) => (
-                <div key={title} className="flex items-start gap-3">
-                  <Icon size={22} className="mt-0.5 shrink-0 text-[#ef1018]" />
-                  <div>
-                    <div className="font-semibold text-white">{title}</div>
-                    <div className="text-sm text-[#92939a]">{text}</div>
-                  </div>
-                </div>
-              ))}
-              <div className="flex items-start gap-3">
-                <Users size={22} className="mt-0.5 shrink-0 text-[#ef1018]" />
-                <div>
-                  <div className="font-semibold text-white">Usuarios aprobados</div>
-                  <div className="text-sm text-[#92939a]">
-                    Calidad garantizada por <span className="text-[#ef1018]">Autokeys Remaps Pro</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-center px-5 py-10 sm:px-8 lg:w-[42%] lg:px-10">
-            {children}
-          </div>
-        </div>
-
-        <AuthFooter />
-      </div>
+      <div className="relative z-10"><AuthFooter /></div>
     </main>
   )
 }

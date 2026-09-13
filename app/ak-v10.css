@@ -1,0 +1,181 @@
+/* AK CLOUD — mockup implementation 2026-09-13 */
+:root {
+  --ak10-red: #ff001b;
+  --ak10-red-dark: #990012;
+  --ak10-black: #050607;
+  --ak10-bg: #090b0d;
+  --ak10-surface: #111316;
+  --ak10-surface-2: #171b1f;
+  --ak10-line: rgba(166, 174, 183, .21);
+  --ak10-muted: #a0a6ad;
+  --ak10-green: #22c55e;
+  --ak10-blue: #208cff;
+  --ak10-amber: #f59e0b;
+}
+
+body { background: var(--ak10-black); }
+
+.ak10-shell {
+  min-width: 0;
+  background:
+    linear-gradient(rgba(255,255,255,.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px),
+    radial-gradient(circle at 70% 0%, rgba(255,0,27,.06), transparent 32%),
+    #060809;
+  background-size: 44px 44px, 44px 44px, auto, auto;
+}
+
+.ak10-sidebar {
+  position: relative;
+  z-index: 50;
+  border-right: 1px solid rgba(255,255,255,.13);
+  background: #030405;
+  box-shadow: 18px 0 50px rgba(0,0,0,.28);
+}
+
+.ak10-sidebar-inner { background: linear-gradient(180deg, rgba(2,3,4,.98), rgba(5,6,7,.96)); }
+.ak10-sidebar-art { position: relative; min-height: 350px; overflow: hidden; border-top: 1px solid rgba(255,255,255,.06); }
+.ak10-sidebar-art img { filter: contrast(1.08) brightness(.55) saturate(.82); }
+.ak10-sidebar-claim { font-size: 22px; font-weight: 500; line-height: 1.08; letter-spacing: .25em; color: rgba(255,255,255,.9); }
+
+.ak10-nav {
+  position: relative;
+  display: flex;
+  min-height: 50px;
+  align-items: center;
+  gap: 15px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 0 16px;
+  color: rgba(255,255,255,.74);
+  font-size: 14px;
+  font-weight: 650;
+  transition: border-color .2s ease, background .2s ease, color .2s ease, transform .2s ease;
+}
+.ak10-nav:hover { background: rgba(255,255,255,.035); color: #fff; transform: translateX(2px); }
+.ak10-nav-active {
+  border-color: rgba(255,0,27,.20);
+  background: linear-gradient(90deg, rgba(255,0,27,.28), rgba(255,0,27,.06));
+  color: #fff;
+  box-shadow: inset 5px 0 0 var(--ak10-red), 0 0 30px rgba(255,0,27,.10);
+}
+.ak10-nav-badge { margin-left: auto; display: grid; width: 24px; height: 24px; place-items: center; border-radius: 999px; background: var(--ak10-red); color: #fff; font-size: 11px; font-weight: 800; box-shadow: 0 0 18px rgba(255,0,27,.55); }
+
+.ak10-topbar { border-bottom: 1px solid rgba(255,255,255,.12); background: rgba(9,12,14,.92); box-shadow: 0 12px 36px rgba(0,0,0,.22); backdrop-filter: blur(22px); }
+.ak10-search { width: min(380px, 34vw); height: 40px; align-items: center; gap: 10px; border: 1px solid var(--ak10-line); border-radius: 7px; background: #101417; padding: 0 13px; color: rgba(255,255,255,.38); font-size: 12px; }
+.ak10-icon-button { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; border: 1px solid var(--ak10-line); border-radius: 7px; background: rgba(255,255,255,.035); }
+.ak10-bell { position: relative; display: grid; width: 42px; height: 42px; place-items: center; border-left: 1px solid rgba(255,255,255,.08); color: white; }
+.ak10-bell span { position: absolute; right: 0; top: 1px; display: grid; width: 20px; height: 20px; place-items: center; border-radius: 999px; background: var(--ak10-red); font-size: 10px; font-weight: 800; box-shadow: 0 0 14px rgba(255,0,27,.62); }
+.ak10-user { display: flex; align-items: center; gap: 10px; border-left: 1px solid rgba(255,255,255,.08); padding-left: 14px; }
+.ak10-avatar { display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid rgba(255,255,255,.22); border-radius: 999px; background: radial-gradient(circle at 32% 26%, #46505a, #14171a 60%, #070809); font-size: 11px; font-weight: 900; }
+.ak10-user-menu, .ak10-command { position: absolute; right: 0; top: calc(100% + 9px); width: 260px; overflow: hidden; border: 1px solid var(--ak10-line); border-radius: 9px; background: rgba(8,10,12,.98); box-shadow: 0 28px 80px rgba(0,0,0,.6); }
+.ak10-command { position: relative; right: auto; top: auto; width: 100%; }
+
+.ak10-content { margin: 0 auto; width: 100%; max-width: 1680px; padding: 0 22px 40px; }
+.ak10-page-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; border-bottom: 1px solid rgba(255,255,255,.10); padding: 30px 4px 24px; }
+.ak10-page-head h1 { margin-top: 6px; font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 850; line-height: .98; letter-spacing: -.045em; }
+.ak10-page-head p { margin-top: 10px; max-width: 760px; color: rgba(255,255,255,.55); font-size: 15px; }
+.ak10-eyebrow { color: var(--ak10-red); font-size: 10px; font-weight: 900; letter-spacing: .28em; text-transform: uppercase; }
+
+.ak10-hero {
+  position: relative;
+  min-height: 228px;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  background-image: linear-gradient(90deg, #050607 0%, rgba(5,6,7,.88) 35%, rgba(5,6,7,.12) 72%, #050607 100%), url('/images/marketing/auth-car-black.webp');
+  background-position: center, 68% center;
+  background-size: cover;
+}
+.ak10-hero::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, transparent 66%, rgba(255,0,27,.06)); }
+.ak10-orders-head { position: relative; min-height: 190px; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,.10); background: linear-gradient(90deg,#050607 0%,rgba(5,6,7,.86) 43%,rgba(5,6,7,.1) 76%,#050607 100%), url('/images/marketing/auth-car-black.webp') 72% center/cover no-repeat; }
+.ak10-orders-head::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg,transparent 60%,rgba(255,0,27,.055)); }
+.ak10-hero-copy { position: relative; z-index: 2; max-width: 670px; padding: 32px 38px; }
+.ak10-hero-kicker { color: var(--ak10-red); font-size: 10px; font-weight: 900; letter-spacing: .32em; text-transform: uppercase; }
+.ak10-hero-title { margin-top: 10px; font-size: clamp(2.2rem, 4.2vw, 4.25rem); font-weight: 900; line-height: .82; letter-spacing: -.04em; text-transform: uppercase; }
+.ak10-hero-title span { color: var(--ak10-red); }
+.ak10-hero-sub { margin-top: 14px; color: rgba(255,255,255,.5); font-size: 10px; font-weight: 800; letter-spacing: .28em; text-transform: uppercase; }
+
+.ak10-panel, .ak5-card, .ak-glass, .card {
+  border: 1px solid var(--ak10-line) !important;
+  border-radius: 8px !important;
+  background: linear-gradient(145deg, rgba(18,22,25,.98), rgba(8,10,12,.98)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 18px 44px rgba(0,0,0,.24) !important;
+}
+.ak5-card::before, .ak-glass::before, .card::before { border-radius: inherit !important; background: linear-gradient(115deg, rgba(255,255,255,.025), transparent 34%, transparent) !important; }
+.ak5-card-hover:hover { transform: translateY(-2px) !important; border-color: rgba(255,0,27,.35) !important; box-shadow: 0 22px 52px rgba(0,0,0,.35), 0 0 24px rgba(255,0,27,.08) !important; }
+
+.ak5-primary, .ak-v5-button, .auth-primary {
+  border: 1px solid #ff2438 !important;
+  border-radius: 6px !important;
+  background: linear-gradient(180deg, #ff1028, #d40018) !important;
+  color: white !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.26), 0 10px 26px rgba(255,0,27,.22) !important;
+}
+.ak5-primary:hover, .ak-v5-button:hover { transform: translateY(-1px); filter: brightness(1.08); box-shadow: 0 14px 34px rgba(255,0,27,.34) !important; }
+.ak5-secondary, .ak-v5-button-secondary { border: 1px solid var(--ak10-line) !important; border-radius: 6px !important; background: #111518 !important; }
+
+.ak10-stat { position: relative; display: flex; min-height: 82px; align-items: center; gap: 14px; overflow: hidden; padding: 14px; }
+.ak10-stat-icon { display: grid; width: 46px; height: 46px; flex: 0 0 auto; place-items: center; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; background: linear-gradient(145deg,#20252a,#0b0e10); }
+.ak10-stat-label { color: rgba(255,255,255,.72); font-size: 12px; font-weight: 650; }
+.ak10-stat-value { margin-top: 2px; font-size: 29px; font-weight: 820; line-height: 1; letter-spacing: -.04em; }
+.ak10-trend { margin-left: auto; font-size: 11px; font-weight: 800; }
+
+.ak10-section-title { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 800; }
+.ak10-section-title::before { content: ''; width: 3px; height: 20px; border-radius: 99px; background: var(--ak10-red); box-shadow: 0 0 13px rgba(255,0,27,.6); }
+.ak10-table { width: 100%; min-width: 780px; }
+.ak10-table th { border-bottom: 1px solid rgba(255,255,255,.10); padding: 11px 15px; color: rgba(255,255,255,.42); font-size: 9px; letter-spacing: .12em; }
+.ak10-table td { border-bottom: 1px solid rgba(255,255,255,.07); padding: 12px 15px; font-size: 12px; }
+.ak10-table tr:last-child td { border-bottom: 0; }
+
+.ak10-service-strip { display: grid; grid-template-columns: repeat(8, minmax(110px,1fr)); gap: 5px; }
+.ak10-service-chip { min-height: 62px; border: 1px solid rgba(255,255,255,.13); border-radius: 5px; background: linear-gradient(180deg,#14181b,#0b0d0f); padding: 10px 12px; transition: .2s ease; }
+.ak10-service-chip:hover { border-color: rgba(255,0,27,.42); background: rgba(255,0,27,.08); }
+
+.ak10-status { display: inline-flex; align-items: center; gap: 6px; border: 1px solid currentColor; border-radius: 999px; padding: 4px 10px; font-size: 10px; font-weight: 750; }
+.ak10-status::before { content: ''; width: 6px; height: 6px; border-radius: 999px; background: currentColor; box-shadow: 0 0 8px currentColor; }
+
+.ak10-auth { min-height: 100dvh; background: #030405; color: #fff; }
+.ak10-auth-bg { position: fixed; inset: 0; }
+.ak10-auth-bg img { width: 100%; height: 100%; object-fit: cover; object-position: center; filter: brightness(.48) contrast(1.12) saturate(.85); }
+.ak10-auth-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.20), rgba(0,0,0,.52) 48%, rgba(0,0,0,.78)); }
+.ak10-auth-grid { position: relative; z-index: 2; display: grid; min-height: calc(100dvh - 64px); grid-template-columns: minmax(0, 44%) minmax(520px, 56%); align-items: center; }
+.ak10-auth-promo { padding: 48px clamp(30px,5vw,80px); }
+.ak10-auth-card { width: calc(100% - 54px); max-width: 680px; margin: 36px auto; border: 1px solid rgba(255,255,255,.27); border-radius: 9px; background: rgba(8,10,12,.88); box-shadow: 0 30px 90px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.04); backdrop-filter: blur(18px); }
+.ak10-auth-card input, .ak10-auth-card textarea { border-radius: 5px !important; background: #15191c !important; }
+.ak10-auth-card button { border-radius: 5px !important; }
+
+.akhome.ak-v5-bg { background: #030405 !important; }
+.akhome .ak-v5-topbar { border-bottom: 1px solid rgba(255,255,255,.12); background: rgba(3,4,5,.90); }
+.akhome .ak-v5-card, .akhome .ak-v5-glass { border-radius: 7px !important; background: linear-gradient(145deg,#15181b,#080a0c) !important; }
+
+.ak10-pricing-hero {
+  position: relative;
+  overflow: hidden;
+  background-image: linear-gradient(90deg, rgba(0,0,0,.97) 0%, rgba(0,0,0,.72) 46%, rgba(0,0,0,.14) 75%, rgba(0,0,0,.75) 100%), url('/images/marketing/hero-car.webp');
+  background-position: center, 70% center;
+  background-size: cover;
+}
+.ak10-pricing-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent, rgba(255,0,27,.04)); pointer-events: none; }
+input:not([type='checkbox']):not([type='radio']), textarea, select { border-radius: 6px !important; border-color: var(--ak10-line) !important; background: #13171a !important; }
+table thead { background: rgba(255,255,255,.025); }
+
+@media (max-width: 1180px) {
+  .ak10-service-strip { grid-template-columns: repeat(4,1fr); }
+  .ak10-auth-grid { grid-template-columns: 1fr; }
+  .ak10-auth-promo { display: none; }
+  .ak10-auth-card { width: min(680px, calc(100% - 32px)); }
+}
+
+@media (max-width: 767px) {
+  .ak10-content { padding: 0 12px 90px; }
+  .ak10-page-head { align-items: stretch; flex-direction: column; padding: 24px 2px 18px; }
+  .ak10-hero { min-height: 210px; background-position: center, 62% center; }
+  .ak10-hero-copy { padding: 28px 20px; }
+  .ak10-hero-title { font-size: clamp(2.2rem, 12vw, 3.4rem); }
+  .ak10-service-strip { grid-template-columns: repeat(2,1fr); }
+  .ak10-auth-card { margin: 18px auto 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ak10-nav, .ak5-card-hover, .ak5-primary { transition: none !important; }
+}

@@ -190,12 +190,12 @@ export default async function HomePage() {
         </div>
         <div className="relative mx-auto grid min-h-[780px] max-w-[1480px] items-center gap-12 px-5 py-20 lg:grid-cols-[.92fr_1.08fr] lg:px-8">
         <div className="ak-v5-reveal">
-          <div className="ak-v5-kicker !text-[#ff2b2b]">Plataforma profesional</div>
-          <h1 className="ak-v5-title mt-6 text-5xl sm:text-6xl xl:text-[4.4rem]">El portal profesional<br />de <span className="text-[#ff2b2b]">File Service</span></h1>
-          <p className="mt-7 max-w-xl text-lg leading-8 text-white/48">Sube tus archivos originales (ORI), solicita el servicio que necesitas y recibe tus archivos procesados de forma rápida, segura y centralizada.</p>
+          <div className="ak-v5-kicker !text-[#ff2b2b]">Rendimiento sin límites</div>
+          <h1 className="ak-v5-title mt-6 text-5xl sm:text-6xl xl:text-[4.4rem]">La plataforma profesional<br />para tu <span className="text-[#ff2b2b]">File Service</span></h1>
+          <p className="mt-7 max-w-xl text-lg leading-8 text-white/48">Sube tu archivo original, elige el servicio y recibe una calibración profesional lista para trabajar. Sin planes, sin cuotas: pagas únicamente por cada archivo.</p>
           <p className="mt-4 max-w-xl leading-7 text-white/40">Los nuevos usuarios requieren aprobación por <span className="text-[#ff2b2b] font-semibold">Autokeys Remaps Pro</span> para garantizar un servicio profesional y de calidad — normalmente en unos <span className="text-[#ff2b2b] font-semibold">15 minutos</span>.</p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Link href="/register" className="ak-v5-button !bg-gradient-to-b !from-[#ff2b2b] !to-[#b30012] !shadow-[0_16px_42px_rgba(230,10,20,.35),inset_0_1px_0_rgba(255,255,255,.25)] hover:!shadow-[0_22px_56px_rgba(230,10,20,.48)]"><UploadCloud size={18} /> Subir archivo</Link>
+            <Link href="/register" className="ak-v5-button !bg-gradient-to-b !from-[#ff2b2b] !to-[#b30012] !shadow-[0_16px_42px_rgba(230,10,20,.35),inset_0_1px_0_rgba(255,255,255,.25)] hover:!shadow-[0_22px_56px_rgba(230,10,20,.48)]"><UploadCloud size={18} /> Solicitar acceso</Link>
             <a href="#como-funciona" className="ak-v5-button-secondary"><PlayCircle size={18} /> Ver funcionamiento</a>
           </div>
         </div>

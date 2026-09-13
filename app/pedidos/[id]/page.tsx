@@ -48,20 +48,20 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
   }
 
   if (loading) {
-    return <AKPageShell title="Cargando trabajo" eyebrow="Pedidos"><AKCard className="p-8 text-white/35"><Loader2 className="mr-2 inline animate-spin" /> Cargando pedido...</AKCard></AKPageShell>
+    return <AKPageShell title="Cargando servicio" eyebrow="Servicios"><AKCard className="p-8 text-white/35"><Loader2 className="mr-2 inline animate-spin" /> Cargando servicio...</AKCard></AKPageShell>
   }
 
   if (!pedido) {
-    return <AKPageShell title="Pedido no encontrado" eyebrow="Pedidos"><AKCard className="p-8 text-white/35">Pedido no encontrado.</AKCard></AKPageShell>
+    return <AKPageShell title="Servicio no encontrado" eyebrow="Servicios"><AKCard className="p-8 text-white/35">Servicio no encontrado.</AKCard></AKPageShell>
   }
 
   const actionRequired = pedido.estado === 'revision_solicitada'
 
   return (
     <AKPageShell
-      title={`Detalle del pedido #${pedido.numero || pedido.id.slice(0, 8)}`}
+      title={`Detalle del servicio #${pedido.numero || pedido.id.slice(0, 8)}`}
       subtitle={pedido.created_at ? `Realizado el ${new Date(pedido.created_at).toLocaleDateString('es-ES')} a las ${new Date(pedido.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}` : 'Fecha de creación no disponible'}
-      eyebrow="Pedido"
+      eyebrow="Servicio"
       actions={
         <div className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-wider transition-colors ${actionRequired ? 'border-amber-400/35 bg-amber-400/10 text-amber-300' : justUpdated ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300' : 'border-white/10 bg-black/25 text-white/55'}`}>
           {(justUpdated || actionRequired) && <span className={`h-2 w-2 rounded-full ${actionRequired ? 'bg-amber-300' : 'animate-pulse bg-emerald-400'}`} />}
@@ -69,7 +69,7 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
         </div>
       }
     >
-      <Link href="/pedidos" className="mb-5 inline-flex items-center gap-2 text-sm font-black text-white/40 transition hover:text-white"><ArrowLeft size={17} /> Volver a trabajos</Link>
+      <Link href="/pedidos" className="mb-5 inline-flex items-center gap-2 text-sm font-black text-white/40 transition hover:text-white"><ArrowLeft size={17} /> Volver a servicios</Link>
 
       <div className="mb-6"><AKTimeline estado={pedido.estado} orientation="horizontal" /></div>
 
@@ -81,7 +81,7 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
               <div>
                 <div className="text-xs font-black uppercase tracking-[0.2em] text-amber-300">Acción requerida</div>
                 <h2 className="mt-1 text-lg font-black text-white">Autokeys necesita información o una comprobación para continuar</h2>
-                <p className="mt-1 max-w-3xl text-sm leading-6 text-white/45">Revisa la conversación del pedido y responde a la solicitud del laboratorio. El trabajo permanece abierto y la decisión técnica final sigue siendo de Autokeys.</p>
+                <p className="mt-1 max-w-3xl text-sm leading-6 text-white/45">Revisa la conversación del servicio y responde a la solicitud del laboratorio. El trabajo permanece abierto y la decisión técnica final sigue siendo de Autokeys.</p>
               </div>
             </div>
             <AKButton onClick={() => setActiveTab('conversacion')} className="shrink-0"><MessageSquare size={17} /> Abrir conversación</AKButton>
@@ -104,7 +104,7 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
         <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
           <section className="space-y-6">
             <div className="ak5-card p-6">
-              <div className="ak5-kicker text-red-300">Información del pedido</div>
+              <div className="ak5-kicker text-red-300">Información del servicio</div>
               <div className="mt-4 grid gap-6 sm:grid-cols-3">
                 <InfoGroup icon={User} title="Cliente">
                   <InfoLine label="Nombre" value={pedido.cliente_nombre || 'Sin identificar'} />
@@ -116,8 +116,8 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
                   <InfoLine label="Año" value={pedido.anio || '—'} />
                   <InfoLine label="ECU" value={pedido.ecu || 'No identificada'} />
                 </InfoGroup>
-                <InfoGroup icon={Hash} title="Pedido">
-                  <InfoLine label="ID de pedido" value={pedido.numero || pedido.id.slice(0, 8)} />
+                <InfoGroup icon={Hash} title="Servicio">
+                  <InfoLine label="ID de servicio" value={pedido.numero || pedido.id.slice(0, 8)} />
                   <div>
                     <div className="text-[10px] font-bold uppercase tracking-wider text-white/25">Prioridad</div>
                     <span className={`mt-1 inline-block rounded-md px-2 py-0.5 text-xs font-black uppercase ${prioridadPillClass(pedido.prioridad)}`}>{pedido.prioridad || 'Normal'}</span>
@@ -157,7 +157,7 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
                 <AccionButton icon={Download} label="Descargar archivo" sub={pedido.mod_path ? 'Disponible' : 'Cuando esté listo'} onClick={() => download(pedido.mod_bucket, pedido.mod_path, pedido.mod_nombre)} disabled={!pedido.mod_path || downloading === pedido.mod_path} primary />
                 <AccionButton icon={MessageSquare} label="Enviar mensaje" sub="Hablar con soporte" onClick={() => setActiveTab('conversacion')} />
                 <AccionButton icon={History} label="Ver historial" sub="Seguimiento completo" onClick={() => setActiveTab('historial')} />
-                <AccionButton icon={Printer} label="Imprimir pedido" sub="Generar PDF" onClick={() => window.print()} />
+                <AccionButton icon={Printer} label="Imprimir servicio" sub="Generar PDF" onClick={() => window.print()} />
               </div>
             </div>
             <AKTimeline estado={pedido.estado}/>
@@ -165,7 +165,7 @@ export default function PedidoDetallePage({ params }: { params: { id: string } }
         </div>
       )}
 
-      {activeTab === 'versiones' && <div className="ak5-card p-6"><div className="flex flex-col justify-between gap-4 md:flex-row md:items-center"><div><div className="ak5-kicker text-red-300">Control de revisiones</div><h2 className="mt-2 text-2xl font-black">Versiones entregadas</h2><p className="mt-2 text-sm text-white/38">Cada revisión queda vinculada al pedido y nunca sustituye el historial anterior.</p></div></div><div className="mt-6 grid gap-4 md:grid-cols-2"><FileBox title="ORI · Base" name={pedido.ori_nombre} size={formatBytes(pedido.ori_size)} ready={!!pedido.ori_path} loading={downloading === pedido.ori_path} onClick={() => download(pedido.ori_bucket, pedido.ori_path, pedido.ori_nombre)} /><FileBox title={pedido.mod_path ? 'V1 · Última entrega' : 'V1 · Pendiente'} name={pedido.mod_nombre} size={pedido.mod_path ? 'Versión disponible' : 'El laboratorio está trabajando'} ready={!!pedido.mod_path} loading={downloading === pedido.mod_path} onClick={() => download(pedido.mod_bucket, pedido.mod_path, pedido.mod_nombre)} /></div></div>}
+      {activeTab === 'versiones' && <div className="ak5-card p-6"><div className="flex flex-col justify-between gap-4 md:flex-row md:items-center"><div><div className="ak5-kicker text-red-300">Control de revisiones</div><h2 className="mt-2 text-2xl font-black">Versiones entregadas</h2><p className="mt-2 text-sm text-white/38">Cada revisión queda vinculada al servicio y nunca sustituye el historial anterior.</p></div></div><div className="mt-6 grid gap-4 md:grid-cols-2"><FileBox title="ORI · Base" name={pedido.ori_nombre} size={formatBytes(pedido.ori_size)} ready={!!pedido.ori_path} loading={downloading === pedido.ori_path} onClick={() => download(pedido.ori_bucket, pedido.ori_path, pedido.ori_nombre)} /><FileBox title={pedido.mod_path ? 'V1 · Última entrega' : 'V1 · Pendiente'} name={pedido.mod_nombre} size={pedido.mod_path ? 'Versión disponible' : 'El laboratorio está trabajando'} ready={!!pedido.mod_path} loading={downloading === pedido.mod_path} onClick={() => download(pedido.mod_bucket, pedido.mod_path, pedido.mod_nombre)} /></div></div>}
 
       {activeTab === 'conversacion' && <div className="mx-auto max-w-5xl"><AKChat pedidoId={pedido.id} autorTipo="cliente" actionRequired={actionRequired} /></div>}
       {activeTab === 'historial' && <div className="mx-auto max-w-4xl"><AKTimeline estado={pedido.estado}/></div>}

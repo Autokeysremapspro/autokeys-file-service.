@@ -2,16 +2,16 @@ import Link from 'next/link'
 import { ArrowRight, BadgeCheck, Gauge, ShieldCheck, UserPlus } from 'lucide-react'
 
 const rates = [
-  { service: 'Stage 1', price: '44,90 €', note: 'Calibración profesional' },
-  { service: 'Stage 2', price: '64,90 €', note: 'Configuración avanzada' },
-  { service: 'DPF', price: '34,90 €', note: 'Solución por archivo' },
-  { service: 'EGR', price: '29,90 €', note: 'Solución por archivo' },
-  { service: 'AdBlue / SCR', price: '39,90 €', note: 'Solución por archivo' },
-  { service: 'Pops & Bangs', price: '39,90 €', note: 'Configuración performance' },
-  { service: 'Airbag Crash Data', price: '34,90 €', note: 'Reset digital estándar' },
-  { service: 'IMMO OFF', price: '44,90 €', note: 'EDC15 / EDC16' },
-  { service: 'TCU / DSG', price: '59,90 €', note: 'Desde' },
-  { service: 'MD1 / MG1', price: '79,90 €', note: 'Desde' },
+  { service: 'Archivo estándar', price: '35 €', note: 'Solución básica por archivo' },
+  { service: 'Stage 1', price: '70 €', note: 'Calibración profesional' },
+  { service: 'Stage 2', price: '120 €', note: 'Configuración avanzada' },
+  { service: 'DPF Off', price: '50 €', note: 'Solución por archivo' },
+  { service: 'EGR Off', price: '50 €', note: 'Solución por archivo' },
+  { service: 'AdBlue Off', price: '60 €', note: 'Solución SCR' },
+  { service: 'IMMO Off', price: '90 €', note: 'Solución inmovilizador' },
+  { service: 'Hardcut', price: '60 €', note: 'Corte a medida' },
+  { service: 'Pops & Bangs', price: '60 €', note: 'Configuración performance' },
+  { service: 'Solución personalizada', price: 'Consultar', note: 'Valoración técnica individual' },
 ]
 
 export default function PricingSection() {
@@ -19,8 +19,8 @@ export default function PricingSection() {
     <section id="precios" className="relative z-10 mx-auto max-w-[1480px] px-5 py-16 lg:px-8">
       <div className="mb-9 text-center">
         <div className="ak-v5-kicker !text-[#ff2b2b]">Tarifas profesionales</div>
-        <h2 className="ak-v5-title mt-4 text-4xl sm:text-5xl">Precios claros. <span className="text-[#ff2b2b]">Soporte real.</span></h2>
-        <p className="mx-auto mt-4 max-w-2xl leading-7 text-white/42">Tarifas estándar por archivo para nuevos clientes. Accede a AK Cloud para consultar el catálogo completo.</p>
+        <h2 className="ak-v5-title mt-4 text-4xl sm:text-5xl">Sin planes. Sin cuotas. <span className="text-[#ff2b2b]">Pago por archivo.</span></h2>
+        <p className="mx-auto mt-4 max-w-2xl leading-7 text-white/42">Elige únicamente el servicio que necesitas y paga por ese archivo. Sin permanencia ni compromisos mensuales.</p>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1fr_340px]">
@@ -61,7 +61,7 @@ export default function PricingSection() {
         </aside>
       </div>
 
-      <p className="mx-auto mt-5 max-w-4xl text-center text-[11px] leading-5 text-white/28">Tarifas estándar orientativas por archivo. El precio final puede variar según ECU, software, complejidad y solución requerida. Los servicios avanzados y Special Lab se valoran individualmente. Las tarifas privadas nunca se muestran en esta página.</p>
+      <p className="mx-auto mt-5 max-w-4xl text-center text-[11px] leading-5 text-white/28">Tarifas orientativas por archivo. El precio final se muestra antes del pago y puede variar según ECU, software, complejidad y solución requerida.</p>
     </section>
   )
 }

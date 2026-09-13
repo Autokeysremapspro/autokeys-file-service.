@@ -55,7 +55,7 @@ const WIZARD_STEPS = [
 
 export default function NuevoPedidoPage() {
   const router = useRouter()
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(4)
   const [file, setFile] = useState<File | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [selected, setSelected] = useState<string[]>([])
@@ -169,7 +169,6 @@ export default function NuevoPedidoPage() {
         precio_final: preciosCondicionales.length > 0
           ? Math.min(precioBase, ...preciosCondicionales)
           : precioBase,
-        incluido_en_plan: false,
       }
     })
   }, [servicios, selected])
@@ -258,11 +257,11 @@ export default function NuevoPedidoPage() {
 
   return (
     <AKPageShell
-      title="Nuevo pedido"
-      subtitle="Sube el ORI, añade los datos técnicos manualmente y elige los servicios por vehículo. Pagas solo lo que pidas."
-      eyebrow="Servicio de archivos"
+      title="Nuevo servicio"
+      subtitle="Sube tu archivo, completa la información y recibe una calibración a medida. Pagas solo por este archivo."
+      eyebrow="Nuevo servicio"
     >
-      <div className="mb-8 flex items-center">
+      <div className="hidden">
         {WIZARD_STEPS.map((s, index) => {
           const reachable = s.n <= maxUnlockedStep || s.n <= step
           const isDone = s.n < step || (s.n <= maxUnlockedStep && s.n !== step && stepValid[s.n])
@@ -298,9 +297,9 @@ export default function NuevoPedidoPage() {
         })}
       </div>
 
-      <div className="grid gap-6 2xl:grid-cols-[1fr_430px]">
+      <div className="ak10-new-order mt-5 grid gap-5 2xl:grid-cols-[1fr_360px]">
         <div className="space-y-6">
-          {step === 1 && (
+          {(
             <AKCard className="p-5 md:p-6">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -328,7 +327,7 @@ export default function NuevoPedidoPage() {
             </AKCard>
           )}
 
-          {step === 2 && (
+          {(
             <div className="space-y-6">
               <AKCard className="p-5 md:p-6">
                 <div className="mb-5 flex items-center gap-3">
@@ -367,7 +366,7 @@ export default function NuevoPedidoPage() {
             </div>
           )}
 
-          {step === 3 && (
+          {(
             <AKCard className="p-5 md:p-6">
               <div className="mb-5 flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 text-[var(--ak-glow)]"><Wrench size={24} /></div>
@@ -458,7 +457,7 @@ export default function NuevoPedidoPage() {
             </AKCard>
           )}
 
-          {step === 4 && (
+          {false && (
             <AKCard className="p-5 md:p-6">
               <div className="mb-5 flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 text-[var(--ak-glow)]"><ShieldCheck size={24} /></div>
@@ -495,7 +494,7 @@ export default function NuevoPedidoPage() {
         </div>
 
         <aside className="space-y-6 2xl:sticky 2xl:top-24 2xl:self-start">
-          {step === 1 && (
+          {file && (
             <AKCard className="p-6">
               <p className="ak-mono text-xs font-bold uppercase tracking-[0.22em] text-[var(--ak-glow)]">Requisitos de calidad del archivo</p>
               <div className="mt-4 space-y-3">
@@ -518,10 +517,10 @@ export default function NuevoPedidoPage() {
           <AKCard className="p-6">
             <div className="flex items-center justify-between">
               <p className="ak-mono text-xs font-bold uppercase tracking-[0.22em] text-[var(--ak-glow)]">Resumen</p>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-white/30">Paso {step} de 4</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/30">Pago por archivo</span>
             </div>
             <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/[.07]"><div className="h-full rounded-full bg-[var(--ak-red)] transition-[width]" style={{ width: `${(step / 4) * 100}%` }} /></div>
-            <h2 className="mt-4 text-3xl font-bold">Pedido</h2>
+            <h2 className="mt-4 text-3xl font-bold">Tu servicio</h2>
             <div className="mt-5 space-y-3 text-sm">
               <SummaryRow label="Archivo" value={fileName || 'Sin archivo'} />
               <SummaryRow label="Vehículo" value={[vehicle.marca, vehicle.modelo, vehicle.motor].filter(Boolean).join(' ') || 'Pendiente'} />
@@ -539,6 +538,10 @@ export default function NuevoPedidoPage() {
                 </div>
               ))}
             </div>
+            <label className="mt-5 block">
+              <span className="ak-mono mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-white/35">Observaciones para el técnico</span>
+              <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="min-h-[96px] w-full border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-[var(--ak-red)]/60" placeholder="Añade cualquier detalle útil para el técnico..." />
+            </label>
             <div className="mt-5 rounded-[1.6rem] border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/[.08] p-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-white/50">Total a pagar</span>
@@ -552,7 +555,7 @@ export default function NuevoPedidoPage() {
             </button>
             {step === 4 ? (
               <AKButton onClick={enviarPedido} disabled={sending || !legalAccepted} className="mt-4 w-full">
-                <Send size={18} /> {sending ? 'Enviando...' : total > 0 ? `Pagar ${total.toFixed(2)} € con PayPal` : 'Enviar pedido (sin coste)'}
+                <Send size={18} /> {sending ? 'Enviando...' : total > 0 ? `Pagar ${total.toFixed(2)} € con PayPal` : 'Enviar servicio (sin coste)'}
               </AKButton>
             ) : (
               <AKButton onClick={goNext} disabled={!stepValid[step]} className="mt-4 w-full">
@@ -590,7 +593,7 @@ export default function NuevoPedidoPage() {
 function StepNav({ canBack, canNext, onBack, onNext }: { canBack: boolean; canNext: boolean; onBack?: () => void; onNext?: () => void }) {
   if (!canBack && !onNext) return null
   return (
-    <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
+    <div className="hidden">
       {canBack ? (
         <button type="button" onClick={onBack} className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[.03] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white/55 transition hover:border-white/20 hover:text-white">
           <ArrowLeft size={15} /> Atrás

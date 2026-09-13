@@ -133,10 +133,14 @@ export default function PedidosPage() {
 
   return (
     <AppShell>
-      <div className="space-y-6">
-        <div>
-          <h1 className="ak5-title text-3xl sm:text-4xl">Pedidos</h1>
-          <p className="mt-2 max-w-2xl text-sm text-white/45">Gestiona y da seguimiento a todos tus pedidos de archivos.</p>
+      <div className="space-y-4">
+        <div className="ak10-orders-head -mx-[22px] flex flex-col justify-end gap-5 px-7 py-7 sm:flex-row sm:items-end sm:justify-between lg:px-10">
+          <div className="relative z-10">
+            <div className="ak10-eyebrow">Tus proyectos, nuestro respaldo</div>
+            <h1 className="ak5-title mt-2 text-4xl sm:text-5xl">Mis <span className="text-[#ff001b]">servicios</span></h1>
+            <p className="mt-2 max-w-xl text-sm text-white/55">Gestiona todos tus archivos, sigue sus estados y lleva el control de tus servicios en un solo lugar.</p>
+          </div>
+          <Link href="/nuevo-pedido" className="ak5-primary relative z-10 shrink-0 !px-6 !py-4 !normal-case !tracking-normal">+ Nuevo servicio</Link>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

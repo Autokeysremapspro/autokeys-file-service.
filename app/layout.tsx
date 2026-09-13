@@ -3,6 +3,7 @@ import { Space_Grotesk, JetBrains_Mono, Inter } from 'next/font/google'
 import './globals.css'
 import './titan-v5.css'
 import './phase2-responsive.css'
+import './ak-v10.css'
 import { Toaster } from 'react-hot-toast'
 
 const display = Space_Grotesk({ subsets: ['latin'], weight: ['500', '700'], variable: '--font-display' })
