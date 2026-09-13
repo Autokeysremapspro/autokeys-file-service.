@@ -3,17 +3,25 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Bell, ChevronDown, Command, LogOut, Menu, Search, UserCircle, X } from 'lucide-react'
+import { ChevronDown, Command, LogOut, Menu, Plus, Search, UserCircle, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import AKSidebar from './AKSidebar'
+import AKThemeSwitcher from './AKThemeSwitcher'
+import AKNotificationBell from './AKNotificationBell'
 import './AKPageShell.css'
 
 const commands = [
-  ['Dashboard', '/dashboard'],
-  ['Nuevo servicio', '/nuevo-pedido'],
-  ['Mis servicios', '/pedidos'],
+  ['Inicio', '/dashboard'],
+  ['Nuevo pedido', '/nuevo-pedido'],
+  ['Pedidos', '/pedidos'],
+  ['Versiones', '/descargas'],
+  ['Garage', '/garage'],
+  ['Knowledge Base', '/biblioteca'],
+  ['AK Intelligence', '/intelligence'],
+  ['Analítica', '/analitica'],
   ['Soporte / Tickets', '/soporte'],
-  ['Perfil / Ajustes', '/perfil'],
+  ['Actividad', '/notificaciones'],
+  ['Mi workspace', '/perfil'],
 ]
 
 export default function AKPageShell({ children, title, subtitle, eyebrow = 'AK CLOUD', actions }: { children: React.ReactNode; title?: string; subtitle?: string; eyebrow?: string; actions?: React.ReactNode }) {
@@ -57,6 +65,11 @@ export default function AKPageShell({ children, title, subtitle, eyebrow = 'AK C
     setCommandOpen(false)
   }, [pathname])
 
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen || commandOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [mobileOpen, commandOpen])
+
   const initials = useMemo(() => {
     const parts = account?.name.trim().split(/\s+/) || []
     return `${parts[0]?.[0] || 'A'}${parts[1]?.[0] || 'K'}`.toUpperCase()
@@ -95,10 +108,9 @@ export default function AKPageShell({ children, title, subtitle, eyebrow = 'AK C
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <button type="button" className="ak10-bell" aria-label="Notificaciones">
-              <Bell size={20} />
-              <span>3</span>
-            </button>
+            <AKThemeSwitcher />
+            <Link href="/nuevo-pedido" className="ak5-primary !px-3 !py-2.5"><Plus size={16} /><span className="hidden sm:inline">Nueva operación</span></Link>
+            <AKNotificationBell />
             <div ref={userMenuRef} className="relative">
               <button type="button" onClick={() => setUserMenuOpen((v) => !v)} className="ak10-user">
                 <span className="ak10-avatar">{initials}</span>
