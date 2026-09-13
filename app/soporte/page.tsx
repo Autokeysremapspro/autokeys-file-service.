@@ -123,7 +123,7 @@ export default function SoportePage() {
           <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <span className="ak10-eyebrow">De técnicos para técnicos</span>
-              <h1 className="ak5-title mt-4 text-4xl sm:text-5xl">Mensajes <span className="font-normal text-white/75">/ Soporte</span></h1>
+              <h1 className="ak5-title mt-4 text-4xl sm:text-5xl">Soporte <span className="font-normal text-white/75">/ Tickets</span></h1>
               <p className="mt-3 max-w-2xl text-white/55">Soporte técnico de AK Cloud. Cada conversación queda vinculada a su servicio.</p>
             </div>
             <button onClick={() => setModalOpen(true)} className="ak5-primary shrink-0">
