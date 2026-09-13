@@ -12,7 +12,7 @@ const commands = [
   ['Dashboard', '/dashboard'],
   ['Nuevo servicio', '/nuevo-pedido'],
   ['Mis servicios', '/pedidos'],
-  ['Mensajes', '/soporte'],
+  ['Soporte / Tickets', '/soporte'],
   ['Perfil / Ajustes', '/perfil'],
 ]
 
