@@ -5,6 +5,7 @@ import {
   Settings, ShieldCheck, TrendingUp, UploadCloud, UserPlus, UserRound, Users, Wrench, Zap,
 } from 'lucide-react'
 import AkProfessionalFit from '@/components/marketing/AkProfessionalFit'
+import ConversionTracker from '@/components/analytics/ConversionTracker'
 import { getPublicStats } from '@/lib/services/publicStats'
 
 const TIKTOK_URL = 'https://www.tiktok.com/@autokeys.pro'
@@ -147,6 +148,7 @@ export default async function HomePage() {
 
   return (
     <main className="akhome ak-v5-bg min-h-screen overflow-hidden text-white">
+      <ConversionTracker eventName="landing_view" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <header className="ak-v5-topbar sticky top-0 z-50">
         <div className="mx-auto flex max-w-[1480px] items-center justify-between px-5 py-4 lg:px-8">

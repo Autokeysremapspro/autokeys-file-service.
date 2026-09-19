@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { BarChart3, Bell, BookOpen, BrainCircuit, Car, Download, FolderOpen, LayoutDashboard, LifeBuoy, Settings, ShieldCheck, UploadCloud, UserCircle, X } from 'lucide-react'
+import { BarChart3, Bell, BookOpen, BrainCircuit, Car, Download, FolderOpen, LayoutDashboard, LifeBuoy, Settings, ShieldCheck, TrendingUp, UploadCloud, UserCircle, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 const items = [
@@ -67,6 +67,9 @@ export default function AKSidebar({ mobile = false, onClose }: { mobile?: boolea
               </Link>
               <Link href="/admin/ecu-database" onClick={onClose} className={`ak10-nav ${pathname.startsWith('/admin/ecu-database') ? 'ak10-nav-active' : ''}`}>
                 <Settings size={19} strokeWidth={1.8} /><span>ECU Intelligence</span>
+              </Link>
+              <Link href="/admin/conversion" onClick={onClose} className={`ak10-nav ${pathname.startsWith('/admin/conversion') ? 'ak10-nav-active' : ''}`}>
+                <TrendingUp size={19} strokeWidth={1.8} /><span>Conversión</span>
               </Link>
             </nav>
           </div>

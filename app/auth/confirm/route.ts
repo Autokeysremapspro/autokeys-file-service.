@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { type EmailOtpType } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { markAkCloudAccess } from '@/lib/auth/access'
+import { analyticsSessionFromUser, recordConversionEventSafe } from '@/lib/analytics/server'
 
 export async function GET(request: NextRequest) {
   const tokenHash = request.nextUrl.searchParams.get('token_hash')
@@ -43,6 +44,12 @@ export async function GET(request: NextRequest) {
 
   if (data.user) {
     await markAkCloudAccess(data.user.id)
+    await recordConversionEventSafe({
+      eventName: 'email_confirmed',
+      userId: data.user.id,
+      sessionId: analyticsSessionFromUser(data.user),
+      pagePath: '/auth/confirm',
+    })
   }
 
   return response

@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase'
 import AuthLayout from '@/components/auth/AuthLayout'
 import AuthCard, { AuthButton } from '@/components/auth/AuthCard'
 import { AuthInput } from '@/components/auth/AuthInput'
+import { getConversionContext } from '@/lib/analytics/client'
 
 const PASSWORD_RESET_URL = 'https://www.akcloud.es/restablecer-contrasena'
 
@@ -53,7 +54,11 @@ export default function LoginClient() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) { setLoading(false); toast.error(error.message); return }
 
-    const accessResponse = await fetch('/api/auth/access', { method: 'POST' })
+    const accessResponse = await fetch('/api/auth/access', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ analytics: getConversionContext() }),
+    })
     const accessResult = await accessResponse.json().catch(() => null)
     setLoading(false)
     if (!accessResponse.ok) {

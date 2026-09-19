@@ -13,6 +13,7 @@ import AKEcuDetectionSummary, { type AKEcuDetection } from '@/components/ak/AKEc
 import { mergeVerifiedEcuPrefill } from '@/lib/ecu/safePrefill'
 import { crearPedidoFileService } from '@/lib/services/pedidos'
 import { extractDtcCodes } from '@/lib/dtc'
+import ConversionTracker from '@/components/analytics/ConversionTracker'
 import {
   FALLBACK_SERVICIOS,
   FAMILIAS,
@@ -261,6 +262,7 @@ export default function NuevoPedidoPage() {
       subtitle="Sube tu archivo, completa la información y recibe una calibración a medida. Pagas solo por este archivo."
       eyebrow="Nuevo servicio"
     >
+      <ConversionTracker eventName="first_order_started" />
       <div className="hidden">
         {WIZARD_STEPS.map((s, index) => {
           const reachable = s.n <= maxUnlockedStep || s.n <= step

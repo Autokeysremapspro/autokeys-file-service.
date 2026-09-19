@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Check, CheckCircle2, Clock3, CloudUpload, Cpu, Download, FileText, Gauge, MoreHorizontal, Rocket, ShieldOff, SlidersHorizontal, Sparkles, Timer, Upload, Waves } from 'lucide-react'
+import { ArrowRight, Check, CheckCircle2, Clock3, CloudUpload, Cpu, CreditCard, FileText, Gauge, MoreHorizontal, Rocket, ShieldOff, SlidersHorizontal, Sparkles, Timer, Upload, Waves } from 'lucide-react'
 import AppShell from '@/components/AppShell'
 import { getMisPedidos, type FileServicePedido, formatEstado } from '@/lib/services/pedidos'
+import ConversionTracker from '@/components/analytics/ConversionTracker'
 
 const quickServices = [
   ['Stage 1', 'Potencia', Rocket],
@@ -55,6 +56,7 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
+      <ConversionTracker eventName="dashboard_view" />
       <div className="-mx-[22px] sm:-mx-[22px]">
         <section className="ak10-hero">
           <div className="ak10-hero-copy">
@@ -70,11 +72,31 @@ export default function DashboardPage() {
         </section>
       </div>
 
+      {!loading && pedidos.length === 0 && (
+        <section className="ak10-panel mt-4 overflow-hidden border-red-500/20">
+          <div className="grid gap-6 p-5 md:p-7 xl:grid-cols-[1fr_auto] xl:items-center">
+            <div>
+              <div className="text-[10px] font-black uppercase tracking-[.22em] text-red-400">Tu cuenta está lista</div>
+              <h2 className="mt-2 text-2xl font-black sm:text-3xl">Crea tu primer pedido en pocos minutos</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">Solo necesitas el archivo original. Si no conoces algún dato de la ECU, puedes escribir «revisar» y el laboratorio lo comprobará.</p>
+              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                <OnboardingStep icon={CheckCircle2} number="1" title="Cuenta activa" text="Correo confirmado y acceso preparado." done />
+                <OnboardingStep icon={CloudUpload} number="2" title="Sube el ORI" text="Formatos BIN, ORI, HEX o ZIP." />
+                <OnboardingStep icon={CreditCard} number="3" title="Selecciona y paga" text="Precio visible antes de confirmar." />
+              </div>
+            </div>
+            <Link href="/nuevo-pedido" className="ak5-primary min-h-[58px] justify-center !px-6 !py-4 text-base">
+              <Upload size={19} /> Crear mi primer pedido <ArrowRight size={18} />
+            </Link>
+          </div>
+        </section>
+      )}
+
       <section className="mt-4 grid gap-3 md:grid-cols-2 2xl:grid-cols-[repeat(4,minmax(0,1fr))_minmax(250px,1.15fr)]">
-        <DashboardStat label="Servicios activos" value={stats.total} change="+12%" icon={FileText} tone="green" />
-        <DashboardStat label="Entregados" value={stats.completed} change="+18%" icon={CheckCircle2} tone="green" />
-        <DashboardStat label="Pendientes" value={stats.pending} change="-14%" icon={Clock3} tone="red" />
-        <DashboardStat label="Tiempo medio" value={stats.average} change="-22%" icon={Timer} tone="green" />
+        <DashboardStat label="Servicios totales" value={stats.total} detail="Histórico real" icon={FileText} />
+        <DashboardStat label="Entregados" value={stats.completed} detail="Finalizados" icon={CheckCircle2} />
+        <DashboardStat label="Pendientes" value={stats.pending} detail="En cola" icon={Clock3} />
+        <DashboardStat label="Tiempo medio" value={stats.average} detail="Según tus pedidos" icon={Timer} />
         <Link href="/nuevo-pedido" className="ak5-primary flex min-h-[82px] items-center gap-4 !px-5 !py-3 !normal-case !tracking-normal">
           <span className="grid h-12 w-12 place-items-center rounded-full border border-white/25 bg-white/10"><Upload size={21} /></span>
           <span className="text-left"><span className="block text-lg font-black">Subir archivo</span><span className="block text-xs font-medium text-white/65">Inicia un nuevo servicio</span></span>
@@ -131,8 +153,12 @@ export default function DashboardPage() {
   )
 }
 
-function DashboardStat({ label, value, change, icon: Icon, tone }: { label: string; value: string | number; change: string; icon: any; tone: 'red' | 'green' }) {
-  return <div className=" ak10-panel ak10-stat"><span className=" ak10-stat-icon"><Icon size={20} /></span><div><div className="ak10-stat-label">{label}</div><div className="ak10-stat-value">{value}</div></div><span className={`ak10-trend ${tone === 'green' ? 'text-emerald-400' : 'text-red-400'}`}>{change}</span></div>
+function DashboardStat({ label, value, detail, icon: Icon }: { label: string; value: string | number; detail: string; icon: any }) {
+  return <div className="ak10-panel ak10-stat"><span className="ak10-stat-icon"><Icon size={20} /></span><div><div className="ak10-stat-label">{label}</div><div className="ak10-stat-value">{value}</div></div><span className="ak10-trend text-white/30">{detail}</span></div>
+}
+
+function OnboardingStep({ icon: Icon, number, title, text, done = false }: { icon: any; number: string; title: string; text: string; done?: boolean }) {
+  return <div className="flex gap-3 rounded-2xl border border-white/[.08] bg-black/20 p-4"><span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl border ${done ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' : 'border-red-500/25 bg-red-500/10 text-red-300'}`}>{done ? <Icon size={17}/> : number}</span><div><div className="text-sm font-black">{title}</div><div className="mt-1 text-xs leading-5 text-white/40">{text}</div></div></div>
 }
 
 function InfoCard({ title, icon: Icon, lines }: { title: string; icon: any; lines: string[] }) {

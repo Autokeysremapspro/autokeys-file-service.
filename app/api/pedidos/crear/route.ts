@@ -6,6 +6,7 @@ import { createSumUpOrderForPedido } from '@/lib/sumup'
 import { FALLBACK_SERVICIOS, type AkCloudServicio } from '@/lib/services/akCloudConfig'
 import { extractDtcCodes } from '@/lib/dtc'
 import { notificarNuevoPedido } from '@/lib/notifyStaff'
+import { analyticsSessionFromUser, recordConversionEventSafe } from '@/lib/analytics/server'
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -253,6 +254,14 @@ export async function POST(request: Request) {
           descripcion,
           payload: paymentPayload,
         })
+
+    await recordConversionEventSafe({
+      eventName: 'checkout_started',
+      userId: user.id,
+      sessionId: analyticsSessionFromUser(user),
+      pagePath: '/nuevo-pedido',
+      metadata: { provider: paymentMethod, amount: totalPrecio },
+    })
 
     return NextResponse.json({
       ok: true,

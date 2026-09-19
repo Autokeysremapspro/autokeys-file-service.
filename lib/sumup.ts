@@ -1,5 +1,6 @@
 import { getSiteUrl, getSupabaseAdmin } from '@/lib/paypal'
 import { notificarNuevoPedido } from '@/lib/notifyStaff'
+import { recordConversionEventSafe } from '@/lib/analytics/server'
 
 const SUMUP_BASE_URL = 'https://api.sumup.com'
 
@@ -245,6 +246,13 @@ export async function confirmarSumUpYCrearPedido(pendienteId: string, expectedUs
   })
 
   await notificarNuevoPedido(pedido)
+
+  await recordConversionEventSafe({
+    eventName: 'payment_completed',
+    userId: pendiente.user_id,
+    pagePath: '/sumup/pedido-completado',
+    metadata: { provider: 'sumup', amount: Number(pendiente.importe), orderId: pedido.id },
+  })
 
   return pedido
 }

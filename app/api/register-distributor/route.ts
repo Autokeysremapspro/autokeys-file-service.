@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
 import { sendNotificationEmail, escapeHtml } from '@/lib/email'
+import { recordConversionEventSafe } from '@/lib/analytics/server'
 
 const SIGNUP_REDIRECT_URL = 'https://www.akcloud.es/login?confirmado=1'
 
@@ -39,6 +40,7 @@ export async function POST(request: Request) {
     const empresa = String(body.empresa || '').trim()
     const nombre = String(body.nombre || '').trim()
     const mensaje = clean(body.mensaje)
+    const analytics = body?.analytics || {}
     emailForLog = email
 
     if (!email || !/^\S+@\S+\.\S+$/.test(email) || password.length < 8 || !empresa || !nombre || !clean(body.telefono) || !clean(body.ciudad)) {
@@ -61,6 +63,10 @@ export async function POST(request: Request) {
           mensaje,
           tipo_usuario: 'distribuidor',
           estado_acceso: 'activo',
+          analytics_session_id: clean(analytics.sessionId),
+          analytics_source: clean(analytics.source),
+          analytics_medium: clean(analytics.medium),
+          analytics_campaign: clean(analytics.campaign),
         },
       },
     })
@@ -208,6 +214,16 @@ export async function POST(request: Request) {
       ? await admin.from('akcloud_distribuidores').update(distributorPayload).eq('id', existingDistributor.id)
       : await admin.from('akcloud_distribuidores').insert(distributorPayload)
     if (distributorWrite.error) throw distributorWrite.error
+
+    await recordConversionEventSafe({
+      eventName: 'registration_completed',
+      userId: authUserId,
+      sessionId: analytics.sessionId,
+      pagePath: '/register',
+      source: analytics.source,
+      medium: analytics.medium,
+      campaign: analytics.campaign,
+    })
 
     // El aviso en el centro de notificaciones de Core (y el push real) ya lo
     // dispara solo el trigger trg_akcore_notify_distributor_request en cuanto
