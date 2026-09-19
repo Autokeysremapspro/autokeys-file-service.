@@ -7,6 +7,8 @@ import { ArrowRight, Building2, CheckCircle2, Eye, EyeOff, Gift, Info, Lock, Mai
 import AuthLayout from '@/components/auth/AuthLayout'
 import AuthCard, { AuthButton } from '@/components/auth/AuthCard'
 import { AuthInput, AuthTextarea } from '@/components/auth/AuthInput'
+import ConversionTracker from '@/components/analytics/ConversionTracker'
+import { getConversionContext } from '@/lib/analytics/client'
 
 type FormState = {
   nombre: string
@@ -91,6 +93,7 @@ export default function RegisterClient() {
           ciudad: form.ciudad.trim(),
           mensaje: form.mensaje.trim(),
           refCode: refCode.trim() || undefined,
+          analytics: getConversionContext(),
         }),
       })
       const result = await response.json().catch(() => null)
@@ -116,6 +119,7 @@ export default function RegisterClient() {
   if (enviado) {
     return (
       <AuthLayout>
+        <ConversionTracker eventName="register_view" />
         <AuthCard className="text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10">
             <CheckCircle2 size={34} className="text-emerald-400" />
@@ -137,6 +141,7 @@ export default function RegisterClient() {
 
   return (
     <AuthLayout>
+      <ConversionTracker eventName="register_view" />
       <AuthCard>
         <h2 className="text-[26px] font-bold text-white">Crear cuenta profesional</h2>
         <p className="mt-2 text-[15px] text-[#92939a]">Regístrate y accede en cuanto confirmes tu correo.</p>
