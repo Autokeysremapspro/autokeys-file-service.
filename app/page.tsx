@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import {
   ArrowRight, Bell, CheckCircle2, Cpu, Download, Eye,
-  Filter, Gauge, Headphones, Instagram, LayoutGrid, Lock, PlayCircle,
+  Filter, Gauge, Headphones, Instagram, LayoutGrid, Lock,
   Settings, ShieldCheck, TrendingUp, UploadCloud, UserPlus, UserRound, Users, Wrench, Zap,
 } from 'lucide-react'
 import AkProfessionalFit from '@/components/marketing/AkProfessionalFit'
@@ -22,7 +22,7 @@ const highlights = [
   { icon: Zap, title: 'Respuesta rápida', text: 'Tiempos de entrega optimizados para que no pierdas tiempo.' },
   { icon: Headphones, title: 'Soporte profesional', text: 'Atención técnica especializada cuando la necesites.' },
   { icon: ShieldCheck, title: 'Archivos seguros', text: 'Tus archivos protegidos con máxima seguridad y privacidad.' },
-  { icon: Users, title: 'Usuarios aprobados', text: 'Solo profesionales verificados por Autokeys Remaps Pro.' },
+  { icon: Users, title: 'Acceso profesional', text: 'Registro para talleres y especialistas con correo verificado.' },
 ]
 
 const services = [
@@ -33,7 +33,7 @@ const services = [
 ]
 
 const steps = [
-  { n: 1, icon: UserRound, title: 'Solicita acceso', text: 'Completa el formulario y espera la aprobación de Autokeys Remaps Pro — normalmente en unos 15 minutos.' },
+  { n: 1, icon: UserRound, title: 'Crea tu cuenta', text: 'Regístrate como profesional y accede en cuanto confirmes tu correo electrónico.' },
   { n: 2, icon: UploadCloud, title: 'Sube tu ORI', text: 'Sube tu archivo original desde la plataforma de forma segura.' },
   { n: 3, icon: Settings, title: 'Recibe el archivo procesado', text: 'Nuestro equipo procesa tu archivo con la mejor calidad y pruebas profesionales.' },
   { n: 4, icon: Download, title: 'Descarga y trabaja', text: 'Descarga el archivo listo y aplícalo en el vehículo de tu cliente.' },
@@ -68,7 +68,7 @@ const progressStyles: Record<string, string> = {
 const trustBadges = [
   { icon: Lock, title: 'Pago seguro', text: 'Cobros procesados por PayPal y SumUp, nunca guardamos tus datos de tarjeta.' },
   { icon: ShieldCheck, title: 'Archivos cifrados', text: 'Cada ORI solo lo ve tu cuenta y el laboratorio que procesa tu pedido.' },
-  { icon: Wrench, title: 'Acceso verificado', text: 'Cada cuenta la revisa y aprueba el equipo de Autokeys Remaps Pro antes de operar.' },
+  { icon: Wrench, title: 'Soporte de laboratorio', text: 'Autokeys Remaps Pro supervisa los pedidos y puede ayudarte durante el trabajo.' },
 ]
 
 function formatStatNumber(value: number) {
@@ -86,7 +86,7 @@ const checklist = [
 const faqs = [
   {
     q: '¿Cómo consigo acceso a AK Cloud?',
-    a: 'Solicitas cuenta desde el registro y el equipo de Autokeys Remaps Pro la revisa y aprueba, normalmente en unos 15 minutos. Es un acceso profesional, no abierto al público general.',
+    a: 'Crea tu cuenta profesional y confirma el correo electrónico. El acceso se activa inmediatamente, sin esperar una aprobación manual.',
   },
   {
     q: '¿Qué formatos de archivo aceptáis?',
@@ -108,7 +108,7 @@ const faqs = [
 
 const footerColumns = [
   { title: 'Plataforma', links: [['Inicio', '/'], ['Servicios', '#servicios'], ['Cómo funciona', '#como-funciona']] },
-  { title: 'Cuenta', links: [['Acceder', '/login'], ['Solicitar cuenta', '/register'], ['Mi cuenta', '/perfil']] },
+  { title: 'Cuenta', links: [['Acceder', '/login'], ['Crear cuenta', '/register'], ['Mi cuenta', '/perfil']] },
   { title: 'Soporte', links: [['Contacto', '#contacto'], ['Soporte técnico', '/soporte'], ['Preguntas frecuentes', '#faq']] },
 ]
 
@@ -170,7 +170,7 @@ export default async function HomePage() {
           </nav>
           <div className="flex gap-2">
             <Link href="/login" className="ak-v5-button-secondary !px-4 !py-2.5 text-xs"><UserRound size={15} /> Acceder</Link>
-            <Link href="/register" className="ak-v5-button hidden !px-4 !py-2.5 text-xs sm:inline-flex !bg-gradient-to-b !from-[#ff2b2b] !to-[#b30012] !shadow-[0_16px_42px_rgba(230,10,20,.35),inset_0_1px_0_rgba(255,255,255,.25)] hover:!shadow-[0_22px_56px_rgba(230,10,20,.48)]"><UserPlus size={15} /> Solicitar cuenta</Link>
+            <Link href="/register" className="ak-v5-button hidden !px-4 !py-2.5 text-xs sm:inline-flex !bg-gradient-to-b !from-[#ff2b2b] !to-[#b30012] !shadow-[0_16px_42px_rgba(230,10,20,.35),inset_0_1px_0_rgba(255,255,255,.25)] hover:!shadow-[0_22px_56px_rgba(230,10,20,.48)]"><UserPlus size={15} /> Crear cuenta</Link>
           </div>
         </div>
       </header>
@@ -184,12 +184,13 @@ export default async function HomePage() {
         <div className="relative mx-auto grid min-h-[780px] max-w-[1480px] items-center gap-12 px-5 py-20 lg:grid-cols-[.92fr_1.08fr] lg:px-8">
         <div className="ak-v5-reveal">
           <div className="ak-v5-kicker !text-[#ff2b2b]">Rendimiento sin límites</div>
-          <h1 className="ak-v5-title mt-6 text-5xl sm:text-6xl xl:text-[4.4rem]">La plataforma profesional<br />para tu <span className="text-[#ff2b2b]">File Service</span></h1>
-          <p className="mt-7 max-w-xl text-lg leading-8 text-white/48">Sube tu archivo original, elige el servicio y recibe una calibración profesional lista para trabajar. Sin planes, sin cuotas: pagas únicamente por cada archivo.</p>
-          <p className="mt-4 max-w-xl leading-7 text-white/40">Los nuevos usuarios requieren aprobación por <span className="text-[#ff2b2b] font-semibold">Autokeys Remaps Pro</span> para garantizar un servicio profesional y de calidad — normalmente en unos <span className="text-[#ff2b2b] font-semibold">15 minutos</span>.</p>
+          <h1 className="ak-v5-title mt-6 text-5xl sm:text-6xl xl:text-[4.4rem]">File Service profesional<br />para <span className="text-[#ff2b2b]">talleres</span></h1>
+          <p className="mt-7 max-w-xl text-lg leading-8 text-white/48">Sube tu archivo ORI, selecciona el servicio y recibe el MOD revisado y listo para trabajar. Sin cuotas: pagas únicamente por cada archivo.</p>
+          <p className="mt-4 max-w-xl leading-7 text-white/40"><span className="font-semibold text-white/70">Archivos desde 35 €</span> · Pago seguro · Historial ORI/MOD · Soporte técnico real.</p>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-white/35">Crea tu cuenta y accede inmediatamente después de confirmar el correo.</p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Link href="/register" className="ak-v5-button !bg-gradient-to-b !from-[#ff2b2b] !to-[#b30012] !shadow-[0_16px_42px_rgba(230,10,20,.35),inset_0_1px_0_rgba(255,255,255,.25)] hover:!shadow-[0_22px_56px_rgba(230,10,20,.48)]"><UploadCloud size={18} /> Solicitar acceso</Link>
-            <a href="#como-funciona" className="ak-v5-button-secondary"><PlayCircle size={18} /> Ver funcionamiento</a>
+            <Link href="/register" className="ak-v5-button !bg-gradient-to-b !from-[#ff2b2b] !to-[#b30012] !shadow-[0_16px_42px_rgba(230,10,20,.35),inset_0_1px_0_rgba(255,255,255,.25)] hover:!shadow-[0_22px_56px_rgba(230,10,20,.48)]"><UploadCloud size={18} /> Crear mi primer pedido</Link>
+            <a href="https://wa.me/34632982646" target="_blank" rel="noreferrer" className="ak-v5-button-secondary"><Headphones size={18} /> Consultar por WhatsApp</a>
           </div>
         </div>
 
@@ -203,7 +204,7 @@ export default async function HomePage() {
                 <div className="flex items-center gap-2">
                   <div className="text-right leading-tight">
                     <div className="text-[11px] font-bold text-white/80">Taller Pro</div>
-                    <div className="text-[9px] text-white/30">Usuario aprobado</div>
+                    <div className="text-[9px] text-white/30">Cuenta profesional</div>
                   </div>
                   <div className="grid h-8 w-8 place-items-center rounded-full border border-[#ff2b2b]/30 bg-[#ff2b2b]/10 text-[10px] font-black text-[#ff2b2b]">TP</div>
                 </div>
@@ -433,13 +434,13 @@ export default async function HomePage() {
               <h2 className="ak-v5-title text-3xl sm:text-4xl">Empieza a trabajar con <span className="text-[#ff2b2b]">AK Cloud</span></h2>
               <p className="mt-3 max-w-md leading-7 text-white/42">Acceso profesional, rápido y centralizado para tu servicio de archivos.</p>
             </div>
-            <Link href="/register" className="ak-v5-button shrink-0 !bg-gradient-to-b !from-[#ff2b2b] !to-[#b30012] !shadow-[0_16px_42px_rgba(230,10,20,.35),inset_0_1px_0_rgba(255,255,255,.25)] hover:!shadow-[0_22px_56px_rgba(230,10,20,.48)]"><UserPlus size={18} /> Solicitar acceso ahora</Link>
+            <Link href="/register" className="ak-v5-button shrink-0 !bg-gradient-to-b !from-[#ff2b2b] !to-[#b30012] !shadow-[0_16px_42px_rgba(230,10,20,.35),inset_0_1px_0_rgba(255,255,255,.25)] hover:!shadow-[0_22px_56px_rgba(230,10,20,.48)]"><UserPlus size={18} /> Crear cuenta ahora</Link>
           </div>
         </div>
       </section>
 
       <div className="fixed inset-x-3 bottom-3 z-50 rounded-2xl border border-white/10 bg-[#080a0f]/90 p-2 shadow-2xl backdrop-blur-xl sm:hidden">
-        <Link href="/register" className="ak-v5-button w-full justify-center !bg-gradient-to-b !from-[#ff2b2b] !to-[#b30012] !shadow-[0_16px_42px_rgba(230,10,20,.35),inset_0_1px_0_rgba(255,255,255,.25)] hover:!shadow-[0_22px_56px_rgba(230,10,20,.48)]">Solicitar cuenta <ArrowRight size={17} /></Link>
+        <Link href="/register" className="ak-v5-button w-full justify-center !bg-gradient-to-b !from-[#ff2b2b] !to-[#b30012] !shadow-[0_16px_42px_rgba(230,10,20,.35),inset_0_1px_0_rgba(255,255,255,.25)] hover:!shadow-[0_22px_56px_rgba(230,10,20,.48)]">Crear cuenta <ArrowRight size={17} /></Link>
       </div>
 
       <footer id="contacto" className="relative z-10 border-t border-white/[.07]">

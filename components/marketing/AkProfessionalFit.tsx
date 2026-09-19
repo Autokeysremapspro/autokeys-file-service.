@@ -61,10 +61,10 @@ export default function AkProfessionalFit() {
             <BadgeCheck size={32} className={professional ? 'text-[#67e8d1]' : 'text-amber-300'} />
             <div className="mt-6 text-[10px] font-black uppercase tracking-[.2em] text-white/30">Resultado orientativo</div>
             <div className="mt-2 text-3xl font-black">{professional ? (score >= 3 ? 'Encaje alto' : 'Encaje profesional') : 'Acceso no orientado a particulares'}</div>
-            <p className="mt-4 leading-7 text-white/42">{professional ? 'Tu perfil coincide con el tipo de profesional para el que se ha diseñado AK Cloud. El alta se revisa antes de activarse.' : 'AK Cloud es un servicio B2B. Para trabajos particulares, el contacto debe realizarse directamente con Autokeys Remaps Pro.'}</p>
-            {professional ? <Link href={`/register?profile=${profile}`} className="ak-v5-button mt-7 w-full justify-center">Solicitar acceso como profesional <ArrowRight size={18} /></Link> : <a href="https://wa.me/34632982646" target="_blank" rel="noreferrer" className="ak-v5-button-secondary mt-7 w-full justify-center">Contactar con Autokeys</a>}
+            <p className="mt-4 leading-7 text-white/42">{professional ? 'Tu perfil coincide con el tipo de profesional para el que se ha diseñado AK Cloud. Confirma tu email y podrás entrar inmediatamente.' : 'AK Cloud es un servicio B2B. Para trabajos particulares, el contacto debe realizarse directamente con Autokeys Remaps Pro.'}</p>
+            {professional ? <Link href={`/register?profile=${profile}`} className="ak-v5-button mt-7 w-full justify-center">Crear cuenta profesional <ArrowRight size={18} /></Link> : <a href="https://wa.me/34632982646" target="_blank" rel="noreferrer" className="ak-v5-button-secondary mt-7 w-full justify-center">Contactar con Autokeys</a>}
           </div>
-          <div className="mt-4 rounded-2xl border border-white/[.07] bg-white/[.025] p-4 text-xs leading-6 text-white/32">La comprobación es informativa. La aprobación definitiva depende de la revisión del registro profesional.</div>
+          <div className="mt-4 rounded-2xl border border-white/[.07] bg-white/[.025] p-4 text-xs leading-6 text-white/32">La comprobación es informativa. AK Cloud está reservado a talleres y profesionales del sector.</div>
         </div>
       </div>
     </div>

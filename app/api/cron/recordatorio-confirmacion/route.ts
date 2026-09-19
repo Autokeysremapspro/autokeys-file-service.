@@ -50,7 +50,7 @@ export async function GET(request: Request) {
     .is('recordatorio_confirmacion_enviado_at', null)
     .lte('created_at', maxCreatedAt)
     .gte('created_at', minCreatedAt)
-    .in('estado', ['pendiente', 'informacion_solicitada'])
+    .in('estado', ['pendiente', 'informacion_solicitada', 'aprobada'])
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -90,7 +90,7 @@ export async function GET(request: Request) {
       to: candidato.email,
       subject: 'Confirma tu email para activar tu cuenta AK Cloud',
       title: 'Falta un paso para activar tu cuenta',
-      bodyHtml: `Hola ${escapeHtml(candidato.nombre || '')},<br><br>Vimos que tu solicitud de acceso para <b>${escapeHtml(candidato.empresa || 'tu taller')}</b> sigue esperando a que confirmes tu email. Te acabamos de reenviar el enlace de confirmación — revisa también la carpeta de spam o promociones.<br><br>Sin ese paso no podemos empezar a revisar tu alta como distribuidor.`,
+      bodyHtml: `Hola ${escapeHtml(candidato.nombre || '')},<br><br>Tu cuenta para <b>${escapeHtml(candidato.empresa || 'tu taller')}</b> está creada, pero todavía falta confirmar el email. Te acabamos de reenviar el enlace — revisa también la carpeta de spam o promociones.<br><br>En cuanto confirmes el correo podrás entrar directamente en AK Cloud.`,
     })
 
     await admin

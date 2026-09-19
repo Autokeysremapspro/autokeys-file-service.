@@ -66,7 +66,6 @@ export default function RegisterClient() {
     if (!form.telefono.trim()) nextErrors.telefono = 'Indica un teléfono de contacto'
     if (!form.empresa.trim()) nextErrors.empresa = 'Indica el nombre de tu taller o empresa'
     if (!form.ciudad.trim()) nextErrors.ciudad = 'Indica tu localidad o país'
-    if (!form.mensaje.trim()) nextErrors.mensaje = 'Cuéntanos brevemente qué necesitas'
 
     setErrors(nextErrors)
     const legalOk = aceptaLegal
@@ -121,9 +120,9 @@ export default function RegisterClient() {
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10">
             <CheckCircle2 size={34} className="text-emerald-400" />
           </div>
-          <h2 className="mt-6 text-[28px] font-bold text-white">Solicitud registrada</h2>
+          <h2 className="mt-6 text-[28px] font-bold text-white">Cuenta creada</h2>
           <p className="mt-3 text-[15px] leading-[1.65] text-[#a1a1a6]">
-            Tu solicitud ya está pendiente de revisión en AK Cloud. Revisa ahora tu correo y confirma tu dirección de email. Autokeys Remaps Pro aprueba la mayoría de cuentas en unos <span className="font-semibold text-[#ef1018]">15 minutos</span>; en cuanto se apruebe, podrás acceder con el email y la contraseña que acabas de crear.
+            Revisa ahora tu correo y confirma tu dirección de email. En cuanto lo hagas, entrarás directamente en AK Cloud con la cuenta activa.
           </p>
           <Link href="/login" className="mt-8 block">
             <AuthButton type="button">Volver al inicio de sesión <ArrowRight size={19} /></AuthButton>
@@ -139,12 +138,12 @@ export default function RegisterClient() {
   return (
     <AuthLayout>
       <AuthCard>
-        <h2 className="text-[26px] font-bold text-white">Solicitar cuenta</h2>
-        <p className="mt-2 text-[15px] text-[#92939a]">Completa el formulario para solicitar acceso a AK Cloud.</p>
+        <h2 className="text-[26px] font-bold text-white">Crear cuenta profesional</h2>
+        <p className="mt-2 text-[15px] text-[#92939a]">Regístrate y accede en cuanto confirmes tu correo.</p>
 
         <div className="mt-5 flex items-start gap-2.5 border-y border-white/[.08] py-3 text-[13px] leading-relaxed text-[#a1a1a6]">
           <Info size={16} className="mt-0.5 shrink-0 text-[#ef1018]" />
-          <p>Todos los nuevos usuarios requieren aprobación por <span className="text-[#ef1018]">Autokeys Remaps Pro</span> — normalmente en unos <span className="text-[#ef1018]">15 minutos</span>.</p>
+          <p>El acceso es inmediato después de confirmar el email. Las cuentas que nunca inicien sesión se pausarán automáticamente a los 20 días.</p>
         </div>
 
         <form onSubmit={submit} className="mt-5 space-y-4">
@@ -188,11 +187,10 @@ export default function RegisterClient() {
           <AuthInput icon={Gift} label="Código de referido (opcional)" value={refCode} onChange={(e) => setRefCode(e.target.value.toUpperCase())} placeholder="¿Te lo pasó otro taller?" className="h-[52px]" />
           <AuthTextarea
             icon={MessageSquare}
-            label="Cuéntanos brevemente tu actividad o los servicios que necesitas"
+            label="Cuéntanos brevemente tu actividad (opcional)"
             value={form.mensaje}
             onChange={(e) => setField('mensaje', e.target.value)}
             placeholder="Escribe aquí…"
-            error={errors.mensaje}
           />
 
           <label className="flex items-start gap-2.5 pt-1 text-sm text-[#92939a]">
@@ -205,7 +203,7 @@ export default function RegisterClient() {
           {legalError && <p className="text-xs text-[#ff4d4d]">{legalError}</p>}
 
           <AuthButton type="submit" loading={loading} className="mt-2">
-            {loading ? 'Enviando solicitud…' : 'Enviar solicitud'} <ArrowRight size={19} />
+            {loading ? 'Creando cuenta…' : 'Crear cuenta'} <ArrowRight size={19} />
           </AuthButton>
         </form>
 

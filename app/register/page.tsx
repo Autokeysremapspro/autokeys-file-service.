@@ -2,13 +2,13 @@ import type { Metadata } from 'next'
 import RegisterClient from './RegisterClient'
 
 export const metadata: Metadata = {
-  title: 'Solicitar cuenta',
-  description: 'Solicita acceso profesional a AK Cloud, el portal de File Service de Autokeys Remaps Pro para talleres y distribuidores. Alta revisada por nuestro equipo.',
+  title: 'Crear cuenta profesional',
+  description: 'Crea tu cuenta profesional en AK Cloud y accede al portal de File Service de Autokeys Remaps Pro tras confirmar tu email.',
   alternates: { canonical: '/register' },
   openGraph: {
     type: 'website',
-    title: 'Solicitar cuenta | AK Cloud',
-    description: 'Solicita acceso profesional a AK Cloud, el portal de File Service de Autokeys Remaps Pro para talleres y distribuidores.',
+    title: 'Crear cuenta profesional | AK Cloud',
+    description: 'Registro profesional con acceso inmediato tras confirmar el email.',
     url: '/register',
   },
 }

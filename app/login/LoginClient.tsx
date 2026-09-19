@@ -24,7 +24,7 @@ export default function LoginClient() {
     const params = new URLSearchParams(window.location.search)
 
     if (params.get('confirmado') === '1') {
-      toast.success('Email confirmado correctamente. Tu solicitud está pendiente de aprobación.')
+      toast.success('Email confirmado correctamente. Tu cuenta ya está activa.')
     } else if (params.get('confirmacion_error') === '1') {
       toast.error('El enlace de confirmación no es válido o ha caducado. Solicita uno nuevo si lo necesitas.')
     } else if (params.get('recovery_error') === '1') {
@@ -51,14 +51,21 @@ export default function LoginClient() {
     e.preventDefault()
     setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) { setLoading(false); toast.error(error.message); return }
+
+    const accessResponse = await fetch('/api/auth/access', { method: 'POST' })
+    const accessResult = await accessResponse.json().catch(() => null)
     setLoading(false)
-    if (error) { toast.error(error.message); return }
+    if (!accessResponse.ok) {
+      toast.error(accessResult?.error || 'No se pudo activar el acceso a AK Cloud')
+      return
+    }
 
     const requested = typeof window !== 'undefined'
       ? new URLSearchParams(window.location.search).get('next') || '/dashboard'
       : '/dashboard'
     const safeNext = requested.startsWith('/') && !requested.startsWith('//') ? requested : '/dashboard'
-    toast.success('Acceso correcto')
+    toast.success(accessResult?.reactivated ? 'Cuenta reactivada correctamente' : 'Acceso correcto')
     router.replace(safeNext)
   }
 
@@ -133,7 +140,7 @@ export default function LoginClient() {
         </div>
 
         <p className="mt-8 text-center text-sm text-[#92939a]">
-          ¿No tienes cuenta? <Link href="/register" className="font-medium text-[#ef1018] transition hover:text-[#ff1c25]">Solicitar cuenta</Link>
+          ¿No tienes cuenta? <Link href="/register" className="font-medium text-[#ef1018] transition hover:text-[#ff1c25]">Crear cuenta</Link>
         </p>
       </AuthCard>
     </AuthLayout>

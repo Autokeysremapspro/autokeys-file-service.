@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/recordatorio-confirmacion",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/cuentas-inactivas",
+      "schedule": "15 9 * * *"
     }
   ]
 }

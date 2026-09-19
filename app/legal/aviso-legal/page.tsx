@@ -23,7 +23,8 @@ export default function AvisoLegalPage() {
       <h2>Condiciones de acceso y uso</h2>
       <p>
         El acceso a las áreas privadas del portal está restringido a distribuidores y talleres profesionales dados
-        de alta y aprobados expresamente por Autokeys Remaps Pro. El uso del portal implica la aceptación plena de
+        de alta con correo electrónico confirmado. Autokeys Remaps Pro podrá revisar y suspender las cuentas que no
+        correspondan a un uso profesional o incumplan las condiciones. El uso del portal implica la aceptación plena de
         este Aviso Legal, de los <a href="/legal/terminos">Términos y Condiciones</a> y de la
         <a href="/legal/privacidad"> Política de Privacidad</a>.
       </p>

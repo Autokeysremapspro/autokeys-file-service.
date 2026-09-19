@@ -60,7 +60,7 @@ export async function POST(request: Request) {
           ciudad: clean(body.ciudad),
           mensaje,
           tipo_usuario: 'distribuidor',
-          estado_acceso: 'pendiente',
+          estado_acceso: 'activo',
         },
       },
     })
@@ -110,6 +110,7 @@ export async function POST(request: Request) {
       throw new Error('Supabase Auth no devolvió el identificador del usuario')
     }
 
+    const automaticAccessAt = new Date().toISOString()
     const payload = {
       auth_user_id: authUserId,
       email,
@@ -121,18 +122,20 @@ export async function POST(request: Request) {
       especialidad: clean(body.especialidad),
       herramientas: Array.isArray(body.herramientas) ? body.herramientas.map(String) : [],
       observaciones: mensaje,
-      estado: 'pendiente',
-      motivo_estado: null,
+      estado: 'aprobada',
+      motivo_estado: 'Alta automática con verificación de email',
       referido_por_codigo: refCodeRaw,
       referido_por_distribuidor_id: referidoPorDistribuidorId,
-      updated_at: new Date().toISOString(),
+      revisada_por: 'Registro automático AK Cloud',
+      revisada_at: automaticAccessAt,
+      updated_at: automaticAccessAt,
     }
 
     const { data: existingByUser, error: existingByUserError } = await admin
       .from('akcloud_solicitudes_distribuidores')
       .select('id,estado')
       .eq('auth_user_id', authUserId)
-      .in('estado', ['pendiente', 'informacion_solicitada'])
+      .in('estado', ['pendiente', 'informacion_solicitada', 'aprobada'])
       .limit(1)
       .maybeSingle()
 
@@ -144,7 +147,7 @@ export async function POST(request: Request) {
         .from('akcloud_solicitudes_distribuidores')
         .select('id,estado')
         .ilike('email', email)
-        .in('estado', ['pendiente', 'informacion_solicitada'])
+        .in('estado', ['pendiente', 'informacion_solicitada', 'aprobada'])
         .limit(1)
         .maybeSingle()
       if (existingByEmailError) throw existingByEmailError
@@ -168,12 +171,43 @@ export async function POST(request: Request) {
       .from('akcloud_solicitudes_distribuidores')
       .select('id,estado')
       .eq('auth_user_id', authUserId)
-      .in('estado', ['pendiente', 'informacion_solicitada'])
+      .in('estado', ['pendiente', 'informacion_solicitada', 'aprobada'])
       .limit(1)
       .maybeSingle()
 
     if (confirmError) throw confirmError
     if (!confirmed?.id) throw new Error('La solicitud no quedó confirmada en AK Core')
+
+    const distributorPayload = {
+      auth_user_id: authUserId,
+      solicitud_id: confirmed.id,
+      empresa,
+      nombre_contacto: nombre,
+      email,
+      telefono: clean(body.telefono),
+      nif: clean(body.nif),
+      estado: 'activo',
+      etiqueta: 'Nuevo',
+      aprobado_at: automaticAccessAt,
+      acceso_inmediato_at: automaticAccessAt,
+      primer_acceso_at: null,
+      aviso_inactividad_enviado_at: null,
+      desactivada_por_inactividad_at: null,
+      referido_por_distribuidor_id: referidoPorDistribuidorId,
+      updated_at: automaticAccessAt,
+    }
+
+    const { data: existingDistributor, error: distributorLookupError } = await admin
+      .from('akcloud_distribuidores')
+      .select('id')
+      .eq('auth_user_id', authUserId)
+      .maybeSingle()
+    if (distributorLookupError) throw distributorLookupError
+
+    const distributorWrite = existingDistributor?.id
+      ? await admin.from('akcloud_distribuidores').update(distributorPayload).eq('id', existingDistributor.id)
+      : await admin.from('akcloud_distribuidores').insert(distributorPayload)
+    if (distributorWrite.error) throw distributorWrite.error
 
     // El aviso en el centro de notificaciones de Core (y el push real) ya lo
     // dispara solo el trigger trg_akcore_notify_distributor_request en cuanto
@@ -181,17 +215,17 @@ export async function POST(request: Request) {
     // además insertamos aquí, sale duplicado en el centro de avisos. Lo que
     // sí falta cubrir aquí es WhatsApp y email, que el trigger no manda.
     await sendWhatsAppNotification(
-      `🆕 Nueva solicitud AK Cloud\n${empresa} (${nombre})\n${email}${clean(body.ciudad) ? `\nCiudad: ${body.ciudad}` : ''}${clean(body.especialidad) ? `\nEspecialidad: ${body.especialidad}` : ''}${mensaje ? `\nMensaje: ${mensaje}` : ''}\n\nRevisar: ${process.env.NEXT_PUBLIC_CORE_URL ? `${process.env.NEXT_PUBLIC_CORE_URL}/ak-cloud/solicitudes` : '/ak-cloud/solicitudes'}`
+      `🆕 Nueva cuenta AK Cloud activa\n${empresa} (${nombre})\n${email}${clean(body.ciudad) ? `\nCiudad: ${body.ciudad}` : ''}${mensaje ? `\nMensaje: ${mensaje}` : ''}\n\nLa cuenta podrá revisarse o suspenderse desde Autokeys Core.`
     )
 
     if (process.env.STAFF_NOTIFICATION_EMAIL) {
       await sendNotificationEmail({
         to: process.env.STAFF_NOTIFICATION_EMAIL,
-        subject: `Nueva solicitud de distribuidor: ${empresa}`,
-        title: 'Nueva solicitud de distribuidor',
-        bodyHtml: `<b>${escapeHtml(empresa)}</b> (${escapeHtml(nombre)}, ${escapeHtml(email)}) ha solicitado acceso como distribuidor en AK Cloud.${clean(body.ciudad) ? `<br>Ciudad: ${escapeHtml(body.ciudad)}` : ''}${clean(body.especialidad) ? `<br>Especialidad: ${escapeHtml(body.especialidad)}` : ''}${mensaje ? `<br>Mensaje: ${escapeHtml(mensaje)}` : ''}`,
-        ctaHref: process.env.NEXT_PUBLIC_CORE_URL ? `${process.env.NEXT_PUBLIC_CORE_URL}/ak-cloud/solicitudes` : undefined,
-        ctaLabel: 'Revisar solicitud',
+        subject: `Nueva cuenta AK Cloud: ${empresa}`,
+        title: 'Nueva cuenta profesional activa',
+        bodyHtml: `<b>${escapeHtml(empresa)}</b> (${escapeHtml(nombre)}, ${escapeHtml(email)}) ha creado una cuenta en AK Cloud. Podrá acceder en cuanto confirme su correo.${clean(body.ciudad) ? `<br>Ciudad: ${escapeHtml(body.ciudad)}` : ''}${mensaje ? `<br>Mensaje: ${escapeHtml(mensaje)}` : ''}`,
+        ctaHref: process.env.NEXT_PUBLIC_CORE_URL ? `${process.env.NEXT_PUBLIC_CORE_URL}/ak-cloud/distribuidores` : undefined,
+        ctaLabel: 'Ver distribuidores',
       })
     }
 

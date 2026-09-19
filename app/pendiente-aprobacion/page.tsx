@@ -19,10 +19,9 @@ export default function PendienteAprobacionPage() {
         <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-300">
           <Clock3 size={26} />
         </div>
-        <h1 className="text-2xl font-black uppercase">Solicitud en revisión</h1>
+        <h1 className="text-2xl font-black uppercase">Cuenta no disponible</h1>
         <p className="mt-3 text-sm leading-6 text-white/55">
-          Tu cuenta todavía no está activada como distribuidor AK Cloud. El equipo de Autokeys revisa cada
-          solicitud manualmente — normalmente en unos <span className="font-semibold text-orange-300">15 minutos</span>. Te avisaremos por email en cuanto esté aprobada; puedes recargar esta página más tarde para comprobarlo.
+          Esta cuenta está suspendida o bloqueada. Si se pausó porque nunca llegaste a utilizarla, cierra sesión y vuelve a entrar para reactivarla automáticamente. Si el problema continúa, contacta con soporte.
         </p>
         <button
           onClick={logout}
@@ -31,7 +30,7 @@ export default function PendienteAprobacionPage() {
           <LogOut size={16} /> Cerrar sesión
         </button>
         <p className="mt-4 text-xs text-white/35">
-          ¿Ya tienes una cuenta aprobada con otro email? <Link href="/login" className="text-red-300 underline">Inicia sesión</Link>
+          ¿Necesitas ayuda? <Link href="/soporte" className="text-red-300 underline">Contacta con soporte</Link>
         </p>
       </div>
     </main>

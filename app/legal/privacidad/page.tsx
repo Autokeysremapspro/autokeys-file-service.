@@ -29,7 +29,7 @@ export default function PrivacidadPage() {
         <li>Gestionar tu alta como distribuidor y tu acceso al portal.</li>
         <li>Prestar el servicio de reprogramación/electrónica ECU que solicitas, incluida la comunicación sobre el estado de tus pedidos.</li>
         <li>Gestionar los pagos y emitir la facturación correspondiente.</li>
-        <li>Enviarte notificaciones operativas (aprobación de cuenta, cambios de estado de pedidos, avisos de soporte) por email.</li>
+        <li>Enviarte notificaciones operativas (confirmación y actividad de la cuenta, cambios de estado de pedidos y avisos de soporte) por email.</li>
         <li>Cumplir con nuestras obligaciones legales, fiscales y contables.</li>
       </ul>
 

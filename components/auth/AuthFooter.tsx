@@ -8,8 +8,7 @@ export default function AuthFooter() {
           <Lock size={15} className="mt-0.5 shrink-0 text-[#92939a]" />
           <p className="leading-relaxed">
             AK Cloud es una plataforma exclusiva para profesionales del sector automotriz.
-            <br className="hidden sm:block" /> Nuevos usuarios requieren aprobación por{' '}
-            <span className="text-[#ef1018]">Autokeys Remaps Pro.</span>
+            <br className="hidden sm:block" /> Acceso inmediato después de confirmar el correo electrónico.
           </p>
         </div>
         <p className="shrink-0 sm:pl-4">© {new Date().getFullYear()} Autokeys Remaps Pro. Todos los derechos reservados.</p>

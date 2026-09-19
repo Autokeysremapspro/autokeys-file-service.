@@ -12,8 +12,9 @@ export default function TerminosPage() {
       <h2>1. Quién puede usar este servicio</h2>
       <p>
         AK Cloud está dirigido exclusivamente a profesionales del sector (talleres, distribuidores e
-        instaladores). El alta como distribuidor requiere aprobación expresa por parte de Autokeys Remaps Pro, que
-        se reserva el derecho a rechazar o suspender cualquier cuenta a su criterio.
+        instaladores). El acceso se habilita después de confirmar el correo electrónico. Autokeys Remaps Pro se
+        reserva el derecho a revisar, suspender o bloquear cuentas que no correspondan a profesionales o que
+        incumplan estas condiciones. Las cuentas nuevas que nunca inicien sesión podrán pausarse automáticamente.
       </p>
 
       <h2>2. Descripción del servicio</h2>
