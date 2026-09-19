@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: 'File Service ECU Profesional para Talleres | AK Cloud',
   description:
-    'File Service ECU online para talleres y profesionales. Stage 1 y Stage 2, soluciones ECU, IMMO, Airbag, TCU y MD1/MG1 con soporte técnico y tarifas desde 29,90 €.',
+    'File Service ECU online para talleres y profesionales. Stage 1 y Stage 2, soluciones ECU, IMMO, Airbag, TCU y MD1/MG1 con soporte técnico y archivos desde 35 €.',
   keywords: [
     'file service ECU',
     'ECU file service',
