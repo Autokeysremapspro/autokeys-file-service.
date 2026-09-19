@@ -8,12 +8,14 @@ import AKPageShell from '@/components/ak/AKPageShell'
 import AKUploader from '@/components/ak/AKUploader'
 import AKCard from '@/components/ak/AKCard'
 import AKButton from '@/components/ak/AKButton'
+import AKPaymentProviderSelector, { type PaymentProvider } from '@/components/ak/AKPaymentProviderSelector'
 import AKServiceCard, { type AKService } from '@/components/ak/AKServiceCard'
 import AKEcuDetectionSummary, { type AKEcuDetection } from '@/components/ak/AKEcuDetectionSummary'
 import { mergeVerifiedEcuPrefill } from '@/lib/ecu/safePrefill'
 import { crearPedidoFileService } from '@/lib/services/pedidos'
 import { extractDtcCodes } from '@/lib/dtc'
 import ConversionTracker from '@/components/analytics/ConversionTracker'
+import { trackConversion } from '@/lib/analytics/client'
 import {
   FALLBACK_SERVICIOS,
   FAMILIAS,
@@ -54,9 +56,21 @@ const WIZARD_STEPS = [
   { n: 4, label: 'Resumen y pago' },
 ] as const
 
+const ORDER_DRAFT_KEY = 'akcloud-order-draft-v1'
+const STEP_EVENTS = ['order_step_file', 'order_step_vehicle', 'order_step_services', 'order_step_review'] as const
+
+type OrderDraft = {
+  vehicle: VehicleForm
+  selected: string[]
+  familia: string
+  observaciones: string
+  dtcCodes: string
+  paymentProvider: PaymentProvider
+}
+
 export default function NuevoPedidoPage() {
   const router = useRouter()
-  const [step, setStep] = useState(4)
+  const [step, setStep] = useState(1)
   const [file, setFile] = useState<File | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [selected, setSelected] = useState<string[]>([])
@@ -72,6 +86,9 @@ export default function NuevoPedidoPage() {
   const [error, setError] = useState<string | null>(null)
   const [detecting, setDetecting] = useState(false)
   const [detection, setDetection] = useState<AKEcuDetection | null>(null)
+  const [paymentProvider, setPaymentProvider] = useState<PaymentProvider>('sumup')
+  const [draftReady, setDraftReady] = useState(false)
+  const [draftRestored, setDraftRestored] = useState(false)
 
   useEffect(() => {
     async function loadConfig() {
@@ -85,6 +102,40 @@ export default function NuevoPedidoPage() {
     }
     loadConfig()
   }, [])
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(ORDER_DRAFT_KEY)
+      if (stored) {
+        const draft = JSON.parse(stored) as Partial<OrderDraft>
+        if (draft.vehicle) setVehicle((current) => ({ ...current, ...draft.vehicle }))
+        if (Array.isArray(draft.selected)) setSelected(draft.selected.filter((item): item is string => typeof item === 'string'))
+        if (typeof draft.familia === 'string') setFamilia(draft.familia)
+        if (typeof draft.observaciones === 'string') setObservaciones(draft.observaciones)
+        if (typeof draft.dtcCodes === 'string') setDtcCodes(draft.dtcCodes)
+        if (draft.paymentProvider === 'paypal' || draft.paymentProvider === 'sumup') setPaymentProvider(draft.paymentProvider)
+        setDraftRestored(true)
+      } else {
+        const storedProvider = window.localStorage.getItem('ak-payment-provider')
+        if (storedProvider === 'paypal') setPaymentProvider('paypal')
+      }
+    } catch {
+      window.localStorage.removeItem(ORDER_DRAFT_KEY)
+    } finally {
+      setDraftReady(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!draftReady) return
+    const draft: OrderDraft = { vehicle, selected, familia, observaciones, dtcCodes, paymentProvider }
+    window.localStorage.setItem(ORDER_DRAFT_KEY, JSON.stringify(draft))
+    window.localStorage.setItem('ak-payment-provider', paymentProvider)
+  }, [draftReady, vehicle, selected, familia, observaciones, dtcCodes, paymentProvider])
+
+  useEffect(() => {
+    void trackConversion(STEP_EVENTS[step - 1], { step })
+  }, [step])
 
   useEffect(() => {
     try {
@@ -202,7 +253,11 @@ export default function NuevoPedidoPage() {
     if (n <= maxUnlockedStep || n <= step) setStep(n)
   }
   function goNext() {
-    if (!stepValid[step]) return
+    if (!stepValid[step]) {
+      setError(step === 1 ? 'Sube primero el archivo ORI.' : step === 2 ? 'Completa marca, modelo y ECU.' : 'Selecciona al menos un servicio.')
+      return
+    }
+    setError(null)
     setStep((s) => Math.min(4, s + 1))
   }
   function goBack() {
@@ -237,16 +292,20 @@ export default function NuevoPedidoPage() {
         sw: vehicle.sw,
         cv: vehicle.cv,
         cambio: vehicle.cambio,
+        herramientaLectura: vehicle.lectura,
+        paymentMethod: paymentProvider,
         legalAccepted: true,
         legalVersion: 'AKCLOUD-LEGAL-2026-07-17',
       })
 
       if (result.requierePago && result.approveUrl) {
+        window.localStorage.removeItem(ORDER_DRAFT_KEY)
         window.location.href = result.approveUrl
         return
       }
 
       if (result.pedido) {
+        window.localStorage.removeItem(ORDER_DRAFT_KEY)
         router.push(`/pedidos/${result.pedido.id}`)
       }
     } catch (err: any) {
@@ -263,7 +322,7 @@ export default function NuevoPedidoPage() {
       eyebrow="Nuevo servicio"
     >
       <ConversionTracker eventName="first_order_started" />
-      <div className="hidden">
+      <div className="flex items-start rounded-[1.6rem] border border-white/10 bg-black/20 p-4 sm:p-5">
         {WIZARD_STEPS.map((s, index) => {
           const reachable = s.n <= maxUnlockedStep || s.n <= step
           const isDone = s.n < step || (s.n <= maxUnlockedStep && s.n !== step && stepValid[s.n])
@@ -299,9 +358,16 @@ export default function NuevoPedidoPage() {
         })}
       </div>
 
+      {draftRestored && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.07] px-4 py-3 text-sm text-emerald-100">
+          <span>Hemos recuperado los datos de tu pedido anterior. Solo falta volver a seleccionar el archivo ORI.</span>
+          <button type="button" onClick={() => setDraftRestored(false)} className="text-xs font-black uppercase tracking-wider text-emerald-300">Entendido</button>
+        </div>
+      )}
+
       <div className="ak10-new-order mt-5 grid gap-5 2xl:grid-cols-[1fr_360px]">
         <div className="space-y-6">
-          {(
+          {step === 1 && (
             <AKCard className="p-5 md:p-6">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -329,14 +395,14 @@ export default function NuevoPedidoPage() {
             </AKCard>
           )}
 
-          {(
+          {step === 2 && (
             <div className="space-y-6">
               <AKCard className="p-5 md:p-6">
                 <div className="mb-5 flex items-center gap-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 text-[var(--ak-glow)]"><Car size={24} /></div>
                   <div>
                     <h2 className="text-2xl font-bold">Datos del vehículo</h2>
-                    <p className="text-sm text-white/40">Estos datos los introduce el cliente manualmente. Nada de detección automática forzada.</p>
+                    <p className="text-sm text-white/40">Solo marca y modelo son obligatorios. Completa el resto si lo conoces.</p>
                   </div>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -354,7 +420,7 @@ export default function NuevoPedidoPage() {
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 text-[var(--ak-glow)]"><Gauge size={24} /></div>
                   <div>
                     <h2 className="text-2xl font-bold">Datos ECU</h2>
-                    <p className="text-sm text-white/40">El cliente rellena ECU / HW / SW manualmente. Si no lo sabe, puede escribir “revisar”.</p>
+                    <p className="text-sm text-white/40">Si no conoces la ECU, puedes pedir que la revisemos nosotros.</p>
                   </div>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -363,12 +429,15 @@ export default function NuevoPedidoPage() {
                   <Field label="Software" value={vehicle.sw} onChange={(v) => updateVehicle('sw', v)} placeholder="SW / versión" />
                   <Field label="Herramienta lectura" value={vehicle.lectura} onChange={(v) => updateVehicle('lectura', v)} placeholder="KESS3, FLEX, Autotuner..." />
                 </div>
+                <button type="button" onClick={() => updateVehicle('ecu', 'No sé / revisar')} className="mt-4 rounded-xl border border-white/10 bg-white/[.03] px-4 py-2.5 text-xs font-bold text-white/60 transition hover:border-white/25 hover:text-white">
+                  No conozco la ECU — revisar
+                </button>
                 <StepNav canBack canNext={stepValid[2]} onBack={goBack} onNext={goNext} />
               </AKCard>
             </div>
           )}
 
-          {(
+          {step === 3 && (
             <AKCard className="p-5 md:p-6">
               <div className="mb-5 flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 text-[var(--ak-glow)]"><Wrench size={24} /></div>
@@ -459,7 +528,7 @@ export default function NuevoPedidoPage() {
             </AKCard>
           )}
 
-          {false && (
+          {step === 4 && (
             <AKCard className="p-5 md:p-6">
               <div className="mb-5 flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/10 text-[var(--ak-glow)]"><ShieldCheck size={24} /></div>
@@ -496,7 +565,7 @@ export default function NuevoPedidoPage() {
         </div>
 
         <aside className="space-y-6 2xl:sticky 2xl:top-24 2xl:self-start">
-          {file && (
+          {file && step === 1 && (
             <AKCard className="p-6">
               <p className="ak-mono text-xs font-bold uppercase tracking-[0.22em] text-[var(--ak-glow)]">Requisitos de calidad del archivo</p>
               <div className="mt-4 space-y-3">
@@ -540,10 +609,6 @@ export default function NuevoPedidoPage() {
                 </div>
               ))}
             </div>
-            <label className="mt-5 block">
-              <span className="ak-mono mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-white/35">Observaciones para el técnico</span>
-              <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="min-h-[96px] w-full border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-[var(--ak-red)]/60" placeholder="Añade cualquier detalle útil para el técnico..." />
-            </label>
             <div className="mt-5 rounded-[1.6rem] border border-[var(--ak-red)]/25 bg-[var(--ak-red)]/[.08] p-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-white/50">Total a pagar</span>
@@ -551,13 +616,16 @@ export default function NuevoPedidoPage() {
               </div>
             </div>
             {error && <div className="mt-4 flex gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200"><AlertCircle size={18} /> {error}</div>}
-            <button type="button" onClick={()=>setLegalOpen(true)} className={`mt-4 flex w-full items-center gap-3 rounded-2xl border p-4 text-left ${legalAccepted ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-amber-500/30 bg-amber-500/10'}`}>
-              {legalAccepted ? <CheckCircle2 className="text-emerald-300"/> : <ShieldCheck className="text-amber-300"/>}
-              <div><div className="font-bold">{legalAccepted ? 'Condiciones aceptadas' : 'Debes aceptar las condiciones'}</div><div className="text-xs text-white/45">Uso legal, responsabilidad del cliente y posible restricción en vía pública.</div></div>
-            </button>
+            {step === 4 && total > 0 && <AKPaymentProviderSelector value={paymentProvider} onChange={setPaymentProvider} />}
+            {step === 4 && (
+              <button type="button" onClick={()=>setLegalOpen(true)} className={`mt-4 flex w-full items-center gap-3 rounded-2xl border p-4 text-left ${legalAccepted ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-amber-500/30 bg-amber-500/10'}`}>
+                {legalAccepted ? <CheckCircle2 className="text-emerald-300"/> : <ShieldCheck className="text-amber-300"/>}
+                <div><div className="font-bold">{legalAccepted ? 'Condiciones aceptadas' : 'Debes aceptar las condiciones'}</div><div className="text-xs text-white/45">Uso legal, responsabilidad del cliente y posible restricción en vía pública.</div></div>
+              </button>
+            )}
             {step === 4 ? (
               <AKButton onClick={enviarPedido} disabled={sending || !legalAccepted} className="mt-4 w-full">
-                <Send size={18} /> {sending ? 'Enviando...' : total > 0 ? `Pagar ${total.toFixed(2)} € con PayPal` : 'Enviar servicio (sin coste)'}
+                <Send size={18} /> {sending ? 'Enviando...' : total > 0 ? `Pagar ${total.toFixed(2)} € con ${paymentProvider === 'sumup' ? 'tarjeta / SumUp' : 'PayPal'}` : 'Enviar servicio (sin coste)'}
               </AKButton>
             ) : (
               <AKButton onClick={goNext} disabled={!stepValid[step]} className="mt-4 w-full">
@@ -565,8 +633,9 @@ export default function NuevoPedidoPage() {
               </AKButton>
             )}
             {step === 4 && total > 0 && !sending && (
-              <p className="mt-2 text-center text-xs text-white/35">Te llevaremos a PayPal para completar el pago — el pedido se crea en cuanto se confirme.</p>
+              <p className="mt-2 text-center text-xs text-white/35">Te llevaremos a {paymentProvider === 'sumup' ? 'SumUp' : 'PayPal'} para completar el pago seguro. El pedido se crea al confirmarse.</p>
             )}
+            <a href="https://wa.me/34642923363?text=Necesito%20ayuda%20con%20un%20pedido%20en%20AK%20Cloud" target="_blank" rel="noreferrer" className="mt-4 block text-center text-xs font-bold text-white/45 transition hover:text-white">¿Tienes alguna duda? Habla con laboratorio</a>
           </AKCard>
         </aside>
       </div>
@@ -595,7 +664,7 @@ export default function NuevoPedidoPage() {
 function StepNav({ canBack, canNext, onBack, onNext }: { canBack: boolean; canNext: boolean; onBack?: () => void; onNext?: () => void }) {
   if (!canBack && !onNext) return null
   return (
-    <div className="hidden">
+    <div className="mt-6 flex items-center justify-between gap-3 border-t border-white/10 pt-5">
       {canBack ? (
         <button type="button" onClick={onBack} className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[.03] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white/55 transition hover:border-white/20 hover:text-white">
           <ArrowLeft size={15} /> Atrás

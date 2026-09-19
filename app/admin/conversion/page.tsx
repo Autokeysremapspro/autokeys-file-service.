@@ -14,6 +14,9 @@ const FUNNEL = [
   ['registration_completed', 'Crean la cuenta'],
   ['email_confirmed', 'Confirman el email'],
   ['first_order_started', 'Empiezan el pedido'],
+  ['order_step_vehicle', 'Datos del vehículo'],
+  ['order_step_services', 'Eligen servicios'],
+  ['order_step_review', 'Revisan el pedido'],
   ['checkout_started', 'Llegan al pago'],
   ['payment_completed', 'Compran'],
 ] as const
@@ -69,11 +72,11 @@ export default function ConversionPage() {
 
           <section className="ak10-panel mt-5 overflow-hidden">
             <div className="border-b border-white/[.08] px-5 py-4"><h2 className="text-sm font-black">Recorrido completo</h2><p className="mt-1 text-xs text-white/40">Cada persona se cuenta una sola vez por etapa.</p></div>
-            <div className="grid gap-3 p-4 lg:grid-cols-7">
+            <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
               {FUNNEL.map(([eventName, label], index) => {
                 const value = counts.get(eventName) || 0
                 const previous = index === 0 ? value : counts.get(FUNNEL[index - 1][0]) || 0
-                return <div key={eventName} className="relative rounded-2xl border border-white/[.08] bg-black/20 p-4"><div className="text-[10px] font-black uppercase tracking-wider text-white/35">{label}</div><div className="mt-2 text-3xl font-black">{value}</div><div className="mt-1 text-xs text-red-300">{index === 0 ? 'Base' : percent(value, previous)}</div>{index < FUNNEL.length - 1 && <ArrowRight size={14} className="absolute -right-[15px] top-1/2 hidden text-white/20 lg:block"/>}</div>
+                return <div key={eventName} className="relative rounded-2xl border border-white/[.08] bg-black/20 p-4"><div className="text-[10px] font-black uppercase tracking-wider text-white/35">{label}</div><div className="mt-2 text-3xl font-black">{value}</div><div className="mt-1 text-xs text-red-300">{index === 0 ? 'Base' : percent(value, previous)}</div>{index < FUNNEL.length - 1 && <ArrowRight size={14} className="absolute -right-[15px] top-1/2 hidden text-white/20 xl:block"/>}</div>
               })}
             </div>
           </section>

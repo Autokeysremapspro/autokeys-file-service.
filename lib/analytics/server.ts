@@ -9,6 +9,10 @@ export const CONVERSION_EVENTS = [
   'login_completed',
   'dashboard_view',
   'first_order_started',
+  'order_step_file',
+  'order_step_vehicle',
+  'order_step_services',
+  'order_step_review',
   'checkout_started',
   'payment_completed',
 ] as const
