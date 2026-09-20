@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { BarChart3, Bell, BookOpen, BrainCircuit, Car, Download, FlaskConical, FolderOpen, LayoutDashboard, LifeBuoy, Settings, ShieldCheck, TrendingUp, UploadCloud, UserCircle, X } from 'lucide-react'
+import { BarChart3, Bell, BookOpen, BrainCircuit, Car, Download, FolderOpen, Gauge, LayoutDashboard, LifeBuoy, Settings, ShieldCheck, TrendingUp, UploadCloud, UserCircle, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 const items = [
@@ -71,8 +71,8 @@ export default function AKSidebar({ mobile = false, onClose }: { mobile?: boolea
               <Link href="/admin/conversion" onClick={onClose} className={`ak10-nav ${pathname.startsWith('/admin/conversion') ? 'ak10-nav-active' : ''}`}>
                 <TrendingUp size={19} strokeWidth={1.8} /><span>Conversión</span>
               </Link>
-              <Link href="/admin/soluciones-automaticas" onClick={onClose} className={`ak10-nav ${pathname.startsWith('/admin/soluciones-automaticas') ? 'ak10-nav-active' : ''}`}>
-                <FlaskConical size={19} strokeWidth={1.8} /><span>Soluciones Auto</span>
+              <Link href="/admin/motor-automatico" onClick={onClose} className={`ak10-nav ${pathname.startsWith('/admin/motor-automatico') || pathname.startsWith('/admin/soluciones-automaticas') ? 'ak10-nav-active' : ''}`}>
+                <Gauge size={19} strokeWidth={1.8} /><span>Motor automático</span>
               </Link>
             </nav>
           </div>
